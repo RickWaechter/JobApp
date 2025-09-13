@@ -1,0 +1,284 @@
+{
+    "BewerbungGenerieren": "新しい応募書類を作成",
+    "BewerbungGenerierenText": "あなた専用のプロフェッショナルな応募書類を素早くかんたんに作成します。",
+    "BewerbungRecycel": "応募書類を再利用",
+    "BewerbungRecycelText": "以前の応募書類を使って、別ポジション用にすばやく調整しましょう。",
+    "personalData": "個人情報",
+    "personalDataDescription": "応募書類に使用する住所を編集します。",
+    "configureEmail": "メール設定",
+    "configureEmailDescription": "応募書類送信用のメールを設定します。",
+    "sortAttachments": "添付ファイルを並べ替え",
+    "sortAttachmentsDescription": "応募書類に入れる添付ファイルの順序を変更します。",
+    "placeholderName": "氏名",
+    "placeholderStreet": "番地・通り名",
+    "placeholderZip": "郵便番号・市区町村",
+    "placeholderEmail": "メールアドレス",
+    "placeholderPassword": "パスワード",
+    "placeholderEmailServer": "メールサーバーを選択",
+    "saveAndClose": "保存して閉じる",
+    "activateAndClose": "有効化 ",
+    "deactivateAndClose": "無効化",
+    "save": "保存",
+    "downloadProgress": "",
+    "bwnzg": "応募書類を作成しています。",
+    "uploadFiles": "ファイルを選択",
+    "selectFilesToUpload": "応募書類に使用する添付ファイルを選択してください。",
+    "addAttachment": "添付を追加",
+    "addAttachmentsToApplication": "選択した添付ファイルを既存の応募書類に追加します。",
+    "replaceOldFiles": "古い添付を置き換える",
+    "replaceExistingAttachments": "既存の添付ファイルを新しいものに置き換えます。",
+    "selectedFiles": "選択済みファイル",
+    "searchCompany": "住所を検索",
+    "searchCompanyOld": "会社の住所を検索...",
+    "companyName": "会社名",
+    "companyStreet": "会社の住所",
+    "companyStreet2": "会社の住所",
+    "companyCity": "会社所在地（郵便番号・市区町村）",
+    "continue": "続行",
+    "enterManually": "手入力",
+    "nameAnsprechpartner": "担当者名",
+    "beruf": "職種",
+    "skillsErfahrung": "スキル / 経験",
+    "fontPlaceholder": "Helvetica（標準フォント）",
+    "generateCoverLetter": "カバーレターを生成",
+    "next": "次へ",
+    "toHome": "閉じる",
+    "ok": "はい、もちろん！",
+    "cancel": "いいえ",
+    "ownName": "あなたの氏名",
+    "ownStreet": "あなたの番地・通り名",
+    "ownCity": "あなたの郵便番号・市区町村",
+    "download": {
+      "titleFirma": "企業リストをダウンロード",
+      "messageFirma": "ドイツ国内約530万社の企業名（住所なし）ディレクトリをダウンロードしますか？",
+      "titleStreet": "通り名リストをダウンロード",
+      "messageStreet": "ドイツのすべての通り名をダウンロードしますか？",
+      "titleCity": "都市リストをダウンロード",
+      "messageCity": "全ドイツの都市と郵便番号をダウンロードしますか？",
+      "titleJob": "職業リストをダウンロード",
+      "messageJob": "3,500以上の職業名をダウンロードしますか？",
+      "button": "ダウンロード"
+    },
+    "Bewerbung": "応募書類",
+    "Profile": "プロフィール",
+    "Anlagen": "添付",
+    "Info": "情報",
+    "Fortsetzen": "続行",
+    "profil": {
+      "coinTitle": "コイン報酬",
+      "coinText": "広告を視聴してコインを獲得しますか？"
+    },
+    "employmentOptions": {
+      "vollzeit": "フルタイム",
+      "teilzeit": "パートタイム",
+      "minijob": "ミニジョブ"
+    },
+    "applicationOptions": {
+      "initiativ": "自主応募",
+      "regulär": "通常",
+      "praktikum": "インターンシップ"
+    },
+    "anredeOptions": {
+      "herr": "男性",
+      "damenUndHerren": "ご担当者様",
+      "frau": "女性"
+    },
+    "salutation": {
+      "herr": "拝啓 ",
+      "frau": "拝啓 ",
+      "default": "拝啓 ご担当者様、"
+    },
+    "applicationOptions2": {
+      "initiativ": "自主応募（",
+      "regulär": "募集職種（",
+      "praktikum": "インターンシップ応募（",
+      "default": "募集職種（"
+    },
+    "employmentChoice": {
+      "fulltime": "フルタイム雇用を希望します",
+      "parttime": "パートタイム雇用を希望します",
+      "minijob": "ミニジョブとして",
+      "default": "貴社にて"
+    },
+    "enterText": "ここにテキストを入力...",
+    "saveCoverLetter": "カバーレターを保存",
+    "merge": "結合",
+    "viewApplication": "応募書類を確認",
+    "viewApplicationDescription": "ダウンロードまたは送信前に誤りがないか応募書類を確認しましょう。",
+    "downloadDescription": "応募書類をPDFとして保存し、希望のポジションに送付できます。",
+    "sendEmail": "メールで送信",
+    "sendEmailDescription": "応募書類を直接メール送信。本文は自動生成されますが送信前に編集できます。✉️",
+    "terms": {
+      "title": "利用規約",
+      "section1": {
+        "heading": "1. 適用範囲",
+        "content": "これらの利用規約は応募書類作成ツールの利用に適用されます。本ツールは外部の第三者が提供する人工知能（AI）を使用して応募書類を生成します。"
+      },
+      "section2": {
+        "heading": "2. データ保護とセキュリティ",
+        "content": "すべての個人データはローカルに保存され、AES-256暗号化で保護されます。"
+      },
+      "section3": {
+        "heading": "3. 免責事項",
+        "content": "生成された応募書類の正確性や完全性について、提供者は一切の責任を負いません。"
+      },
+      "section4": {
+        "heading": "4. 使用権",
+        "content": "本ツールの使用権は非独占的かつ譲渡不可です。変更や再販は禁止されています。"
+      },
+      "section5": {
+        "heading": "5. 最終条項",
+        "content": "本規約にはドイツ連邦共和国の法律が適用されます。"
+      },
+      "email": {
+        "placeholder": "メールアドレス",
+        "sendButton": "メール送信"
+      },
+      "subject": {
+        "placeholder": "件名"
+      },
+      "message": {
+        "placeholder": "メッセージ"
+      },
+      "messageText": "拝啓\n\n{{companyName}}の{{jobTitle}}ポジションに応募いたします。\n\n敬具\n{{applicantName}}"
+    },
+    "emailSent": {
+      "success": "メールを正常に送信しました！",
+      "error": "メール送信中にエラーが発生しました。もう一度お試しください。"
+    },
+    "emailConfig": {
+      "server": {
+        "placeholder": "メールサーバー"
+      },
+      "port": {
+        "placeholder": "ポート"
+      },
+      "username": {
+        "placeholder": "ユーザー名"
+      },
+      "password": {
+        "placeholder": "パスワード"
+      }
+    },
+    "faq": {
+      "heading": "よくある質問",
+      "entry1": {
+        "subheading": "データはどのように保存されますか？",
+        "paragraph": "あなたのデータは安全に保管されます。すべての情報はスマートフォン内のSQLiteデータベースにのみ保存され、強力な256ビットAES暗号化によって保護されています。そのため、あなた以外がアクセスすることはできません。当社はプライバシーを最優先し、外部サーバーへの保存や第三者への提供は一切行いません。\n\nEメールサービスを利用する場合、メールアドレス、パスワード、メールサーバーも同様の強力な暗号化で保護されたうえで処理されます。機密情報は常に最善の方法で保護され、あなたがデータを完全に管理できます。"
+      },
+      "entry2": {
+        "subheading": "Eメールサーバーはどのように機能しますか？",
+        "paragraph": "本Eメールサービスを利用すると、応募書類を希望企業のEメールアドレスへ直接送信できます。件名と本文テンプレートは自動生成されるため、簡単かつ迅速に送信が完了します。\n\nあなたのデータは安全な2048ビット暗号化でサーバーに送信され、応募書類はそこで復号化された後、即座に受信者へ転送されます。ログは作成されず、データはキャッシュに一時保存された後ただちに削除されます。\n\n将来的には完全にローカルで完結するバージョンの開発も進めています。本サービスは無料かつ任意で、利用するかどうかはあなたが自由に決められます。"
+      },
+      "entry3": {
+        "subheading": "応募書類の作成と再利用",
+        "paragraph": "新しいカバーレターを1回約1セントで生成することも、既存のカバーレターを再利用することも可能です。会社、担当者を変更し、テキストを編集して簡単に調整できるので、時間を節約しつつ柔軟に応募書類をカスタマイズできます。"
+      }
+    },
+    "privacy": {
+      "heading": "プライバシーポリシー",
+      "entry1": {
+        "title": "1. 一般情報",
+        "text": "本プライバシーポリシーでは、応募書類作成ツールがどのように個人データを処理するかを説明します。"
+      },
+      "entry2": {
+        "title": "2. データの収集と処理",
+        "text": "本ツールは応募書類作成に必要なデータのみを収集します：\n• 希望する職種ポジション\n• 関連スキル（技能）\n• 応募の種類"
+      },
+      "entry3": {
+        "title": "3. 保存とセキュリティ",
+        "text": "すべての個人データはデバイス内に保存され、AES-256ビット暗号化で保護されます。"
+      },
+      "entry4": {
+        "title": "4. 第三者への提供",
+        "text": "個人データが第三者へ提供されることはありません。応募書類生成のためにAIサービスに送信されるのは匿名化されたデータのみです。"
+      },
+      "entry5": {
+        "title": "5. ユーザーの権利",
+        "text": "ユーザーはローカルに保存されたデータについて、閲覧、訂正、削除を要求する権利があります。"
+      },
+      "entry6": {
+        "title": "6. プライバシーポリシーの変更",
+        "text": "本プライバシーポリシーは更新される場合があります。常に最新バージョンがアプリ内で確認できます。"
+      }
+    },
+    "imprint": {
+      "heading": "インプリント",
+      "entry1": {
+        "title": "TMG §5に基づく情報",
+        "text": "Rick Wächter\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nドイツ"
+      },
+      "entry2": {
+        "title": "連絡先",
+        "text": "電話: 01234/56789\nメール: kontakt@musterapp.de\nWeb: www.musterapp.de"
+      },
+      "entry3": {
+        "title": "免責事項",
+        "text": "本アプリの内容は細心の注意を払って作成されていますが、正確性・完全性・最新性について保証するものではありません。利用は自己責任となります。"
+      },
+      "entry4": {
+        "title": "著作権",
+        "text": "本アプリのすべての内容は著作権で保護されています。私的かつ非商用目的に限り使用が許可されます。それ以外の利用には著作権者の書面による許可が必要です。"
+      }
+    },
+    "navigation": {
+      "faq": "FAQ",
+      "contact": "お問い合わせ",
+      "agb": "利用規約",
+      "privacy": "プライバシー",
+      "impressum": "インプリント"
+    },
+    "validation": {
+      "job": {
+        "required": "職種は必須項目です！"
+      },
+      "skill": {
+        "required": "経験を入力してください"
+      },
+      "name": {
+        "required": "名前を入力してください",
+        "minWords": "名前は2単語以上で入力してください！"
+      },
+      "generating": "お待ちください。\n応募書類を生成中です。"
+    },
+    "alerts": {
+      "error": {
+        "title": "エラー",
+        "attachments": "添付ファイルに問題がありました。再度アップロードしてください。",
+        "emailSettings": "メール設定を確認してください。",
+        "unknown": "不明なエラー"
+      },
+      "success": {
+        "title": "成功",
+        "applicationSent": "応募書類を正常に送信しました"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "upload": {
+      "title": "成功",
+      "info": "ファイルは正常に保存されました。"
+    },
+    "settings": {
+      "title": "設定",
+      "language": "言語",
+      "theme": "テーマ",
+      "darkMode": "ダークモード",
+      "lightMode": "ライトモード",
+      "languageSaved": "言語を保存しました",
+      "languageChange": "言語を変更",
+      "apiKey": "独自APIを使用",
+      "apiKeyKey": "APIキーを入力",
+      "changeMode": "ダークモードを有効化",
+      "pleaseApi": "APIを選択してください。",
+      "changeApiText": "APIキーを使用",
+      "apiText": "OpenAIキーを使用して個別の応募書類を生成します。",
+      "apiGoogleText": "Google企業・住所検索用APIキーを使用します。",
+      "languageText": "アプリの表示言語を変更します（応募書類には影響しません）。"
+    },
+    "email": {
+      "sendButton": "送信",
+      "placeholder": "メールアドレス"
+    }
+  }

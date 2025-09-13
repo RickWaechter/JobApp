@@ -1,0 +1,284 @@
+{
+    "BewerbungGenerieren": "Creează o candidatură nouă",
+    "BewerbungGenerierenText": "Creează rapid și ușor o candidatură profesională, adaptată ție.",
+    "BewerbungRecycel": "Reutilizează candidatura",
+    "BewerbungRecycelText": "Folosește candidatura ta anterioară pentru a o adapta rapid la un alt post.",
+    "personalData": "Date personale",
+    "personalDataDescription": "Editează aici adresa ta personală pentru candidatura ta.",
+    "configureEmail": "Configurează e-mailul",
+    "configureEmailDescription": "Configurează-ți e-mailul pentru trimiterea candidaturilor.",
+    "sortAttachments": "Ordonează anexele",
+    "sortAttachmentsDescription": "Ordonează anexele pentru mapa ta de candidatură.",
+    "placeholderName": "Numele meu",
+    "placeholderStreet": "Stradă și număr",
+    "placeholderZip": "Cod poștal și oraș",
+    "placeholderEmail": "E-mail",
+    "placeholderPassword": "Parolă",
+    "placeholderEmailServer": "Alege un server de e-mail",
+    "saveAndClose": "Salvează și închide",
+    "activateAndClose": "Activează",
+    "deactivateAndClose": "Dezactivează",
+    "save": "Salvează",
+    "downloadProgress": "",
+    "bwnzg": "Mapa ta de candidatură este acum în curs de asamblare.",
+    "uploadFiles": "Selectează fișiere",
+    "selectFilesToUpload": "Alege anexele pe care dorești să le folosești în mapa ta de candidatură.",
+    "addAttachment": "Adaugă anexă",
+    "addAttachmentsToApplication": "Adaugă anexele selectate la mapa ta existentă.",
+    "replaceOldFiles": "Înlocuiește anexele vechi",
+    "replaceExistingAttachments": "Înlocuiește anexele existente cu cele selectate.",
+    "selectedFiles": "Fișier(e) selectat(e)",
+    "searchCompany": "Caută aici adresa",
+    "searchCompanyOld": "Caută adresa companiei...",
+    "companyName": "Numele companiei",
+    "companyStreet": "Strada și numărul companiei",
+    "companyStreet2": "Strada și numărul companiei",
+    "companyCity": "Cod poștal și orașul sediului",
+    "continue": "Continuă",
+    "enterManually": "Introdu manual",
+    "nameAnsprechpartner": "Nume, persoană de contact",
+    "beruf": "Profesie",
+    "skillsErfahrung": "Competențe / experiență",
+    "fontPlaceholder": "Helvetica (font implicit)",
+    "generateCoverLetter": "Generează scrisoarea de intenție",
+    "next": "Înainte",
+    "toHome": "Închide",
+    "ok": "Da, sigur!",
+    "cancel": "Nu",
+    "ownName": "Prenumele și numele dumneavoastră",
+    "ownStreet": "Strada și numărul dumneavoastră",
+    "ownCity": "Codul poștal și orașul dumneavoastră",
+    "download": {
+      "titleFirma": "Descarcă lista de companii",
+      "messageFirma": "Doriți să descărcați directorul cu aprox. 5,3 milioane de nume de companii din Germania? (fără adrese)",
+      "titleStreet": "Descarcă lista de străzi",
+      "messageStreet": "Doriți să descărcați toate denumirile străzilor din Germania?",
+      "titleCity": "Descarcă lista de orașe",
+      "messageCity": "Doriți să descărcați toate orașele din Germania împreună cu codurile lor poștale?",
+      "titleJob": "Descarcă lista de profesii",
+      "messageJob": "Doriți să descărcați peste 3500 de denumiri de profesii?",
+      "button": "Descarcă"
+    },
+    "Bewerbung": "Candidatură",
+    "Profile": "Profil",
+    "Anlagen": "Anexe",
+    "Info": "Informații",
+    "Fortsetzen": "Continuă",
+    "profil": {
+      "coinTitle": "Recompensă în monede",
+      "coinText": "Doriți să primiți monede prin vizionarea de reclame?"
+    },
+    "employmentOptions": {
+      "vollzeit": "Normă întreagă",
+      "teilzeit": "Part-time",
+      "minijob": "Minijob"
+    },
+    "applicationOptions": {
+      "initiativ": "Inițiativă",
+      "regulär": "Regulată",
+      "praktikum": "Practică"
+    },
+    "anredeOptions": {
+      "herr": "Domn",
+      "damenUndHerren": "Doamnelor și domnilor",
+      "frau": "Doamnă"
+    },
+    "salutation": {
+      "herr": "Stimate domn ",
+      "frau": "Stimată doamnă ",
+      "default": "Stimate doamnelor și stimați domni,"
+    },
+    "applicationOptions2": {
+      "initiativ": "Candidatură spontană ca ",
+      "regulär": "Candidatură pentru postul anunțat ca ",
+      "praktikum": "Candidatură pentru practică ca ",
+      "default": "Candidatură pentru postul anunțat ca "
+    },
+    "employmentChoice": {
+      "fulltime": "pentru un loc de muncă cu normă întreagă în compania dumneavoastră",
+      "parttime": "pentru un loc de muncă part-time în compania dumneavoastră",
+      "minijob": "pe bază de minijob",
+      "default": "în compania dumneavoastră"
+    },
+    "enterText": "Introdu textul aici...",
+    "saveCoverLetter": "Salvează scrisoarea de intenție",
+    "merge": "Fuzionează",
+    "viewApplication": "Vezi candidatura",
+    "viewApplicationDescription": "Verifică mapa de candidatură pentru a evita erorile înainte de descărcare sau trimitere.",
+    "downloadDescription": "Salvează mapa de candidatură ca PDF pe dispozitivul tău și trimite-o către locul de muncă dorit.",
+    "sendEmail": "Trimite prin e-mail",
+    "sendEmailDescription": "Trimite mapa de candidatură direct prin e-mail. Textul mesajului este generat automat, dar poate fi ajustat înainte de trimitere. ✉️",
+    "terms": {
+      "title": "Termeni și condiții",
+      "section1": {
+        "heading": "1. Domeniul de aplicare",
+        "content": "Acești termeni și condiții se aplică utilizării instrumentului de candidatură. Instrumentul creează candidaturi cu ajutorul inteligenței artificiale (IA) furnizate de terți."
+      },
+      "section2": {
+        "heading": "2. Protecția datelor și securitate",
+        "content": "Toate datele personale sunt stocate local și protejate cu criptare AES-256."
+      },
+      "section3": {
+        "heading": "3. Exonerare de răspundere",
+        "content": "Furnizorul nu își asumă răspunderea pentru corectitudinea sau caracterul complet al candidaturilor generate."
+      },
+      "section4": {
+        "heading": "4. Drepturi de utilizare",
+        "content": "Utilizarea instrumentului nu este exclusivă și nu poate fi transferată. Modificarea sau revânzarea sunt interzise."
+      },
+      "section5": {
+        "heading": "5. Dispoziții finale",
+        "content": "Se aplică legea Republicii Federale Germania."
+      },
+      "email": {
+        "placeholder": "E-mail",
+        "sendButton": "Trimite e-mail"
+      },
+      "subject": {
+        "placeholder": "Subiect"
+      },
+      "message": {
+        "placeholder": "Mesaj"
+      },
+      "messageText": "Stimate doamnelor și domnilor,\n\nPrin prezenta doresc să aplic pentru postul de {{jobTitle}} la {{companyName}}.\n\nCu stimă,\n{{applicantName}}"
+    },
+    "emailSent": {
+      "success": "E-mail trimis cu succes!",
+      "error": "Eroare la trimiterea e-mailului. Te rugăm să încerci din nou."
+    },
+    "emailConfig": {
+      "server": {
+        "placeholder": "Server de e-mail"
+      },
+      "port": {
+        "placeholder": "Port"
+      },
+      "username": {
+        "placeholder": "Nume de utilizator"
+      },
+      "password": {
+        "placeholder": "Parolă"
+      }
+    },
+    "faq": {
+      "heading": "Întrebări frecvente",
+      "entry1": {
+        "subheading": "Cum sunt stocate datele mele?",
+        "paragraph": "Datele tale sunt în siguranță la noi. Toate informațiile tale sunt stocate exclusiv local pe telefonul tău, într-o bază de date SQLite, și sunt protejate prin criptare AES de 256 de biți. Aceasta garantează că nimeni altcineva nu are acces la ele. Acordăm o importanță deosebită protecției datelor și renunțăm în mod deliberat la stocarea sau transmiterea datelor tale pe servere externe.\n\nDacă utilizezi serviciul de e-mail, adresa ta de e-mail, parola și serverul de e-mail sunt, de asemenea, protejate cu aceeași criptare puternică înainte de procesare. Astfel, informațiile tale sensibile rămân întotdeauna protejate cât mai bine. Confidențialitatea ta este prioritatea noastră – tu deții oricând controlul deplin asupra datelor tale."
+      },
+      "entry2": {
+        "subheading": "Cum funcționează serverul de e-mail?",
+        "paragraph": "Cu serviciul nostru de e-mail poți trimite mapa de candidatură direct la adresa de e-mail a companiei dorite – ai nevoie doar de adresa de contact. Subiectul și un șablon pentru textul e-mailului sunt generate automat pentru tine, astfel încât trimiterea să fie rapidă și ușoară.\n\nDatele tale sunt transmise serverului nostru cu o criptare sigură de 2048 de biți, care decriptează mapa de candidatură și o redirecționează direct către destinatar. Nu se creează jurnale și nici nu se stochează date permanent – informațiile rămân doar temporar în cache și sunt șterse imediat după redirecționare.\n\nLucrăm deja la o versiune complet locală a acestui serviciu, astfel încât să ai și mai mult control asupra datelor tale în viitor. Serviciul este complet gratuit și opțional – tu decizi dacă vrei să-l folosești."
+      },
+      "entry3": {
+        "subheading": "Crearea și reutilizarea candidaturilor",
+        "paragraph": "Ai posibilitatea fie să creezi o scrisoare de intenție complet nouă, fie să reutilizezi una existentă. Pentru doar aproximativ 1 cent per generare îți poți crea o scrisoare de intenție adaptată postului dorit. Alternativ, poți reutiliza și modifica o scrisoare de intenție anterioară selectând compania, definind din nou persoana de contact și ajustând textul după dorință. Astfel economisești timp și rămâi flexibil pentru a adapta fiecare candidatură după necesități."
+      }
+    },
+    "privacy": {
+      "heading": "Politica de confidențialitate",
+      "entry1": {
+        "title": "1. Informații generale",
+        "text": "Această politică de confidențialitate explică modul în care instrumentul de candidatură prelucrează datele cu caracter personal."
+      },
+      "entry2": {
+        "title": "2. Colectarea și prelucrarea datelor",
+        "text": "Instrumentul colectează doar datele necesare pentru crearea unei candidaturi:\n• Postul dorit\n• Competențe relevante\n• Tipul candidaturii"
+      },
+      "entry3": {
+        "title": "3. Stocare și securitate",
+        "text": "Toate datele cu caracter personal sunt stocate exclusiv pe dispozitiv și protejate cu criptare AES-256."
+      },
+      "entry4": {
+        "title": "4. Transmiterea către terți",
+        "text": "Nu are loc nicio transmitere de date personale către terți. Sunt transmise doar date anonimizate pentru crearea candidaturii către furnizorii de servicii IA."
+      },
+      "entry5": {
+        "title": "5. Drepturile utilizatorilor",
+        "text": "Utilizatorii au dreptul la informare, rectificare și ștergerea datelor lor stocate local."
+      },
+      "entry6": {
+        "title": "6. Modificări ale politicii de confidențialitate",
+        "text": "Această politică de confidențialitate poate fi actualizată. Versiunea curentă este întotdeauna disponibilă în aplicație."
+      }
+    },
+    "imprint": {
+      "heading": "Impressum",
+      "entry1": {
+        "title": "Informații conform § 5 TMG",
+        "text": "Rick Wächter\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermania"
+      },
+      "entry2": {
+        "title": "Contact",
+        "text": "Telefon: 01234/56789\nE-mail: kontakt@musterapp.de\nWebsite: www.musterapp.de"
+      },
+      "entry3": {
+        "title": "Declinare a răspunderii",
+        "text": "Conținutul acestei aplicații a fost creat cu cea mai mare grijă. Totuși, nu putem garanta corectitudinea, exhaustivitatea și actualitatea conținutului. Utilizarea aplicației se face pe propriul risc."
+      },
+      "entry4": {
+        "title": "Drepturi de autor",
+        "text": "Toate conținuturile acestei aplicații sunt protejate de drepturi de autor. Utilizarea este permisă doar în scopuri private și necomerciale. Orice utilizare suplimentară, în special exploatarea comercială, necesită acordul expres al titularului drepturilor de autor."
+      }
+    },
+    "navigation": {
+      "faq": "FAQ",
+      "contact": "Contact",
+      "agb": "Termeni",
+      "privacy": "Confidențialitate",
+      "impressum": "Impressum"
+    },
+    "validation": {
+      "job": {
+        "required": "Profesie obligatorie!"
+      },
+      "skill": {
+        "required": "Te rugăm să-ți introduci experiența"
+      },
+      "name": {
+        "required": "Te rugăm să-ți introduci numele",
+        "minWords": "Numele trebuie să conțină cel puțin 2 cuvinte!"
+      },
+      "generating": "Te rugăm să aștepți.\n Textul candidaturii este în curs de generare."
+    },
+    "alerts": {
+      "error": {
+        "title": "Eroare",
+        "attachments": "Au apărut probleme cu anexele tale, te rugăm să le încarci din nou.",
+        "emailSettings": "Te rugăm să verifici setările de e-mail.",
+        "unknown": "Eroare necunoscută"
+      },
+      "success": {
+        "title": "Succes",
+        "applicationSent": "Mapa ta de candidatură a fost trimisă cu succes"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "upload": {
+      "title": "Succes",
+      "info": "Fișierele au fost salvate cu succes."
+    },
+    "settings": {
+      "title": "Setări",
+      "language": "Limbă",
+      "theme": "Temă",
+      "darkMode": "Mod întunecat",
+      "lightMode": "Mod luminos",
+      "languageSaved": "Limba a fost salvată",
+      "languageChange": "Schimbă limba",
+      "apiKey": "Folosește API propriu",
+      "apiKeyKey": "Introdu API-Key",
+      "changeMode": "Activează modul întunecat",
+      "pleaseApi": "Te rugăm să alegi un API.",
+      "changeApiText": "Folosește API-Key",
+      "apiText": "Folosește-ți OpenAI-Key pentru scrisori de intenție personalizate.",
+      "apiGoogleText": "Folosește-ți API-Key pentru căutarea de companii și adrese Google.",
+      "languageText": "Schimbă limba aplicației (nu afectează candidaturile)."
+    },
+    "email": {
+      "sendButton": "Trimite",
+      "placeholder": "Adresă de e-mail"
+    }
+  }

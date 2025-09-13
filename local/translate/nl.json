@@ -1,0 +1,284 @@
+{
+  "BewerbungGenerieren": "Nieuwe sollicitatie aanmaken",
+  "BewerbungGenerierenText": "Maak snel en eenvoudig een professionele sollicitatie die op jou is afgestemd.",
+  "BewerbungRecycel": "Sollicitatie hergebruiken",
+  "BewerbungRecycelText": "Gebruik je vorige sollicitatie om snel een nieuwe voor een andere functie aan te passen.",
+  "personalData": "Persoonlijke gegevens",
+  "personalDataDescription": "Bewerk hier je persoonlijke adres voor je sollicitatie.",
+  "configureEmail": "E-mail configureren",
+  "configureEmailDescription": "Configureer je e-mail voor het versturen van sollicitaties.",
+  "sortAttachments": "Bijlagen ordenen",
+  "sortAttachmentsDescription": "Orden je bijlagen voor je sollicitatiemap.",
+  "placeholderName": "Mijn naam",
+  "placeholderStreet": "Straat en huisnummer",
+  "placeholderZip": "Postcode en plaats",
+  "placeholderEmail": "E-mail",
+  "placeholderPassword": "Wachtwoord",
+  "placeholderEmailServer": "Selecteer een e-mailserver",
+  "saveAndClose": "Opslaan & sluiten",
+  "activateAndClose": "Activeren",
+  "deactivateAndClose": "Deactiveren",
+  "save": "Opslaan",
+  "downloadProgress": "",
+  "bwnzg": "Je sollicitatiemap wordt nu samengesteld.",
+  "uploadFiles": "Bestanden selecteren",
+  "selectFilesToUpload": "Selecteer de bijlagen die je voor je sollicitatiemap wilt gebruiken.",
+  "addAttachment": "Bijlage toevoegen",
+  "addAttachmentsToApplication": "Voeg de geselecteerde bijlagen toe aan je bestaande sollicitatiemap.",
+  "replaceOldFiles": "Oude bijlagen vervangen",
+  "replaceExistingAttachments": "Vervang je bestaande bijlagen door de nieuw geselecteerde.",
+  "selectedFiles": "Geselecteerde bestand(en)",
+  "searchCompany": "Adres hier zoeken",
+  "searchCompanyOld": "Adres van het bedrijf zoeken...",
+  "companyName": "Naam van het bedrijf",
+  "companyStreet": "Straat en huisnummer van het bedrijf",
+  "companyStreet2": "Straat en huisnummer van het bedrijf",
+  "companyCity": "Postcode en plaats van de vestiging",
+  "continue": "Doorgaan",
+  "enterManually": "Handmatig invoeren",
+  "nameAnsprechpartner": "Naam, contactpersoon",
+  "beruf": "Beroep",
+  "skillsErfahrung": "Vaardigheden / ervaring",
+  "fontPlaceholder": "Helvetica (standaardlettertype)",
+  "generateCoverLetter": "Sollicitatiebrief genereren",
+  "next": "Volgende",
+  "toHome": "Sluiten",
+  "ok": "Ja, natuurlijk!",
+  "cancel": "Nee",
+  "ownName": "Je voor- en achternaam",
+  "ownStreet": "Je straat en huisnummer",
+  "ownCity": "Je postcode en woonplaats",
+  "download": {
+    "titleFirma": "Bedrijvenlijst downloaden",
+    "messageFirma": "Wil je de directory met ca. 5,3 miljoen bedrijfsnamen in Duitsland downloaden? (Geen adressen)",
+    "titleStreet": "Stratenlijst downloaden",
+    "messageStreet": "Wil je alle straatnamen van Duitsland downloaden?",
+    "titleCity": "Stedenlijst downloaden",
+    "messageCity": "Wil je alle steden inclusief hun postcode downloaden?",
+    "titleJob": "Beroepenlijst downloaden",
+    "messageJob": "Wil je meer dan 3500 beroepennamen downloaden?",
+    "button": "Downloaden"
+  },
+  "Bewerbung": "Sollicitatie",
+  "Profile": "Profiel",
+  "Anlagen": "Bijlagen",
+  "Info": "Informatie",
+  "Fortsetzen": "Doorgaan",
+  "profil": {
+    "coinTitle": "Muntbeloning",
+    "coinText": "Wil je munten verdienen door advertenties te bekijken?"
+  },
+  "employmentOptions": {
+    "vollzeit": "Voltijds",
+    "teilzeit": "Deeltijds",
+    "minijob": "Bijbaan"
+  },
+  "applicationOptions": {
+    "initiativ": "Open sollicitatie",
+    "regulär": "Reguliere sollicitatie",
+    "praktikum": "Stage"
+  },
+  "anredeOptions": {
+    "herr": "heer",
+    "damenUndHerren": "dames en heren",
+    "frau": "mevrouw"
+  },
+  "salutation": {
+    "herr": "Geachte heer ",
+    "frau": "Geachte mevrouw ",
+    "default": "Geachte dames en heren,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Open sollicitatie als ",
+    "regulär": "Sollicitatie voor de vacature als ",
+    "praktikum": "Stage-sollicitatie als ",
+    "default": "Sollicitatie voor de vacature als "
+  },
+  "employmentChoice": {
+    "fulltime": "voor een voltijdsbaan in uw bedrijf",
+    "parttime": "voor een deeltijdbaan in uw bedrijf",
+    "minijob": "op basis van een bijbaan",
+    "default": "in uw bedrijf"
+  },
+  "enterText": "Voer hier je tekst in...",
+  "saveCoverLetter": "Sollicitatiebrief opslaan",
+  "merge": "Samenvoegen",
+  "viewApplication": "Sollicitatie bekijken",
+  "viewApplicationDescription": "Controleer je sollicitatiemap om fouten te vermijden voordat je downloadt of verzendt.",
+  "downloadDescription": "Sla de sollicitatiemap als pdf op je apparaat op en stuur deze naar je gewenste functie.",
+  "sendEmail": "Per e-mail verzenden",
+  "sendEmailDescription": "Stuur je sollicitatiemap direct per e-mail. De berichttekst wordt automatisch gegenereerd maar kan vóór verzending worden aangepast. ✉️",
+  "terms": {
+    "title": "Algemene voorwaarden",
+    "section1": {
+      "heading": "1. Toepassingsgebied",
+      "content": "Deze algemene voorwaarden zijn van toepassing op het gebruik van de sollicitatietool. De tool maakt sollicitaties met behulp van kunstmatige intelligentie (AI) van externe derden."
+    },
+    "section2": {
+      "heading": "2. Gegevensbescherming en veiligheid",
+      "content": "Alle persoonlijke gegevens worden lokaal opgeslagen en met AES-256-versleuteling beveiligd."
+    },
+    "section3": {
+      "heading": "3. Aansprakelijkheidsuitsluiting",
+      "content": "De aanbieder aanvaardt geen aansprakelijkheid voor de juistheid of volledigheid van de gegenereerde sollicitaties."
+    },
+    "section4": {
+      "heading": "4. Gebruiksrechten",
+      "content": "Het gebruik van de tool is niet exclusief en niet overdraagbaar. Wijzigingen of doorverkoop zijn verboden."
+    },
+    "section5": {
+      "heading": "5. Slotbepalingen",
+      "content": "Op deze overeenkomst is het recht van de Bondsrepubliek Duitsland van toepassing."
+    },
+    "email": {
+      "placeholder": "E-mail",
+      "sendButton": "E-mail verzenden"
+    },
+    "subject": {
+      "placeholder": "Onderwerp"
+    },
+    "message": {
+      "placeholder": "Bericht"
+    },
+    "messageText": "Geachte dames en heren,\n\nHierbij solliciteer ik naar de functie van {{jobTitle}} bij {{companyName}}.\n\nMet vriendelijke groet,\n{{applicantName}}"
+  },
+  "emailSent": {
+    "success": "E-mail succesvol verzonden!",
+    "error": "Fout bij het verzenden van de e-mail. Probeer het opnieuw."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "E-mailserver"
+    },
+    "port": {
+      "placeholder": "Poort"
+    },
+    "username": {
+      "placeholder": "Gebruikersnaam"
+    },
+    "password": {
+      "placeholder": "Wachtwoord"
+    }
+  },
+  "faq": {
+    "heading": "Veelgestelde vragen",
+    "entry1": {
+      "subheading": "Hoe worden mijn gegevens opgeslagen?",
+      "paragraph": "Je gegevens zijn bij ons in veilige handen. Al je informatie wordt uitsluitend lokaal op je telefoon opgeslagen in een SQLite-database en beschermd met sterke 256-bit-AES-versleuteling. Zo heeft niemand anders toegang tot je gegevens. We hechten veel waarde aan privacy en slaan je gegevens daarom bewust niet op externe servers op en delen ze niet.\n\nWanneer je de e-maildienst gebruikt, worden je e-mailadres, wachtwoord en mailserver eveneens met dezelfde sterke versleuteling beveiligd voordat de gegevens worden verwerkt. Zo blijven je gevoelige informatie optimaal beschermd. Jouw privacy heeft voor ons de hoogste prioriteit – jij behoudt te allen tijde de volledige controle over je gegevens."
+    },
+    "entry2": {
+      "subheading": "Hoe werkt de e-mailserver?",
+      "paragraph": "Met onze e-mailservice kun je je sollicitatiemap eenvoudig rechtstreeks naar het e-mailadres van het gewenste bedrijf sturen – je hebt alleen het juiste contactadres nodig. De onderwerpregel en een sjabloon voor de e-mailtekst worden automatisch voor je gegenereerd, zodat het verzenden snel en eenvoudig gaat.\n\nJe gegevens worden met een veilige 2048-bit-versleuteling naar onze server gestuurd, die de sollicitatiemap ontsleutelt en direct naar de ontvanger doorstuurt. Er worden geen logs aangemaakt en er worden geen gegevens permanent opgeslagen – de informatie blijft slechts tijdelijk in de cache en wordt na het doorsturen onmiddellijk verwijderd.\n\nWe werken al aan een volledig lokale versie van deze dienst, zodat je in de toekomst nog meer controle over je gegevens hebt. De service is volledig gratis en optioneel – jij beslist of je hem wilt gebruiken."
+    },
+    "entry3": {
+      "subheading": "Sollicitatie aanmaken en hergebruiken",
+      "paragraph": "Je kunt ervoor kiezen om een geheel nieuwe sollicitatiebrief te maken of een bestaande opnieuw te gebruiken. Voor slechts ongeveer 1 cent per generatie kun je een brief laten maken die precies is afgestemd op de gewenste functie. Je kunt ook een eerdere brief hergebruiken en aanpassen door het bedrijf te selecteren, de contactpersoon te wijzigen en de tekst naar wens te bewerken. Zo bespaar je tijd en blijf je toch flexibel om elke sollicitatie aan te passen."
+    }
+  },
+  "privacy": {
+    "heading": "Privacyverklaring",
+    "entry1": {
+      "title": "1. Algemene informatie",
+      "text": "Deze privacyverklaring legt uit hoe de sollicitatietool persoonsgegevens verwerkt."
+    },
+    "entry2": {
+      "title": "2. Verzameling en verwerking van gegevens",
+      "text": "De tool verzamelt alleen de gegevens die nodig zijn voor het opstellen van een sollicitatie:\n• Gewenste functietitel\n• Relevante vaardigheden (skills)\n• Type sollicitatie"
+    },
+    "entry3": {
+      "title": "3. Opslag en veiligheid",
+      "text": "Alle persoonsgegevens worden uitsluitend op het apparaat opgeslagen en met AES-256-bit-versleuteling beschermd."
+    },
+    "entry4": {
+      "title": "4. Doorgifte aan derden",
+      "text": "Er vindt geen doorgifte van persoonsgegevens aan derden plaats. Alleen geanonimiseerde gegevens voor het maken van de sollicitatie worden naar AI-dienstverleners verzonden."
+    },
+    "entry5": {
+      "title": "5. Rechten van gebruikers",
+      "text": "Gebruikers hebben het recht op inzage, rectificatie en verwijdering van hun lokaal opgeslagen gegevens."
+    },
+    "entry6": {
+      "title": "6. Wijzigingen in de privacyverklaring",
+      "text": "Deze privacyverklaring kan worden bijgewerkt. De actuele versie is altijd beschikbaar in de app."
+    }
+  },
+  "imprint": {
+    "heading": "Colofon",
+    "entry1": {
+      "title": "Gegevens volgens § 5 TMG",
+      "text": "Rick Wächter\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nDuitsland"
+    },
+    "entry2": {
+      "title": "Contact",
+      "text": "Telefoon: 01234/56789\nE-mail: kontakt@musterapp.de\nWebsite: www.musterapp.de"
+    },
+    "entry3": {
+      "title": "Aansprakelijkheidsdisclaimer",
+      "text": "De inhoud van deze app is met de grootst mogelijke zorg samengesteld. Voor de juistheid, volledigheid en actualiteit van de inhoud kunnen wij echter geen garantie geven. Het gebruik van de app is op eigen risico."
+    },
+    "entry4": {
+      "title": "Auteursrecht",
+      "text": "Alle inhoud van deze app is auteursrechtelijk beschermd. Gebruik is alleen toegestaan voor privé- en niet-commerciële doeleinden. Elke andere vorm van gebruik, met name commerciële exploitatie, vereist de uitdrukkelijke toestemming van de rechthebbende."
+    }
+  },
+  "navigation": {
+    "faq": "FAQ",
+    "contact": "Contact",
+    "agb": "AV",
+    "privacy": "Privacy",
+    "impressum": "Colofon"
+  },
+  "validation": {
+    "job": {
+      "required": "Beroep is verplicht!"
+    },
+    "skill": {
+      "required": "Geef je ervaring op"
+    },
+    "name": {
+      "required": "Voer je naam in",
+      "minWords": "De naam moet uit minstens 2 woorden bestaan!"
+    },
+    "generating": "Even geduld.\n Je sollicitatietekst wordt gegenereerd."
+  },
+  "alerts": {
+    "error": {
+      "title": "Fout",
+      "attachments": "Er waren problemen met je bijlagen, upload ze alstublieft opnieuw.",
+      "emailSettings": "Controleer je e-mailinstellingen.",
+      "unknown": "Onbekende fout"
+    },
+    "success": {
+      "title": "Succes",
+      "applicationSent": "Je sollicitatiemap is succesvol verzonden"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "upload": {
+    "title": "Succes",
+    "info": "Bestanden succesvol opgeslagen."
+  },
+  "settings": {
+    "title": "Instellingen",
+    "language": "Taal",
+    "theme": "Thema",
+    "darkMode": "Donkere modus",
+    "lightMode": "Lichte modus",
+    "languageSaved": "Taal opgeslagen",
+    "languageChange": "Taal wijzigen",
+    "apiKey": "Eigen API gebruiken",
+    "apiKeyKey": "API-sleutel invoeren",
+    "changeMode": "Donkere modus inschakelen",
+    "pleaseApi": "Selecteer een API.",
+    "changeApiText": "API-sleutel gebruiken",
+    "apiText": "Gebruik je eigen OpenAI-sleutel voor individuele sollicitaties.",
+    "apiGoogleText": "Gebruik je API-sleutel voor de Google-bedrijfs- en adreszoekfunctie.",
+    "languageText": "App-taal wijzigen (heeft geen invloed op de sollicitaties)."
+  },
+  "email": {
+    "sendButton": "Verzenden",
+    "placeholder": "E-mailadres"
+  }
+}
