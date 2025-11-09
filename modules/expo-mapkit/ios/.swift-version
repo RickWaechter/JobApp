@@ -1,0 +1,1 @@
+echo "5.9" > expo-mapkit/ios/.swift-version

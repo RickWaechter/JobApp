@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions, Text, FlatList,SafeAreaView } from 'react-native';
-import { Card } from '@rneui/themed';
 import SQLite from 'react-native-sqlite-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import DeviceInfo from 'react-native-device-info';

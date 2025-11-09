@@ -1,20 +1,20 @@
 // i18n.ts
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as RNLocalize from 'react-native-localize';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import en from './translate/en.json';
-import de from './translate/de.json';
-import tr from './translate/tr.json';
-import ar from './translate/ar.json';
-import gr from './translate/gr.json';
-import fr from './translate/fr.json';
-import it from './translate/it.json';
-import jp from './translate/jp.json';
-import nl from './translate/nl.json';
-import ua from './translate/ua.json';
-import pl from './translate/pl.json';
-import ru from './translate/ru.json';
+import * as RNLocalize from 'react-native-localize';
+import ar from './ar.json';
+import de from './de.json';
+import en from './en.json';
+import fr from './fr.json';
+import gr from './gr.json';
+import it from './it.json';
+import jp from './jp.json';
+import nl from './nl.json';
+import pl from './pl.json';
+import ru from './ru.json';
+import tr from './tr.json';
+import ua from './ua.json';
 
 
 const resources = { en: { translation: en },
