@@ -1,18 +1,45 @@
 {
   "expo": {
-    "name": "jobape",
-    "slug": "jobape",
-    "version": "1.0.0",
+     "name": "JobApp 2",
+  "slug": "jobapp2",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#002D6F"
+    },
     "scheme": "jobape",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
+       "splash": {
+        "image": "./assets/images/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#002D6F"
+      },
+       "icon": "./assets/images/icon.png",
+        "buildNumber": "12",
       "bundleIdentifier": "com.ricky1993.jobape",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app needs access to your camera to allow taking pictures.",
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to allow audio recording.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library so you can select and upload images.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to save images to your photo library.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to display relevant nearby content.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app may use your location to provide continuous location-based features.",
+        "NSContactsUsageDescription": "This app needs access to your contacts to connect with other users.",
+        "NSCalendarsUsageDescription": "This app needs access to your calendars to manage events.",
+        "NSRemindersUsageDescription": "This app needs access to reminders to keep tasks synced.",
+        "NSBluetoothPeripheralUsageDescription": "This app needs access to Bluetooth to connect to nearby devices.",
+        "NSBluetoothAlwaysUsageDescription": "This app needs Bluetooth permission to maintain connectivity with accessories.",
+        "NSLocalNetworkUsageDescription": "This app needs access to devices on your local network.",
+        "NSFaceIDUsageDescription": "This app uses Face ID to securely authenticate your identity.",
+        "NSUserTrackingUsageDescription": "This app uses tracking data to provide a better personalized experience.",
+        "NSDocumentsFolderUsageDescription": "This app needs access to your documents to upload files."
       }
     },
     "android": {
@@ -24,15 +51,21 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ricky1993.jobape"
+      "package": "com.ricky1993.jobape",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-          "@config-plugins/react-native-blob-util",
-    "@config-plugins/react-native-pdf",
+      "@config-plugins/react-native-blob-util",
+      "@config-plugins/react-native-pdf",
       "expo-router",
       [
         "expo-splash-screen",
@@ -51,19 +84,20 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
+        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
-    }
+      "enabled": false
+    },
+    "owner": "mrnorthside"
   }
 }

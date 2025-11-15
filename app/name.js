@@ -129,7 +129,7 @@ const Name = () => {
           <>
             <TextInput
               style={styles.textInput}
-              placeholder="Suche direkt nach der Firma"
+              placeholder={t("searchCompany")}
               placeholderTextColor="gray"
               value={query}
               onChangeText={onChange}
@@ -157,7 +157,7 @@ const Name = () => {
             )}
 
             <TouchableOpacity style={styles.buttonNext} onPress={inputStateNew}>
-              <Text style={styles.buttonText}>Manuell eingeben</Text>
+              <Text style={styles.buttonText}>{t("enterManually")}</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -241,15 +241,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     color: "white",
   },
-  loadingContainer: {
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginLeft: 8,
-    color: "white",
-  },
   suggestionsContainerCity: {
     position: "absolute",
     top: 50,
@@ -331,14 +322,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
-  },
-  finishMessage: {
-    textAlign: "center",
-    marginTop: 50,
-    color: "white",
-  },
-  noResultsContainer: {
-    padding: 12,
   },
 });
 

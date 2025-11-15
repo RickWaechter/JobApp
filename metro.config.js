@@ -1,18 +1,9 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { getDefaultConfig } = require("expo/metro-config");
 
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const defaultConfig = getDefaultConfig(__dirname);
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
 
-const config = {
-  resolver: {
-    // 👇 Add support for `.cjs` so pdf-lib can load properly
-    sourceExts: [...defaultConfig.resolver.sourceExts, 'cjs'],
-  },
-};
+  config.resolver.sourceExts.push("cjs");
 
-module.exports = mergeConfig(defaultConfig, config);
+  return config;
+})();

@@ -1,6 +1,6 @@
 // ContactForm.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { router } from 'expo-router';
 import forge from 'node-forge';
@@ -26,11 +26,9 @@ import { WebView } from 'react-native-webview';
 import colors from '../inc/colors.js';
 import { decryp, decryptBase, encryp } from '../inc/cryp.js';
 import { selectDb } from '../inc/db.js';
-import '../local/i18n.js';
 const ContactForm = () => {
 
         const { t } = useTranslation();
-  const navigation = useNavigation();
   const route = useRoute();
   const [formData, setFormData] = useState({message: 'Bitte warten, Ihre Vorlage wird generiert.'});
   const [triggerGeneratePDF, setTriggerGeneratePDF] = useState(false);
@@ -500,12 +498,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: colors.background,
   },
-  emailContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 5,
-  },
+emailContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 5,
+  position: 'relative',   // ← WICHTIG
+  zIndex: 10,      
+  width: width * 0.95       // ← Damit es über allem liegt
+}
+,
   emailInput: {
     flex: 1,
     borderColor: 'gray',
@@ -541,7 +543,7 @@ const styles = StyleSheet.create({
   },
   textarea: {
 border:'none',
-
+width: width * 0.96,
     borderRadius: 8,
     padding: 10,
     marginBottom: 5,

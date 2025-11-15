@@ -1,7 +1,8 @@
 // Home.js
 
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Animated, Dimensions, Pressable, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -9,9 +10,10 @@ import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from "react-native-draggable-flatlist";
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
 import Modal from 'react-native-modal';
-import { Card, Text } from 'react-native-paper';
+import { Card, Divider, Text } from 'react-native-paper';
 import Pdf from 'react-native-pdf';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
@@ -23,7 +25,6 @@ import {
   genIv,
 } from '../inc/cryp.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
-import '../local/i18n.js';
 // Aktivieren des Debug-Modus (optional)
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
@@ -39,7 +40,6 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
   const [expand, setExpand] = useState(false);
   const [buttonOne, setButtonOne] = useState(true);
   const [buttonUpload, setButtonUpload] = useState(true);
-  const navigation = useNavigation();
   const keyboardHeight = useKeyboardAnimation();
   const [isAnimating, setIsAnimating] = useState(false);
   const [source, setSource] = useState('');
@@ -51,6 +51,7 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
     "add1", "add2", "add3", "add4", "add5",
     "add6", "add7", "add8", "add9", "add10"
   ];
+  const router = useRouter();
   const fetchData = async () => {
     try {
       console.log("Opening database...");
@@ -119,8 +120,9 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
   );
   useEffect(() => {
 console.log("useEffect triggered" + data.length);
+console.log("buttonOne:" + buttonOne);
   }
-    , [data]);
+    , [data, buttonOne]);
 
     const deleteFileIfExists = async (fileName) => {
       const filePath = `${RNFS.LibraryDirectoryPath}/${fileName}`;
@@ -273,7 +275,7 @@ console.log("useEffect triggered" + data.length);
         console.log('Processed files:', processedFiles);
         setButtonUpload(false)
         setButtonOne(false)
-
+console.log("buttonOne:", buttonOne, "files:", files.length);
         setFiles(processedFiles);
         setError('');
       } else {
@@ -321,7 +323,7 @@ console.log("useEffect triggered" + data.length);
       setButtonUpload(true)
       fetchData();
       Alert.alert(t('upload.title'), t('upload.info'),);
-      navigation.navigate('MainTabs');
+      
       console.log('Alle Dateien wurden aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Dateien:', error);
@@ -443,11 +445,13 @@ console.log("useEffect triggered" + data.length);
       setButtonOne(true)
       setButtonUpload(true)
       fetchData();
-      navigation.navigate('MainTabs');
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Dateien:', error);
     }
   };
+  const cont = () => {
+    router.push("(tabs)");
+  }
   return (
     <View style={styles.container}>
       {buttonUpload && (
@@ -457,65 +461,59 @@ console.log("useEffect triggered" + data.length);
           >
             {({ pressed }) => (
               <View style={[
-                styles.entry,                // Grund‑Layout
+                styles.entry2,                // Grund‑Layout
                 pressed && styles.entryPress // nur solange gedrückt
               ]}>
                 <Card.Title
-                 title={t('addAttachment')}
+                 title={t('uploadFiles')}
                  titleStyle={styles.job}
                />
+                  <Divider
+ color='gray'
+ style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
+/>
                 <Text style={styles.name}>{t('selectFilesToUpload')}</Text>
               </View>
             )}
           </Pressable>
-          <Pressable
-            onPress={() => {data.length > 0 ? setModalSortVisible(true) : Alert.alert(t('sortAttachments'), t('sortAttachmentsDescription'))}}        // Grund‑Style 
-          >
-            {({ pressed }) => (
-              <View style={[
-                styles.entry2,                // Grund‑Layout
-                pressed && styles.entryPress // nur solange gedrückt
-              ]}>
-                <Card.Title style={styles.job}>
-                  {t('sortAttachments')}
-                </Card.Title>
-                <Text style={styles.name}>{t('sortAttachmentsDescription')}</Text>
-              </View>
-            )}
-          </Pressable>
+          
         </>
       )}
 
       {!buttonOne && (
         <>
-          <TouchableOpacity
-            onPress={addToDB}
-            style={files.length > 0 ? {} : styles.buttonDisabled}
-            disabled={files.length === 0}
-          >
-            <View style={styles.entry}>
-               <Card.Title
-                 title={t('addAttachment')}
-                 titleStyle={styles.job}
-               />
-              <Text style={styles.name}>{t('addAttachmentsToApplication')}</Text>
-            </View>
-          </TouchableOpacity>
+         
 
           <TouchableOpacity
             onPress={handleSaveToDB}
             style={files.length > 0 ? {} : styles.buttonDisabled}
             disabled={files.length === 0}
           >
-            <View style={styles.entry}>
-              <Card.Title style={styles.job}>
-                  {t('sortAttachments')}
-                </Card.Title>
-              <Text style={styles.name}>{t('replaceExistingAttachments')}</Text>
+            <View style={styles.entry2}>
+             <Card.Title
+                 title={t('saveFile')}
+                 titleStyle={styles.job}
+               /> 
+           <Divider
+ color='gray'
+ style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
+/>
+              <Text style={styles.name}>{t('saveFileText')}</Text>
             </View>
           </TouchableOpacity>
         </>
-      )}
+      )} 
+ <TouchableOpacity
+                    onPress={cont}
+                 
+                  >
+<View style={styles.entryFort}>
+       <Card.Title
+        title={t('Continue')}
+        titleStyle={styles.job}>
+       </Card.Title>
+                  </View>
+                  </TouchableOpacity>
 
       {error !== '' && <Text style={styles.errorText}>{error}</Text>}
       {files.length > 0 && (
@@ -528,10 +526,11 @@ console.log("useEffect triggered" + data.length);
           ))}
         </View>
       )}
+      
       <Modal
         isVisible={isModalSortVisible}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
+        animationIn="zoomIn"
+        animationOut="zoomOut"
         onBackdropPress={() => { setModalSortVisible(false); setPdfView(false) }}
         style={{
           justifyContent: 'flex-end',
@@ -562,6 +561,7 @@ console.log("useEffect triggered" + data.length);
               }
             ]}>
             <View style={styles.listContainer}>
+              <GestureHandlerRootView style={{ flex: 1 }}>
               <DraggableFlatList
                 data={data}
                 onDragEnd={({ data }) => setData(data)}
@@ -569,7 +569,7 @@ console.log("useEffect triggered" + data.length);
                 renderItem={({ item, drag, isActive }) => (
                   <View style={[styles.card, isActive && styles.cardActive]}>
                     <TouchableOpacity onPress={() => handleItemClick(item)} style={[styles.dragArea, isActive && styles.dragActive]} onLongPress={drag}>
-                      <Text style={[styles.itemText, isActive && styles.itemTextActive]}>{item.name.length > 30 ? item.name.substring(0, 30) + '...': item.name}</Text>
+                      <Text style={[styles.itemText, isActive && styles.itemTextActive]}>{item.name.length > 25 ? item.name.substring(0, 25) + '...': item.name}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.deleteButton} onPress={() =>
                       Alert.alert(
@@ -591,7 +591,7 @@ console.log("useEffect triggered" + data.length);
                 )}
 
               />
-
+</GestureHandlerRootView>
               
               {pdfView && (
                 <Modal visible={pdfView} transparent={true} animationType="fade">
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
   },
   entryPress: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -659,6 +659,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'white',
 
+
+  },
+   entryFort: {
+      flexDirection: "column",
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth:1,
+    borderColor:'gray',
+justifyContent:'center',
+width:width * 0.9,
 
   },
   popup: {
@@ -714,19 +730,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
   listContainer: {
     flex: 1,
-    marginBottom: 20,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     maxHeight: '90%',
     width: width * 0.80,
-
+ marginTop: 5,
     borderRadius: 15,
   },
   deleteButton: {
@@ -767,25 +777,12 @@ const styles = StyleSheet.create({
 
   },
 
-  CardContainer: {
-    BorderWidth: 'none',
-    backgroundColor: "transparent",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Für Android-Schatten
-  },
   itemText: {
     color: "rgb(232, 225, 247)",
   },
   entry: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -796,12 +793,12 @@ const styles = StyleSheet.create({
     shadowColor: "gray",
     borderWidth: 1,
     borderColor: 'gray',
-width:width * 0.9,
+    maxWidth: width * 0.90,
 
   },
   entry2: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -812,6 +809,7 @@ width:width * 0.9,
     shadowColor: "gray",
     borderWidth: 1,
     borderColor: 'gray',
+    width: width * 0.90,
 
   },
   name: {
@@ -819,22 +817,15 @@ width:width * 0.9,
     fontSize: 13,
     fontWeight: "bold",
     color: "#C8C8C8",
-    marginBottom: 5,
+    marginBottom: 10,
     minWidth: width * 0.80,
   },
   job: {
+    textAlign: "center",
     fontSize: 20,
     fontWeight: "bold",
     color: "#E5E5E5",
 
-  },
-  text: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 5,
-  },
-  user: {
-    marginVertical: 10,
   },
 
 
@@ -851,21 +842,13 @@ width:width * 0.9,
     marginTop: 20,
     width: '100%',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'left',
   },
   fileListTitle: {
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 12,
-    textAlign: ',center',
-    color: 'white'
-  },
-  fileItem: {
-    backgroundColor: '#F2F2F2',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 8,
+    textAlign: 'left',
     color: 'white'
   },
   deleteButton: {
@@ -878,7 +861,8 @@ width:width * 0.9,
 
   fileName: {
     fontSize: 16,
-    color: 'white'
+    color: 'white',
+    marginBottom: 12,
   },
 });
 export default UploadScreen;

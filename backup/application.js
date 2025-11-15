@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
+import axios from 'axios';
+
+import { router } from 'expo-router';
+import { sha512 } from 'js-sha512';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  SafeAreaView,
-  ScrollView,
-  View,
+  Alert,
+  Animated,
+  Dimensions,
+  FlatList,
+  Keyboard,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  Dimensions,
-  Keyboard,
-  Animated,
-  Alert
+  View
 } from 'react-native';
-import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
-import BottomPopup from "../inc/popup"; // Importiere das Popup
-import SQLite from 'react-native-sqlite-storage';
-import EncryptedStorage from 'react-native-encrypted-storage';
 import DeviceInfo from 'react-native-device-info';
-import useKeyboardAnimation from '../inc/Keyboard.js'
 import DropDownPicker from 'react-native-dropdown-picker';
-import { useTranslation } from 'react-i18next';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
-import '../local/i18n';
-import { sha512 } from 'js-sha512';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import RNFS from 'react-native-fs';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SQLite from 'react-native-sqlite-storage';
+import colors from '../inc/colors.js';
+import useKeyboardAnimation from '../inc/Keyboard.js';
 const Bewerbung = () => {
   const { t } = useTranslation();
   const DB_NAME = 'firstNew.db';
@@ -49,13 +49,17 @@ const Bewerbung = () => {
   const [isFlatListVisibleSkills, setIsFlatListVisibleSkills] = useState(false);
   const [userSelectedSuggestion, setUserSelectedSuggestion] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
-  const navigation = useNavigation();
   const inputRef = useRef(null);
   const jobRef = useRef(null);
+  const dbRef = useRef(null);
+  const dbRefJobs = useRef(null);
   const jobRef2 = useRef(null);
   const timeoutRef = useRef(null);
+  const [jobsDbExist, setJobsDbExist] = useState(false);
   const [saveButton, setSaveButton] = useState(false);
   const [skillButton, setSkillButton] = useState(false);
+  const animView = useRef(new Animated.Value(0)).current;   // bleibt Animated
+
   const employmentOptions = [
     t('employmentOptions.vollzeit'),
     t('employmentOptions.teilzeit'),
@@ -74,9 +78,9 @@ const Bewerbung = () => {
     t('anredeOptions.frau'),
   ];
   const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
-  const keyboardHeight = useKeyboardAnimation();
+  const {keyboardHeight, reset} = useKeyboardAnimation();
 
-
+  
 
   const items = [
     { label: 'Courier', value: 'Courier' },
@@ -87,6 +91,36 @@ const Bewerbung = () => {
     { label: 'TimesRomanItalic', value: 'TimesRomanItalic' },
 
   ]
+useEffect(() => {
+  const checkDbExists = async () => {
+    const jobsDb = await RNFS.exists(`${RNFS.LibraryDirectoryPath}/LocalDatabase/jobs.db`);
+
+    if (jobsDb) {
+      console.log('DB exists');
+      setJobsDbExist(true);
+      console.log('cityDb', jobsDbExist);
+    } 
+
+  };
+const setDb = async () => {
+ if (jobsDbExist) {
+            const db1 = await SQLite.openDatabase({
+              name: 'jobs.db',
+              location: 'default',
+              readOnly: false,
+            });
+            dbRefJobs.current = db1;
+          }
+        }
+
+  checkDbExists();
+  setDb();
+}, [jobsDbExist, inputValue]);
+
+
+
+
+
   useEffect(() => {
     const selectDb = async () => {
       const deviceId = await DeviceInfo.getUniqueId();
@@ -96,7 +130,7 @@ const Bewerbung = () => {
           location: 'default',
         });
         const result = await db.executeSql(
-          'SELECT skills, jobs FROM files WHERE ident = ?',
+          'SELECT skills FROM files WHERE ident = ?',
           [deviceId],
         );
         const rawData = result[0]?.rows?.raw()?.[0];
@@ -107,7 +141,7 @@ const Bewerbung = () => {
         }
 
         const files = rawData.skills;
-        const jobData = rawData.jobs;
+       
 
         if (typeof files === "string" && files.length > 0) {
           setSkills(files.split("#"));
@@ -115,15 +149,11 @@ const Bewerbung = () => {
           setSkills([]); // Falls keine Daten vorhanden sind, leere Liste setzen
         }
 
-        if (typeof jobData === "string" && jobData.length > 0) {
-          setJobs(jobData.split("#"));
-        } else {
-          setJobs([]); // Falls keine Daten vorhanden sind, leere Liste setzen
-        }
+      
 
 
 
-        console.log('jobs', jobs);
+      
       } catch (err) {
         console.error('Error combining files:', err);
       }
@@ -131,13 +161,33 @@ const Bewerbung = () => {
     selectDb();
   }, [erfahrung, inputValue]);
 
-  const toChange = text => {
-    navigation.navigate('Change');
+  const toChange = async text => {
+    await EncryptedStorage.setItem('result', 'change');
+    router.replace('change');
   };
 
-  const handleChange = value => {
-
-    setInputValue(value);
+  const handleChange = async value => {
+    try {
+      if (!dbRefJobs.current) {
+        console.log('dbRef.current is null');
+        setInputValue(value);
+        return;
+      }
+      setInputValue(value);
+      const [res] = await dbRefJobs.current.executeSql(
+       'SELECT rowid, text FROM eintraege WHERE eintraege MATCH ? LIMIT 20',
+        [`${value}*`],
+      );
+  
+      console.log('res', res);
+      const names = res.rows.raw();
+      console.log('names', names);
+      setJobs(names);
+     
+    } catch (err) {
+      console.warn('Search error', err);
+    }
+    
     setUserSelectedSuggestion(false);
     const newOne = jobs.filter(job => job.toLowerCase().includes(value.toLowerCase()));
     setSuggestions(newOne);
@@ -171,8 +221,8 @@ const Bewerbung = () => {
 
   // Wenn ein Vorschlag angeklickt wird
   const handleSuggestionClick = suggestion => {
-    setInputValue(suggestion);
-    setSuggestions([]);
+    setInputValue(suggestion.text);
+    setJobs([]);
     setIsFlatListVisible(false);
     setSaveButton(false);
     for (let i = 0; i < jobs.length; i++) {
@@ -290,12 +340,14 @@ const Bewerbung = () => {
       });
       return;
     }
-    if (!words.length < 2 && name.length < 1) {
+    if (!words.length < 2 && name.length < 1 && !selectedOption3) {
       setErrors({
         anrede: t('validation.name.required')
       });
       return;
     }
+
+    
     if (!inputValue.trim()) {
       setErrors({
         job: t('validation.job.required')
@@ -336,31 +388,31 @@ const Bewerbung = () => {
 
       switch (selectedOption) {
         case t('employmentOptions.vollzeit'):
-          choice = t('employmentChoice.fulltime');
+          choice = t('employmentChoice.fulltime', { lng: 'de' });
           break;
         case t('employmentOptions.teilzeit'):
-          choice = t('employmentChoice.parttime');
+          choice = t('employmentChoice.parttime', { lng: 'de' });
           break;
         case t('employmentOptions.minijob'):
-          choice = t('employmentChoice.minijob');
+          choice = t('employmentChoice.minijob' , { lng: 'de' });
           break;
         default:
-          choice = t('employmentChoice.default');
+          choice = t('employmentChoice.default', { lng: 'de' });
       }
       console.log('choice', choice);
       switch (selectedOption2) {
 
         case t('applicationOptions.initiativ'):
-          timepart = t('applicationOptions2.initiativ', inputValue);
+          timepart = t('applicationOptions2.initiativ', { lng: 'de' }, inputValue);
           break;
         case t('applicationOptions.regulär'):
-          timepart = t('applicationOptions2.regulär', inputValue);
+          timepart = t('applicationOptions2.regulär', { lng: 'de' }, inputValue);
           break;
         case t('applicationOptions.praktikum'):
-          timepart = t('applicationOptions2.praktikum', inputValue);
+          timepart = t('applicationOptions2.praktikum', { lng: 'de' }, inputValue);
           break;
         default:
-          timepart = t('applicationOptions2.default', inputValue);
+          timepart = t('applicationOptions2.default', { lng: 'de' }, inputValue);
       }
       console.log('timepart', timepart);
       const subject = timepart + '' + inputValue + " " + choice;
@@ -372,13 +424,13 @@ const Bewerbung = () => {
       switch (selectedOption3) {
 
         case t('anredeOptions.herr'):
-          anrede = t('salutation.herr', { name });
+          anrede = 'Sehr geehrter Herr ' + '' +  name + ',';
           break;
         case t('anredeOptions.damenUndHerren'):
-          anrede = t('salutation.default');
+          anrede = 'Sehr geehrte Damen und Herren,';
           break;
         case t('anredeOptions.frau'):
-          anrede = t('salutation.frau', { name });
+          anrede = 'Sehr geehrte Frau ' + '' + name + ',';
           break;
         default:
           anrede = t('salutation.default');
@@ -395,41 +447,28 @@ const Bewerbung = () => {
             : 'Bewerbung'
         } Verfasse ein Bewerbungsschreiben für die Position als ${inputValue}. Ich habe ${erfahrung} Erfahrung.
 	•	Keine Firmennamen oder spezifische Unternehmen nennen.
-	•	Die Anrede komplett weglassen und direkt mit dem Bewerbungstext beginnen.
-	•	Das erste Wort des Textes klein schreiben.
-	•	Der Text darf maximal 240 Wörter umfassen.
+	•	Die Anrede komplett weglassen und direkt mit dem Bewerbungstext beginnen. Keine "Sehr geehrte Damen und Herren"
+	•	Der Text darf maximal 300 Wörter umfassen.
 	•	Beende das Schreiben mit “Mit freundlichen Grüßen”, aber ohne einen Namen.
-  •	Der Text soll ${language} verfasst sein.`;
+ `
 
       try {
         await EncryptedStorage.setItem('choices', selectedOption2);
         const deviceId = await DeviceInfo.getUniqueId();
-        const apiKey = await EncryptedStorage.getItem('apiKey');
-        console.log(prompt1)
-       // Anfrage an die OpenAI API
-    const openaiResponse = await axios.post("https://api.openai.com/v1/chat/completions", 
-        {
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: "user",
-              content: prompt1
-            }
-          ]
-        }, 
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          }
-        }
-      );
-      const newText = openaiResponse.data.choices[0].message.content;
-      console.log('openaiResponse' + newText);
-   
-        await EncryptedStorage.setItem('text', newText);
+        const key = sha512(deviceId);
+        const response = await axios.post(
+          'https://jobape.de/getText',
+          {
+            prompt1: prompt1,
+            key: key
+          },
+        );
+        const text = response.data.response;
+        console.log(response)
+        await EncryptedStorage.setItem('text', text);
        toChange();
         setPopupVisible(false);
-
+        console.log(text);
       } catch (error) {
         setPopupVisible(false);
         if (error.response) {
@@ -442,7 +481,19 @@ const Bewerbung = () => {
       console.error('Fehler beim Speichern der Daten:', error);
     }
   };
+ useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      console.log('keyboardHeight')
+   );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      changeView(0) 
+    );
 
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const isDisabled = selectedOption3 ===  t('anredeOptions.damenUndHerren');
 
   const handleSave = async () => {
@@ -467,14 +518,14 @@ setSkillButton(false);
   const handleSaveJob = async () => {
     const deviceId = await DeviceInfo.getUniqueId();
     try {
-      const db = await SQLite.openDatabase({
-        name: DB_NAME,
-        location: 'default',
-      });
+      if (!dbRefJobs.current) {
+        console.log('dbRef.current is null');
+        return;
+      }
 
 
-      db.executeSql(
-        `UPDATE files SET jobs = IFNULL(jobs, '') || ? || '#' WHERE ident = ?`,
+      dbRefJobs.current.executeSql(
+        `INSERT INTO eintraege (text) VALUES (?)`,
         [inputValue, deviceId]
       );
 
@@ -483,14 +534,25 @@ setSkillButton(false);
       console.error('Error combining files:', err);
     }
   }
+  const changeView = wert => {
+    console.log('wert', wert);
+    Animated.timing(animView, {
+      toValue: wert,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+  <SafeAreaView style={styles.safeAreaView}>
+    
+      <View style={styles.container}>
+   
         <Animated.View
           style={[
-            { paddingBottom: keyboardHeight }  // Diese Zeile fügt die dynamische Anpassung hinzu
+            {  transform: [{ translateY: animView }]  }  // Diese Zeile fügt die dynamische Anpassung hinzu
           ]}
         >
+  
           <View style={styles.section}>
             <View style={styles.radioContainer}>
               {anredeOptions.map(option => (
@@ -507,6 +569,7 @@ setSkillButton(false);
                   </Text>
                 </TouchableOpacity>
               ))}
+              
             </View>
           </View>
 
@@ -520,39 +583,49 @@ setSkillButton(false);
               onChangeText={handleNameChange}
               editable={!isDisabled}
               selectTextOnFocus={!isDisabled}
+              autoCorrect={false}
+               onFocus={() => {
+               changeView(-105);
+              }}
             />
             {errors.anrede ? <Text style={styles.error}>{errors.anrede}</Text> : null}
           </View>
 
           <View style={styles.section}>
+          
             <TextInput
               ref={jobRef}
               style={styles.input}
               placeholder={t("beruf")}
               placeholderTextColor={"gray"}
               value={inputValue}
-              autoCorrect={false}
+              onFocus={() => {
+               changeView(-180);
+              }}
               onChangeText={handleChange}
+              autoCorrect={false}
             />
             
-            {errors ? <Text style={styles.error}>{errors.job}</Text> : null}
-            {saveButton && ( <>
+                
+            {errors.job ? <Text style={styles.error}>{errors.job}</Text> : null}
+            {saveButton && inputValue.length > 0 && ( <>
             <TouchableOpacity onPress={handleSaveJob} style={styles.saveButton}>
        <MaterialIcons name="save" size={24} color="white" />
             
             </TouchableOpacity>
             </>)}
-            {inputValue.length > 0 && seeFlatList && suggestions.length > 0 && (
+            {inputValue.length > 0 && seeFlatList && jobs.length > 0 && (
     
                <FlatList
-                data={suggestions}
-                keyExtractor={(item, index) => index.toString()}
+                data={jobs}
+                keyboardShouldPersistTaps="handled"
+
+                keyExtractor={(item, index) => index}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleSuggestionClick(item)} style={styles.suggestionItemContainer}>
-                    <Text style={styles.suggestionItem}>{item}</Text>
+                    <Text style={styles.suggestionItem}>{item.text}</Text>
                   </TouchableOpacity>
-                )}
-                keyboardShouldPersistTaps="handled"
+                )} 
                 style={[styles.suggestionsList, { display: isFlatListVisible ? 'flex' : 'none' }]}
               /> 
             )}
@@ -567,6 +640,10 @@ setSkillButton(false);
                 placeholderTextColor={"gray"}
                 value={erfahrung}
                 onChangeText={handleErfahrung}
+                           onFocus={() => {
+               changeView(-255);
+              }}
+    
                 autoCorrect={false}
               />
               {errors.skill ? <Text style={styles.error}>{errors.skill}</Text> : null}
@@ -579,18 +656,18 @@ setSkillButton(false);
 
             </View>
             {erfahrung.length > 0 && seeFlatList && skillsNew.length > 0 && (
-              <FlatList
-                data={skillsNew}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleSuggestionClickSkill(item)} style={styles.suggestionItemContainer}>
-                    <Text style={styles.suggestionItem}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                keyboardShouldPersistTaps="handled"
-                style={[styles.suggestionsList, { display: isFlatListVisibleSkills ? 'flex' : 'none' }]}
-              />
-            )}
+    <View style={styles.dropdownAbsolute}>
+      {skillsNew.map((item) => (
+        <TouchableOpacity
+          key={item}
+          onPress={() => handleSuggestionClickSkill(item)}
+          style={styles.item}
+        >
+          <Text style={styles.itemText}>{item}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  )}
           </View>
 
           <View style={styles.section}>
@@ -631,7 +708,7 @@ setSkillButton(false);
             </View>
           </View>
 
-          <View style={{ zIndex: 3000, width: "100%" }}>
+          <View style={{  width: "100%" }}>
             <DropDownPicker
               open={open}
               value={value}
@@ -642,23 +719,20 @@ setSkillButton(false);
               style={styles.dropdown}
               dropDownContainerStyle={styles.dropDownContainer}
               textStyle={{ color: "#C9C1C1", fontSize: 16 }}
+              dropDownDirection='TOP'
             />
           </View>
 
           <View style={styles.section}>
             <TouchableOpacity style={styles.button} onPress={handleGeneratePDF}>
-              <Text style={styles.buttonText}>{t("generateCovertter")}</Text>
+              <Text style={styles.buttonText}>{t("generateCoverLetter")}</Text>
             </TouchableOpacity>
            
           </View>
         </Animated.View>
-      </ScrollView>
-      <BottomPopup
-        visible={popupVisible}
-        message={popup}
-        onClose={() => setPopupVisible(false)}
-      />
-    </SafeAreaView>
+ 
+      </View>
+</SafeAreaView>
   );
 };
 
@@ -667,7 +741,7 @@ const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   safeContainer: {
 
-    backgroundColor: "rgba(18, 24, 34, 1)",
+    backgroundColor: colors.background,
   },
   error: {
     color: 'red',
@@ -676,18 +750,19 @@ const styles = StyleSheet.create({
     top: '7%',
     left: '1%'
   },
-
+section: {
+    position: 'relative',
+    marginBottom: 25
+  },
   container: {
     width: width,
     height: height,
-    backgroundColor: "rgba(18, 24, 34, 1)",
+    backgroundColor: "rgb(8, 12, 32)",
     padding: 20,
     justifyContent: 'center',
+  },
+ 
 
-  },
-  section: {
-    marginBottom: 25
-  },
   input: {
     width: '100%',
     height: 50,
@@ -697,9 +772,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: '#fff',
     fontSize: 16,
-    backgroundColor: "rgba(27, 47, 75, 2)",
-    color: "#C9C1C1",
+    backgroundColor: colors.card3,
+    color: "white",
   },
+  dropdownAbsolute: {
+  position: "absolute",
+  top: 50,
+  
+  width: "100%",
+  backgroundColor: colors.card3,
+  borderWidth: 1,
+  borderColor: "#ddd",
+  zIndex: 9999,
+  borderRadius: 10,
+  marginTop:10,
+},
+item: {
+height:30,
+justifyContent: "center",
+marginLeft:10,
+},  
+itemText: {
+  fontSize: 16,
+  color: 'white',
+},
+
   disabledInput: {
     backgroundColor: 'rgb(16, 27, 43)',
     opacity: 0.4
@@ -732,13 +829,12 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     height: 50,
-    backgroundColor: "rgba(27, 47, 75, 2)",
+    backgroundColor: colors.card3,
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 12,
     color: "gray",
     elevation: 2,
-    zIndex: 3000,
     borderColor: 'gray',
 
     marginBottom: 10,
@@ -747,57 +843,55 @@ const styles = StyleSheet.create({
     position: 'absolute',
     marginBottom: 11,
     color: 'white',
-    backgroundColor: "rgba(27, 47, 75, 2)",
+    backgroundColor: colors.card3,
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 10,
-    zIndex: 3000,
 
   },
   radioOptionSelected: {
    
     borderColor: '#007AFF',
     borderWidth: 1,
-    borderColor: '#f7fbf5',
-    color: '#f7fbf5',
+    borderColor: '#f7fbf5' ,
+   
   },
   radioOptionText: {
     fontSize: 16,
-    color: "gray",
+    color: "gray" ,
   },
   radioOptionTextSelected: {
     fontSize: 16,
-    color: 'white'
+    color: 'white' ,
   },
   suggestionsList: {
     position: 'absolute',
     top: 50,
     width: '100%',
-    zIndex: 1,
     marginTop: 10,
     maxHeight: 160,
     borderWidth: 1,
     borderColor: '#eee',
     borderRadius: 8,
-    backgroundColor: '#fafafa'
+ backgroundColor: colors.card3,  // ganze Fläche blickdicht
+  elevation: 10,                  // für Android Touch / Zeichnen
+  overflow: 'hidden',   
   },
   suggestionItemContainer: {
     padding: 10,
-    backgroundColor: "rgba(27, 47, 75, 2)",
+    backgroundColor: colors.card3,
   },
   suggestionItem: {
+
     fontSize: 16,
-    color: 'white'
+    color: 'white',
   },
-  skillInputContainer: {
-    position: 'relative',
-    width: '100%'
-  },
+
   saveButton: {
     position: 'absolute',
     top: 10,
     right: 15,
-   
+
     paddingHorizontal: 5,
     paddingVertical: 3,
     borderRadius: 5
@@ -809,9 +903,28 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    backgroundColor: "rgba(27, 47, 75, 2)",
+    backgroundColor: colors.card3,
     padding: 15,
 
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "gray",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+
+
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5, // Für Android-Schatten
+  },
+  button1: {
+    width: "100%",
+    
+    padding: 15,
+color: 'gray',
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
@@ -831,6 +944,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    textAlign: 'center',
+    fontSize: 20
+  },
+  buttonText1: {
+    color: 'gray',
     textAlign: 'center',
     fontSize: 20
   }

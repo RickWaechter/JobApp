@@ -269,13 +269,7 @@
 "offlineHeader": "Lokal Bewerbung erstellen",
 "offlineMain": "Erstelle deine Bewerbung einfach und professionell, ganz lokal auf deinem Gerät",
 
-"first":{ 
-    "heading": "Willkommen bei JobApe",
-    "theDrop":"Alle Daten bleiben verschlüsselt und lokal auf deinem Gerät gespeichert – sicher und privat."
-},
-"ownName" : "Ihren Vor- und Nachnamen",
-"ownStreet" : "Ihre Straße und Hausnummer",
-"ownCity" : "Ihre PLZ und Ort",
+
 "settings": {
     "title": "Einstellungen",
     "language": "Menü-Sprache",
@@ -292,7 +286,17 @@
     "apiText": "Nutzen Sie Ihren OpenAI-Key für individuelle Bewerbungsschreiben.",
 "apiGoogleText": "Nutzen Sie Ihren API-Key für die Google-Firmen- und Adresssuche.",
 "languageText": "Sprache der App ändern (betrifft nicht die Bewerbungen)."
-}
+},
+"saveFile": "Datei speichern",
+"saveFileText": "Speichere die Anlagen, um sie später für deine Bewerbungsmappen zu verwenden.",
+"Continue": "Überspringen",
+"first":{ 
+    "heading": "Willkommen bei JobApe",
+    "theDrop":"Alle Daten bleiben verschlüsselt und lokal auf deinem Gerät gespeichert – sicher und privat."
+},
+"ownName" : "Ihren Vor- und Nachnamen",
+"ownStreet" : "Ihre Straße und Hausnummer",
+"ownCity" : "Ihre PLZ und Ort"
 
 
 

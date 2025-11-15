@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
@@ -32,7 +31,6 @@ import {
 import { getCurrentDateTime } from '../inc/date.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
 import BottomPopup from '../inc/popup.js';
-import '../local/i18n.js';
 const ChangeScreen = () => {
   const { t } = useTranslation();
   const [text, setText] = useState('');
@@ -41,7 +39,6 @@ const ChangeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [collectTag, setCollectTag] = useState(false);
   const [firstView, setFirstView] = useState(false);
-  const navigation = useNavigation();
   const [popupVisible, setPopupVisible] = useState(false);
   const [popup, setPopup] = useState('');
   const {keyboardHeight, reset} = useKeyboardAnimation();
@@ -179,7 +176,6 @@ const saveText = async () => {
                 t('alerts.error.title'),
                 t('alerts.error.attachments'),
               );
-              navigation.replace('Upload');
             }
             return;
           }
@@ -383,10 +379,6 @@ const saveText = async () => {
 };
 const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-    flex: 1,
-  },
   innerContainer: {
     backgroundColor: colors.background,
     paddingHorizontal: 20,
@@ -433,24 +425,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  buttonNew: {
-    opacity: 0,
-  },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-  },
-  pdfContainer: {
-    flex: 1,
-  },
-  pdfLabel: {
-    fontSize: 20,
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  webview: {
-    flex: 1,
-    height: 500,
   },
   message: {
     color: 'red',

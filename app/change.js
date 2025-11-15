@@ -31,7 +31,6 @@ import {
 import { getCurrentDateTime } from '../inc/date.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
 import BottomPopup from '../inc/popup.js';
-import '../local/i18n.js';
 const ChangeScreen = () => {
   const { t } = useTranslation();
   const [text, setText] = useState('');
@@ -41,7 +40,7 @@ const ChangeScreen = () => {
   const [collectTag, setCollectTag] = useState(false);
   const [firstView, setFirstView] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
-  const [popup, setPopup] = useState('');
+  const [popup, setPopup] = useState('jdbkjsabdkjsadkjsa');
   const {keyboardHeight, reset} = useKeyboardAnimation();
 const [subject, setSubject] = useState('');
   const DB_NAME = 'firstNew.db';
@@ -72,7 +71,7 @@ const [subject, setSubject] = useState('');
       }
     };
     loadText();
-  }, [text, pdfUri]);
+  }, [pdfUri]);
 
 
   const saveText = async () => {
@@ -354,7 +353,7 @@ const [subject, setSubject] = useState('');
 
       const dateX = leftMargin + textWidth - 50;
       page.drawText(date, { x: dateX, y: currentY, size: fontSize, font: helvetica });
-      currentY -= 3 * lineHeight;
+      currentY -= 2 * lineHeight;
       console.log('Added date to PDF');
 
       const line1 = splitTextIntoLinesWithoutFont(objectSubject, 95);
@@ -362,7 +361,7 @@ const [subject, setSubject] = useState('');
         page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize, font: helveticaBold });
         currentY -= lineHeight;
       });
-      currentY -= 3 * lineHeight;
+      currentY -= 2 * lineHeight;
       console.log('Added subject to PDF');
 
       const paragraphs = text.split('\n\n');
@@ -417,7 +416,7 @@ const {height} = Dimensions.get('window');
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 <SafeAreaView style={styles.innerContainer}>
 
-<Animated.View style={{  height: height * 1 -  keyboardHeight * 1.45 }} >
+<Animated.View style={{  height: height * 0.85 -  keyboardHeight * 1.03 }} >
     <TextInput
       style={styles.textArea}
       value={text}
@@ -448,34 +447,11 @@ const {height} = Dimensions.get('window');
 };
 const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-    flex: 1,
-  },
   innerContainer: {
     backgroundColor: colors.background,
     padding: 20,
     justifyContent: 'center',
     
-  },
-  subjectInput: {
-    borderRadius: 10,
-    justifyContent: 'center',
- backgroundColor: colors.card,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingLeft: 15,
-    paddingRight: 15,
-    textAlignVertical: 'center',
-    marginBottom: 2,
-    color: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
- height: height * 0.067,
- marginBottom: 10,
   },
   textArea: {
     borderRadius: 10,
@@ -499,24 +475,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  buttonNew: {
-    opacity: 0,
-  },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-  },
-  pdfContainer: {
-    flex: 1,
-  },
-  pdfLabel: {
-    fontSize: 20,
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  webview: {
-    flex: 1,
-    height: 500,
   },
   message: {
     color: 'red',

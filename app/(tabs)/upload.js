@@ -1,6 +1,6 @@
 // Home.js
 
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,6 @@ import {
   genIv,
 } from '../../inc/cryp.js';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
-import '../../local/i18n.js';
 // Aktivieren des Debug-Modus (optional)
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
@@ -40,7 +39,6 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
   const [expand, setExpand] = useState(false);
   const [buttonOne, setButtonOne] = useState(true);
   const [buttonUpload, setButtonUpload] = useState(true);
-  const navigation = useNavigation();
   const keyboardHeight = useKeyboardAnimation();
   const [isAnimating, setIsAnimating] = useState(false);
   const [source, setSource] = useState('');
@@ -120,8 +118,9 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
   );
   useEffect(() => {
 console.log("useEffect triggered" + data.length);
+console.log("buttonOne:" + buttonOne);
   }
-    , [data]);
+    , [data, buttonOne]);
 
     const deleteFileIfExists = async (fileName) => {
       const filePath = `${RNFS.LibraryDirectoryPath}/${fileName}`;
@@ -274,7 +273,7 @@ console.log("useEffect triggered" + data.length);
         console.log('Processed files:', processedFiles);
         setButtonUpload(false)
         setButtonOne(false)
-
+console.log("buttonOne:", buttonOne, "files:", files.length);
         setFiles(processedFiles);
         setError('');
       } else {
@@ -322,7 +321,6 @@ console.log("useEffect triggered" + data.length);
       setButtonUpload(true)
       fetchData();
       Alert.alert(t('upload.title'), t('upload.info'),);
-      navigation.navigate('MainTabs');
       console.log('Alle Dateien wurden aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Dateien:', error);
@@ -444,7 +442,6 @@ console.log("useEffect triggered" + data.length);
       setButtonOne(true)
       setButtonUpload(true)
       fetchData();
-      navigation.navigate('MainTabs');
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Dateien:', error);
     }
@@ -458,7 +455,7 @@ console.log("useEffect triggered" + data.length);
           >
             {({ pressed }) => (
               <View style={[
-                styles.entry,                // Grund‑Layout
+                styles.entry2,                // Grund‑Layout
                 pressed && styles.entryPress // nur solange gedrückt
               ]}>
                 <Card.Title
@@ -503,11 +500,12 @@ console.log("useEffect triggered" + data.length);
             style={files.length > 0 ? {} : styles.buttonDisabled}
             disabled={files.length === 0}
           >
-            <View style={styles.entry}>
+            <View style={styles.entry2}>
 <Card.Title
                  title={t('addAttachment')}
                  titleStyle={styles.job}
-               />              <Text style={styles.name}>{t('addAttachmentsToApplication')}</Text>
+               />              
+               <Text style={styles.name}>{t('addAttachmentsToApplication')}</Text>
             </View>
           </TouchableOpacity>
 
@@ -516,7 +514,7 @@ console.log("useEffect triggered" + data.length);
             style={files.length > 0 ? {} : styles.buttonDisabled}
             disabled={files.length === 0}
           >
-            <View style={styles.entry}>
+            <View style={styles.entry2}>
              <Card.Title
                  title={t('replaceOldFiles')}
                  titleStyle={styles.job}
@@ -545,10 +543,9 @@ console.log("useEffect triggered" + data.length);
         animationOut="zoomOut"
         onBackdropPress={() => { setModalSortVisible(false); setPdfView(false) }}
         style={{
-          justifyContent: 'flex-end',
+          justifyContent: 'center',
           margin: 0,
         }}
-        swipeDirection={['down']}
         onSwipeComplete={() => { setModalSortVisible(false); setPdfView(false) }}
         // Add these handlers:
         onModalWillShow={() => setIsAnimating(true)}
@@ -570,6 +567,8 @@ console.log("useEffect triggered" + data.length);
                 opacity: isAnimating ? 1 : 0,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
+                width: width * 0.9,
+                alignSelf: 'center',
               }
             ]}>
             <View style={styles.listContainer}>
@@ -660,7 +659,7 @@ const styles = StyleSheet.create({
   },
   entryPress: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -726,11 +725,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
   listContainer: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -778,25 +772,12 @@ const styles = StyleSheet.create({
 
   },
 
-  CardContainer: {
-    BorderWidth: 'none',
-    backgroundColor: "transparent",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Für Android-Schatten
-  },
   itemText: {
     color: "rgb(232, 225, 247)",
   },
   entry: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -812,7 +793,7 @@ const styles = StyleSheet.create({
   },
   entry2: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -823,6 +804,7 @@ const styles = StyleSheet.create({
     shadowColor: "gray",
     borderWidth: 1,
     borderColor: 'gray',
+    width: width * 0.90,
 
   },
   name: {
@@ -830,7 +812,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "bold",
     color: "#C8C8C8",
-    marginBottom: 5,
+    marginBottom: 10,
     minWidth: width * 0.80,
   },
   job: {
@@ -839,14 +821,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#E5E5E5",
 
-  },
-  text: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 5,
-  },
-  user: {
-    marginVertical: 10,
   },
 
 
@@ -870,14 +844,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
     textAlign: ',center',
-    color: 'white'
-  },
-  fileItem: {
-    backgroundColor: '#F2F2F2',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 8,
     color: 'white'
   },
   deleteButton: {

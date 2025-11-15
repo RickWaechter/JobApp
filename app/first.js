@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,9 +29,8 @@ const StartScreen = () => {
   const [name, setName] = useState('');
   const [finishMessage, setFinishMessage] = useState('');
   const [inputState, setInputState] = useState(false);
-  const navigation = useNavigation();
   const [value, setValue] = useState(null);
-  const { keyboardHeight, reset } = useKeyboardAnimation();
+  const { animated, reset } = useKeyboardAnimation();
   const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
   const jobRef2 = useRef(null);
   const nameRef = useRef(null);
@@ -152,115 +150,41 @@ const handleSuggestionClickStreet = (suggestion) => {
   };
 
 
-  useEffect(() => {
-    
-  const hallo = async () => {
-    const DB_DIR = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;   // ✅
-    const DB_NAMES = ["street.db", "city.db", "jobs.db"];
 
 
- async function dbExists(dbName) {
-  const dbPath = `${DB_DIR}/${dbName}`;
-  const exists = await RNFS.exists(dbPath);
+useEffect(() => {
+const hallo = async () => {
+  console.log('hallo function called');
+  const DB_DIR = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
+  const DB_NAMES = ["jobs.db"];
 
-  if (!exists) {
-    console.log("❌ Missing:", dbName);
-    return false;
-  }
+  const ensureDir = async () => {
+    if (!(await RNFS.exists(DB_DIR))) await RNFS.mkdir(DB_DIR);
+    console.log('ensureDir function called');
+  };
 
-  const stat = await RNFS.stat(dbPath);
-  console.log(`📦 ${dbName} -> ${stat.size} bytes`);
-  return true;
+  const exists = (name) => RNFS.exists(`${DB_DIR}/${name}`);
+
+  const download = async (name) => {
+    const url = `https://jobape.de/download?file=${name}`;
+    const dest = `${DB_DIR}/${name}`;
+    const res = await RNFS.downloadFile({ fromUrl: url, toFile: dest }).promise;
+    if (res.statusCode !== 200) throw new Error("Download failed");
+    console.log('download function called');
+  };
+
+  const setup = async () => {
+    await ensureDir();
+    console.log('setup function called');
+    for (const name of DB_NAMES) if (!(await exists(name))) await download(name);
+    console.log(`download function called for file '+ name`)
+  };
+
+  await setup();
+  console.log('setup function completed');
 }
-
-
-    async function downloadDb(dbName) {
-      const base = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
-
-if (!(await RNFS.exists(base))) {
-  await RNFS.mkdir(base);
-}
-      const dest = `${DB_DIR}/${dbName}`;
-      const url = `https://jobape.de/download?file=${dbName}`;
-
-      console.log("[DB] 🚀 Download DB:", url);
-
-      try {
-        const result = await RNFS.downloadFile({
-          fromUrl: url,
-          toFile: dest,
-        }).promise;
-
-        if (result.statusCode === 200) {
-          console.log("[DB] ✅ DB Downloaded →", dest);
-          return dest;
-        } else {
-          throw new Error(`Status ${result.statusCode}`);
-        }
-      } catch (err) {
-        console.log("[DB] ❌ Download error:", err);
-        throw err;
-      }
-    }
-
-    async function setupDatabases() {
-      let missing = false;
-
-      // 🔎 Check if any DB missing
-      for (const dbName of DB_NAMES) {
-        const exists = await dbExists(dbName);
-        if (!exists) {
-          missing = true;
-          break;
-        }
-      }
-
-      if (missing) {
-        console.log("[DB] 🔄 Missing DBs → downloading...");
-        for (const dbName of DB_NAMES) {
-          await downloadDb(dbName);
-        }
-        console.log("[DB] ✅ All DBs downloaded");
-      } else {
-        console.log("[DB] ✅ All DBs exist");
-      }
-    }
-
-    await setupDatabases();
-
-    // ✅ CORRECT way to open DB from DocumentDirectory on iOS
-    const openDb = async (dbName) => {
-      try {
-        const db = await SQLite.openDatabase({
-  name: dbName,
-location: 'default',
-  // <<< WICHTIG
-});
-console.log('dbdbdbdbd' ,db)
-
-
-
-        console.log("✅ Opened DB:", dbName);
-        return db;
-      } catch (err) {
-        console.log("❌ Open error:", err);
-        return null;
-      }
-    };
-
-    // Example: open street.db
-    const db = await openDb("street.db");
-    if (!db) return;
-const stat = await RNFS.stat(`${RNFS.LibraryDirectoryPath}/LocalDatabase/street.db`);
-console.log("File size:", stat.size);
-    // ✅ TEST
-    
-  }
-
-  hallo();
+hallo();
 }, []);
-
-
 
   const init = async () => {
     try {
@@ -381,7 +305,7 @@ console.log("File size:", stat.size);
       console.log('Data inserted');
     
       console.log('Datenbank initialisiert und Tabelle erstellt.');
-      router.push('upload');
+      router.push('uploadFirst');
 
     } catch (err) {
       console.error('Fehler bei der Datenbankinitialisierung:', err);
@@ -394,8 +318,7 @@ console.log("File size:", stat.size);
 
       <Animated.View
         style={[
-          { transform: [{ translateY: Animated.multiply(keyboardHeight / 3, -1) }] }, styles.innerContainer  // Diese Zeile fügt die dynamische Anpassung hinzu
-        ]}
+  { transform: [{ translateY: Animated.multiply(Animated.divide(animated, 2.1), -1) }] },        ]}
       >
         <Text style={styles.text1}>{t('first.heading')}</Text>
         <TextInput
@@ -500,6 +423,7 @@ console.log("File size:", stat.size);
         <TouchableOpacity style={styles.buttonNext} onPress={init}>
           <Text style={styles.buttonText}>Speichern</Text>
         </TouchableOpacity>
+         
         <Text style={styles.text2}>{t('first.theDrop')}</Text>
 
         <Text>{finishMessage}</Text>
@@ -515,49 +439,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background,
-  },
-  innerContainer: {
-    width: '80%',
-  },
-  textInput: {
-    borderRadius: 15,
-    padding: 13,
-    backgroundColor: colors.card3,
-    borderColor: 'gray',
-    borderWidth: 1,
-    shadowColor: "gray",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    color: 'white',
-  },
-  loading: {
-    marginTop: 10,
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    bottom: 115, // Position it below the input field
-    left: 0,
-    right: 0,
-    backgroundColor: colors.card3,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    zIndex: 1000, // Ensure it's above other elements
-    maxHeight: 200,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    overflow: 'hidden', // Keep suggestions inside rounded container
   },
   text1: {
     fontSize: 28,
@@ -579,10 +460,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  suggestionText: {
-    color: 'white',
-    fontSize: 14,
-  },
   inputSecondary: {
     marginTop: 10,
     textAlign: 'center',
@@ -602,9 +479,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     color: 'white',
   },
-  buttonContainer: {
-
-  },
   dropdown: {
     alignSelf: 'center',
     height: 50,
@@ -616,7 +490,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     zIndex: 3000,
     borderColor: 'gray',
-    width: width * 0.8,
+    width: width * 0.9,
     marginTop: 10,
   },
   dropDownContainer: {
@@ -660,7 +534,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   buttonNext: {
-    width: "100%",
+width: width * 0.9,
     backgroundColor: colors.card3,
     padding: 12,
     borderRadius: 12,
@@ -676,26 +550,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  buttonNextTrans: {
-    width: "100%",
-    backgroundColor: "transparent",
-    padding: 12,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-  },
   buttonText: {
     color: colors.textColor,
     fontSize: 15,
-  },
-  buttonTextTrans: {
-    color: 'transparent',
-    fontSize: 16,
-  },
-  finishMessage: {
-    textAlign: 'center',
-    marginTop: 50,
-    color: 'white',
   },
 });
 

@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import { addSearchListener, fetchPlace, search } from "expo-mapkit";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,7 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ClearButton from "../comp/clearButton.jsx";
 import colors from "../inc/colors.js";
 import useKeyboardAnimation from "../inc/Keyboard.js";
-import "../local/i18n.js";
 const Name = () => {
   const [yourName, setYourName] = useState("");
   const [yourStreet, setYourStreet] = useState("");
@@ -27,7 +25,6 @@ const Name = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [buttonManually, setButtonManually] = useState(true);
   const [showAddressSearch, setShowAddressSearch] = useState(true);
-  const navigation = useNavigation();
   const { keyboardHeight, reset } = useKeyboardAnimation();
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState("");
@@ -236,15 +233,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     color: "white",
   },
-  loadingContainer: {
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginLeft: 8,
-    color: "white",
-  },
   suggestionsContainerCity: {
     position: "absolute",
     top: 50,
@@ -326,14 +314,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
-  },
-  finishMessage: {
-    textAlign: "center",
-    marginTop: 50,
-    color: "white",
-  },
-  noResultsContainer: {
-    padding: 12,
   },
 });
 

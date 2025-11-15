@@ -1,6 +1,5 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -19,11 +18,8 @@ import { Card, Divider, Text } from 'react-native-paper';
 import SQLite from 'react-native-sqlite-storage';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
 import colors from '../../inc/colors.js';
-import { checkIfFirst } from '../../inc/db.js';
-import '../../local/i18n.js';
 export default function StartApp() {
   const { t, i18n } = useTranslation();
-  const navigation = useNavigation();
   const [message, setMessage] = useState('');
   const [startVisible, setStartVisible] = useState(false);
   const appState = useRef(AppState.currentState);
@@ -47,8 +43,28 @@ export default function StartApp() {
     },
     
   ],
-};
+height: anim.interpolate({
+  inputRange: [0, 1],
+  outputRange: [0, 50],   // 0 → 50
+}),
 
+
+ 
+  opacity: anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],   // 50px → 0
+  }),
+};
+useFocusEffect(() =>  {
+   const a = async  ()  => {
+     if (await EncryptedStorage.getItem('result')) {
+      setIsButtonVisible(true)
+     }
+   }
+   a()
+  }
+
+);
 
 useEffect(() => {
   (async () => {
@@ -81,7 +97,7 @@ const googleKey = await EncryptedStorage.getItem('googleApi');
         Alert.alert("Bitte tragen Sie Ihre Adresse auf der Profilseite ein.");
       } else if (!item.lebenslauf ) {
         Alert.alert("Bitte laden Sie Ihren Lebenslauf hoch.");
-        router.push("/first");
+        router.push("/upload");
       } 
       else {
         router.push("/name");
@@ -100,48 +116,13 @@ const googleKey = await EncryptedStorage.getItem('googleApi');
   }
             
 }
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-      console.log(keyboardHeight);
-      const where = async () => {
-        if (!isActive) return;
-        const much = await EncryptedStorage.getItem('result');
-        if (much) {
-          console.log("API Key:", much);
-          setIsButtonVisible(true);
-        } else {
-          console.log("No API Key found");
-          setIsButtonVisible(false);
-        }
-      };
 
-      const checkFirstRun = async () => {
-        if (!isActive) return;
-        const firstRun = await checkIfFirst();
-        if (firstRun) {
-          console.log("Not First run detected");
-          console.log(firstRun);
-        } else {
-          console.log(firstRun);
-          console.log("Not first run");
-        }
-      };
-
-      checkFirstRun();
-      where();
-
-      return () => {
-        isActive = false;
-      };
-    }, [])
-  );
   useEffect(() => {
     if (isButtonVisible) {
       Animated.timing(anim, {
         toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
+        duration: 300,
+        useNativeDriver: false,
       }).start();
     } else {
       anim.setValue(0); // zurücksetzen
@@ -300,11 +281,22 @@ const next = async() => {
               style={animatedStyle}          // ③  animierte Styles hier
            
             >
-              <View style={styles.entryFort}>
- <Card.Title
+<Pressable
+                 onPress={next}        // Grund‑Style 
+               >
+               {({ pressed }) => (
+                 <View style={[
+                           styles.entryFort,                // Grund‑Layout
+                           pressed && styles.entryPressFort // nur solange gedrückt
+                         ]}>
+                  <Card.Title
   title={t('Fortsetzen')}
   titleStyle={styles.job}
-/>              </View>
+/>
+                   
+                 </View>
+               )}
+               </Pressable>
             </AnimatedTouchable>
             
           )}
@@ -326,14 +318,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.background,
   },
-  inputContainer: {
-    width: width * 0.9,
-
-  },
   entry: {
       flexDirection: "column",
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 40,
     shadowColor: "#000",
@@ -363,18 +351,32 @@ justifyContent:'center',
 width:width * 0.9,
 
   },
+  entryPressFort: {
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'white',
+    wdith:width * 0.9,
   
+
+  },
   name: {
         alignSelf: "center",
     textAlign: "center",
     fontSize: 13,
     fontWeight: "bold",
     color: "rgb(179, 176, 184)",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   entryPress: {
     backgroundColor: colors.card3,
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 40,
     shadowColor: "#000",
@@ -398,28 +400,5 @@ width:width * 0.9,
     color: "rgb(232, 228, 238)",
   },
   
-  job2: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "rgb(232, 228, 238)",
-  marginBottom: 5,
-  },
-  text: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 5,
-  },
-  user: {
-    marginVertical: 10,
-  },
-  user: {
-    marginVertical: 10,
-  },
 
-  messageContainer: {
-    marginTop: 20,
-  },
-  messageText: {
-    fontSize: 16,
-  },
 });

@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -15,7 +14,6 @@ import colors from '../inc/colors.js';
 import {
   decryptBase,
 } from '../inc/cryp.js';
-import '../local/i18n.js';
 // Aktivieren des Debug-Modus (optional)
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
@@ -25,7 +23,6 @@ const DB_NAME = 'firstNew.db';
 const CollectScreen = () => {
 
         const { t } = useTranslation();
-  const navigation = useNavigation();
   const [popupVisible, setPopupVisible] = useState(false);
   const [popup, setPopup] = useState('');
   const [fileUri, setFileUri] = useState('');
@@ -269,11 +266,6 @@ RNFS.exists(outputPath)
 };
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  bg: {
-
-  padding: 15,   // damit Inhalt nicht am Rand klebt
-  justifyContent: "flex-start",
-},
 
   container: {
     flex: 1,
@@ -391,49 +383,6 @@ alignSelf: 'center',
     fontWeight: "bold",
     color: "#E5E5E5",
   
-  },
-  text: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 5,
-  },
-  user: {
-    marginVertical: 10,
-  },
-  button: {
-    backgroundColor: '#7D26CD',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-    zIndex: 100,
-  },
-  buttonDisabled: {
-    backgroundColor: '#7D26CD',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  errorText: {
-    color: 'red',
-    marginTop: 10,
-    alignSelf: 'center',
-  },
-  fileList: {
-    marginTop: 20,
-  },
-  fileListTitle: {
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  fileName: {
-    fontSize: 16,
   },
 });
 export default CollectScreen;

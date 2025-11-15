@@ -1,5 +1,4 @@
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +26,6 @@ import Pdf from 'react-native-pdf';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
 import { decryp, encryp } from '../inc/cryp.js';
-import '../local/i18n.js';
 const DB_NAME = 'firstNew.db';
 const OldScreen = () => {
 
@@ -35,7 +33,6 @@ const OldScreen = () => {
   const [entries , setEntries] = useState([]);
   const [pdfView, setPdfView] = useState(false);  
   const [source, setSource] = useState({});
-  const navigate = useNavigation();
 
   useEffect(() => {
     console.log('OldScreen mounted');
@@ -274,10 +271,6 @@ position: 'absolute',
 top: -16,
 right: -12,
   },
-  listContainer: {
-    flex: 1,
-    marginBottom: 20,
-  },
   entry: {
     alignSelf: "center",
     backgroundColor: colors.card3,
@@ -313,9 +306,6 @@ width: width * 0.9
     color: "#E5E5E5",
     fontSize:16,
 
-  },
-  user: {
-    marginVertical: 10,
   },
   overlay: {
     flex: 1,

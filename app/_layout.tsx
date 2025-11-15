@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import "../local/i18n"; // ← nur hier
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -26,6 +27,8 @@ export default function RootLayout() {
                 <Stack.Screen name="old" options={{ headerShown: false }}  />
                 <Stack.Screen name="nameOld" options={{ headerShown: false }}  />
                 <Stack.Screen name="changeOld" options={{ headerShown: false }}  />
+                <Stack.Screen name="uploadFirst" options={{ headerShown: false }}  />
+                <Stack.Screen name="email" options={{ headerShown: false }}  />
 
                 <Stack.Screen name="change" options={{ headerShown: false }}  />
 

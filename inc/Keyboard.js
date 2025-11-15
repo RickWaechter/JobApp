@@ -2,35 +2,31 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
 
 const useKeyboardAnimation = (duration = 300) => {
-  const animated = useRef(new Animated.Value(0)).current;   // bleibt Animated
-  const [keyboardHeight, setKeyboardHeight] = useState(0);                  // ← reine Zahl
+  const animated = useRef(new Animated.Value(0)).current;  
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  // 1) Animated → plain number spiegeln
+  // Animated -> state spiegeln
   useEffect(() => {
     const id = animated.addListener(({ value }) => setKeyboardHeight(value));
     return () => animated.removeListener(id);
   }, [animated]);
 
-  // 2) Show/Hide Listener
   useEffect(() => {
-    const animateTo = to =>
+    const animateTo = (to) =>
       Animated.timing(animated, {
         toValue: to,
         duration,
-        useNativeDriver: false
+        useNativeDriver: true,
       }).start();
 
-    const onShow = e => animateTo(e.endCoordinates.height);
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = (e) => animateTo(e.endCoordinates.height);
     const onHide = () => animateTo(0);
 
-    const showSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      onShow
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      onHide
-    );
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
 
     return () => {
       showSub.remove();
@@ -38,10 +34,9 @@ const useKeyboardAnimation = (duration = 300) => {
     };
   }, [duration, animated]);
 
-  // 3) Reset wenn Modal zu
   const reset = useCallback(() => animated.setValue(0), [animated]);
 
-  return { keyboardHeight, reset, animated }; // keyboardHeight = Zahl, animated = Animated.Value
+  return { keyboardHeight, reset, animated };
 };
 
 export default useKeyboardAnimation;
