@@ -8,12 +8,15 @@ import {
   Animated,
   Dimensions,
   Keyboard,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
+import { Card } from 'react-native-paper';
+
 import DeviceInfo from 'react-native-device-info';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
@@ -30,7 +33,6 @@ import {
 } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
-import BottomPopup from '../inc/popup.js';
 const ChangeScreen = () => {
   const { t } = useTranslation();
   const [text, setText] = useState('');
@@ -338,17 +340,8 @@ const saveText = async () => {
 
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 <SafeAreaView style={styles.innerContainer}>
-  <Animated.View style={{  height: height * 0.96 -  keyboardHeight * 1.6 }} >
-  
-      <TextInput
-      style={styles.subjectInput}
-      value={subject}
-      onChangeText={setSubject}
-      placeholder={t('placeholderText')}
-      multiline={true}
-      numberOfLines={2}
-    />
 
+<Animated.View style={{  height: height * 0.85 -  keyboardHeight * 1.03 }} >
     <TextInput
       style={styles.textArea}
       value={text}
@@ -358,55 +351,98 @@ const saveText = async () => {
       numberOfLines={30}
     />
     {message ? <Text style={styles.message}>{message}</Text> : null}
-    <TouchableOpacity
-      style={styles.button}
-      onPress={async () => {
-        generate();
-      }}
+  <Pressable
+  disabled={loading}
+  onPress={generate}
+>
+  {({ pressed }) => (
+    <View
+      style={[
+        styles.entryFort,
+        pressed && !loading && styles.entryPressFort, // nur wenn nicht loading
+      ]}
     >
-      <Text style={styles.buttonText}>{t('saveCoverLetter')}</Text>
-    </TouchableOpacity>
-  
+      <Card.Title
+        title={
+          loading
+            ? `Bitte warten${dots}`   // 👈 animierter Text
+            : t('saveCoverLetter')
+        }
+        titleStyle={styles.job}
+      />
+
+     
+
+      {/* Optional: du kannst Loading hier auch zentriert anzeigen */}
+    </View>
+  )}
+</Pressable>
+
+
+
+
+
   </Animated.View>
-  <BottomPopup
-    visible={popupVisible}
-    message={popup}
-    onClose={() => setPopupVisible(false)}
-  />
 </SafeAreaView>
 </TouchableWithoutFeedback>
   );
 };
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   innerContainer: {
     backgroundColor: colors.background,
-    paddingHorizontal: 20,
+    padding: 20,
     justifyContent: 'center',
+    
   },
-  subjectInput: {
+ entryFort: {
+      flexDirection: "column",
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    marginTop:10,
     borderRadius: 10,
-    justifyContent: 'center',
- backgroundColor: colors.card,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingLeft: 15,
-    paddingRight: 15,
-    textAlignVertical: 'center',
-    marginBottom: 2,
-    color: 'white',
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
- height: height * 0.1,
- marginBottom: 10,
+    borderWidth:1,
+    borderColor:'gray',
+justifyContent:'center',
+width:width * 0.9,
+
+  },
+    job: {
+    justifyContent:'center',
+
+  textAlign: "center",
+    alignSelf: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "rgb(232, 228, 238)",
+  },
+  entryPressFort: {
+          flexDirection: "column",
+
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'white',
+    wdith:width * 0.9,
+  justifyContent:'center',
+
   },
   textArea: {
     borderRadius: 10,
     borderColor: 'gray',
     borderWidth: 1,
+    padding: 15,
     textAlignVertical: 'top',
     marginBottom: 2,
     backgroundColor: colors.card,
@@ -416,7 +452,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     color: 'white',
-    paddingHorizontal: 15,
   },
   button: {
     backgroundColor:colors.card,

@@ -1,15 +1,14 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
 import { Card, Divider } from 'react-native-paper';
 import Pdf from 'react-native-pdf';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Share from 'react-native-share';
 import SQLite from 'react-native-sqlite-storage';
-
-import { useTranslation } from 'react-i18next';
-import EncryptedStorage from 'react-native-encrypted-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '../inc/colors.js';
 import {
   decryptBase,
@@ -49,38 +48,25 @@ const [source, setSource] = useState({});
     if (await EncryptedStorage.getItem('result')) {
     await EncryptedStorage.removeItem('result')
     }
-    router.dismissAll();
-    router.replace('(tabs)');
+    router.dismissTo('(tabs)');
     console.log("Navigation zu MainTabs abgeschlossen");
   }
   
   const lookAtIt = async () => {
-    console.log("lookAtIt Funktion aufgerufen");
     try {
 
       const name = await EncryptedStorage.getItem('yourName');
-      console.log("Name aus EncryptedStorage gelesen:", name);
       const blue = `${(name)}_Bewerbungsmappe`;
-      console.log("Dateiname erzeugt:", blue);
       const myKey = await EncryptedStorage.getItem('key');
-      console.log("key aus EncryptedStorage gelesen:", myKey);
       const data = `${RNFS.LibraryDirectoryPath}/${blue}.pdf`;
       const temp = `${RNFS.LibraryDirectoryPath}/${blue}_temp.pdf`;
-      console.log("Quell-Pfad:", data);
       const encData = await RNFS.readFile(data, 'base64');
-      console.log("Verschlüsselte Daten gelesen");
       const decryptedData = await decryptBase(encData, myKey);
-      console.log("Daten entschlüsselt");
       const encData2 = await RNFS.readFile(data + '_1', 'base64');
-      console.log("Zusätzliche verschlüsselte Daten gelesen");
       const encData3 = decryptedData + encData2;
-      console.log("Daten kombiniert");
       await RNFS.writeFile(temp, encData3, 'base64');
-      console.log("Datei geschrieben:", temp);
       const exists = await RNFS.exists(temp);
-console.log("exists:", exists);
       setSource({ uri: `file://${temp}` });
-      console.log("PDF-Quelle gesetzt:", source);
       setPdfView(true);
       await EncryptedStorage.setItem("result", "collect")
     
@@ -97,9 +83,7 @@ const deleteIt = async () => {
   const name = await EncryptedStorage.getItem('yourName');
  
   const blue = `${(name)}_Bewerbungsmappe`;
-  console.log("Dateiname erzeugt:", blue);
   const myKey = await EncryptedStorage.getItem('key');
-  console.log("key aus EncryptedStorage gelesen:", myKey);
 const outputPath = `${RNFS.LibraryDirectoryPath}/${blue}_temp.pdf`;
 RNFS.exists(outputPath)
     .then( (result) => {
@@ -128,11 +112,9 @@ RNFS.exists(outputPath)
       setPopup('Ihre Bewerbungsmappe wird im Download Ordner gespeichert');
       setPopupVisible(true);
       const name = await EncryptedStorage.getItem('yourName');
-      console.log("Name aus EncryptedStorage gelesen:", name);
    
  
       const myKey = await EncryptedStorage.getItem('key');
-      console.log("key aus EncryptedStorage gelesen:", myKey);
       const data = `${RNFS.LibraryDirectoryPath}/${(name)}_Bewerbungsmappe.pdf`;
       
 

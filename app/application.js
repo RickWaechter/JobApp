@@ -43,7 +43,8 @@ const Bewerbung = () => {
   const [selectedOption2, setSelectedOption2] = useState('');
   const [selectedOption3, setSelectedOption3] = useState('');
   const [popup, setPopup] = useState('');
-  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dots, setDots] = useState("")
   const [seeFlatList, setSeeFlatList] = useState(false);
   const [isFlatListVisible, setIsFlatListVisible] = useState(false);
   const [isFlatListVisibleSkills, setIsFlatListVisibleSkills] = useState(false);
@@ -272,6 +273,12 @@ const Bewerbung = () => {
   };
 
   const handleGeneratePDF = async () => {
+    let count = 0;
+setLoading(true)
+      const interval = setInterval(() => {
+    count = (count + 1) % 4;
+    setDots(".".repeat(count));
+  }, 500);
     await EncryptedStorage.setItem('font', value);
     console.log('Application:' + (await EncryptedStorage.getItem('font')));
     setSeeFlatList(false);
@@ -456,7 +463,6 @@ const Bewerbung = () => {
         await EncryptedStorage.setItem('choices', selectedOption2);
         const deviceId = await DeviceInfo.getUniqueId();
         const key = sha512(deviceId);
-        Alert.alert("Ihr Text wird produziert")
 
         const response = await axios.post('https://jobape.de/getText', {
           prompt1: prompt1,
@@ -468,6 +474,8 @@ const Bewerbung = () => {
         toChange();
         setPopupVisible(false);
         console.log(text);
+        setDots("")
+      clearInterval(interval);
       } catch (error) {
         setPopupVisible(false);
         if (error.response) {
@@ -751,9 +759,18 @@ const Bewerbung = () => {
           </View>
 
           <View style={styles.section}>
-            <TouchableOpacity style={styles.button} onPress={handleGeneratePDF}>
-              <Text style={styles.buttonText}>{t('generateCoverLetter')}</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+             style={[
+               styles.button,
+                // optional: visuelles Feedback
+             ]}
+             onPress={handleGeneratePDF}
+             disabled={loading && Object.values(errors).length === 0}  // 👈 Button ist deaktiviert!
+           >
+             <Text style={styles.buttonText}>
+               {loading && Object.values(errors).length === 0 ? `Bitte warten${dots}` : t('generateCoverLetter')}
+             </Text>
+           </TouchableOpacity>
           </View>
             </View>
 
@@ -914,7 +931,7 @@ const styles = StyleSheet.create({
     top: 70,
     width: '100%',
     marginTop: 10,
-    maxHeight: height * 0.15,
+    maxHeight: height * 0.14,
     borderWidth: 1,
     borderColor: '#eee',
     borderRadius: 8,

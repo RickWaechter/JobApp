@@ -1,10 +1,8 @@
 import DeviceInfo from "react-native-device-info";
-import SQLite from "react-native-sqlite-storage";
 import EncryptedStorage from "react-native-encrypted-storage";
-import { decryp, decryptAndStore } from "./cryp";
 import * as Keychain from "react-native-keychain";
-import { useNavigation } from "@react-navigation/native";
-import { Alert } from "react-native";
+import SQLite from "react-native-sqlite-storage";
+import { decryp, decryptAndStore } from "./cryp";
 const DB_NAME = 'firstNew.db';
 
 export const selectDb = async () => {
@@ -44,7 +42,18 @@ export const selectDb = async () => {
     }
   }
 
-
+export const runQuery = (db, query, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        query,
+        params,
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};
 
 
   export const secureStore = async () => {

@@ -66,9 +66,9 @@ const BottomPopup = ({ visible, message, onClose }) => {
       <Animated.View
         style={{
           position: 'absolute',
-          top: '4%',
-          left: 0,
-          width: width,
+          top: '5%',
+left: (width - width * 0.9) / 2,   // zentriert
+          width: width * 0.9,
           height: 50,
           backgroundColor: '#3f4377ff',
           borderRadius: 10,

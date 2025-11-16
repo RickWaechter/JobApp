@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react';
-
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Animated,
   Dimensions,
   Keyboard,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
+import { Card } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
@@ -29,17 +30,19 @@ import {
   genIv,
 } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
+import { runQuery } from '../inc/db.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
-import BottomPopup from '../inc/popup.js';
 const ChangeScreen = () => {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [message, setMessage] = useState('');
   const [pdfUri, setPdfUri] = useState(null);
+  const [dots, setDots] = useState("");
   const [loading, setLoading] = useState(false);
   const [collectTag, setCollectTag] = useState(false);
   const [firstView, setFirstView] = useState(false);
-  const [popupVisible, setPopupVisible] = useState(false);
+  
+  const [popupVisible, setPopupVisible] = useState(true);
   const [popup, setPopup] = useState('jdbkjsabdkjsadkjsa');
   const {keyboardHeight, reset} = useKeyboardAnimation();
 const [subject, setSubject] = useState('');
@@ -139,6 +142,12 @@ const [subject, setSubject] = useState('');
   }
 
   const mergeFilesFromDB = async () => {
+  let count = 0;
+
+      const interval = setInterval(() => {
+    count = (count + 1) % 4;
+    setDots(".".repeat(count));
+  }, 100);
     try {
       const regex = /([^\/]*)$/;
       console.log('Starting merging');
@@ -150,12 +159,13 @@ const [subject, setSubject] = useState('');
       const deviceId = await DeviceInfo.getUniqueId();
       console.log('Device ID:', deviceId);
 
-      const result = await db.executeSql(
+      const result = await runQuery(
+        db,
         'SELECT mergePdf, lebenslauf, anschreiben, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
         [deviceId],
       );
 
-      const files = result[0].rows.raw();
+      const files = result.rows.raw();
 
       if (files.length < 1) {
         console.log('No files found in the database');
@@ -256,7 +266,8 @@ const [subject, setSubject] = useState('');
       console.log('Merged PDF saved to:', outputPath);
    
       await saveText();
-      setPopupVisible(false);
+      clearInterval(interval);
+      setDots("");  
       toCollect();
     } catch (err) {
       console.error('Error during merging:', err);
@@ -298,9 +309,11 @@ const [subject, setSubject] = useState('');
 
   const generate = async () => {
     console.log('Starting PDF generation process');
+ if (loading) return; // doppelklick verhindern
+  setLoading(true);
 
-    setPopup('Ihre Bewerbungsmappe wird nun zusammengestellt.');
-    setPopupVisible(true);
+  // animierte Punkte starten
+
 
     try {
       const pdfDoc1 = await PDFDocument.create();
@@ -426,32 +439,92 @@ const {height} = Dimensions.get('window');
       numberOfLines={30}
     />
     {message ? <Text style={styles.message}>{message}</Text> : null}
-    <TouchableOpacity
-      style={styles.button}
-      onPress={async () => {
-        generate();
-      }}
+  <Pressable
+  disabled={loading}
+  onPress={generate}
+>
+  {({ pressed }) => (
+    <View
+      style={[
+        styles.entryFort,
+        pressed && !loading && styles.entryPressFort, // nur wenn nicht loading
+      ]}
     >
-      <Text style={styles.buttonText}>{t('saveCoverLetter')}</Text>
-    </TouchableOpacity>
+      <Card.Title
+        title={
+          loading
+            ? `Bitte warten${dots}`   // 👈 animierter Text
+            : t('saveCoverLetter')
+        }
+        titleStyle={styles.job}
+      />
+
+     
+
+      {/* Optional: du kannst Loading hier auch zentriert anzeigen */}
+    </View>
+  )}
+</Pressable>
+
+
+
+
 
   </Animated.View>
-    <BottomPopup
-    visible={popupVisible}
-    message={popup}
-    onClose={() => setPopupVisible(false)}
-  />
 </SafeAreaView>
 </TouchableWithoutFeedback>
   );
 };
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   innerContainer: {
     backgroundColor: colors.background,
     padding: 20,
     justifyContent: 'center',
     
+  },
+ entryFort: {
+      flexDirection: "column",
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    marginTop:10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth:1,
+    borderColor:'gray',
+justifyContent:'center',
+width:width * 0.9,
+
+  },
+    job: {
+    justifyContent:'center',
+
+  textAlign: "center",
+    alignSelf: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "rgb(232, 228, 238)",
+  },
+  entryPressFort: {
+          flexDirection: "column",
+
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'white',
+    wdith:width * 0.9,
+  justifyContent:'center',
+
   },
   textArea: {
     borderRadius: 10,

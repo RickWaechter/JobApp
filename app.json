@@ -1,7 +1,7 @@
 {
   "expo": {
-     "name": "JobApp 2",
-  "slug": "jobapp2",
+    "name": "JobApp 2",
+    "slug": "jobape",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,13 +15,13 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-       "splash": {
+      "splash": {
         "image": "./assets/images/splash.png",
         "resizeMode": "cover",
         "backgroundColor": "#002D6F"
       },
-       "icon": "./assets/images/icon.png",
-        "buildNumber": "12",
+      "icon": "./assets/images/icon.png",
+      "buildNumber": "12",
       "bundleIdentifier": "com.ricky1993.jobape",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -80,7 +80,8 @@
         }
       ],
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      "react-native-google-mobile-ads"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -97,7 +97,7 @@ const googleKey = await EncryptedStorage.getItem('googleApi');
         Alert.alert("Bitte tragen Sie Ihre Adresse auf der Profilseite ein.");
       } else if (!item.lebenslauf ) {
         Alert.alert("Bitte laden Sie Ihren Lebenslauf hoch.");
-        router.push("/upload");
+        router.push("/uploadFirst");
       } 
       else {
         router.push("/name");
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card3,
     padding: 10,
     borderRadius: 10,
-    marginBottom: 40,
+    marginBottom: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -378,7 +378,7 @@ width:width * 0.9,
     backgroundColor: colors.card3,
     padding: 10,
     borderRadius: 10,
-    marginBottom: 40,
+    marginBottom: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

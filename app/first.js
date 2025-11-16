@@ -92,24 +92,8 @@ const handleSuggestionClickStreet = (suggestion) => {
   const handleMyCity = async value => {
   
     try {
-      const db = await SQLite.openDatabase({ name: 'city.db', location: 'default' });
       setYourCity(value);
-      const [res] = await db.executeSql(
-       'SELECT rowid, city FROM citys WHERE city MATCH ? LIMIT 20',
-        [`${value}*`],
-      );
-  
-      console.log('res', res);
-      const names = res.rows.raw();
-      console.log(names)
-      
-        const resultArray = names.map(row => row.city);
-        setSuggestionsCity(resultArray);
-   
-      console.log('names', names[0].city);
-      console.log(suggestions)
-      setIsFlatListVisible2(true);
-      setIsFlatListVisible(false)
+     
      console.log('suggestions', suggestions);
     } catch (err) {
       console.warn('Search error', err);
@@ -122,25 +106,8 @@ const handleSuggestionClickStreet = (suggestion) => {
   };
   const handleMyStreet = async value => {
     try {
-      const db = await SQLite.openDatabase({ name: 'street.db', location: 'default'  });
       setYourStreet(value);
-      const [res] = await db.executeSql(
-       'SELECT *FROM streets WHERE street MATCH ? LIMIT 20',
-        [`${value}*`],
-      );
-  
-      console.log('res', res);
-      const names = res.rows.raw();
-      console.log(names)
-      
-        const resultArray = names.map(row => row.street);
-        setSuggestionsStreet(resultArray);
-   
-      console.log('names', names[0].city);
-      console.log(suggestions)
-      setIsFlatListVisible2(false);
-      setIsFlatListVisible(true);
-     console.log('suggestions', suggestions);
+     
     } catch (err) {
       console.warn('Search error', err);
     }

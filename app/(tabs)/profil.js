@@ -1,5 +1,5 @@
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { sha512 } from 'js-sha512';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -12,9 +12,10 @@ import Modal from 'react-native-modal';
 import { Card, Divider } from 'react-native-paper';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../../inc/colors.js';
-import { decryp, encryp } from '../../inc/cryp.js';
+import { encryp } from '../../inc/cryp.js';
 import CutLine from '../../inc/CutLine.js';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
+import '../../local/i18n.js';
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -29,6 +30,7 @@ const ProfilScreen = () => {
   const [valueLang, setValueLang] = useState(null);
   const { t } = useTranslation();
   const [data, setData] = useState([]);
+  const navigation = useNavigation();
   const [myName, setMyName] = useState('');
   const [myCity, setMyCity] = useState('');
   const [email, setEmail] = useState('');
@@ -43,7 +45,7 @@ const ProfilScreen = () => {
   const [coins, setCoins] = useState('');
   const [isModalEmailVisible, setModalEmailVisible] = useState(false);
   const [db, setDb] = useState(null);
-  const { keyboardHeight, animated, reset } = useKeyboardAnimation(300);
+  const { keyboardHeight, reset } = useKeyboardAnimation(300);
   const DB_NAME = 'firstNew.db';
   const [isAnimating, setIsAnimating] = useState(false);
   const [source, setSource] = useState('');
@@ -63,6 +65,7 @@ const ProfilScreen = () => {
   };
   const pan = useRef(new Animated.ValueXY()).current;
 
+ 
 
   useFocusEffect(
     useCallback(() => {
@@ -117,14 +120,37 @@ useEffect(() => {
       setCoins(prevCoins => prevCoins + amount);
     }
 
+
+    const unsubscribeLoaded = rewardedAd.addAdEventListener(
+      RewardedAdEventType.LOADED,
+      () => {
+        setLoaded(true);
+      }
+    );
+
+    const unsubscribeEarned = rewardedAd.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      reward => {
+        console.log('Belohnung erhalten: ', reward);
+        
+          get(5);
+
+       
+      }
+    );
+    // Load the ad  
+
+
+
+
+
+    rewardedAd.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+    };
   }
-   
-
- 
-
-
-
-
   load();
 }, []);
 
@@ -132,44 +158,23 @@ useEffect(() => {
 
 
   useEffect(() => {
-    const handleLogin = async () => {
-      const deviceId = await DeviceInfo.getUniqueId();
-      const key = await EncryptedStorage.getItem('key');
-      try {
-        const db = await SQLite.openDatabase({
-          name: 'firstNew.db',
-          location: 'default',
-        });
-        const result = await db.executeSql(
-          'SELECT * FROM files WHERE ident = ?',
-          [deviceId],
-        );
-        const files = result[0].rows.raw();
-        if (files.length === 0) {
-          console.log('No files found');
-          return;
-        }
-        const file = files[0];
-        setMyName(await decryp(file.name, key));
-        setMyCity(await decryp(file.city, key));
-        setMyStreet(await decryp(file.street, key));
-        if (file.email && file.emailPassword) {
-          setEmail(await decryp(file.email, key));
-          setPassword(await decryp(file.emailPassword, key));
-          setValue(await decryp(file.emailServer, key))
+const load = async ()  => {
+
+        setMyName(await EncryptedStorage.getItem('name'));
+        setMyCity(await EncryptedStorage.getItem('city'));
+        setMyStreet(await EncryptedStorage.getItem('street'));
+        if (await EncryptedStorage.getItem('email') && await EncryptedStorage.getItem('emailPassword') && await EncryptedStorage.getItem('emailServer')) {
+         const email = await EncryptedStorage.getItem('email');
+          const password = await EncryptedStorage.getItem('emailPassword');
+          const emailServer = await EncryptedStorage.getItem('emailServer');
+          setEmail(email);
+          setPassword(password);
+          setValue(emailServer);
+          
         }
 
-      } catch (error) {
-        console.error('Login failed:', error.response ? error.response.data : error.message);
-        setMessage('Login failed: ' + (error.response ? error.response.data.error : error.message));
       }
-    };
-
-    setTimeout(() => {
-      handleLogin();
-
-    }
-      , 800);
+      load();
   }, [pdfView]);
 
   const handleEmail = (value) => {
@@ -256,12 +261,11 @@ useEffect(() => {
   };
   const itemsLang = [
     { label: 'English', value: 'en' },
-    { label: 'French', value: 'fr' },
-
     { label: 'Deutsch', value: 'de' },
     { label: 'Turkish', value: 'tr' },
     { label: 'Arabic', value: 'ar' },
     { label: 'Greek', value: 'gr' },
+    { label: 'French', value: 'fr' },
     { label: 'Italian', value: 'it' },
     { label: 'Japanese', value: 'jp' },
     { label: 'Dutch', value: 'nl' },
@@ -557,6 +561,7 @@ useEffect(() => {
         animationOutTiming={475}
         onBackdropPress={() => setLangModal(false)}
         style={{ margin: 0,  width: width, justifyContent: 'center', alignSelf: 'center' }}
+        swipeDirection={['down']}
         onSwipeComplete={() => setLangModal(false)}
         // Add these handlers:
         onModalWillShow={() => setIsAnimating(true)}
@@ -678,7 +683,7 @@ const styles = StyleSheet.create({
       },
   entry: {
     backgroundColor: colors.card3,
-    padding: 10,
+    padding: 15,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "gray",
@@ -732,7 +737,7 @@ width:width * 0.9,
   },
   entryPress: {
     backgroundColor: colors.card3,
-    padding: 10,
+    padding: 15,
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: "#000",
@@ -795,6 +800,13 @@ width:width * 0.9,
     color: "#FFFFFF",
     textAlign: "right",
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: "transparent",
+
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   clearButton: {
     position: 'absolute',
     right: 12,
@@ -813,7 +825,52 @@ width:width * 0.9,
     top: 135,
     padding: 5,
   },
+  clearText: {
+    color: 'gray',
+    fontSize: 16,
+  },
+  popup: {
 
+
+    width: '90%',
+    height: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10, // Schatten für Android
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pdf: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10, // Optional für abgerundete Ecken
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#E74C3C',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonContainer: {
+    marginBottom: height * 0.05,
+    width: width * 0.8,
+  },
   dropDownContainer: {
     borderColor: 'gray',
     textAlign: 'center',
@@ -823,7 +880,44 @@ width:width * 0.9,
 
   },
 
+  listContainer: {
+    flex: 1,
+    marginBottom: 20,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    maxHeight: '75%',
+    width: width * 0.80,
+    height: 50,
+    borderRadius: 15,
+  },
 
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card3,
+    borderRadius: 10,
+    padding: 12,
+    marginVertical: 8,
+    // Schatten für iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  CardContainer: {
+    BorderWidth: 'none',
+    backgroundColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Für Android-Schatten
+  },
 
   deleteButton: {
     backgroundColor: '#E74C3C',
@@ -835,11 +929,21 @@ width:width * 0.9,
     right: 10
 
   },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   inputsContainer: {
     flex: 1,
    
     justifyContent: "center",
     alignItems: "center", // fügt horizontale Zentrierung hinzu
+  },
+  formContainer: {
+
+    justifyContent: "center",
+    alignItems: "center"
   },
   input: {
     height: 35,
@@ -868,6 +972,15 @@ width:width * 0.9,
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5, // Für Android-Schatten
+  },
+  job2: {
+    width: '100%',
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+
+
   },
   buttonNew: {
     width: width * 0.8,
@@ -899,7 +1012,7 @@ width:width * 0.9,
     fontSize: 13,
     fontWeight: "bold",
     color: "#C8C8C8",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   job: {
     textAlign: "center",
@@ -908,6 +1021,14 @@ width:width * 0.9,
     color: "rgb(220, 221, 232)",
 
   },
+  text: {
+    textAlign: "center",
+    color: "#C8C8C8",
+    marginBottom: 5,
+  },
+  user: {
+    marginVertical: 10,
+  },
   modalBackground: {
     flex: 1,
     justifyContent: "center",
@@ -915,6 +1036,11 @@ width:width * 0.9,
     backgroundColor: "transparent" // Dunkler Hintergrund
 
 
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15
   },
 
   modalContainer: {
@@ -946,6 +1072,14 @@ width:width * 0.9,
     borderWidth: 'none',
     textAlign: 'center',
 
+  },
+  modalButton: {
+    backgroundColor: '#7D26CD',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 15,
+    width: "100%",
+    alignItems: "center"
   },
 
 

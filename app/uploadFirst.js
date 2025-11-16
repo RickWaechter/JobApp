@@ -1,6 +1,5 @@
 // Home.js
 
-import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -103,21 +102,7 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
       console.error("Error in fetchData:", err);
     }
   };
-  useFocusEffect(
-    useCallback(() => {
-      console.log("Drawer-Screen geöffnet oder erneut geöffnet!");
-
-
-      fetchData();
-
-      // Deine Funktion hier ausführen
-
-
-      return () => {
-        console.log("Drawer-Screen wird verlassen.");
-      };
-    }, [])
-  );
+   
   useEffect(() => {
 console.log("useEffect triggered" + data.length);
 console.log("buttonOne:" + buttonOne);
@@ -322,8 +307,17 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
       setButtonOne(true)
       setButtonUpload(true)
       fetchData();
-      Alert.alert(t('upload.title'), t('upload.info'),);
-      
+      Alert.alert(
+  t('upload.title'),
+  t('upload.info'),
+  [
+    {
+      text: "OK",
+      onPress: () => router.push("(tabs)"),
+    }
+  ]
+);
+
       console.log('Alle Dateien wurden aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Dateien:', error);

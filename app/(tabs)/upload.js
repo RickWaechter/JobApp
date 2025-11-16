@@ -174,7 +174,6 @@ console.log("buttonOne:" + buttonOne);
     } catch (err) {
       console.error("Error while deleting file:", err);
     }
-    await saveOrder();
 
   };
   const sanitizeName = (name) => {
@@ -365,7 +364,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
 
       await EncryptedStorage.setItem("result", "collect");
       setTimeout(() => {
-        setPdfView(true);
+        setPdfView(true); 
       }, 300);
 
 
@@ -541,16 +540,16 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
         isVisible={isModalSortVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
-        onBackdropPress={() => { setModalSortVisible(false); setPdfView(false) }}
+        onBackdropPress={() =>setModalSortVisible(false)}
         style={{
           justifyContent: 'center',
           margin: 0,
         }}
-        onSwipeComplete={() => { setModalSortVisible(false); setPdfView(false) }}
+        onSwipeComplete={() =>setModalSortVisible(false)  }
         // Add these handlers:
         onModalWillShow={() => setIsAnimating(true)}
         onModalHide={() => setIsAnimating(false)}
-        backdropTransitionOutTiming={1}
+        backdropTransitionOutTiming={1} 
         useNativeDriver={false}
       >
         <TouchableWithoutFeedback onPress={() => setModalSortVisible(false)}>
@@ -582,20 +581,28 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
                     <TouchableOpacity onPress={() => handleItemClick(item)} style={[styles.dragArea, isActive && styles.dragActive]} onLongPress={drag}>
                       <Text style={[styles.itemText, isActive && styles.itemTextActive]}>{item.name.length > 25 ? item.name.substring(0, 25) + '...': item.name}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton} onPress={() =>
+                    <TouchableOpacity style={styles.deleteButton} 
+                      delayLongPress={300}
+                     onPress={() =>
                       Alert.alert(
-                        "Erfolg",
-                        "Ihre neuen Einstellungen wurden erfolgreich gespeichert",
-                        [
-                          {
-                            text: "OK",
-                            onPress: () => {
-                              deleteItem(item);
-
-                            },
-                          },
-                        ]
-                      )}>
+      "Erfolg",
+      "Ihre neuen Einstellungen wurden erfolgreich gespeichert",
+      [
+        {
+          text: "Abbrechen",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => deleteItem(item),
+        },
+      ]
+    )}
+      onLongPress={() => {
+    // LongPress IGNORIERT das Alert
+    deleteItem(item)
+  }}
+    >
                       <Text style={styles.deleteButtonText}>X</Text>
                     </TouchableOpacity>
                   </View>
@@ -643,7 +650,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: colors.card,
+    backgroundColor: colors.background,
 
     justifyContent: 'center',
     alignItems: 'center',
@@ -779,7 +786,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card3,
     padding: 10,
     borderRadius: 10,
-    marginBottom: 30,
+    marginBottom: 40,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

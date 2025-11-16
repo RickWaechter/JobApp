@@ -230,8 +230,8 @@ const getOld = async () => {
      titleNumberOfLines={0}   // 0 = unlimitiert
 
   title={entry.job}
-  titleStyle={styles.job}/>
-<Divider
+  titleStyle={[styles.job, entry.job.length > 30 ? { marginBottom: 15  } : null]} ></Card.Title>
+<Divider  
  color='gray'
  style={{ justifyContent: 'center', marginBottom: 15 , width: '55%', alignSelf: 'center'  }}
 />
