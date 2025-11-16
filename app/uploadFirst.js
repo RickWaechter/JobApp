@@ -4,24 +4,19 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Animated, Dimensions, Pressable, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Dimensions, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import DraggableFlatList from "react-native-draggable-flatlist";
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
-import Modal from 'react-native-modal';
 import { Card, Divider, Text } from 'react-native-paper';
-import Pdf from 'react-native-pdf';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
 import {
   decryp,
-  decryptBase,
   encryp,
   encryptBase64,
-  genIv,
+  genIv
 } from '../inc/cryp.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
 // Aktivieren des Debug-Modus (optional)
@@ -36,15 +31,9 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
   const [error, setError] = useState('');
   const [data, setData] = useState([]);
   const [db, setDb] = useState(null);
-  const [expand, setExpand] = useState(false);
   const [buttonOne, setButtonOne] = useState(true);
   const [buttonUpload, setButtonUpload] = useState(true);
   const keyboardHeight = useKeyboardAnimation();
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [source, setSource] = useState('');
-  const [pdfView, setPdfView] = useState(false);
-  const [pdfTab, setPdfTab] = useState(false);
-  const [isModalSortVisible, setModalSortVisible] = useState(false);
   const orderedKeys = [
     "lebenslauf",
     "add1", "add2", "add3", "add4", "add5",
@@ -109,61 +98,7 @@ console.log("buttonOne:" + buttonOne);
   }
     , [data, buttonOne]);
 
-    const deleteFileIfExists = async (fileName) => {
-      const filePath = `${RNFS.LibraryDirectoryPath}/${fileName}`;
-      const exists = await RNFS.exists(filePath);
-      if (exists) {
-        await RNFS.unlink(filePath);
-        console.log(`Datei gelöscht: ${filePath}`);
-      } else {
-        console.log(`Datei existiert nicht: ${filePath}`);
-      }
-    };
-
-  const deleteItem = async (idToDelete) => {
-
-    console.log("deleteItem:", idToDelete);
-    const newData = data.filter(item => item.id !== idToDelete.id);
-    setData(newData);
-    console.log("Trying to delete file:", idToDelete.name);
-    try {
-      await deleteFileIfExists(idToDelete.name);
-      await deleteFileIfExists(idToDelete.name + '_1');
-      console.log("File deleted successfully.");
-
-      if (!db) return;
-      console.log("Saving order...");
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
-        console.log("Device ID:", deviceId);
-        const myKey = await EncryptedStorage.getItem("key");
-        console.log("My Key:", myKey);
-        const encryptedKeys = await Promise.all(newData.map(async (item) => await encryp(item.key, myKey)));
-        console.log("Encrypted Keys:", encryptedKeys);
-        const updateValues = orderedKeys.map((key, index) => encryptedKeys[index] || null);
-        console.log("Update Values:", updateValues);
-        const updateQuery = `UPDATE files SET ${orderedKeys.map((key) => `${key} = ?`).join(", ")} WHERE ident = ?`;
-        console.log("Update Query:", updateQuery);
-        const queryParams = [...updateValues, deviceId];
-        console.log("Query Params:", queryParams);
-  
-        await db.executeSql(updateQuery, queryParams);
-        console.log("Reihenfolge gespeichert mit NULL für leere Felder.");
-        if (newData.length < 1) {
-          setModalSortVisible(false);
-
-        }
-      } catch (error) {
-        console.error("Fehler beim Speichern der Reihenfolge:", error);
-      }
-
-
-    } catch (err) {
-      console.error("Error while deleting file:", err);
-    }
-    await saveOrder();
-
-  };
+ 
   const sanitizeName = (name) => {
     return name
       .normalize('NFKD')              // strips diacritics so ü → u, etc.
@@ -313,7 +248,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
   [
     {
       text: "OK",
-      onPress: () => router.push("(tabs)"),
+      onPress: () => cont(),
     }
   ]
 );
@@ -338,113 +273,14 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
 
   };
 
-  const handleItemClick = async (item) => {
-    try {
-      const outputPath = `${item.name}`;
-      const output = RNFS.LibraryDirectoryPath + '/' + outputPath;
-      const temp = RNFS.TemporaryDirectoryPath + '/temp.pdf';
-
-      const myKey = await EncryptedStorage.getItem("key");
-
-      const encData = await RNFS.readFile(output, 'base64');
-
-      const decryptedData = await decryptBase(encData, myKey);
-
-      const encData2 = await RNFS.readFile(output + '_1', 'base64');
-
-      const encData3 = decryptedData + encData2;
-      await RNFS.writeFile(temp, encData3, 'base64');
-      setSource({
-        uri: `file://${temp}`,
-        cache: true,
-      });
 
 
-      await EncryptedStorage.setItem("result", "collect");
-      setTimeout(() => {
-        setPdfView(true);
-      }, 300);
+ 
+  
 
-
-
-    } catch (err) {
-      console.error('Fehler beim Teilen der Datei:', err);
-    }
-  }
-  const close = async () => {
-    const temp = RNFS.TemporaryDirectoryPath + '/temp.pdf';
-    setPdfView(false);
-    await RNFS.unlink(temp)
-
-  }
-
-  const handlePdfLoadComplete = (numberOfPages, filePath) => {
-    // Wird aufgerufen, wenn das PDF vollständig geladen wurde
-
-    console.log('PDF vollständig geladen.' + filePath);
-    console.log('Anzahl der Seiten:', numberOfPages);
-
-  };
-  const addToDB = async () => {
-    if (files.length === 0) {
-      setError('Keine Dateien ausgewählt.');
-      return;
-    }
-    const deviceId = await DeviceInfo.getUniqueId();
-    const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-
-    try {
-      db.transaction(tx => {
-        tx.executeSql(
-          'SELECT lebenslauf, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
-          [deviceId],
-          (_, result) => {
-            if (result.rows.length > 0) {
-              const row = result.rows.item(0);
-              let columnIndex = 0;
-
-              // Finde die erste freie Spalte
-              const columnNames = ['lebenslauf', 'add1', 'add2', 'add3', 'add4', 'add5', 'add6', 'add7', 'add8', 'add9', 'add10'];
-              while (columnIndex < columnNames.length && row[columnNames[columnIndex]]) {
-                columnIndex++;
-              }
-
-              // Falls alle Felder voll sind, nichts speichern
-              if (columnIndex >= columnNames.length) {
-                console.log('Kein Platz für neue Dateien.');
-                return;
-              }
-
-              files.forEach((file, index) => {
-                if (columnIndex >= columnNames.length) return; // Falls alle Spalten voll sind
-
-                const column = columnNames[columnIndex];
-                columnIndex++;
-
-                tx.executeSql(
-                  `UPDATE files SET ${column} = ? WHERE ident = ?`,
-                  [file.path, deviceId],
-                  () => console.log(`Updated ${column} with path: ${file.path}`),
-                  error => console.error('Fehler beim Aktualisieren:', error)
-                );
-              });
-            }
-          },
-          error => console.error('Fehler beim Abrufen der Daten:', error)
-        );
-      });
-
-      Alert.alert(t('upload.title'), t('upload.info'),);
-      setFiles([])
-      setButtonOne(true)
-      setButtonUpload(true)
-      fetchData();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Dateien:', error);
-    }
-  };
   const cont = () => {
-    router.push("(tabs)");
+        router.dismissTo('(tabs)');
+    
   }
   return (
     <View style={styles.container}>
@@ -521,95 +357,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
         </View>
       )}
       
-      <Modal
-        isVisible={isModalSortVisible}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        onBackdropPress={() => { setModalSortVisible(false); setPdfView(false) }}
-        style={{
-          justifyContent: 'flex-end',
-          margin: 0,
-        }}
-        swipeDirection={['down']}
-        onSwipeComplete={() => { setModalSortVisible(false); setPdfView(false) }}
-        // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
-        backdropTransitionOutTiming={1}
-        useNativeDriver={false}
-      >
-        <TouchableWithoutFeedback onPress={() => setModalSortVisible(false)}>
-          <Animated.View
-            style={[
-
-              {
-                height:  data.length < 8 ? 40 + (data.length * 80) : 40 + (8 * 80),
-                paddingTop: 10,
-                backgroundColor: colors.background, // Damit es sichtbar bleibt
-                justifyContent: 'center',
-                alignItems: 'center',
-               paddingBottom: 0,
-                opacity: isAnimating ? 1 : 0,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }
-            ]}>
-            <View style={styles.listContainer}>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-              <DraggableFlatList
-                data={data}
-                onDragEnd={({ data }) => setData(data)}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item, drag, isActive }) => (
-                  <View style={[styles.card, isActive && styles.cardActive]}>
-                    <TouchableOpacity onPress={() => handleItemClick(item)} style={[styles.dragArea, isActive && styles.dragActive]} onLongPress={drag}>
-                      <Text style={[styles.itemText, isActive && styles.itemTextActive]}>{item.name.length > 25 ? item.name.substring(0, 25) + '...': item.name}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton} onPress={() =>
-                      Alert.alert(
-                        "Erfolg",
-                        "Ihre neuen Einstellungen wurden erfolgreich gespeichert",
-                        [
-                          {
-                            text: "OK",
-                            onPress: () => {
-                              deleteItem(item);
-
-                            },
-                          },
-                        ]
-                      )}>
-                      <Text style={styles.deleteButtonText}>X</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-              />
-</GestureHandlerRootView>
-              
-              {pdfView && (
-                <Modal visible={pdfView} transparent={true} animationType="fade">
-                  <View style={styles.overlay}>
-                    <View style={styles.popup}>
-
-                      <Pdf source={source} style={styles.pdf}
-                        onLoadComplete={handlePdfLoadComplete} />
-
-                      <TouchableOpacity onPress={close} style={styles.closeButton}>
-                        <Text style={styles.closeText}>✕</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </Modal>
-              )}
-            </View>
-            {/* Drag Handle */}
-
-
-
-          </Animated.View>
-        </TouchableWithoutFeedback>
-      </Modal>
+     
     </View>
   );
 };
