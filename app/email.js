@@ -110,7 +110,25 @@ const ContactForm = () => {
               },
             );
           });
-   
+          if (await EncryptedStorage.getItem('merge')) {
+            const mergeName = await EncryptedStorage.getItem('merge');
+            const data = `${RNFS.LibraryDirectoryPath}/${(mergeName)}`;
+            const base64String = await RNFS.readFile(data, 'base64');
+            const abc = await decryptBase(base64String, key);
+            const base64String2 = await RNFS.readFile(data + '_1', 'base64');
+            Object.keys(formData).forEach(key => {
+              console.log(key, formData[key]);
+            });
+            if (data) {
+              setFormData(prevData => ({
+                ...prevData,
+                base64String,
+                base64String2
+              }));
+              console.log('Form data updated with base64 string');
+            }
+          }
+          else {
           const name = await EncryptedStorage.getItem('yourName');
            const data = `${RNFS.LibraryDirectoryPath}/${(name)}_Bewerbungsmappe.pdf`;
           const base64String = await RNFS.readFile(data, 'base64');
@@ -129,7 +147,8 @@ const ContactForm = () => {
             }));
             console.log('Form data updated with base64 string');
           }
-        } catch (error) {
+        } }
+        catch (error) {
           console.error('Error in initializeForm:', error);
         }
       };
@@ -194,6 +213,8 @@ useEffect(() => {
       });
       console.log('handleSubmit: response received');
       if (response.ok) {
+                await EncryptedStorage.removeItem('merge')
+
         console.log('handleSubmit: response ok');
         Alert.alert(
           t('alerts.success.title'),

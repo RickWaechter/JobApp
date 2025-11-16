@@ -80,8 +80,7 @@
         }
       ],
       "expo-asset",
-      "expo-web-browser",
-      "react-native-google-mobile-ads"
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -90,7 +89,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
+        "projectId": "77ff1066-5126-4580-92f3-eeaeeeaa1cd3"
       }
     },
     "runtimeVersion": {
@@ -98,7 +97,6 @@
     },
     "updates": {
       "enabled": false
-    },
-    "owner": "mrnorthside"
+    }
   }
 }

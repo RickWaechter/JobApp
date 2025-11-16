@@ -12,8 +12,9 @@ import Modal from 'react-native-modal';
 import { Card, Divider } from 'react-native-paper';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../../inc/colors.js';
-import { encryp } from '../../inc/cryp.js';
+import { decryp, encryp } from '../../inc/cryp.js';
 import CutLine from '../../inc/CutLine.js';
+import { runQuery } from '../../inc/db.js';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
 import '../../local/i18n.js';
 if (
@@ -108,74 +109,139 @@ const ProfilScreen = () => {
       };
     }, [])
   );
+
+
 useEffect(() => {
   const load = async () => {
-    const get = async (amount) => {
+    try {
+      console.log("⏳ Lade Daten…");
+
+      let email = null;
+      let emailPassword = null;
+      let emailServer = null;
+
+      // 1) Key
+      const key = await EncryptedStorage.getItem("key");
+      if (!key) {
+        console.log("⚠️ Kein Key gefunden");
+        return;
+      }
+
+      // 2) Device ID
       const deviceId = await DeviceInfo.getUniqueId();
-      const key = sha512(deviceId);
-      const response = await axios.post('http://178.254.6.218:3001/api/addCoins', {
-        key: key,
-        coin: amount
-      })
-      setCoins(prevCoins => prevCoins + amount);
+
+      // 3) DB öffnen
+      const db = await SQLite.openDatabase({
+        name: "firstNew.db",
+        location: "default",
+      });
+
+      // 4) Query
+      const result = await runQuery(
+        db,
+        "SELECT * FROM files WHERE ident = ?",
+        [deviceId]
+      ).catch((e) => {
+        console.log("❌ SQL Fehler:", e);
+        return null;
+      });
+
+      // Wenn keine DB-Daten → danach load2()
+      if (!result || !result.rows || result.rows.length === 0) {
+        console.log("⚠️ Kein DB-Eintrag gefunden → Lade aus Storage");
+        load2();
+        return;
+      }
+
+      const row = result.rows.raw()[0];
+
+      // Helper: safeDecrypt
+      const safeDecrypt = async (value) => {
+        try {
+          if (!value) return null;
+          return await decryp(value, key);
+        } catch {
+          return null;
+        }
+      };
+
+      // 5) Basisdaten
+      const name = await safeDecrypt(row.name);
+      const street = await safeDecrypt(row.street);
+      const city = await safeDecrypt(row.city);
+
+      if (name && street && city) {
+        await EncryptedStorage.setItem("name", name);
+        await EncryptedStorage.setItem("street", street);
+        await EncryptedStorage.setItem("city", city);
+
+        setMyName(name);
+        setMyCity(city);
+        setMyStreet(street);
+      }
+
+      console.log("☀️ Basisdaten:", { name, street, city });
+
+      // 6) Email-Daten
+      if (row.email && row.emailPassword && row.emailServer) {
+        email = await safeDecrypt(row.email);
+        emailPassword = await safeDecrypt(row.emailPassword);
+        emailServer = await safeDecrypt(row.emailServer);
+
+        console.log("☀️ E-Mail Daten:", {
+          email,
+          emailPassword,
+          emailServer,
+        });
+
+        if (email && emailPassword && emailServer) {
+          await EncryptedStorage.setItem("email", email);
+          await EncryptedStorage.setItem("emailPassword", emailPassword);
+          await EncryptedStorage.setItem("emailServer", emailServer);
+
+          setEmail(email);
+          setPassword(emailPassword);
+          setValue(emailServer);
+        }
+      }
+    } catch (err) {
+      console.log("❌ Fehler in load():", err);
     }
+  };
 
+  const load2 = async () => {
+    console.log("📦 Lade E-Mail aus Storage…");
 
-    const unsubscribeLoaded = rewardedAd.addAdEventListener(
-      RewardedAdEventType.LOADED,
-      () => {
-        setLoaded(true);
-      }
-    );
+    const email = await EncryptedStorage.getItem("email");
+    const password = await EncryptedStorage.getItem("emailPassword");
+    const emailServer = await EncryptedStorage.getItem("emailServer");
 
-    const unsubscribeEarned = rewardedAd.addAdEventListener(
-      RewardedAdEventType.EARNED_REWARD,
-      reward => {
-        console.log('Belohnung erhalten: ', reward);
-        
-          get(5);
+    if (email && password && emailServer) {
+      setEmail(email);
+      setPassword(password);
+      setValue(emailServer);
 
-       
-      }
-    );
-    // Load the ad  
+      console.log("☀️ E-Mail Daten aus Storage:", {
+        email,
+        password,
+        emailServer,
+      });
+    } else {
+      console.log("⚠️ Keine E-Mail Daten in Storage gefunden");
+    }
+  };
 
-
-
-
-
-    rewardedAd.load();
-
-    return () => {
-      unsubscribeLoaded();
-      unsubscribeEarned();
-    };
-  }
   load();
+  load2()
 }, []);
 
 
 
 
-  useEffect(() => {
-const load = async ()  => {
 
-        setMyName(await EncryptedStorage.getItem('name'));
-        setMyCity(await EncryptedStorage.getItem('city'));
-        setMyStreet(await EncryptedStorage.getItem('street'));
-        if (await EncryptedStorage.getItem('email') && await EncryptedStorage.getItem('emailPassword') && await EncryptedStorage.getItem('emailServer')) {
-         const email = await EncryptedStorage.getItem('email');
-          const password = await EncryptedStorage.getItem('emailPassword');
-          const emailServer = await EncryptedStorage.getItem('emailServer');
-          setEmail(email);
-          setPassword(password);
-          setValue(emailServer);
-          
-        }
 
-      }
-      load();
-  }, [pdfView]);
+
+ 
 
   const handleEmail = (value) => {
     setEmail(value);

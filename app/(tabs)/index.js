@@ -66,6 +66,8 @@ useFocusEffect(() =>  {
 
 );
 
+
+
 useEffect(() => {
   (async () => {
 const dbPath = `${RNFS.LibraryDirectoryPath}/LocalDatabase/firstNew.db`;
@@ -73,7 +75,7 @@ const dbPath = `${RNFS.LibraryDirectoryPath}/LocalDatabase/firstNew.db`;
 const exists = await RNFS.exists(dbPath);
 console.log("Exists:", exists);
 if (!exists) {
-  router.push("/first")
+  router.dismissTo("/first")
 }
   })();
 }, []);

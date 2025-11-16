@@ -48,35 +48,73 @@ const [source, setSource] = useState({});
     if (await EncryptedStorage.getItem('result')) {
     await EncryptedStorage.removeItem('result')
     }
+    if (await EncryptedStorage.getItem('merge')) {
+      await EncryptedStorage.removeItem('merge')
+    }
     router.dismissTo('(tabs)');
     console.log("Navigation zu MainTabs abgeschlossen");
   }
   
   const lookAtIt = async () => {
-    try {
+  console.log("lookAtIt Funktion aufgerufen");
 
-      const name = await EncryptedStorage.getItem('yourName');
-      const blue = `${(name)}_Bewerbungsmappe`;
-      const myKey = await EncryptedStorage.getItem('key');
-      const data = `${RNFS.LibraryDirectoryPath}/${blue}.pdf`;
-      const temp = `${RNFS.LibraryDirectoryPath}/${blue}_temp.pdf`;
-      const encData = await RNFS.readFile(data, 'base64');
-      const decryptedData = await decryptBase(encData, myKey);
-      const encData2 = await RNFS.readFile(data + '_1', 'base64');
-      const encData3 = decryptedData + encData2;
-      await RNFS.writeFile(temp, encData3, 'base64');
-      const exists = await RNFS.exists(temp);
-      setSource({ uri: `file://${temp}` });
-      setPdfView(true);
-      await EncryptedStorage.setItem("result", "collect")
-    
+  try {
+    // 1) Key einmal laden
+    const myKey = await EncryptedStorage.getItem('key');
+    const yourName = await EncryptedStorage.getItem('yourName');
+    const mergeName = await EncryptedStorage.getItem('merge');
 
+    console.log(`Key: ${myKey}`);
+    console.log(`YourName: ${yourName}`);
+    console.log(`MergeName: ${mergeName}`);
 
-
-    } catch (err) {
-      console.error('Fehler beim Teilen der Datei:', err);
+    // 2) PDF-Name bestimmen (merge oder normal)
+    let filename = "";
+    if (mergeName) {
+      filename = mergeName;
+      console.log("Merge-Datei gefunden");
+    } else {
+      filename = `${yourName}_Bewerbungsmappe.pdf`;
+      console.log("Keine Merge-Datei -> Standard");
     }
-  };
+
+    // 3) Paths vorbereiten
+    const base = `${RNFS.LibraryDirectoryPath}/${filename}`;
+    const base2 = base + "_1"; // zweiter Teil
+    const temp = `${RNFS.LibraryDirectoryPath}/${yourName}_Bewerbungsmappe_temp.pdf`;
+
+    console.log("PDF Pfade:");
+    console.log("base:", base);
+    console.log("base2:", base2);
+    console.log("temp:", temp);
+
+    // 4) Lesen + decrypten
+    const encData = await RNFS.readFile(base, "base64");
+    const decrypted = await decryptBase(encData, myKey);
+
+    const encData2 = await RNFS.readFile(base2, "base64");
+
+    // ⚠️ Hier klebst du PDFs zusammen – das kann fehlerhaft sein
+    const combined = decrypted + encData2;
+
+    // 5) Neue Datei schreiben
+    await RNFS.writeFile(temp, combined, "base64");
+
+    // 6) Checken ob sie existiert
+    const exists = await RNFS.exists(temp);
+    console.log("Temp-Datei existiert:", exists);
+
+    // 7) PDF anzeigen
+    setSource({ uri: `file://${temp}` });
+    setPdfView(true);
+
+    // 8) Flag setzen
+    await EncryptedStorage.setItem("result", "collect");
+  } 
+  catch (err) {
+    console.error("Fehler beim Öffnen der PDF:", err);
+  }
+};
 
 const deleteIt = async () => {
   setPdfView(false)
@@ -109,22 +147,35 @@ RNFS.exists(outputPath)
 
   const download = async () => {
     try {
+                    const myKey = await EncryptedStorage.getItem('key');
+
+      if (await EncryptedStorage.getItem('merge')) {
+
+        const mergeName = await EncryptedStorage.getItem('merge');
+              const data = `${RNFS.LibraryDirectoryPath}/${(mergeName)}`;
+ const outputPath = `${RNFS.LibraryDirectoryPath}/${mergeName}_Bewerbungsmappe.pdf`;
+      const encData = await RNFS.readFile(data, 'base64');
+      const decryptedData = await decryptBase(encData, myKey);
+      const encData2 = await RNFS.readFile(data + '_1', 'base64');
+      const encData3 = decryptedData + encData2;
+
+      await RNFS.writeFile(outputPath, encData3, 'base64');
+
+      try {
+        await Share.open({
+          url: `file://${outputPath}`,
+          saveToFiles: true, // Erzwingt Speichern in der "Dateien"-App
+        });
+      } catch (err) {
+        console.error('Fehler beim Teilen der Datei:', err);
+      }
+      }
       setPopup('Ihre Bewerbungsmappe wird im Download Ordner gespeichert');
       setPopupVisible(true);
       const name = await EncryptedStorage.getItem('yourName');
    
- 
-      const myKey = await EncryptedStorage.getItem('key');
       const data = `${RNFS.LibraryDirectoryPath}/${(name)}_Bewerbungsmappe.pdf`;
       
-
-
-      const datum = new Date().toLocaleDateString('de-DE', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      });
-  
       const outputPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbung.pdf`;
       const encData = await RNFS.readFile(data, 'base64');
       const decryptedData = await decryptBase(encData, myKey);

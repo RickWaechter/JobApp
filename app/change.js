@@ -86,59 +86,45 @@ const [subject, setSubject] = useState('');
     const date = getCurrentDateTime();
     console.log('Current date:', date);
     const myKey = await EncryptedStorage.getItem('key');
-    const time = await EncryptedStorage.getItem('time')
-    const myType = await EncryptedStorage.getItem('type')
-    const text = await EncryptedStorage.getItem('text');
-    const subject = await EncryptedStorage.getItem('subject');
-    const yourName = await EncryptedStorage.getItem('yourName');
-    const job = await EncryptedStorage.getItem('beruf');
-    const join = job + '#' + date + '#' + time + '#' + myType + '#' + subject + '#' + text + ';';
-    console.log('Join:', join);
-    const deviceId = await DeviceInfo.getUniqueId();
-    db.transaction(tx => {
-      console.log('Executing SQL query with WHERE clause');
-      tx.executeSql(
-        'SELECT old FROM files WHERE ident = ?;',
-        [deviceId],
-      async (_, { rows }) => {
-        if (rows.length > 0) {
-          console.log('hallo hasenfurz')
-          const data = rows.item(0);
-       
-          if (data.old.length > 5) {
-            
-         
-          const encData = await decryp(data.old, myKey);
-          console.log('decrypted data:', encData);
-          const newOld = encData + join;
-          const encNewOld = await encryp(newOld, myKey);
-        
-          db.executeSql(
-            'UPDATE files SET old = ? WHERE ident = ?',
-            [encNewOld, deviceId],
-          );
-        }
-        else {
-          const encNewOld = await encryp(join, myKey);
-          console.log('encrypted data:', encNewOld);
-          db.executeSql(
-            'UPDATE files SET old = ? WHERE ident = ?',
-            [encNewOld, deviceId],
-          );
-        }
-        } if (rows.length < 1) {
-          console.log('else')
-          const encNewOld = await encryp(join, myKey);
-          console.log('encrypted data:', encNewOld);
-          db.executeSql(
-            'UPDATE files SET old = ? WHERE ident = ?',
-            [encNewOld, deviceId],
-          );
-        }
-      }
-    )
-  }
-)
+const time = await EncryptedStorage.getItem('time');
+const myType = await EncryptedStorage.getItem('type');
+const text = await EncryptedStorage.getItem('text');
+const subject = await EncryptedStorage.getItem('subject');
+const yourName = await EncryptedStorage.getItem('yourName');
+const job = await EncryptedStorage.getItem('beruf');
+
+const join = `${job}#${date}#${time}#${myType}#${subject}#${text}&`;
+const deviceId = await DeviceInfo.getUniqueId();
+
+// 1️⃣ SELECT first (transaction OK)
+const oldData = await new Promise((resolve, reject) => {
+  db.transaction(tx => {
+    tx.executeSql(
+      "SELECT old FROM files WHERE ident = ?;",
+      [deviceId],
+      (_, res) => resolve(res.rows.length ? res.rows.item(0).old : null),
+      (_, err) => reject(err)
+    );
+  });
+});
+
+// 2️⃣ async/await OUTSIDE transaction
+let decrypted = "";
+
+if (oldData) {
+  decrypted = await decryp(oldData, myKey);
+}
+console.log('Decrypted old data:', decrypted);
+const encryptedNew = await encryp(decrypted + join, myKey);
+
+// 3️⃣ update in SEPARATE transaction
+db.transaction(tx => {
+  tx.executeSql(
+    "UPDATE files SET old = ? WHERE ident = ?;",
+    [encryptedNew, deviceId]
+  );
+});
+    console.log('Text entry saved to database');
   }
 
   const mergeFilesFromDB = async () => {

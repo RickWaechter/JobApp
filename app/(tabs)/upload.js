@@ -373,12 +373,27 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
       console.error('Fehler beim Teilen der Datei:', err);
     }
   }
-  const close = async () => {
-    const temp = RNFS.TemporaryDirectoryPath + '/temp.pdf';
-    setPdfView(false);
-    await RNFS.unlink(temp)
+const close = async () => {
+  try {
+    const temp = `${RNFS.TemporaryDirectoryPath}/temp.pdf`;
+    console.log("PDF schließen. Temp path:", temp);
 
+    setPdfView(false);
+
+    const exists = await RNFS.exists(temp);
+
+    if (exists) {
+      await RNFS.unlink(temp);
+      console.log("Temp PDF gelöscht.");
+    } else {
+      console.log("Temp PDF existiert nicht, kein Löschen nötig.");
+    }
+
+  } catch (err) {
+    console.log("Fehler beim Schließen:", err);
   }
+};
+
 
   const handlePdfLoadComplete = (numberOfPages, filePath) => {
     // Wird aufgerufen, wenn das PDF vollständig geladen wurde
