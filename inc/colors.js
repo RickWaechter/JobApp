@@ -8,7 +8,7 @@ const colors = {
   accent: '#7F5AF0',          // Vibrant violet accent
   border: '#2A2D3A',          // Low-key outline
   shadow: '#000',  
-  card3: "rgb(14, 27, 90)",   
+  card3: "rgba(7, 20, 83, 1)",   
   card4: "rgb(22, 7, 88)",  
   textColor: "rgb(232, 225, 247)",
 };

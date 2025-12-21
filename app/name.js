@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { addSearchListener, fetchPlace, search } from "expo-mapkit";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -33,8 +33,15 @@ const Name = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [address, setAddress] = useState("");
+  const lastTimeClick = useRef(0)
   const [term, setTerm] = useState("");
   const [details, setDetails] = useState(null);
+  const companyRef = useRef(null);
+  const [errors, setErrors] = useState({
+    nameErr: "",
+    cityErr: "",
+    streetErr: "",
+  });
 
   // Your API key
   useEffect(() => {
@@ -48,7 +55,10 @@ const Name = () => {
       listener.remove();
     };
   }, []);
+useEffect(() => {
+  console.log(yourName, yourCity, yourStreet);
 
+}, [yourName, yourCity, yourStreet,errors]);
   const onChange = (text) => {
     setQuery(text);
     search(text);
@@ -63,7 +73,17 @@ const Name = () => {
       if (item.subtitle) {
         const name = item.title;
         const street = item.subtitle.split(",")[0];
-        const city = item.subtitle.split(", ")[2];
+
+        let city = item.subtitle.split(", ")[1];
+        if (city.includes(" ")) {
+          city = item.subtitle.split(", ")[1];
+          console.log("1")
+        }
+          else {
+            console.log("2")
+            city = item.subtitle.split(", ")[2];
+          }
+      
         console.log("Name:", name);
         console.log("Street:", street);
         console.log("City:", city); 
@@ -75,10 +95,79 @@ const Name = () => {
   };
 
   const next = async () => {
+     console.log('Navigating to application screen', errors);
 
-      router.replace('application');
-     await EncryptedStorage.setItem('result', 'application');
- 
+ if (
+      yourName.length < 1 &&
+     yourCity.length < 1 &&
+     yourStreet.length < 1
+     
+    ) {
+      setErrors({
+        nameErr: t('validation.nameCompany.required'),
+        cityErr: t('validation.city.required'),
+        streetErr: t('validation.street.required'),
+      });
+      return;
+    }
+    if (yourName.length < 1 && yourStreet.length < 1) {
+      setErrors({
+        nameErr: t('validation.nameCompany.required'),
+        streetErr: t('validation.street.required'),
+      });
+      return;
+    }
+    if (yourName.length < 1 && yourCity.length < 1) {
+      setErrors({
+        nameErr: t('validation.nameCompany.required'),
+        cityErr: t('validation.city.required'),
+      });
+      return;
+    }
+    if (yourCity.length < 1 && yourStreet.length < 1) {
+      setErrors({
+        cityErr: t('validation.city.required'),
+        streetErr: t('validation.street.required'),
+        
+      });
+      return;
+    }
+    if (yourCity.length < 1) {
+      setErrors({
+        cityErr: t('validation.city.required'),
+        
+      });
+      return;
+    }
+    if (yourStreet.length < 1) {
+      setErrors({
+        streetErr: t('validation.street.required'),
+      });
+      return;
+    }
+    if (yourName.length < 1) {
+      setErrors({
+        nameErr: t('validation.nameCompany.required'),
+      });
+      return;
+    }
+
+     const now = Date.now();
+      if (now - lastTimeClick.current < 1000) {
+        console.log('Zu schnell! Doppelklick verhindert.');
+        return;
+      }
+      lastTimeClick.current = now;
+
+   
+ await EncryptedStorage.setItem('result', 'application');
+    if (yourName && yourCity && yourStreet) {
+      await EncryptedStorage.setItem("yourName", yourName);
+      await EncryptedStorage.setItem("yourCity", yourCity);
+      await EncryptedStorage.setItem("yourStreet", yourStreet);
+       setErrors({});
+    }
+      router.push('application');
   };
   const handleSaveChanges = async (theName, theStreet, theCity) => {
     if (theName && theCity && theStreet) {
@@ -113,9 +202,11 @@ const Name = () => {
 
   // Change input state after a small delay
   const inputStateNew = () => {
+    companyRef.current?.focus();
     console.log("Manuell eingeben");
     setShowAddressSearch(false);
     setButtonManually(true);
+    setYourName(query);
   };
 
   // For debugging
@@ -133,6 +224,8 @@ const Name = () => {
               placeholderTextColor="gray"
               value={query}
               onChangeText={onChange}
+              ref={companyRef}
+
             />
 
             {/* Suggestions container */}
@@ -164,47 +257,59 @@ const Name = () => {
           <>
             <TextInput
               style={styles.textInput}
-              placeholder="Name des Unternehmens"
+              placeholder={t('companyName')}
               placeholderTextColor={isDarkMode}
               value={yourName}
               onChangeText={setYourName}
+              
             />
+              {errors.nameErr ? (
+                              <Text style={styles.error}>{errors.nameErr}</Text>
+                            ) : null}
             {yourName.length > 0 && (
-              <ClearButton value={yourName} setValue={setYourName} top={5} />
+              <ClearButton value={yourName} setValue={setYourName} top={5} right={10} />
             )}
             {buttonManually && (
               <>
                 <TextInput
                   style={styles.inputSecondary}
-                  placeholder="Straße und Hausnummer"
+                  placeholder={t('companyStreet')}
                   placeholderTextColor="gray"
                   value={yourStreet}
                   onChangeText={setYourStreet}
                 />
+                  {errors.streetErr ? (
+                              <Text style={styles.error}>{errors.streetErr}</Text>
+                            ) : null}
                 {yourStreet.length > 0 && (
                   <ClearButton
                     value={yourStreet}
                     setValue={setYourStreet}
                     top={60}
+                    right={10}
                   />
                 )}
                 <TextInput
                   style={styles.inputSecondary}
-                  placeholder="PLZ und Stadt"
+                  placeholder={t('companyCity')}
                   placeholderTextColor="gray"
                   value={yourCity}
                   onChangeText={setYourCity}
                 />
+                  {errors.cityErr ? (
+                              <Text style={styles.error}>{errors.cityErr}</Text>
+                            ) : null}
                 {yourCity.length > 0 && (
                   <ClearButton
                     value={yourCity}
                     setValue={setYourCity}
+                  right={10}
                     top={115}
                   />
                 )}
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity style={styles.buttonNext} onPress={next}>
-                    <Text style={styles.buttonText}>Weiter</Text>
+                    <Text style={styles.buttonText}>{t('continue')}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -240,6 +345,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     color: "white",
+  },
+    error: {
+    color: 'red',
+    fontSize: 12,
+    position: 'abosulte',
+    top: '2%',
+    left: '1%',
   },
   suggestionsContainerCity: {
     position: "absolute",

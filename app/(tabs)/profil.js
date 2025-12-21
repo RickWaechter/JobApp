@@ -16,17 +16,25 @@ import { decryp, encryp } from '../../inc/cryp.js';
 import CutLine from '../../inc/CutLine.js';
 import { runQuery } from '../../inc/db.js';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
+import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import '../../local/i18n.js';
+import {useIAP} from 'expo-iap';
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-1715349546414110/9198789045';
 
+const rewarded = RewardedAd.createForAdRequest(adUnitId, {
+  keywords: ['fashion', 'clothing'],
+    requestNonPersonalizedAdsOnly: true,
+});
 const ProfilScreen = () => {
     const { i18n } = useTranslation();
-
+const adLoaded = useRef(false);
+  const [payModal, setPayModal] = useState(false);
     const [openLang, setOpenLang] = useState(false);
   const [valueLang, setValueLang] = useState(null);
   const { t } = useTranslation();
@@ -36,6 +44,7 @@ const ProfilScreen = () => {
   const [myCity, setMyCity] = useState('');
   const [email, setEmail] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [dots, setDots] = useState('');
   const [password, setPassword] = useState('');
   const [myStreet, setMyStreet] = useState('');
   const [langModal, setLangModal] = useState(false); 
@@ -49,29 +58,155 @@ const ProfilScreen = () => {
   const { keyboardHeight, reset } = useKeyboardAnimation(300);
   const DB_NAME = 'firstNew.db';
   const [isAnimating, setIsAnimating] = useState(false);
-  const [source, setSource] = useState('');
-  const [pdfView, setPdfView] = useState(false);
-  const [pdfTab, setPdfTab] = useState(false);
+  const [source, setSource] = useState(false);
+const [loadedAd, setLoadedAd] = useState(false);
+const [adDisabled, setAdDisabled] = useState(false);
+const [adLoadedState, setAdLoadedState] = useState(false);
+  const {
+    connected,
+    products,
+    fetchProducts,
+    requestPurchase,
+    finishTransaction,
+  } = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      console.log('Purchase successful:', purchase.productId);
+     setCoins(coins => coins + 40); 
+     setLoaded(false);
+      // IMPORTANT: Verify receipt on your backend before finishing transaction
+      const isValid = await putCoinsIAP(purchase.productId);
+      console.log('isValid:');
 
+      if (isValid) {
+        await finishTransaction({purchase, isConsumable: true});
+      }
+    },
+    onPurchaseError: (error) => {
+      console.error('Purchase failed:', error);
+      Alert.alert(t('profil.error'), t('profil.buyCancel'));
+      setLoaded(false);
+    },
+  });
 
+  const productIds = 'JA2C0002';
+  const putCoinsIAP = async productId => {
+      try{
+       const deviceId = await DeviceInfo.getUniqueId();
+          const key = sha512(deviceId);
+          const response = await axios.post('https://api.jobapp2.de/putCoinsIAP', {
+            username: key,
+            productId: productId
+          });
+          console.log(response.data);
+          // Loggt die komplette Antwort
+          console.log("Antwort vom Server:", response.data);
+          
+        return true}
+      catch (error) {
+        console.error("Fehler beim Abrufen der Coins:", error);
+      }
+    }
+  useEffect(() => {
+    const putCoins = async coins => {
+      try{
+       const deviceId = await DeviceInfo.getUniqueId();
+          const key = sha512(deviceId);
+          const response = await axios.post('https://api.jobapp2.de/putCoins', {
+            username: key,
+            coins:coins
+          });
+
+          // Loggt die komplette Antwort
+          console.log("Antwort vom Server:", response.data);
+          setCoins(coins => coins +4); }
+      catch (error) {
+        console.error("Fehler beim Abrufen der Coins:", error);
+      }
+    }
+    const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      console.log('Rewarded ad is loaded');
+          console.log(adLoadedState)
+        adLoaded.current = true;  
+        console.log(adLoaded.current)
+      if (adLoadedState) {
+      rewarded.show();
+      console.log("super")
+        setAdLoadedState(false);
+        console.log("super1")
+        adLoaded.current = false;
+        console.log("2")
+        setAdDisabled(false);
+      }
+       
+    });
+    const unsubscribeEarned = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      reward => {
+        console.log('User earned reward of ', reward);
+        putCoins(4)
+        setLoadedAd(false); 
+
+      },  
+    );
+
+    // Start loading the rewarded ad straight away
+    rewarded.load();
+
+    // Unsubscribe from events on unmount
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+    };
+  }, [source]);
+useEffect(() => {
+  console.log(adLoadedState)
+}, [adLoadedState])
   const items = [
     { label: 'mail.de', value: 'smtp.mail.de' },
     { label: 'web.de', value: 'Smtp.web.de' },
     { label: 't-online.de', value: 'Securesmtp.t-online.de' },
     { label: 'gmail.com', value: 'Smtp.gmail.com' },
   ];
-
+const handlePurchase = async (productId) => {
+  setLoaded(true);
+  try {
+    await requestPurchase({
+      request: {
+        ios: {
+          sku: productId,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Purchase failed:', error);
+    setLoaded(false);
+  }
+};
   const deleteItem = (idToDelete) => {
     setData(prevData => prevData.filter(item => item.id !== idToDelete));
   };
   const pan = useRef(new Animated.ValueXY()).current;
 
- 
+ const showRewarded = () => {
+  if (!adLoaded.current) {
+    setAdDisabled(true);
+setSource(!source);
+rewarded.load();  
+          setAdLoadedState(true);
+
+    console.log("Ad ist noch nicht geladen");
+    return;
+  }
+  rewarded.show();
+      adLoaded.current = false;
+      setAdDisabled(false);
+
+};
+
 
   useFocusEffect(
     useCallback(() => {
       console.log("Drawer-Screen geöffnet oder erneut geöffnet!");
-
 
 
       const fetchCoins = async () => {
@@ -79,7 +214,7 @@ const ProfilScreen = () => {
           console.log("fetchCoins");
           const deviceId = await DeviceInfo.getUniqueId();
           const key = sha512(deviceId);
-          const response = await axios.post('https://jobape.de/getCoins', {
+          const response = await axios.post('https://api.jobapp2.de/getCoins', {
             key: key
           });
 
@@ -246,35 +381,7 @@ useEffect(() => {
   const handleEmail = (value) => {
     setEmail(value);
   }
-  const showAd = () => {
-    if (loaded) {
-      Alert.alert(
-        t('profil.coinTitle'),
-        t('profil.coinText'),
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              rewardedAd.show();
-              setLoaded(false);
-            },
 
-          },
-          {
-            text: "Abbrechen",
-            style: "cancel",
-            onPress: () => {
-              console.log("Werbung abgebrochen");
-            },
-          },
-
-        ]
-      );
-
-    } else {
-      console.log('Ad noch nicht geladen');
-    }
-  };
   const handlePassword = (value) => {
     setPassword(value);
   }
@@ -286,16 +393,19 @@ useEffect(() => {
 
   const handleSaveChangesEmail = async () => {
     try {
-      if (!value) {
+      if (!value || !email  || !password) {
         Alert.alert(
-          "Fehler",
-          "Bitte wählen Sie einen E-Mail-Server ausder schließen Sie das Fenster.",
+           t("profil.error"),
+          t("profil.errorDataEmail"),
         );
         return;
       }
 
       const deviceId = await DeviceInfo.getUniqueId();
       const key = await EncryptedStorage.getItem('key');
+      await EncryptedStorage.setItem('email', email);
+      await EncryptedStorage.setItem('emailPassword', password);
+      await EncryptedStorage.setItem('emailServer', value);
       const myEmailEnc = await encryp(email, key)
       const myEmailPassword = await encryp(password, key)
       const emailServer = await encryp(value, key)
@@ -308,8 +418,8 @@ useEffect(() => {
         [myEmailEnc, myEmailPassword, emailServer, deviceId],
       );
       Alert.alert(
-        "Erfolg",
-        "Ihre neuen Einstellungen wurden erfolgreich gespeichert",
+        t("profil.title"),
+        t("profil.infoEmail"),
         [
           {
             text: "OK",
@@ -341,6 +451,13 @@ useEffect(() => {
   ];
   const handleSaveChangesName = async () => {
     try {
+       if (!myName || !myCity || !myStreet) {
+        Alert.alert(
+           t("profil.error"),
+          t("profil.errorDataEmail"),
+        );
+        return;
+      }
       const deviceId = await DeviceInfo.getUniqueId();
       const key = await EncryptedStorage.getItem('key');
       await EncryptedStorage.setItem('name', myName.trimStart());
@@ -359,8 +476,8 @@ useEffect(() => {
         [myNameEnc, myCityEnc, myStreetEnc, deviceId],
       );
       Alert.alert(
-        "Erfolg",
-        "Ihre neuen Einstellungen wurden erfolgreich gespeichertName",
+        t("profil.title"),
+        t("profil.infoData"),
         [
           {
             text: "OK",
@@ -378,13 +495,24 @@ useEffect(() => {
   };
  const handleSaveChanges = async () => {
     if (!valueLang) {
-      Alert.alert(t('settings.languageError'));
+      Alert.alert(t('profil.error'), t('profil.languageError'));
       return;
     }
+     i18n.changeLanguage(valueLang);
     EncryptedStorage.setItem("lang", valueLang);
-    Alert.alert(t('settings.languageSaved'));
-    i18n.changeLanguage(valueLang);
+    Alert.alert(t('profil.title'),t('profil.languageSaved'));
+   
     setModalEmailVisible(false);
+  }
+
+  const loadThings = async() => {
+    setMyName(await EncryptedStorage.getItem('name'));
+    setMyCity(await EncryptedStorage.getItem('city'));
+    setMyStreet(await EncryptedStorage.getItem('street'));
+    setEmail(await EncryptedStorage.getItem('email'));
+    setPassword(await EncryptedStorage.getItem('emailPassword'));
+    setValue(await EncryptedStorage.getItem('emailServer'));
+
   }
   return (
     <View style={styles.container}>
@@ -394,7 +522,7 @@ useEffect(() => {
         <View style={styles.headerOut}>
           <View style={styles.header}>
             <Text style={styles.name2}>{myName != null ? 'Hey, ' + myName : "Kein Name"}</Text>
-            <TouchableOpacity onPress={showAd} >
+            <TouchableOpacity onPress={() => setPayModal(true)} >
             <Text style={styles.coins}>
   {coins != null ? (
     <>
@@ -409,7 +537,7 @@ useEffect(() => {
         </View>
         <Card style={{ backgroundColor: "transparent", elevation: 0, shadowOpacity: 0, borderWidth: 'none' }}>
           <Pressable
-            onPress={() => setModalAdVisible(true)}        // Grund‑Style 
+            onPress={() => {setModalAdVisible(true); loadThings()}}        // Grund‑Style 
           >
           {({ pressed }) => (
             <View style={[
@@ -429,7 +557,7 @@ useEffect(() => {
           </Pressable>
 
                     <Pressable
-            onPress={() => setModalEmailVisible(true)}        // Grund‑Style 
+            onPress={() => {setModalEmailVisible(true); loadThings()}}        // Grund‑Style 
           >
           {({ pressed }) => (
             <View style={[
@@ -503,7 +631,7 @@ useEffect(() => {
                 borderTopRightRadius: 20,
               }
             ]}>
-            <View style={styles.modalBackground}>
+            <View style={styles.modalBackground} onStartShouldSetResponder={() => true} >
               <View style={styles.modalContainer}>
                 <TextInput
                   style={styles.input}
@@ -575,7 +703,7 @@ useEffect(() => {
               }
 
             ]}>
-            <View style={styles.modalBackground}>
+            <View style={styles.modalBackground} onStartShouldSetResponder={() => true} >
               <View style={[styles.modalContainer, { zIndex: 2000 }]}>
                 <TextInput style={styles.input} placeholder={t('placeholderEmail')} value={email} onChangeText={setEmail} placeholderTextColor="gray" />
                 {email.length > 0 && (
@@ -627,7 +755,6 @@ useEffect(() => {
         animationOutTiming={475}
         onBackdropPress={() => setLangModal(false)}
         style={{ margin: 0,  width: width, justifyContent: 'center', alignSelf: 'center' }}
-        swipeDirection={['down']}
         onSwipeComplete={() => setLangModal(false)}
         // Add these handlers:
         onModalWillShow={() => setIsAnimating(true)}
@@ -636,6 +763,7 @@ useEffect(() => {
         backdropTransitionOutTiming={1}
 transparent
       animationType="fade"
+        propagateSwipe={true}            // ← MUSS für Scroll
       >
 
         <Animated.View
@@ -687,7 +815,48 @@ transparent
 
       </Modal>
 
+<Modal
+        isVisible={payModal}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        animationInTiming={475}
+        animationOutTiming={475}
+        onBackdropPress={() => setPayModal(false)}
+        style={{ margin: 0,  width: width, justifyContent: 'center', alignSelf: 'center' }}
+        onSwipeComplete={() => setPayModal(false)}
+        // Add these handlers:
+        onModalWillShow={() => setIsAnimating(true)}
+        onModalHide={() => setIsAnimating(false)}
+   hardwareAccelerated={true}
+        backdropTransitionOutTiming={1}
+transparent
+      animationType="fade"
+        propagateSwipe={true}            // ← MUSS für Scroll
+      >
+<View style={{backgroundColor: "transparent", justifyContent: 'center', alignItems: 'center', opacity: isAnimating ? 1 : 0, borderTopLeftRadius: 20, borderTopRightRadius: 20,}}>
+        
 
+
+
+
+                 <Pressable
+            onPress={() => handlePurchase('JA2C0002')} 
+            disabled={loaded}       // Grund‑Style 
+          >
+          {({ pressed }) => (
+           <View style={[
+                      styles.entryAd,                // Grund‑Layout
+                      pressed && styles.entryPressAd // nur solange gedrückt
+                    ]}>
+               <Card.Title
+                            title={loaded ? `${t('pleaseWait')}${dots}` : t('buy1')}
+                            titleStyle={styles.job}/>
+                    </View>
+          )}
+          </Pressable>
+
+</View>
+      </Modal>
     </View>
   );
 };
@@ -828,6 +997,35 @@ width:width * 0.9,
     borderWidth: 1,
     borderColor: 'white',
   
+
+  },
+   entryPressAd: {
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    marginTop: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'white',
+  
+
+  },
+      entryAd: {
+    backgroundColor: colors.card3,
+    paddingTop: 5,
+    borderRadius: 10,
+    shadowColor: "gray",
+       marginTop: 10,
+
+    shadowColor: "gray",
+    borderWidth: 1,
+    borderColor: 'gray',
+width:width * 0.7,
+
 
   },
   header: {
@@ -1077,8 +1275,9 @@ width:width * 0.9,
     textAlign: "center",
     fontSize: 13,
     fontWeight: "bold",
-    color: "#C8C8C8",
+    color: "rgb(179, 176, 184)",
     marginBottom: 5,
+    lineHeight:19,
   },
   job: {
     textAlign: "center",

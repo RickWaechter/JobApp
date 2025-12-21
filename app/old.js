@@ -1,6 +1,6 @@
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useRef} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -11,6 +11,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Pressable
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,16 +30,23 @@ const OldScreen = () => {
   const [entries, setEntries] = useState([]);
   const [pdfView, setPdfView] = useState(false);
   const [source, setSource] = useState({});
-
+  const lastTimeClick = useRef(0);
   useEffect(() => {
     console.log('OldScreen mounted');
     getOld();
   }, []);
   const saveToStorage = async entry => {
     try {
+      const now = Date.now();
+      if (now - lastTimeClick.current < 1000) {
+        console.log('Zu schnell! Doppelklick verhindert.');
+        return;
+      }
+      lastTimeClick.current = now;
       await EncryptedStorage.setItem('job', entry.job);
       await EncryptedStorage.setItem('text', entry.text);
       await EncryptedStorage.setItem('subject', entry.subject);
+      await EncryptedStorage.setItem('result', "nameOld");
       router.push('/nameOld');
     } catch (error) {
       console.log('Fehler beim Speichern:', error);
@@ -95,7 +103,7 @@ const OldScreen = () => {
                   {
                     text: 'OK',
                     onPress: () => {
-                      router.replace('/(tabs)');
+                      router.dismissTo('/(tabs)');
                     },
                   },
                 ],
@@ -221,48 +229,55 @@ console.log('Decrypted mergePdf data:', decData);
           }}
         >
           {entries.map((entry, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => saveToStorage(entry)}
-              onLongPress={() => OldApp(entry)} // <- hier ist die LongPress-Funktion
-            >
-              <View style={styles.entry}>
-                <Card.Title
-                  titleNumberOfLines={0} // 0 = unlimitiert
-                  title={entry.job}
-                  titleStyle={[
-                    styles.job,
-                    entry.job.length > 30 ? { marginBottom: 15 } : null,
-                  ]}
-                ></Card.Title>
-                <Divider
-                  color="gray"
-                  style={{
-                    justifyContent: 'center',
-                    marginBottom: 15,
-                    width: '55%',
-                    alignSelf: 'center',
-                  }}
-                />
-                <Text style={styles.name}>{entry.date}</Text>
-                <Divider
-                  color="gray"
-                  style={{
-                    justifyContent: 'center',
-                    marginBottom: 15,
-                    width: '55%',
-                    alignSelf: 'center',
-                  }}
-                />
-                <Text style={styles.text}>{entry.myType}</Text>
-                <TouchableOpacity
-                  onPress={() => deleteEntry(index)}
-                  style={styles.deleteButton}
-                >
-                  <MaterialIcons name="cancel" size={35} color="#a7a7a7" />
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
+
+
+<Pressable
+  key={index}
+  onPress={() => saveToStorage(entry)}
+  onLongPress={() => OldApp(entry)}
+  // Hier fügen wir den visuellen Effekt hinzu:
+  style={({ pressed }) => [
+   styles.entry,
+      pressed && styles.entryPress
+  ]}
+>
+    <Card.Title
+      titleNumberOfLines={0}
+      title={entry.job}
+      titleStyle={[
+        styles.job,
+        entry.job.length > 30 ? { marginBottom: 15 } : null,
+      ]}
+    />
+    <Divider
+      color="gray"
+      style={{
+        justifyContent: 'center',
+        marginBottom: 15,
+        width: '55%',
+        alignSelf: 'center',
+      }}
+    />
+    <Text style={styles.name}>{entry.date}</Text>
+    <Divider
+      color="gray"
+      style={{
+        justifyContent: 'center',
+        marginBottom: 15,
+        width: '55%',
+        alignSelf: 'center',
+      }}
+    />
+    <Text style={styles.text}>{entry.myType}</Text>
+    
+    {/* Delete Button (kann bleiben oder auch Pressable werden) */}
+    <TouchableOpacity
+      onPress={() => deleteEntry(index)}
+      style={styles.deleteButton}
+    >
+      <MaterialIcons name="cancel" size={35} color="#a7a7a7" />
+    </TouchableOpacity>
+</Pressable>
           ))}
         </Card>
       </ScrollView>
@@ -289,6 +304,21 @@ const styles = StyleSheet.create({
     padding: 15,
     borderWidth: 1,
     borderColor: 'gray',
+    borderRadius: 10,
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    width: width * 0.9,
+  },
+    entryPress: {
+    alignSelf: 'center',
+    backgroundColor: colors.card3,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: 'white',
     borderRadius: 10,
     marginBottom: 30,
     shadowColor: '#000',

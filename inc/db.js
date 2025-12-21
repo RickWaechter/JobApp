@@ -16,7 +16,9 @@ export const selectDb = async () => {
         'SELECT emails FROM files WHERE ident = ?',
         [deviceId],
       );
+      console.log('Database query result:', result);
       const rawData = result[0]?.rows?.raw()?.[0];
+      console.log('Raw data from database:', rawData);
 
       if (!rawData) {
         console.error("Fehler: Kein gültiges Datenobjekt gefunden");
@@ -24,15 +26,19 @@ export const selectDb = async () => {
       }
 
       const emailClient = rawData.emails;
+      console.log('Encrypted emailClient data:', emailClient);
       const key = await EncryptedStorage.getItem('key');
       if (typeof emailClient === "string" && emailClient.length > 0) {
         const decryptedEmailClient = await decryp(emailClient, key);
+        console.log('Decrypted emailClient data:', decryptedEmailClient);
  
         const split = decryptedEmailClient.split("#")
+        console.log('Split emailClient data:', split);
         console.log(split)
         return split
       
       } else {
+        console.log('EmailClient data is empty or not a string');
        return []; // Falls der Wert leer ist, leere Liste zurückgeben
         // Falls keine Daten vorhanden sind, leere Liste setzen
       }

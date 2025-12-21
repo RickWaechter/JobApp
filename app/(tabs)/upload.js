@@ -9,12 +9,13 @@ import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from "react-native-draggable-flatlist";
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
 import Modal from 'react-native-modal';
 import { Card, Divider, Text } from 'react-native-paper';
 import Pdf from 'react-native-pdf';
 import SQLite from 'react-native-sqlite-storage';
+import { Portal, Dialog, Button } from 'react-native-paper';
 import colors from '../../inc/colors.js';
 import {
   decryp,
@@ -51,56 +52,103 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
     "add6", "add7", "add8", "add9", "add10"
   ];
   const fetchData = async () => {
-    try {
-      console.log("Opening database...");
-      const database = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      setDb(database);
-      console.log("Database opened.");
+  try {
+    console.log("Opening database...");
+    // Nutze 'database' als lokale Variable für den ganzen Block
+    const database = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+    setDb(database);
+    console.log("Database opened.");
 
-      console.log("Retrieving key from EncryptedStorage...");
-      const credentials = await Keychain.getGenericPassword();
-      const myKey = credentials.password;
-      console.log("Key retrieved.", await EncryptedStorage.getItem("key"));
+    console.log("Retrieving key...");
+    const credentials = await Keychain.getGenericPassword();
+    const myKey = credentials.password;
+    console.log("Getting device ID...");
+    const deviceId = await DeviceInfo.getUniqueId();
 
-      console.log("Getting device ID...");
-      const deviceId = await DeviceInfo.getUniqueId();
-      console.log(`Device ID: ${deviceId}`);
+    console.log("Executing SQL query...");
+    const res = await database.executeSql(
+      "SELECT lebenslauf, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?",
+      [deviceId]
+    );
 
-      console.log("Executing SQL query...");
-      const res = await database.executeSql(
-        "SELECT lebenslauf, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?",
-        [deviceId]
-      );
-
-      const hallo = res[0].rows.raw();
-      console.log("Query result:", hallo);
-
-      console.log("Decrypting values and removing nulls...");
-      const sortedArray = orderedKeys
-        .map((key) => hallo[0][key])
-        .filter((value) => value !== null);
-
-      console.log("Decrypting files...");
-      const decryptedFiles = await Promise.all(
-        sortedArray.map(async (frucht) => {
-          const decrypted = await decryp(frucht, myKey);
-          console.log(`Decrypted: ${decrypted}`);
-          return { key: decrypted, name: decrypted.match(/[^/]+$/)?.[0] || "Unbekannte Datei" };
-        })
-      );
-
-      console.log("Assigning unique IDs to each entry...");
-      const dataWithIds = decryptedFiles.map((item, index) => ({
-        ...item,
-        id: `${index}-${item.key}`
-      }));
-      setData(dataWithIds);
-      console.log("Data set successfully.");
-
-    } catch (err) {
-      console.error("Error in fetchData:", err);
+    const resultRows = res[0].rows.raw();
+    
+    // Sicherheitscheck: Gibt es überhaupt eine Zeile?
+    if (resultRows.length === 0) {
+      console.log("Keine Daten gefunden.");
+      setData([]);
+      return;
     }
-  };
+
+    const row = resultRows[0];
+    
+    // 1. Daten auslesen und Null-Werte filtern
+    const sortedArray = orderedKeys
+      .map(key => ({ column: key, value: row[key] }))
+      .filter(item => item.value !== null);
+
+    // 2. Alles entschlüsseln
+    console.log("Decrypting files...");
+    const allDecryptedPaths = await Promise.all(
+      sortedArray.map(async (item) => {
+        return await decryp(item.value, myKey); // Gibt nur den String (Pfad) zurück
+      })
+    );
+
+    // 3. Duplikate entfernen (Set erstellt Liste einzigartiger Pfade)
+    const uniquePathsSet = new Set(allDecryptedPaths);
+    const uniquePathsArray = [...uniquePathsSet]; // Das sind die sauberen, lesbaren Pfade
+    
+    console.log("Unique files (decrypted):", uniquePathsArray);
+
+
+    // --- TEIL A: DATENBANK UPDATE (Verschlüsseln) ---
+
+    // Wir verschlüsseln die saubere Liste neu für die Datenbank
+    const encryptedForDb = await Promise.all(
+      uniquePathsArray.map(async (path) => {
+        return await encryp(path, myKey);
+      })
+    );
+
+    // Wir mappen die verschlüsselten Werte auf die festen Spalten (orderedKeys)
+    // Wenn wir weniger Dateien haben als Spalten, füllen wir mit null auf
+    const updateValues = orderedKeys.map((_, index) => {
+      return encryptedForDb[index] || null;
+    });
+
+    const queryParams = [...updateValues, deviceId];
+    const updateQuery = `UPDATE files SET ${orderedKeys.map(key => `${key} = ?`).join(", ")} WHERE ident = ?`;
+
+    console.log("Updating DB cleanup...");
+    await database.executeSql(updateQuery, queryParams);
+    console.log("Datenbank erfolgreich bereinigt.");
+
+
+    // --- TEIL B: UI UPDATE (Lesbare Daten) ---
+    
+    // Hier nutzen wir 'uniquePathsArray' (die entschlüsselten), nicht die aus der DB!
+    console.log("Building UI data...");
+    
+    const uiData = uniquePathsArray.map((filePath, index) => {
+      // Dateinamen aus dem Pfad extrahieren (alles nach dem letzten /)
+      const fileName = filePath.match(/[^/]+$/)?.[0] || "Unbekannte Datei";
+      
+      return {
+        id: index.toString(),      // Eindeutige ID für FlatList
+        name: fileName,            // Der Name, der angezeigt wird (z.B. cv.pdf)
+        path: filePath,            // Der volle Pfad (für Logik)
+        column: orderedKeys[index] // (Optional) In welcher Spalte es jetzt liegt
+      };
+    });
+
+    setData(uiData);
+    console.log("Data set successfully for UI.");
+
+  } catch (err) {
+    console.error("Error in fetchData:", err);
+  }
+};
   useFocusEffect(
     useCallback(() => {
       console.log("Drawer-Screen geöffnet oder erneut geöffnet!");
@@ -120,7 +168,7 @@ const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
 console.log("useEffect triggered" + data.length);
 console.log("buttonOne:" + buttonOne);
   }
-    , [data, buttonOne]);
+    , [data, buttonOne, pdfView]);
 
     const deleteFileIfExists = async (fileName) => {
       const filePath = `${RNFS.LibraryDirectoryPath}/${fileName}`;
@@ -133,49 +181,70 @@ console.log("buttonOne:" + buttonOne);
       }
     };
 
-  const deleteItem = async (idToDelete) => {
+  const deleteItem = async (itemToDelete) => {
+  console.log("Starte Löschvorgang für:", itemToDelete.name);
 
-    console.log("deleteItem:", idToDelete);
-    const newData = data.filter(item => item.id !== idToDelete.id);
-    setData(newData);
-    console.log("Trying to delete file:", idToDelete.name);
-    try {
-      await deleteFileIfExists(idToDelete.name);
-      await deleteFileIfExists(idToDelete.name + '_1');
-      console.log("File deleted successfully.");
+  // 1. UI sofort aktualisieren (Optimistic Update)
+  // Wir filtern das gelöschte Element aus der aktuellen Liste
+  const newData = data.filter(item => item.id !== itemToDelete.id);
+  setData(newData);
 
-      if (!db) return;
-      console.log("Saving order...");
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
-        console.log("Device ID:", deviceId);
-        const myKey = await EncryptedStorage.getItem("key");
-        console.log("My Key:", myKey);
-        const encryptedKeys = await Promise.all(newData.map(async (item) => await encryp(item.key, myKey)));
-        console.log("Encrypted Keys:", encryptedKeys);
-        const updateValues = orderedKeys.map((key, index) => encryptedKeys[index] || null);
-        console.log("Update Values:", updateValues);
-        const updateQuery = `UPDATE files SET ${orderedKeys.map((key) => `${key} = ?`).join(", ")} WHERE ident = ?`;
-        console.log("Update Query:", updateQuery);
-        const queryParams = [...updateValues, deviceId];
-        console.log("Query Params:", queryParams);
-  
-        await db.executeSql(updateQuery, queryParams);
-        console.log("Reihenfolge gespeichert mit NULL für leere Felder.");
-        if (newData.length < 1) {
-          setModalSortVisible(false);
+  try {
+    // 2. Physische Dateien löschen (vom Gerätespeicher)
+    console.log("Lösche physische Dateien...");
+    await deleteFileIfExists(itemToDelete.name); // oder itemToDelete.path, je nach deiner Funktion
+    await deleteFileIfExists(itemToDelete.name + '_1'); // Falls du Thumbnails/Kopien hast
+    console.log("Physische Dateien gelöscht.");
 
-        }
-      } catch (error) {
-        console.error("Fehler beim Speichern der Reihenfolge:", error);
-      }
+    if (!db) return;
 
+    // 3. Datenbank aktualisieren
+    console.log("Bereite Datenbank-Update vor...");
+    
+    const deviceId = await DeviceInfo.getUniqueId();
+    const credentials = await Keychain.getGenericPassword();
+    const myKey = credentials.password; // oder await EncryptedStorage.getItem("key")
 
-    } catch (err) {
-      console.error("Error while deleting file:", err);
+    // WICHTIG: Wir verschlüsseln die verbleibenden Daten neu.
+    // Wir nehmen 'newData' (die Liste OHNE das gelöschte Item).
+    // Dadurch rücken alle nachfolgenden Items automatisch eine Position nach oben.
+    const encryptedValues = await Promise.all(
+      newData.map(async (item) => {
+        // Hier item.path (der volle Pfad) oder item.name verschlüsseln
+        // Basierend auf deiner fetchData Funktion ist 'path' das, was in die DB gehört.
+        const valueToSave = item.path || item.name; 
+        return await encryp(valueToSave, myKey);
+      })
+    );
+
+    // 4. Auf die Spalten verteilen (Auffüllen mit NULL)
+    // orderedKeys ist z.B. ['lebenslauf', 'add1', 'add2', ...]
+    const dbValues = orderedKeys.map((key, index) => {
+      // Wenn wir noch verschlüsselte Werte haben, nimm sie. Sonst NULL.
+      return encryptedValues[index] || null;
+    });
+
+    const updateQuery = `UPDATE files SET ${orderedKeys.map(key => `${key} = ?`).join(", ")} WHERE ident = ?`;
+    const queryParams = [...dbValues, deviceId];
+
+    console.log("Führe SQL Update aus...");
+    await db.executeSql(updateQuery, queryParams);
+    
+    // Optional: fetchData aufrufen, um sicherzugehen, dass DB und UI synchron sind
+    // fetchData(); 
+
+    console.log("Datenbank erfolgreich aktualisiert. Lücke geschlossen.");
+
+    // Modal schließen, wenn keine Dateien mehr da sind
+    if (newData.length < 1) {
+      setModalSortVisible(false);
     }
 
-  };
+  } catch (error) {
+    console.error("Fehler im deleteItem Prozess:", error);
+    // Optional: Hier könntest du setData(data) aufrufen, um die Löschung in der UI rückgängig zu machen, falls der Server-Call fehlschlägt.
+  }
+};
   const sanitizeName = (name) => {
     return name
       .normalize('NFKD')              // strips diacritics so ü → u, etc.
@@ -218,7 +287,10 @@ console.log("buttonOne:" + buttonOne);
         size: file.size,
       });
     });
-
+if (results.assets.length > 11) {
+     Alert.alert(t('profil.error'), t('upload.error'));
+      return;
+    }
       if (results.assets && results.assets.length > 0) {
         console.log('Picked files:', results);
         const documentsDir = RNFS.LibraryDirectoryPath;
@@ -233,7 +305,7 @@ console.log("buttonOne:" + buttonOne);
               const credentials = await Keychain.getGenericPassword();
               const myKey = credentials.password;
               console.log('Using key:', myKey);
-              const theFilePath = await encryp(filePath, myKey);
+              const theFilePath = await encryp(file.name, myKey);
               console.log('Encrypted file path:', theFilePath);
               const base64String = await RNFS.readFile(
                 originalFilePath,
@@ -256,9 +328,10 @@ console.log("buttonOne:" + buttonOne);
               }
 
               return {
-                name: file.name,
+                name: theFilePath,
                 size: file.size,
-                path: theFilePath,
+                path: filePath,
+                decrypName: file.name,
               };
             } catch (err) {
               console.error(
@@ -289,6 +362,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
       setError('Keine Dateien ausgewählt.');
       return;
     }
+    
     const deviceId = await DeviceInfo.getUniqueId();
     const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
 
@@ -303,7 +377,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
           return new Promise((resolve, reject) => {
             db.executeSql(
               `UPDATE files SET ${column} = ? WHERE ident = ?`,
-              [file.path, deviceId],
+              [file.name, deviceId],
               (_, result) => {
                 console.log(`Updated ${column} with path: ${file.path}`);
                 resolve(result);
@@ -361,7 +435,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
         cache: true,
       });
 
-
+      setModalSortVisible(false);
       await EncryptedStorage.setItem("result", "collect");
       setTimeout(() => {
         setPdfView(true); 
@@ -378,15 +452,19 @@ const close = async () => {
     const temp = `${RNFS.TemporaryDirectoryPath}/temp.pdf`;
     console.log("PDF schließen. Temp path:", temp);
 
-    setPdfView(false);
 
     const exists = await RNFS.exists(temp);
 
     if (exists) {
       await RNFS.unlink(temp);
+      setPdfView(false);
+      setTimeout(() => {
+        setModalSortVisible(true)
+      }, 300)
       console.log("Temp PDF gelöscht.");
     } else {
       console.log("Temp PDF existiert nicht, kein Löschen nötig.");
+      setPdfView(false);
     }
 
   } catch (err) {
@@ -395,14 +473,9 @@ const close = async () => {
 };
 
 
-  const handlePdfLoadComplete = (numberOfPages, filePath) => {
-    // Wird aufgerufen, wenn das PDF vollständig geladen wurde
 
-    console.log('PDF vollständig geladen.' + filePath);
-    console.log('Anzahl der Seiten:', numberOfPages);
-
-  };
   const addToDB = async () => {
+    let error;
     if (files.length === 0) {
       setError('Keine Dateien ausgewählt.');
       return;
@@ -411,7 +484,7 @@ const close = async () => {
     const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
 
     try {
-      db.transaction(tx => {
+      db.transaction(tx  =>  {
         tx.executeSql(
           'SELECT lebenslauf, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
           [deviceId],
@@ -419,16 +492,17 @@ const close = async () => {
             if (result.rows.length > 0) {
               const row = result.rows.item(0);
               let columnIndex = 0;
-
+              
               // Finde die erste freie Spalte
               const columnNames = ['lebenslauf', 'add1', 'add2', 'add3', 'add4', 'add5', 'add6', 'add7', 'add8', 'add9', 'add10'];
               while (columnIndex < columnNames.length && row[columnNames[columnIndex]]) {
                 columnIndex++;
+                console.log(`Spalte ${columnNames[columnIndex]} belegt.`);
               }
 
               // Falls alle Felder voll sind, nichts speichern
               if (columnIndex >= columnNames.length) {
-                console.log('Kein Platz für neue Dateien.');
+                  console.log('Kein Platz für neue Dateien.');
                 return;
               }
 
@@ -436,11 +510,12 @@ const close = async () => {
                 if (columnIndex >= columnNames.length) return; // Falls alle Spalten voll sind
 
                 const column = columnNames[columnIndex];
+                console.log(`Speichere Datei in Spalte: ${column}`);
                 columnIndex++;
 
                 tx.executeSql(
                   `UPDATE files SET ${column} = ? WHERE ident = ?`,
-                  [file.path, deviceId],
+                  [file.name, deviceId],
                   () => console.log(`Updated ${column} with path: ${file.path}`),
                   error => console.error('Fehler beim Aktualisieren:', error)
                 );
@@ -460,8 +535,59 @@ const close = async () => {
       console.error('Fehler beim Aktualisieren der Dateien:', error);
     }
   };
+  
+  const handleNewSort = async (data) => {
+  console.log("Starte Neusortierung...", data.length, "Dateien");
+
+  try {
+    const deviceId = await DeviceInfo.getUniqueId();
+    // Falls du Keychain nutzt, nimm das. Ansonsten EncryptedStorage wie in deinem Snippet:
+    const myKey = await EncryptedStorage.getItem("key"); 
+
+    // SCHRITT 1: Die sortierten Daten verschlüsseln
+    // Wir gehen durch die 'data'-Liste (die bereits die neue Reihenfolge hat)
+    const encryptedSortedFiles = await Promise.all(
+      data.map(async (item) => {
+        // WICHTIG: Wir müssen den Pfad (item.path) verschlüsseln, nicht den key!
+        // item.path kommt aus deiner fetchData-Struktur.
+        const valueToSave = item.path || item.name; 
+        return await encryp(valueToSave, myKey);
+      })
+    );
+
+    // SCHRITT 2: Werte auf die Datenbank-Spalten mappen
+    // Wir nutzen 'orderedKeys' (['lebenslauf', 'add1', ...]), um sicherzustellen,
+    // dass wir immer die richtige Anzahl an Argumenten für SQL haben.
+    const dbValues = orderedKeys.map((key, index) => {
+      // Existiert an Position 'index' eine Datei? Dann nimm sie.
+      // Wenn nicht (weil wir weniger Dateien als Spalten haben), setze NULL.
+      return encryptedSortedFiles[index] || null;
+    });
+
+    // SCHRITT 3: Ein einziges, effizientes SQL-Update
+    const updateQuery = `UPDATE files SET ${orderedKeys.map(key => `${key} = ?`).join(", ")} WHERE ident = ?`;
+    
+    // Die Parameter für SQL: Erst die Werte für die Spalten, dann die ID für WHERE
+    const queryParams = [...dbValues, deviceId];
+
+    console.log("Führe SQL Update aus...");
+    // console.log("Query:", updateQuery); // Zum Debuggen einkommentieren
+    // console.log("Params:", queryParams); // Zum Debuggen einkommentieren
+
+    await db.executeSql(updateQuery, queryParams);
+
+    console.log('Reihenfolge erfolgreich in DB gespeichert.');
+    
+    // UI neu laden, um sicherzugehen, dass alles synchron ist
+    fetchData();
+
+  } catch (error) {
+    console.error('Fehler beim Speichern der Sortierung:', error);
+  }
+};
   return (
     <View style={styles.container}>
+      
       {buttonUpload && (
         <>
           <Pressable
@@ -541,16 +667,25 @@ const close = async () => {
       )}
 
       {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+      <GestureHandlerRootView style={{position:"relative"}}>
       {files.length > 0 && (
         <View style={styles.fileList}>
           <Text style={styles.fileListTitle}>{t('selectedFiles')}:</Text>
+      <ScrollView style={{maxHeight: 100}}>
+
           {files.map((file, index) => (
+
             <Text key={index} style={styles.fileName}>
-              {file.name} ({(file.size / 1024).toFixed(0)} KByte)
+              {file.decrypName} 
             </Text>
           ))}
+             </ScrollView>
+
         </View>
+
       )}
+     
+      </GestureHandlerRootView>
       <Modal
         isVisible={isModalSortVisible}
         animationIn="zoomIn"
@@ -562,25 +697,22 @@ const close = async () => {
         }}
         onSwipeComplete={() =>setModalSortVisible(false)  }
         // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
         backdropTransitionOutTiming={1} 
         useNativeDriver={false}
+          propagateSwipe={true}
       >
-        <TouchableWithoutFeedback onPress={() => setModalSortVisible(false)}>
           <Animated.View
             style={[
 
               {
-                height:  data.length < 8 ? 40 + (data.length * 80) : 40 + (8 * 80),
-                paddingTop: 10,
+                height:  data.length < 8 ? 40 + (data.length / 1 * 80) : 40 + (8 * 80),
                 backgroundColor: colors.background, // Damit es sichtbar bleibt
                 justifyContent: 'center',
                 alignItems: 'center',
+                maxHeight: '90%',
                paddingBottom: 0,
-                opacity: isAnimating ? 1 : 0,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
+                opacity: 1,
+               borderRadius:20,
                 width: width * 0.9,
                 alignSelf: 'center',
               }
@@ -589,13 +721,20 @@ const close = async () => {
               <GestureHandlerRootView style={{ flex: 1 }}>
               <DraggableFlatList
                 data={data}
-                onDragEnd={({ data }) => setData(data)}
+                onDragEnd={({ data }) => {setData(data), handleNewSort(data)}}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item, drag, isActive }) => (
+                renderItem={({ item, index, drag, isActive }) => ( 
+                  console.log("index:", item),
+                  <View style={{
+                    flexDirection: 'column',}}>
+                      <View><Text style={{color: "white", alignSelf: "center", fontSize: 18,  justifyContent: 'center'}}>{item.id.split("")[0] === "0" ? 'Lebenslauf' : "Anlage " + item.id.split("")[0]}</Text></View>
                   <View style={[styles.card, isActive && styles.cardActive]}>
+                       {/* Nummern oder Lebenslauf */}
+                       
                     <TouchableOpacity onPress={() => handleItemClick(item)} style={[styles.dragArea, isActive && styles.dragActive]} onLongPress={drag}>
                       <Text style={[styles.itemText, isActive && styles.itemTextActive]}>{item.name.length > 25 ? item.name.substring(0, 25) + '...': item.name}</Text>
                     </TouchableOpacity>
+                  
                     <TouchableOpacity style={styles.deleteButton} 
                       delayLongPress={300}
                      onPress={() =>
@@ -620,35 +759,47 @@ const close = async () => {
     >
                       <Text style={styles.deleteButtonText}>X</Text>
                     </TouchableOpacity>
+              </View>
+
                   </View>
                 )}
 
               />
 </GestureHandlerRootView>
               
-              {pdfView && (
-                <Modal visible={pdfView} transparent={true} animationType="fade">
-                  <View style={styles.overlay}>
-                    <View style={styles.popup}>
-
-                      <Pdf source={source} style={styles.pdf}
-                        onLoadComplete={handlePdfLoadComplete} />
-
-                      <TouchableOpacity onPress={close} style={styles.closeButton}>
-                        <Text style={styles.closeText}>✕</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </Modal>
-              )}
             </View>
             {/* Drag Handle */}
 
 
-
           </Animated.View>
-        </TouchableWithoutFeedback>
+         
+
       </Modal>
+      
+         <Modal
+      isVisible={pdfView}
+      animationIn="zoomIn"
+      animationOut="zoomOut">
+      <View style={styles.overlay}>
+        <View style={styles.popup}>
+          <Pdf
+          
+            source={source}
+            style={styles.pdf}
+          />
+
+          <TouchableOpacity
+            onPress={close}
+            style={styles.closeButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.closeText}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+   
+      
     </View>
   );
 };
@@ -753,7 +904,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     maxHeight: '90%',
     width: width * 0.80,
- marginTop: 5,
     borderRadius: 15,
   },
   deleteButton: {
@@ -830,12 +980,14 @@ const styles = StyleSheet.create({
 
   },
   name: {
+        alignSelf: "center",
     textAlign: "center",
     fontSize: 13,
     fontWeight: "bold",
-    color: "#C8C8C8",
+    color: "rgb(179, 176, 184)",
     marginBottom: 10,
-    minWidth: width * 0.80,
+    maxWidth: '80%',
+    lineHeight:19,
   },
   job: {
     textAlign: "center",

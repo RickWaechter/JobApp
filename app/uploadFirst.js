@@ -150,39 +150,39 @@ console.log("buttonOne:" + buttonOne);
           results.assets.map(async file => {
             try {
               console.log('Processing file:', file);
-              const originalFilePath = decodeURI(file.uri);
-              const filePath = `${documentsDir}/${file.name}`;
-              console.log('Encrypting file to:', filePath);
-              const credentials = await Keychain.getGenericPassword();
-              const myKey = credentials.password;
-              console.log('Using key:', myKey);
-              const theFilePath = await encryp(filePath, myKey);
-              console.log('Encrypted file path:', theFilePath);
-              const base64String = await RNFS.readFile(
-                originalFilePath,
-                'base64',
-              );
-              console.log('Base64 string:', base64String);
-              const base641 = base64String.slice(0, 16);
-              console.log('Base64 string 1:', base641);
-              const base642 = base64String.slice(16);
-              console.log('Base64 string 2:', base642.substring(0, 100));
-              const iv = await genIv();
-              console.log('Generated IV:', iv);
-              const encrypted = await encryptBase64(base641, iv, myKey);
-              if (encrypted) {
-                await RNFS.writeFile(filePath, encrypted, 'base64');
-                await RNFS.writeFile(filePath + '_1', base642, 'base64');
-                console.log('Encrypted file written to:', filePath);
-              } else {
-                console.error('Encryption failed: No data to write');
-              }
-
-              return {
-                name: file.name,
-                size: file.size,
-                path: theFilePath,
-              };
+                           const originalFilePath = decodeURI(file.uri);
+                           const filePath = `${documentsDir}/${file.name}`;
+                           console.log('Encrypting file to:', filePath);
+                           const credentials = await Keychain.getGenericPassword();
+                           const myKey = credentials.password;
+                           console.log('Using key:', myKey);
+                           const theFilePath = await encryp(file.name, myKey);
+                           console.log('Encrypted file path:', theFilePath);
+                           const base64String = await RNFS.readFile(
+                             originalFilePath,
+                             'base64',
+                           );
+                           console.log('Base64 string:', base64String);
+                           const base641 = base64String.slice(0, 16);
+                           console.log('Base64 string 1:', base641);
+                           const base642 = base64String.slice(16);
+                           console.log('Base64 string 2:', base642.substring(0, 100));
+                           const iv = await genIv();
+                           console.log('Generated IV:', iv);
+                           const encrypted = await encryptBase64(base641, iv, myKey);
+                           if (encrypted) {
+                             await RNFS.writeFile(filePath, encrypted, 'base64');
+                             await RNFS.writeFile(filePath + '_1', base642, 'base64');
+                             console.log('Encrypted file written to:', filePath);
+                           } else {
+                             console.error('Encryption failed: No data to write');
+                           }
+             
+                           return {
+                             name: theFilePath,
+                             size: file.size,
+                             path: filePath,
+                           };
             } catch (err) {
               console.error(
                 `Fehler beim Speichern der Datei ${file.name}:`,
@@ -226,7 +226,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
           return new Promise((resolve, reject) => {
             db.executeSql(
               `UPDATE files SET ${column} = ? WHERE ident = ?`,
-              [file.path, deviceId],
+              [file.name, deviceId],
               (_, result) => {
                 console.log(`Updated ${column} with path: ${file.path}`);
                 resolve(result);

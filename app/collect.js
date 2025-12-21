@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
 import { Card, Divider } from 'react-native-paper';
@@ -26,6 +26,7 @@ const CollectScreen = () => {
   const [popup, setPopup] = useState('');
   const [fileUri, setFileUri] = useState('');
   const [pdfView, setPdfView] = useState(false);
+  const lastTimeClick = useRef(0);
 const [source, setSource] = useState({});
   useEffect(() => {
     console.log(fileUri)
@@ -34,6 +35,12 @@ const [source, setSource] = useState({});
     [fileUri, source]);
 
   const email = async () => {
+     const now = Date.now();
+      if (now - lastTimeClick.current < 1000) {
+        console.log('Zu schnell! Doppelklick verhindert.');
+        return;
+      }
+      lastTimeClick.current = now;
     console.log("email Funktion aufgerufen, Navigation zu Email-Screen");
     try {
       await EncryptedStorage.setItem("result", "collect") 
@@ -90,16 +97,18 @@ const [source, setSource] = useState({});
 
     // 4) Lesen + decrypten
     const encData = await RNFS.readFile(base, "base64");
+    console.log("encData:", encData);
     const decrypted = await decryptBase(encData, myKey);
+    console.log("decrypted Data erhalten");
 
     const encData2 = await RNFS.readFile(base2, "base64");
-
+    console.log("encData2:", encData2);
     // ⚠️ Hier klebst du PDFs zusammen – das kann fehlerhaft sein
     const combined = decrypted + encData2;
-
+    console.log("PDFs kombiniert");
     // 5) Neue Datei schreiben
     await RNFS.writeFile(temp, combined, "base64");
-
+    console.log("Temp-Datei geschrieben:", temp);
     // 6) Checken ob sie existiert
     const exists = await RNFS.exists(temp);
     console.log("Temp-Datei existiert:", exists);
@@ -238,56 +247,73 @@ RNFS.exists(outputPath)
 
 <View style={styles.container2}>
  <Card style={{  backgroundColor: colors.background, shadowColor: 'transparent' }}>
-<TouchableOpacity onPress={lookAtIt}>
+<Pressable onPress={lookAtIt}>
+  {({ pressed }) => (
+    <View style={[
+      styles.entry,
+      pressed && styles.entryPress
+    ]}>
+      <Card.Title
+        title={t('viewApplication')}
+        titleStyle={styles.job}
+      />
+      <Divider
+        color='gray'
+        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
+      />
+      <Text style={styles.name}>{t('viewApplicationDescription')}</Text>
+    </View>
+  )}
+</Pressable>
 
-<View style={styles.entry}>
-     
- <Card.Title
-                 title={t('viewApplication')}
-                 titleStyle={styles.job}
-               />
-               <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-<Text style={styles.name}>{t('viewApplicationDescription')}</Text>
+<Pressable onPress={download}>
+  {({ pressed }) => (
+    <View style={[
+      styles.entry,
+      pressed && styles.entryPress
+    ]}>
+      <Card.Title
+        title={t('download.button')}
+        titleStyle={styles.job}
+      />
+      <Divider
+        color='gray'
+        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
+      />
+      <Text style={styles.name}>{t('downloadDescription')}</Text>
+    </View>
+  )}
+</Pressable>
 
+<Pressable onPress={email}>
+  {({ pressed }) => (
+    <View style={[
+      styles.entry,
+      pressed && styles.entryPress
+    ]}>
+      <Card.Title
+        title={t('sendEmail')}
+        titleStyle={styles.job}
+      />
+      <Divider
+        color='gray'
+        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
+      />
+      <Text style={styles.name}>{t('sendEmailDescription')}</Text>
+    </View>
+  )}
+</Pressable>
 
-</View>
-
-</TouchableOpacity>
-<TouchableOpacity onPress={download}>
-<View style={styles.entry}>
- <Card.Title
-                 title={t('download.button')}
-                 titleStyle={styles.job}
-               />
-                <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-<Text style={styles.name}>{t('downloadDescription')}</Text>
-</View>
-</TouchableOpacity>
-<TouchableOpacity onPress={email}>
-<View style={styles.entry}>
- <Card.Title
-                 title={t('sendEmail')}
-                 titleStyle={styles.job}
-               />
-               <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-<Text style={styles.name}>{t('sendEmailDescription')}</Text>
-</View>
-</TouchableOpacity> 
-<TouchableOpacity onPress={toHome}>
-<View style={styles.finishButton}>
-
-<Text style={styles.finishText}>{t('toHome')}</Text>
-</View>
-</TouchableOpacity>
+<Pressable onPress={toHome}>
+  {({ pressed }) => (
+    <View style={[
+      styles.finishButton,                // Dein Basis-Style für den Home-Button
+      pressed && styles.finishButtonPress        // Der Effekt beim Drücken (oder hier styles.finishButtonPress nutzen)
+    ]}>
+      <Text style={styles.finishText}>{t('toHome')}</Text>
+    </View>
+  )}
+</Pressable>
 </Card>
 </View>
     </View>
@@ -343,6 +369,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 10, // Optional für abgerundete Ecken
   },
+
   closeButton: {
     position: 'absolute',
     top: 10,
@@ -366,22 +393,38 @@ const styles = StyleSheet.create({
   },
  
   entry: {
-    padding:15,
+      flexDirection: "column",
     backgroundColor: colors.card3,
+    padding: 10,
     borderRadius: 10,
-    marginBottom: height * 0.05,
+    marginBottom: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    shadowColor: "gray",
     borderWidth:1,
     borderColor:'gray',
-    width:width * 0.9,
+justifyContent:'center',
+width:width * 0.9,
 
+  },
+    entryPress: {
+    backgroundColor: colors.card3,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'white',
+    wdith:width * 0.9,
+  
 
-  }, 
+  },
   finishButton: {
     backgroundColor: colors.card3,
 alignSelf: 'center',
@@ -396,12 +439,27 @@ alignSelf: 'center',
     borderColor:'gray',
 
   },
+   finishButtonPress: {
+    backgroundColor: colors.card3,
+alignSelf: 'center',
+    padding: 15,
+    borderRadius: 10,
+   width: width * 0.9,
+    marginBottom: height * 0.05,
+
+        borderWidth: 1,
+    borderColor: 'white',
+    shadowColor: "gray",
+
+
+  },
   name: {
     textAlign: "center",
     fontSize: 13,
     fontWeight: "bold",
-    color: "#C8C8C8",
+    color: "rgb(179, 176, 184)",
     marginBottom: 5,
+    lineHeight:19,
   },
   finishText: {
     textAlign: "center",

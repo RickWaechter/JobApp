@@ -1,14 +1,14 @@
 {
   "BewerbungGenerieren": "Crea una nuova candidatura",
-  "BewerbungGenerierenText": "Crea rapidamente e facilmente una candidatura professionale su misura per te.",
-  "BewerbungRecycel": "Riutilizza candidatura",
-  "BewerbungRecycelText": "Utilizza la tua candidatura precedente per adattarne velocemente una nuova a un'altra posizione.",
+  "BewerbungGenerierenText": "Crea in modo semplice e veloce una candidatura professionale.",
+  "BewerbungRecycel": "Riutilizza",
+  "BewerbungRecycelText": "Usa la tua candidatura precedente per adattarne rapidamente una nuova a un’altra posizione.",
   "personalData": "Dati personali",
   "personalDataDescription": "Modifica qui il tuo indirizzo personale per la candidatura.",
   "configureEmail": "Configura e-mail",
-  "configureEmailDescription": "Configura la tua e-mail per l'invio delle candidature.",
+  "configureEmailDescription": "Configura la tua e-mail per l’invio delle candidature.",
   "sortAttachments": "Ordina allegati",
-  "sortAttachmentsDescription": "Ordina i tuoi allegati per il tuo dossier di candidatura.",
+  "sortAttachmentsDescription": "Ordina gli allegati per il tuo dossier di candidatura.",
   "placeholderName": "Il mio nome",
   "placeholderStreet": "Via e numero civico",
   "placeholderZip": "CAP e città",
@@ -22,52 +22,38 @@
   "downloadProgress": "",
   "bwnzg": "Il tuo dossier di candidatura viene ora assemblato.",
   "uploadFiles": "Seleziona file",
-  "selectFilesToUpload": "Seleziona gli allegati che desideri usare per il tuo dossier di candidatura.",
+  "selectFilesToUpload": "Seleziona gli allegati che vuoi usare per il tuo dossier di candidatura.",
   "addAttachment": "Aggiungi allegato",
   "addAttachmentsToApplication": "Aggiungi gli allegati selezionati al tuo dossier di candidatura esistente.",
-  "replaceOldFiles": "Sostituisci allegati esistenti",
-  "replaceExistingAttachments": "Sostituisci i tuoi allegati esistenti con quelli appena selezionati.",
+  "replaceOldFiles": "Sostituisci i vecchi allegati",
+  "replaceExistingAttachments": "Sostituisci gli allegati esistenti con quelli appena selezionati.",
   "selectedFiles": "File selezionati",
-  "searchCompany": "Cerca indirizzo qui",
-  "searchCompanyOld": "Cerca l'indirizzo dell'azienda...",
-  "companyName": "Nome dell'azienda",
-  "companyStreet": "Via e numero civico dell'azienda",
-  "companyStreet2": "Via e numero civico dell'azienda",
+  "searchCompany": "Cerca qui l’indirizzo",
+  "searchCompanyOld": "Cerca l’indirizzo dell’azienda...",
+  "companyName": "Nome dell’azienda",
+  "companyStreet": "Via e numero civico dell’azienda",
+  "companyStreet2": "Via e numero civico dell’azienda",
   "companyCity": "CAP e città della sede aziendale",
-  "continue": "Continua",
+  "continue": "Avanti",
   "enterManually": "Inserisci manualmente",
   "nameAnsprechpartner": "Nome, referente",
   "beruf": "Professione",
   "skillsErfahrung": "Competenze / esperienza",
-  "fontPlaceholder": "Helvetica (font predefinito)",
+  "fontPlaceholder": "Helvetica (carattere predefinito)",
   "generateCoverLetter": "Genera lettera di presentazione",
   "next": "Avanti",
   "toHome": "Chiudi",
   "ok": "Sì, certo!",
   "cancel": "No",
-  "ownName": "Il tuo nome e cognome",
-  "ownStreet": "La tua via e numero civico",
-  "ownCity": "Il tuo CAP e città",
-  "download": {
-    "titleFirma": "Scarica elenco aziende",
-    "messageFirma": "Desideri scaricare il repertorio di circa 5,3 milioni di ragioni sociali di aziende in Germania? (Nessun indirizzo)",
-    "titleStreet": "Scarica elenco strade",
-    "messageStreet": "Vuoi scaricare tutti i nomi di vie della Germania?",
-    "titleCity": "Scarica elenco città",
-    "messageCity": "Vuoi scaricare tutte le città, inclusi i loro CAP?",
-    "titleJob": "Scarica elenco professioni",
-    "messageJob": "Vuoi scaricare oltre 3500 denominazioni di professioni?",
-    "button": "Scarica"
-  },
+  "pleaseWait": "Attendere prego",
+
   "Bewerbung": "Candidatura",
   "Profile": "Profilo",
   "Anlagen": "Allegati",
   "Info": "Informazioni",
+
   "Fortsetzen": "Continua",
-  "profil": {
-    "coinTitle": "Ricompensa in coin",
-    "coinText": "Vuoi ricevere coin guardando la pubblicità?"
-  },
+
   "employmentOptions": {
     "vollzeit": "Tempo pieno",
     "teilzeit": "Part-time",
@@ -75,7 +61,7 @@
   },
   "applicationOptions": {
     "initiativ": "Candidatura spontanea",
-    "regulär": "Candidatura standard",
+    "regulär": "Standard",
     "praktikum": "Tirocinio"
   },
   "anredeOptions": {
@@ -86,45 +72,46 @@
   "salutation": {
     "herr": "Egregio Sig. ",
     "frau": "Gentile Sig.ra ",
-    "default": "Egregi Signore e Signori,"
+    "default": "Gentili Signore e Signori,"
   },
   "applicationOptions2": {
     "initiativ": "Candidatura spontanea come ",
-    "regulär": "Candidatura per la posizione aperta di ",
+    "regulär": "Candidatura come ",
     "praktikum": "Candidatura per tirocinio come ",
-    "default": "Candidatura per la posizione aperta di "
+    "default": "Candidatura come "
   },
   "employmentChoice": {
-    "fulltime": "per un impiego a tempo pieno nella vostra azienda",
-    "parttime": "per un impiego part-time nella vostra azienda",
-    "minijob": "con contratto Mini-job",
-    "default": "nella vostra azienda"
+    "fulltime": "per un impiego a tempo pieno",
+    "parttime": "per un impiego part-time",
+    "minijob": "con contratto mini-job",
+    "default": ""
   },
   "enterText": "Inserisci qui il tuo testo...",
   "saveCoverLetter": "Salva lettera di presentazione",
   "merge": "Unisci",
   "viewApplication": "Visualizza candidatura",
-  "viewApplicationDescription": "Controlla il tuo dossier di candidatura per evitare errori prima di scaricare o inviare.",
-  "downloadDescription": "Salva il dossier di candidatura come PDF sul tuo dispositivo e invialo alla posizione desiderata.",
-  "sendEmail": "Invia per e-mail",
-  "sendEmailDescription": "Invia il tuo dossier di candidatura direttamente via e-mail. Il testo del messaggio viene generato automaticamente, ma può essere modificato prima dell'invio. ✉️",
+  "viewApplicationDescription": "Controlla il tuo dossier di candidatura per evitare errori prima di scaricarlo o inviarlo.",
+
+  "downloadDescription": "Salva il dossier di candidatura in PDF sul tuo dispositivo e invialo per la posizione desiderata.",
+  "sendEmail": "Invia via e-mail",
+  "sendEmailDescription": "Invia il tuo dossier di candidatura direttamente via e-mail. Il testo del messaggio viene generato automaticamente, ma può essere modificato prima dell’invio. ✉️",
   "terms": {
-    "title": "Termini e condizioni generali",
+    "title": "Condizioni generali",
     "section1": {
       "heading": "1. Ambito di applicazione",
-      "content": "I presenti termini e condizioni generali si applicano all'uso dello strumento di candidatura. Lo strumento crea candidature con l'aiuto dell'intelligenza artificiale (IA) fornita da terzi."
+      "content": "Le presenti Condizioni generali si applicano all’uso dello strumento per le candidature. Lo strumento crea candidature con l’aiuto dell’intelligenza artificiale (IA), fornita da provider terzi esterni."
     },
     "section2": {
       "heading": "2. Protezione dei dati e sicurezza",
-      "content": "Tutti i dati personali vengono memorizzati localmente e protetti con crittografia AES-256."
+      "content": "Tutti i dati personali vengono salvati localmente e protetti con crittografia AES-256."
     },
     "section3": {
       "heading": "3. Esclusione di responsabilità",
-      "content": "Il fornitore non si assume alcuna responsabilità per la correttezza o completezza delle candidature generate."
+      "content": "Il fornitore non si assume alcuna responsabilità per la correttezza o la completezza delle candidature generate."
     },
     "section4": {
       "heading": "4. Diritti di utilizzo",
-      "content": "L'uso dello strumento è non esclusivo e non trasferibile. Modifiche o rivendita sono vietate."
+      "content": "L’uso dello strumento non è esclusivo e non è trasferibile. Modifiche o rivendita sono vietate."
     },
     "section5": {
       "heading": "5. Disposizioni finali",
@@ -140,11 +127,11 @@
     "message": {
       "placeholder": "Messaggio"
     },
-    "messageText": "Egregi Signore e Signori,\n\ncon la presente mi candido per la posizione di {{jobTitle}} presso {{companyName}}.\n\nCordiali saluti,\n{{applicantName}}"
+    "messageText": "Gentili Signore e Signori,\n\ncon la presente mi candido per la posizione di {{jobTitle}} presso {{companyName}}.\n\nCordiali saluti,\n{{applicantName}}"
   },
   "emailSent": {
     "success": "E-mail inviata con successo!",
-    "error": "Errore nell'invio dell'e-mail. Riprova, per favore."
+    "error": "Errore durante l’invio dell’e-mail. Riprova."
   },
   "emailConfig": {
     "server": {
@@ -164,67 +151,67 @@
     "heading": "Domande frequenti",
     "entry1": {
       "subheading": "Come vengono salvati i miei dati?",
-      "paragraph": "I tuoi dati sono al sicuro con noi. Tutte le tue informazioni sono memorizzate esclusivamente in locale sul tuo smartphone in un database SQLite e protette da una robusta crittografia AES a 256 bit. In questo modo ci assicuriamo che nessuno oltre a te possa accedervi. Attribuiamo grande importanza alla protezione dei dati e rinunciamo consapevolmente a salvare o condividere i tuoi dati su server esterni.\n\nSe utilizzi il servizio e-mail, anche il tuo indirizzo e-mail, la password e il server di posta sono protetti dalla stessa potente crittografia prima che i dati vengano elaborati. Così le tue informazioni sensibili restano sempre il più possibile al sicuro. La tua privacy è la nostra massima priorità – hai sempre il pieno controllo dei tuoi dati."
+      "paragraph": "I tuoi dati sono al sicuro. Tutte le informazioni vengono salvate esclusivamente in locale sul tuo telefono in un database SQLite e protette con una robusta crittografia AES a 256 bit. Questo garantisce che nessuno, tranne te, possa accedervi. Diamo grande importanza alla privacy e scegliamo volutamente di non salvare né condividere i tuoi dati su server esterni.\n\nSe utilizzi il servizio e-mail, anche il tuo indirizzo e-mail, la password e il server di posta vengono protetti con la stessa forte crittografia prima dell’elaborazione. Così le tue informazioni sensibili restano sempre protette nel modo migliore possibile. La tua privacy è la nostra priorità: mantieni sempre il pieno controllo dei tuoi dati."
     },
     "entry2": {
       "subheading": "Come funziona il server e-mail?",
-      "paragraph": "Con il nostro servizio e-mail puoi inviare il tuo dossier di candidatura direttamente all'indirizzo e-mail dell'azienda desiderata – ti serve solo il relativo contatto. L'oggetto e un modello di testo per la mail vengono generati automaticamente, così la spedizione è rapida e semplice.\n\nI tuoi dati vengono trasferiti al nostro server con una sicura crittografia a 2048 bit, dove il dossier viene decifrato e inoltrato direttamente al destinatario. Non vengono creati log né conservati dati in modo permanente – le informazioni restano solo temporaneamente nella cache e vengono eliminate subito dopo l'inoltro.\n\nStiamo già lavorando a una versione completamente locale di questo servizio, in modo che in futuro tu abbia ancora più controllo sui tuoi dati. Il servizio è completamente gratuito e facoltativo – decidi tu se utilizzarlo."
+      "paragraph": "Con il nostro servizio e-mail puoi inviare facilmente il tuo dossier di candidatura direttamente all’indirizzo e-mail dell’azienda desiderata: ti serve solo il contatto corretto. L’oggetto e un modello di testo del messaggio vengono generati automaticamente, così l’invio è rapido e semplice.\n\nI tuoi dati vengono trasferiti al nostro server con una crittografia sicura a 2048 bit; il server decifra il dossier e lo inoltra direttamente al destinatario. Non vengono creati log né i dati vengono salvati in modo permanente: le informazioni restano solo temporaneamente nella cache e vengono eliminate immediatamente dopo l’inoltro.\n\nStiamo già lavorando a una versione completamente locale di questo servizio, così in futuro avrai ancora più controllo sui tuoi dati. Il servizio è totalmente gratuito e opzionale: decidi tu se usarlo."
     },
     "entry3": {
-      "subheading": "Creazione e riutilizzo delle candidature",
-      "paragraph": "Hai la possibilità di creare una lettera di presentazione completamente nuova oppure di riutilizzarne una esistente. Per soli circa 1 centesimo a generazione puoi ottenere un testo su misura per la posizione desiderata. In alternativa puoi riutilizzare e modificare una lettera precedente selezionando l'azienda, definendo un nuovo referente e adattando il testo alle tue esigenze. Così risparmi tempo e rimani comunque flessibile per personalizzare ogni candidatura quando serve."
+      "subheading": "Creazione candidatura e riutilizzo",
+      "paragraph": "Hai la possibilità di creare una lettera di presentazione completamente nuova oppure di riutilizzarne una esistente. Per circa 1 centesimo per generazione puoi ottenere una lettera di presentazione personalizzata per la posizione desiderata. In alternativa, puoi riutilizzare una lettera precedente e modificarla selezionando l’azienda, ridefinendo il referente e adattando il testo secondo le tue esigenze. Così risparmi tempo e rimani comunque flessibile per personalizzare ogni candidatura quando serve."
     }
   },
   "privacy": {
     "heading": "Informativa sulla privacy",
     "entry1": {
       "title": "1. Informazioni generali",
-      "text": "La presente informativa illustra come lo strumento di candidatura tratta i dati personali."
+      "text": "La presente informativa sulla privacy spiega come lo strumento per le candidature tratta i dati personali."
     },
     "entry2": {
       "title": "2. Raccolta e trattamento dei dati",
-      "text": "Lo strumento raccoglie solo i dati necessari per creare una candidatura:\n• Posizione desiderata\n• Competenze rilevanti\n• Tipo di candidatura"
+      "text": "Lo strumento raccoglie solo i dati necessari per creare una candidatura:\n• Posizione desiderata\n• Competenze rilevanti (skill)\n• Tipo di candidatura"
     },
     "entry3": {
       "title": "3. Conservazione e sicurezza",
-      "text": "Tutti i dati personali sono memorizzati esclusivamente sul dispositivo e protetti da crittografia AES a 256 bit."
+      "text": "Tutti i dati personali vengono salvati esclusivamente sul dispositivo e protetti con crittografia AES-256 bit."
     },
     "entry4": {
       "title": "4. Trasmissione a terzi",
-      "text": "Nessun dato personale viene trasmesso a terzi. Solo dati anonimizzati per la creazione della candidatura vengono inviati a fornitori di IA."
+      "text": "Non avviene alcuna condivisione di dati personali con terzi. Solo dati anonimizzati per la creazione della candidatura vengono trasmessi ai fornitori di servizi di IA."
     },
     "entry5": {
       "title": "5. Diritti degli utenti",
       "text": "Gli utenti hanno il diritto di accesso, rettifica e cancellazione dei dati salvati localmente."
     },
     "entry6": {
-      "title": "6. Modifiche all'informativa",
-      "text": "Questa informativa può essere aggiornata. La versione corrente è sempre disponibile nell'app."
+      "title": "6. Modifiche all’informativa sulla privacy",
+      "text": "La presente informativa può essere aggiornata. La versione più recente è sempre disponibile nell’app."
     }
   },
   "imprint": {
     "heading": "Note legali",
     "entry1": {
       "title": "Informazioni ai sensi del § 5 TMG",
-      "text": "Rick Wächter\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermania"
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermania"
     },
     "entry2": {
-      "title": "Contatto",
-      "text": "Telefono: 01234/56789\nE-mail: kontakt@musterapp.de\nSito web: www.musterapp.de"
+      "title": "Contatti",
+      "text": "E-mail: kontakt@jobape.de\nSito web: www.jobape.de"
     },
     "entry3": {
       "title": "Esclusione di responsabilità",
-      "text": "I contenuti di questa app sono stati creati con la massima cura. Non possiamo tuttavia garantire l'esattezza, completezza e attualità dei contenuti. L'uso dell'app avviene a proprio rischio."
+      "text": "I contenuti di questa app sono stati creati con la massima cura possibile. Tuttavia non possiamo garantire l’accuratezza, la completezza e l’attualità dei contenuti. L’uso dell’app avviene a tuo rischio."
     },
     "entry4": {
-      "title": "Diritto d'autore",
-      "text": "Tutti i contenuti di questa app sono protetti da copyright. L'uso è consentito solo per scopi privati e non commerciali. Qualsiasi ulteriore utilizzo, in particolare quello commerciale, richiede l'esplicito consenso del titolare dei diritti."
+      "title": "Diritto d’autore",
+      "text": "Tutti i contenuti di questa app sono protetti da diritto d’autore. L’uso è consentito solo per scopi privati e non commerciali. Qualsiasi ulteriore utilizzo, in particolare lo sfruttamento commerciale, richiede l’espresso consenso del titolare dei diritti d’autore."
     }
   },
   "navigation": {
     "faq": "FAQ",
     "contact": "Contatto",
-    "agb": "CG",
+    "agb": "Condizioni",
     "privacy": "Privacy",
     "impressum": "Note legali"
   },
@@ -237,48 +224,102 @@
     },
     "name": {
       "required": "Inserisci il tuo nome",
-      "minWords": "Il nome deve essere composto da almeno 2 parole!"
+      "minWords": "Il nome deve contenere almeno 2 parole!"
     },
-    "generating": "Attendere prego.\nIl testo della candidatura viene generato."
+    "nameCompany": {
+      "required": "Inserisci il nome dell’azienda"
+    },
+    "city": {
+      "required": "Inserisci CAP e città."
+    },
+    "street": {
+      "required": "Inserisci via e numero civico.",
+      "minWords": "Il nome deve contenere almeno 2 parole!"
+    },
+    "email": {
+      "required": "Inserisci un indirizzo e-mail",
+      "invalid": "Inserisci un indirizzo e-mail valido"
+    },
+    "generating": "Attendere prego. \n Il testo della tua candidatura viene generato."
   },
   "alerts": {
     "error": {
       "title": "Errore",
-      "attachments": "Si sono verificati problemi con i tuoi allegati, caricali di nuovo.",
-      "emailSettings": "Controlla le tue impostazioni e-mail.",
+      "attachments": "Ci sono stati problemi con i tuoi allegati: caricali di nuovo.",
+      "emailSettings": "Controlla le impostazioni e-mail.",
       "unknown": "Errore sconosciuto"
-    },
-    "success": {
-      "title": "Successo",
-      "applicationSent": "Il tuo dossier di candidatura è stato inviato con successo"
     }
   },
   "common": {
     "ok": "OK"
   },
-  "upload": {
-    "title": "Successo",
-    "info": "I file sono stati salvati con successo."
+
+  "email": {
+    "sendButton": "Invia",
+    "placeholder": "Indirizzo e-mail"
   },
+  "offlineHeader": "Crea candidatura in locale",
+  "offlineMain": "Crea la tua candidatura in modo semplice e professionale, completamente in locale sul tuo dispositivo",
+
   "settings": {
     "title": "Impostazioni",
-    "language": "Lingua",
+    "language": "Lingua del menu",
     "theme": "Tema",
     "darkMode": "Modalità scura",
     "lightMode": "Modalità chiara",
     "languageSaved": "Lingua salvata",
     "languageChange": "Cambia lingua",
-    "apiKey": "Usa API personale",
-    "apiKeyKey": "Inserisci chiave API",
-    "changeMode": "Attiva modalità scura",
-    "pleaseApi": "Seleziona un'API.",
+    "apiKey": "Usa una tua API",
+    "apiKeyKey": "Inserisci la chiave API",
+    "changeMode": "Attiva la modalità scura",
+    "pleaseApi": "Seleziona un’API.",
     "changeApiText": "Usa chiave API",
     "apiText": "Usa la tua chiave OpenAI per lettere di candidatura personalizzate.",
-    "apiGoogleText": "Usa la tua chiave API per la ricerca di aziende e indirizzi su Google.",
-    "languageText": "Cambia la lingua dell'app (non influisce sulle candidature)."
+    "apiGoogleText": "Usa la tua chiave API per la ricerca di aziende e indirizzi con Google.",
+    "languageText": "Cambia la lingua dell’app (non influisce sulle candidature)."
   },
-  "email": {
-    "sendButton": "Invia",
-    "placeholder": "Indirizzo e-mail"
+  "saveFile": "Salva file",
+  "saveFileText": "Salva gli allegati per usarli in seguito nei tuoi dossier di candidatura.",
+  "Continue": "Salta",
+  "first": {
+    "heading": "Benvenuto in JobApp 2.0",
+    "theDrop": "Tutti i dati restano crittografati e salvati localmente sul tuo dispositivo: sicuri e privati. Puoi modificarli in qualsiasi momento.",
+    "error": "Compila tutti i campi"
+  },
+  "ownName": "Il tuo nome e cognome",
+  "ownStreet": "La tua via e numero civico",
+  "ownCity": "Il tuo CAP e città",
+  "buy1": "0,29 € (40 monete)",
+  "ad": "Pubblicità (4 monete)",
+  "download": {
+    "titleFirma": "Scarica elenco aziende",
+    "messageFirma": "Vuoi scaricare l’elenco con circa 5,3 milioni di nomi di aziende/impese in Germania? (Senza indirizzi)",
+    "titleStreet": "Scarica elenco",
+    "messageStreet": "Vuoi scaricare tutti i nomi delle strade della Germania?",
+    "titleCity": "Scarica elenco",
+    "messageCity": "Vuoi scaricare tutte le città incluse le rispettive CAP?",
+    "titleJob": "Scarica elenco professioni",
+    "messageJob": "Vuoi scaricare oltre 3500 nomi di professioni?",
+    "button": "Scarica"
+  },
+  "success": {
+    "title": "Operazione riuscita",
+    "applicationSent": "Il tuo dossier di candidatura è stato inviato con successo"
+  },
+  "upload": {
+    "title": "Operazione riuscita",
+    "info": "I file sono stati salvati con successo.",
+    "error": "Troppi file selezionati. Seleziona al massimo 11 file."
+  },
+  "profil": {
+    "title": "Operazione riuscita",
+    "infoData": "I tuoi dati sono stati salvati con successo.",
+    "infoEmail": "Le impostazioni e-mail sono state salvate con successo.",
+    "error": "Errore",
+    "errorDataEmail": "Compila tutti i campi.",
+    "errorEmail": "Non è stato possibile salvare le impostazioni e-mail.",
+    "languageError": "Seleziona una lingua.",
+    "languageSaved": "La lingua selezionata è ora disponibile",
+    "buyCancel": "L’acquisto è stato annullato."
   }
 }

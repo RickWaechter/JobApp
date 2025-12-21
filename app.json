@@ -2,7 +2,7 @@
   "expo": {
     "name": "JobApp 2",
     "slug": "jobape",
-    "version": "1.0.1",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -14,11 +14,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "splash": {
         "image": "./assets/images/splash.png",
         "resizeMode": "cover",
         "backgroundColor": "#002D6F"
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-1715349546414110~5908012388"
       },
       "icon": "./assets/images/icon.png",
       "buildNumber": "12",
@@ -38,7 +41,6 @@
         "NSBluetoothAlwaysUsageDescription": "This app needs Bluetooth permission to maintain connectivity with accessories.",
         "NSLocalNetworkUsageDescription": "This app needs access to devices on your local network.",
         "NSFaceIDUsageDescription": "This app uses Face ID to securely authenticate your identity.",
-        "NSUserTrackingUsageDescription": "This app uses tracking data to provide a better personalized experience.",
         "NSDocumentsFolderUsageDescription": "This app needs access to your documents to upload files."
       }
     },
@@ -70,17 +72,18 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/splash.png",
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
+          "width": 200,
           "dark": {
             "backgroundColor": "#000000"
           }
         }
       ],
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -89,7 +92,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "77ff1066-5126-4580-92f3-eeaeeeaa1cd3"
+        "projectId": "d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
       }
     },
     "runtimeVersion": {

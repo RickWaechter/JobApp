@@ -1,276 +1,268 @@
 {
-    "BewerbungGenerieren": "Neue Bewerbung erstellen",
-    "BewerbungGenerierenText": "Erstelle schnell und einfach eine professionelle Bewerbung.",
-    "BewerbungRecycel": "Wiederverwenden",
-    "BewerbungRecycelText": "Nutze deine vorherige Bewerbung, um schnell eine neue für eine andere Stelle anzupassen.",
-    "personalData": "Persönliche Daten",
-    "personalDataDescription": "Bearbeite hier deine persönliche Adresse für deine Bewerbung.",
-    "configureEmail": "E-Mail konfigurieren",
-    "configureEmailDescription": "Konfiguriere deine E-Mail für den Versand von Bewerbungen.",
-    "sortAttachments": "Anlagen sortieren",
-    "sortAttachmentsDescription": "Sortiere deine Anlagen für deine Bewerbungsmappe.",
-    "placeholderName": "Mein Name",
-    "placeholderStreet": "Straße und Hausnummer",
-    "placeholderZip": "PLZ und Ort",
-    "placeholderEmail": "E-Mail",
-    "placeholderPassword": "Passwort",
-    "placeholderEmailServer": "Wähle einen E-Mail-Server",
-    "saveAndClose": "Speichern & Schließen",
-    "activateAndClose": "Aktivieren ",
-    "deactivateAndClose": "Deaktivieren",
-    "save": "Speichern",
-    "downloadProgress": "",
-    "bwnzg":"Ihre Bewerbungsmappe wird nun zusammengestellt.",
-    "uploadFiles": "Dateien auswählen",
-    "selectFilesToUpload": "Wähle die Anlagen aus, die du für deine Bewerbungsmappe benutzen möchtest.",
-    "addAttachment": "Anlage hinzufügen",
-    "addAttachmentsToApplication": "Füge die ausgewählten Anlagen zu deiner bestehenden Bewerbungsmappe hinzu.",
-    "replaceOldFiles": "Alte Anlagen ersetzen",
-    "replaceExistingAttachments": "Ersetze deine bestehenden Anlagen durch die neu ausgewählten.",
-    "selectedFiles": "Ausgewählte Datei(en)",
-    "searchCompany": "Hier Adresse suchen",
-    "searchCompanyOld": "Adresse der Firma suchen...",
-    "companyName": "Name der Firma",
-    "companyStreet": "Straße und Hausnummer der Firma",
-    "companyStreet2": "Straße und Hausnummer der Firma",
-    "companyCity": "PLZ und Ort des Firmenstandorts",
-    "continue": "Weiter",
-    "enterManually": "Manuell eingeben",
-    "nameAnsprechpartner": "Name, Ansprechpartner",
-    "beruf": "Beruf",
-    "skillsErfahrung": "Fähigkeiten / Erfahrung",
-    "fontPlaceholder": "Helvetica (Standardschriftart)",
-    "generateCoverLetter": "Anschreiben generieren",
-    "next": "Weiter",
-    "toHome": "Schließen",
-    "ok" : "Ja, klar !",
-    "cancel" : "Nein",
+  "BewerbungGenerieren": "Neue Bewerbung erstellen",
+  "BewerbungGenerierenText": "Erstelle schnell und einfach eine professionelle Bewerbung.",
+  "BewerbungRecycel": "Wiederverwenden",
+  "BewerbungRecycelText": "Nutze deine vorherige Bewerbung, um schnell eine neue für eine andere Stelle anzupassen.",
+  "personalData": "Persönliche Daten",
+  "personalDataDescription": "Bearbeite hier deine persönliche Adresse für deine Bewerbung.",
+  "configureEmail": "E-Mail konfigurieren",
+  "configureEmailDescription": "Konfiguriere deine E-Mail für den Versand von Bewerbungen.",
+  "sortAttachments": "Anlagen sortieren",
+  "sortAttachmentsDescription": "Sortiere deine Anlagen für deine Bewerbungsmappe.",
+  "placeholderName": "Mein Name",
+  "placeholderStreet": "Straße und Hausnummer",
+  "placeholderZip": "PLZ und Ort",
+  "placeholderEmail": "E-Mail",
+  "placeholderPassword": "Passwort",
+  "placeholderEmailServer": "Wähle einen E-Mail-Server",
+  "saveAndClose": "Speichern & Schließen",
+  "activateAndClose": "Aktivieren ",
+  "deactivateAndClose": "Deaktivieren",
+  "save": "Speichern",
+  "downloadProgress": "",
+  "bwnzg": "Ihre Bewerbungsmappe wird nun zusammengestellt.",
+  "uploadFiles": "Dateien auswählen",
+  "selectFilesToUpload": "Wähle die Anlagen aus, die du für deine Bewerbungsmappe benutzen möchtest.",
+  "addAttachment": "Anlage hinzufügen",
+  "addAttachmentsToApplication": "Füge die ausgewählten Anlagen zu deiner bestehenden Bewerbungsmappe hinzu.",
+  "replaceOldFiles": "Alte Anlagen ersetzen",
+  "replaceExistingAttachments": "Ersetze deine bestehenden Anlagen durch die neu ausgewählten.",
+  "selectedFiles": "Ausgewählte Datei(en)",
+  "searchCompany": "Hier Adresse suchen",
+  "searchCompanyOld": "Adresse der Firma suchen...",
+  "companyName": "Name der Firma",
+  "companyStreet": "Straße und Hausnummer der Firma",
+  "companyStreet2": "Straße und Hausnummer der Firma",
+  "companyCity": "PLZ und Ort des Firmenstandorts",
+  "continue": "Weiter",
+  "enterManually": "Manuell eingeben",
+  "nameAnsprechpartner": "Name, Ansprechpartner",
+  "beruf": "Beruf",
+  "skillsErfahrung": "Fähigkeiten / Erfahrung",
+  "fontPlaceholder": "Helvetica (Standardschriftart)",
+  "generateCoverLetter": "Anschreiben generieren",
+  "next": "Weiter",
+  "toHome": "Schließen",
+  "ok": "Ja, klar !",
+  "cancel": "Nein",
+  "pleaseWait": "Bitte warten",
 
-    "download": {
-        "titleFirma": "Firmenliste herunterladen",
-        "messageFirma": "Möchten Sie das Verzeichnis für ca. 5.3 Millionen Namen von Firmen bzw. Unternehmen in Deutschland herunterladen? (Keine Adressen)",
-       "titleStreet": "Firmenliste herunterladen",
-        "messageStreet": "Möchten Sie alle Straßennamen von Deutschland herunterladen?",
-        "titleCity": "Firmenliste herunterladen",
-        "messageCity": "Möchten Sie alle Städte inklsuiver ihrer Postleitzahl herunterladen?",
-        "titleJob": "Berufsliste herunterladen",
-        "messageJob": "Möchten Sie über 3500 Berufe-Namen herunterladen?",
-        "button": "Herunterladen"
+  "Bewerbung": "Bewerbung",
+  "Profile": "Profil",
+  "Anlagen": "Anlagen",
+  "Info": "Information",
+
+  "Fortsetzen": "Fortsetzen",
+
+  "employmentOptions": {
+    "vollzeit": "Vollzeit",
+    "teilzeit": "Teilzeit",
+    "minijob": "Minijob"
+  },
+  "applicationOptions": {
+    "initiativ": "Initiativ",
+    "regulär": "Regulär",
+    "praktikum": "Praktikum"
+  },
+  "anredeOptions": {
+    "herr": "Herr",
+    "damenUndHerren": "Damen und Herren",
+    "frau": "Frau"
+  },
+  "salutation": {
+    "herr": "Sehr geehrter Herr ",
+    "frau": "Sehr geehrte Frau ",
+    "default": "Sehr geehrte Damen und Herren,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Initiativbewerbung als ",
+    "regulär": "Bewerbung als ",
+    "praktikum": "Praktikumsbewerbung als ",
+    "default": "Bewerbung als "
+  },
+  "employmentChoice": {
+    "fulltime": "für eine Vollzeitbeschäftigung",
+    "parttime": "für eine Teilzeitbeschäftigung",
+    "minijob": "auf Minijob-Basis",
+    "default": ""
+  },
+  "enterText": "Gib hier deinen Text ein...",
+  "saveCoverLetter": "Anschreiben speichern",
+  "merge": "Zusammenführen",
+  "viewApplication": "Bewerbung ansehen",
+  "viewApplicationDescription": "Überprüfe deine Bewerbungsmappe, um Fehler vor dem Herunterladen oder Versenden zu vermeiden.",
+
+  "downloadDescription": "Speichere die Bewerbungsmappe als PDF auf deinem Gerät und sende sie an deine Wunschposition.",
+  "sendEmail": "Per E-Mail senden",
+  "sendEmailDescription": "Sende deine Bewerbungsmappe direkt per E-Mail. Der Nachrichtentext wird automatisch generiert, kann aber vor dem Versand angepasst werden. ✉️",
+  "terms": {
+    "title": "Allgemeine Geschäftsbedingungen",
+    "section1": {
+      "heading": "1. Geltungsbereich",
+      "content": "Diese Allgemeinen Geschäftsbedingungen gelten für die Nutzung des Bewerbungstools. Das Tool erstellt Bewerbungen mithilfe künstlicher Intelligenz (KI), die von externen Drittanbietern bereitgestellt wird."
     },
-    
-        "Bewerbung": "Bewerbung",
-        "Profile": "Profil",
-        "Anlagen": "Anlagen",
-        "Info": "Information",
-      
-    "Fortsetzen": "Fortsetzen",
-    "profil": {
-        "coinTitle": "Coin Reward",
-        "coinText": "Möchten Sie Coins erhalten durch das Ansehen von Werbung?"
+    "section2": {
+      "heading": "2. Datenschutz und Sicherheit",
+      "content": "Alle persönlichen Daten werden lokal gespeichert und mit AES-256-Verschlüsselung gesichert."
     },
-    "employmentOptions": {
-        "vollzeit": "Vollzeit",
-        "teilzeit": "Teilzeit",
-        "minijob": "Minijob"
+    "section3": {
+      "heading": "3. Haftungsausschluss",
+      "content": "Der Anbieter übernimmt keine Haftung für die Richtigkeit oder Vollständigkeit der generierten Bewerbungen."
     },
-    "applicationOptions": {
-        "initiativ": "Initiativ",
-        "regulär": "Regulär",
-        "praktikum": "Praktikum"
+    "section4": {
+      "heading": "4. Nutzungsrechte",
+      "content": "Die Nutzung des Tools ist nicht exklusiv und nicht übertragbar. Änderungen oder Weiterverkauf sind untersagt."
     },
-    "anredeOptions": {
-        "herr": "Herr",
-        "damenUndHerren": "Damen und Herren",
-        "frau": "Frau"
+    "section5": {
+      "heading": "5. Schlussbestimmungen",
+      "content": "Es gilt das Recht der Bundesrepublik Deutschland."
     },
-    "salutation": {
-        "herr": "Sehr geehrter Herr ",
-        "frau": "Sehr geehrte Frau ",
-        "default": "Sehr geehrte Damen und Herren,"
-    },
-    "applicationOptions2": {
-        "initiativ": "Initiativbewerbung als ",
-        "regulär": "Bewerbung auf die ausgeschriebene Stelle als ",
-        "praktikum": "Praktikumsbewerbung als ",
-        "default": "Bewerbung auf die ausgeschriebene Stelle als "
-    },
-    "employmentChoice": {
-        "fulltime": "für eine Vollzeitbeschäftigung in Ihrem Unternehmen",
-        "parttime": "für eine Teilzeitbeschäftigung in Ihrem Unternehmen",
-        "minijob": "auf Minijob-Basis",
-        "default": "in Ihrem Unternehmen"
-    },
-    "enterText": "Gib hier deinen Text ein...",
-    "saveCoverLetter": "Anschreiben speichern",
-    "merge": "Zusammenführen",
-    "viewApplication": "Bewerbung ansehen",
-    "viewApplicationDescription": "Überprüfe deine Bewerbungsmappe, um Fehler vor dem Herunterladen oder Versenden zu vermeiden.",
-   
-    "downloadDescription": "Speichere die Bewerbungsmappe als PDF auf deinem Gerät und sende sie an deine Wunschposition.",
-    "sendEmail": "Per E-Mail senden",
-    "sendEmailDescription": "Sende deine Bewerbungsmappe direkt per E-Mail. Der Nachrichtentext wird automatisch generiert, kann aber vor dem Versand angepasst werden. ✉️",
-    "terms": {
-        "title": "Allgemeine Geschäftsbedingungen",
-        "section1": {
-            "heading": "1. Geltungsbereich",
-            "content": "Diese Allgemeinen Geschäftsbedingungen gelten für die Nutzung des Bewerbungstools. Das Tool erstellt Bewerbungen mithilfe künstlicher Intelligenz (KI), die von externen Drittanbietern bereitgestellt wird."
-        },
-        "section2": {
-            "heading": "2. Datenschutz und Sicherheit",
-            "content": "Alle persönlichen Daten werden lokal gespeichert und mit AES-256-Verschlüsselung gesichert."
-        },
-        "section3": {
-            "heading": "3. Haftungsausschluss",
-            "content": "Der Anbieter übernimmt keine Haftung für die Richtigkeit oder Vollständigkeit der generierten Bewerbungen."
-        },
-        "section4": {
-            "heading": "4. Nutzungsrechte",
-            "content": "Die Nutzung des Tools ist nicht exklusiv und nicht übertragbar. Änderungen oder Weiterverkauf sind untersagt."
-        },
-        "section5": {
-            "heading": "5. Schlussbestimmungen",
-            "content": "Es gilt das Recht der Bundesrepublik Deutschland."
-        },
-        "email": {
-            "placeholder": "E-Mail",
-            "sendButton": "E-Mail senden"
-        },
-        "subject": {
-            "placeholder": "Betreff"
-        },
-        "message": {
-            "placeholder": "Nachricht"
-        },
-        "messageText": "Sehr geehrte Damen und Herren,\n\nhiermit bewerbe ich mich auf die Stelle als {{jobTitle}} bei {{companyName}}.\n\nMit freundlichen Grüßen,\n{{applicantName}}"
-    },
-    "emailSent": {
-        "success": "E-Mail erfolgreich gesendet!",
-        "error": "Fehler beim Senden der E-Mail. Bitte versuche es erneut."
-    },
-    "emailConfig": {
-        "server": {
-            "placeholder": "E-Mail-Server"
-        },
-        "port": {
-            "placeholder": "Port"
-        },
-        "username": {
-            "placeholder": "Benutzername"
-        },
-        "password": {
-            "placeholder": "Passwort"
-        }
-    },
-    "faq": {
-        "heading": "Häufig gestellte Fragen",
-        "entry1": {
-            "subheading": "Wie werden meine Daten gespeichert?",
-            "paragraph": "Deine Daten sind bei uns in sicheren Händen. Alle deine Informationen werden ausschließlich lokal auf deinem Handy in einer SQLite-Datenbank gespeichert und durch eine starke 256-Bit-AES-Verschlüsselung geschützt. Dies stellt sicher, dass niemand außer dir Zugriff darauf hat. Wir legen großen Wert auf Datenschutz und verzichten bewusst darauf, deine Daten auf externen Servern zu speichern oder weiterzugeben.\n\nWenn du den E-Mail-Dienst nutzt, werden deine E-Mail-Adresse, dein Passwort und der Mail-Server ebenfalls mit derselben starken Verschlüsselung geschützt, bevor die Daten verarbeitet werden. So bleiben deine sensiblen Informationen stets bestmöglich geschützt. Deine Privatsphäre hat für uns höchste Priorität – du behältst jederzeit die volle Kontrolle über deine Daten."
-        },
-        "entry2": {
-            "subheading": "Wie funktioniert der E-Mail-Server?",
-            "paragraph": "Mit unserem E-Mail-Service kannst du deine Bewerbungsmappe ganz einfach direkt an die E-Mail-Adresse deines Wunschunternehmens senden – du benötigst lediglich die entsprechende Kontaktadresse. Die Betreffzeile sowie eine Vorlage für den E-Mail-Text werden automatisch für dich generiert, sodass der Versand schnell und unkompliziert erfolgt.\n\nDeine Daten werden mit einer sicheren 2048-Bit-Verschlüsselung an unseren Server übertragen, der die Bewerbungsmappe entschlüsselt und direkt an den Empfänger weiterleitet. Dabei werden weder Logs erstellt noch Daten dauerhaft gespeichert – die Informationen verbleiben nur temporär im Cache und werden nach der Weiterleitung sofort gelöscht.\n\nWir arbeiten bereits an einer vollständig lokalen Version dieses Dienstes, sodass du in Zukunft noch mehr Kontrolle über deine Daten haben wirst. Der Service ist komplett kostenlos und optional – du entscheidest, ob du ihn nutzen möchtest."
-        },
-        "entry3": {
-            "subheading": "Bewerbungserstellung und Recycling",
-            "paragraph": "Du hast die Möglichkeit, entweder ein völlig neues Anschreiben zu erstellen oder ein bestehendes wiederzuverwenden. Für nur etwa 1 Cent pro Generierung kannst du dir ein auf die gewünschte Stelle zugeschnittenes Anschreiben erstellen lassen. Alternativ kannst du ein früheres Anschreiben wiederverwenden und modifizieren, indem du das Unternehmen auswählst, den Ansprechpartner neu definierst und den Text nach deinen Wünschen bearbeitest. So sparst du Zeit und bleibst dennoch flexibel, um jede Bewerbung nach Bedarf anzupassen."
-        }
-    },
-    "privacy": {
-        "heading": "Datenschutzerklärung",
-        "entry1": {
-            "title": "1. Allgemeine Informationen",
-            "text": "Diese Datenschutzerklärung erläutert, wie das Bewerbungstool personenbezogene Daten verarbeitet."
-        },
-        "entry2": {
-            "title": "2. Erhebung und Verarbeitung von Daten",
-            "text": "Das Tool erhebt nur die Daten, die für die Erstellung einer Bewerbung notwendig sind:\n• Gewünschte Stellenposition\n• Relevante Fähigkeiten (Skills)\n• Art der Bewerbung"
-        },
-        "entry3": {
-            "title": "3. Speicherung und Sicherheit",
-            "text": "Alle personenbezogenen Daten werden ausschließlich auf dem Gerät gespeichert und mit AES-256-Bit-Verschlüsselung gesichert."
-        },
-        "entry4": {
-            "title": "4. Weitergabe an Dritte",
-            "text": "Es erfolgt keine Weitergabe personenbezogener Daten an Dritte. Lediglich anonymisierte Daten zur Erstellung der Bewerbung werden an KI-Dienstleister übermittelt."
-        },
-        "entry5": {
-            "title": "5. Rechte der Nutzer",
-            "text": "Nutzer haben das Recht auf Auskunft, Berichtigung und Löschung ihrer lokal gespeicherten Daten."
-        },
-        "entry6": {
-            "title": "6. Änderungen der Datenschutzerklärung",
-            "text": "Diese Datenschutzerklärung kann aktualisiert werden. Die jeweils aktuelle Version ist stets in der App verfügbar."
-        }
-    },
-    "imprint": {
-        "heading": "Impressum",
-        "entry1": {
-            "title": "Angaben gemäß § 5 TMG",
-            "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nDeutschland"
-        },
-        "entry2": {
-            "title": "Kontakt",
-            "text": "E-Mail: kontakt@jobape.de\nWebsite: www.jobape.de"
-        },
-        "entry3": {
-            "title": "Haftungsausschluss",
-            "text": "Die Inhalte dieser App wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Die Nutzung der App erfolgt auf eigene Gefahr."
-        },
-        "entry4": {
-            "title": "Urheberrecht",
-            "text": "Alle Inhalte dieser App sind urheberrechtlich geschützt. Die Nutzung ist nur für private und nicht-kommerzielle Zwecke gestattet. Jede weitere Nutzung, insbesondere die kommerzielle Verwertung, bedarf der ausdrücklichen Zustimmung des Urheberrechtsinhabers."
-        }
-    },
-    "navigation": {
-        "faq": "FAQ",
-        "contact": "Kontakt",
-        "agb": "AGB",
-        "privacy": "Datenschutz",
-        "impressum": "Impressum"
-    },
-    "validation": {
-        "job": {
-            "required": "Beruf ist erforderlich!"
-        },
-        "skill": {
-            "required": "Bitte gib deine Erfahrung an"
-        },
-        "name": {
-            "required": "Bitte gib deinen Namen ein",
-            "minWords": "Der Name muss mindestens aus 2 Wörtern bestehen!"
-        },
-        "generating": "Bitte warten. \n Dein Bewerbungstext wird generiert."
-    },
-    "alerts": {
-        "error": {
-            "title": "Fehler",
-            "attachments": "Es gab Probleme mit deinen Anlagen, bitte lade sie erneut hoch.",
-            "emailSettings": "Bitte überprüfe deine E-Mail-Einstellungen.",
-            "unknown": "Unbekannter Fehler"
-        },
-        "success": {
-            "title": "Erfolg",
-            "applicationSent": "Deine Bewerbungsmappe wurde erfolgreich versendet"
-        }
-    },
-    "common": {
-        "ok": "OK"
-    },
-    "upload": {
-            "title": "Erfolg",
-            "info": "Dateien wurden erfolgreich gespeichert."
-        },
-  
     "email": {
-        "sendButton": "Absenden",
-        "placeholder": "E-Mail-Adresse"
+      "placeholder": "E-Mail",
+      "sendButton": "E-Mail senden"
+
     },
-"offlineHeader": "Lokal Bewerbung erstellen",
-"offlineMain": "Erstelle deine Bewerbung einfach und professionell, ganz lokal auf deinem Gerät",
+    "subject": {
+      "placeholder": "Betreff"
+    },
+    "message": {
+      "placeholder": "Nachricht"
+    },
+    "messageText": "Sehr geehrte Damen und Herren,\n\nhiermit bewerbe ich mich auf die Stelle als {{jobTitle}} bei {{companyName}}.\n\nMit freundlichen Grüßen,\n{{applicantName}}"
+  },
+  "emailSent": {
+    "success": "E-Mail erfolgreich gesendet!",
+    "error": "Fehler beim Senden der E-Mail. Bitte versuche es erneut."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "E-Mail-Server"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Benutzername"
+    },
+    "password": {
+      "placeholder": "Passwort"
+    }
+  },
+  "faq": {
+    "heading": "Häufig gestellte Fragen",
+    "entry1": {
+      "subheading": "Wie werden meine Daten gespeichert?",
+      "paragraph": "Deine Daten sind bei uns in sicheren Händen. Alle deine Informationen werden ausschließlich lokal auf deinem Handy in einer SQLite-Datenbank gespeichert und durch eine starke 256-Bit-AES-Verschlüsselung geschützt. Dies stellt sicher, dass niemand außer dir Zugriff darauf hat. Wir legen großen Wert auf Datenschutz und verzichten bewusst darauf, deine Daten auf externen Servern zu speichern oder weiterzugeben.\n\nWenn du den E-Mail-Dienst nutzt, werden deine E-Mail-Adresse, dein Passwort und der Mail-Server ebenfalls mit derselben starken Verschlüsselung geschützt, bevor die Daten verarbeitet werden. So bleiben deine sensiblen Informationen stets bestmöglich geschützt. Deine Privatsphäre hat für uns höchste Priorität – du behältst jederzeit die volle Kontrolle über deine Daten."
+    },
+    "entry2": {
+      "subheading": "Wie funktioniert der E-Mail-Server?",
+      "paragraph": "Mit unserem E-Mail-Service kannst du deine Bewerbungsmappe ganz einfach direkt an die E-Mail-Adresse deines Wunschunternehmens senden – du benötigst lediglich die entsprechende Kontaktadresse. Die Betreffzeile sowie eine Vorlage für den E-Mail-Text werden automatisch für dich generiert, sodass der Versand schnell und unkompliziert erfolgt.\n\nDeine Daten werden mit einer sicheren 2048-Bit-Verschlüsselung an unseren Server übertragen, der die Bewerbungsmappe entschlüsselt und direkt an den Empfänger weiterleitet. Dabei werden weder Logs erstellt noch Daten dauerhaft gespeichert – die Informationen verbleiben nur temporär im Cache und werden nach der Weiterleitung sofort gelöscht.\n\nWir arbeiten bereits an einer vollständig lokalen Version dieses Dienstes, sodass du in Zukunft noch mehr Kontrolle über deine Daten haben wirst. Der Service ist komplett kostenlos und optional – du entscheidest, ob du ihn nutzen möchtest."
+    },
+    "entry3": {
+      "subheading": "Bewerbungserstellung und Recycling",
+      "paragraph": "Du hast die Möglichkeit, entweder ein völlig neues Anschreiben zu erstellen oder ein bestehendes wiederzuverwenden. Für nur etwa 1 Cent pro Generierung kannst du dir ein auf die gewünschte Stelle zugeschnittenes Anschreiben erstellen lassen. Alternativ kannst du ein früheres Anschreiben wiederverwenden und modifizieren, indem du das Unternehmen auswählst, den Ansprechpartner neu definierst und den Text nach deinen Wünschen bearbeitest. So sparst du Zeit und bleibst dennoch flexibel, um jede Bewerbung nach Bedarf anzupassen."
+    }
+  },
+  "privacy": {
+    "heading": "Datenschutzerklärung",
+    "entry1": {
+      "title": "1. Allgemeine Informationen",
+      "text": "Diese Datenschutzerklärung erläutert, wie das Bewerbungstool personenbezogene Daten verarbeitet."
+    },
+    "entry2": {
+      "title": "2. Erhebung und Verarbeitung von Daten",
+      "text": "Das Tool erhebt nur die Daten, die für die Erstellung einer Bewerbung notwendig sind:\n• Gewünschte Stellenposition\n• Relevante Fähigkeiten (Skills)\n• Art der Bewerbung"
+    },
+    "entry3": {
+      "title": "3. Speicherung und Sicherheit",
+      "text": "Alle personenbezogenen Daten werden ausschließlich auf dem Gerät gespeichert und mit AES-256-Bit-Verschlüsselung gesichert."
+    },
+    "entry4": {
+      "title": "4. Weitergabe an Dritte",
+      "text": "Es erfolgt keine Weitergabe personenbezogener Daten an Dritte. Lediglich anonymisierte Daten zur Erstellung der Bewerbung werden an KI-Dienstleister übermittelt."
+    },
+    "entry5": {
+      "title": "5. Rechte der Nutzer",
+      "text": "Nutzer haben das Recht auf Auskunft, Berichtigung und Löschung ihrer lokal gespeicherten Daten."
+    },
+    "entry6": {
+      "title": "6. Änderungen der Datenschutzerklärung",
+      "text": "Diese Datenschutzerklärung kann aktualisiert werden. Die jeweils aktuelle Version ist stets in der App verfügbar."
+    }
+  },
+  "imprint": {
+    "heading": "Impressum",
+    "entry1": {
+      "title": "Angaben gemäß § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nDeutschland"
+    },
+    "entry2": {
+      "title": "Kontakt",
+      "text": "E-Mail: kontakt@jobape.de\nWebsite: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Haftungsausschluss",
+      "text": "Die Inhalte dieser App wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Die Nutzung der App erfolgt auf eigene Gefahr."
+    },
+    "entry4": {
+      "title": "Urheberrecht",
+      "text": "Alle Inhalte dieser App sind urheberrechtlich geschützt. Die Nutzung ist nur für private und nicht-kommerzielle Zwecke gestattet. Jede weitere Nutzung, insbesondere die kommerzielle Verwertung, bedarf der ausdrücklichen Zustimmung des Urheberrechtsinhabers."
+    }
+  },
+  "navigation": {
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "agb": "AGB",
+    "privacy": "Datenschutz",
+    "impressum": "Impressum"
+  },
+  "validation": {
+    "job": {
+      "required": "Beruf ist erforderlich!"
+    },
+    "skill": {
+      "required": "Bitte gib deine Erfahrung an"
+    },
+    "name": {
+      "required": "Bitte gib deinen Namen ein",
+      "minWords": "Der Name muss mindestens aus 2 Wörtern bestehen!"
+    },
+     "nameCompany": {
+      "required": "Bitte gib den Firmennamen ein"
+    },
+    "city": {
+      "required": "Biite gebe die Postleitzahl und Stadt an."
+    },
+    "street": {
+      "required": "Bitte gebe die Straße und Hausnummer an.",
+      "minWords": "Der Name muss mindestens aus 2 Wörtern bestehen!"
+    },
+    "email": {
+      "required": "Bitte gib eine E-Mail-Adresse ein",
+      "invalid": "Bitte gib eine korrekte E-Mail-Adresse ein"
+    },
+    "generating": "Bitte warten. \n Dein Bewerbungstext wird generiert."
+  },
+  "alerts": {
+    "error": {
+      "title": "Fehler",
+      "attachments": "Es gab Probleme mit deinen Anlagen, bitte lade sie erneut hoch.",
+      "emailSettings": "Bitte überprüfe deine E-Mail-Einstellungen.",
+      "unknown": "Unbekannter Fehler"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
 
+  "email": {
+    "sendButton": "Absenden",
+    "placeholder": "E-Mail-Adresse"
+  },
+  "offlineHeader": "Lokal Bewerbung erstellen",
+  "offlineMain": "Erstelle deine Bewerbung einfach und professionell, ganz lokal auf deinem Gerät",
 
-"settings": {
+  "settings": {
     "title": "Einstellungen",
     "language": "Menü-Sprache",
     "theme": "Thema",
@@ -278,26 +270,61 @@
     "lightMode": "Hellmodus",
     "languageSaved": "Sprache gespeichert",
     "languageChange": "Sprache ändern",
-    "apiKey" : "Eigene API vewenden",
-    "apiKeyKey" : "Api-Key eingeben",
+    "apiKey": "Eigene API vewenden",
+    "apiKeyKey": "Api-Key eingeben",
     "changeMode": "Dunkelmodus aktivieren",
     "pleaseApi": "Bitte wählen Sie eine API aus.",
     "changeApiText": "API-Key verwenden",
     "apiText": "Nutzen Sie Ihren OpenAI-Key für individuelle Bewerbungsschreiben.",
-"apiGoogleText": "Nutzen Sie Ihren API-Key für die Google-Firmen- und Adresssuche.",
-"languageText": "Sprache der App ändern (betrifft nicht die Bewerbungen)."
-},
-"saveFile": "Datei speichern",
-"saveFileText": "Speichere die Anlagen, um sie später für deine Bewerbungsmappen zu verwenden.",
-"Continue": "Überspringen",
-"first":{ 
-    "heading": "Willkommen bei JobApe",
-    "theDrop":"Alle Daten bleiben verschlüsselt und lokal auf deinem Gerät gespeichert – sicher und privat."
-},
-"ownName" : "Ihren Vor- und Nachnamen",
-"ownStreet" : "Ihre Straße und Hausnummer",
-"ownCity" : "Ihre PLZ und Ort"
+    "apiGoogleText": "Nutzen Sie Ihren API-Key für die Google-Firmen- und Adresssuche.",
+    "languageText": "Sprache der App ändern (betrifft nicht die Bewerbungen)."
+  },
+  "saveFile": "Datei speichern",
+  "saveFileText": "Speichere die Anlagen, um sie später für deine Bewerbungsmappen zu verwenden.",
+  "Continue": "Überspringen",
+  "first": {
+    "heading": "Willkommen bei JobApp 2.0",
+    "theDrop": "Alle Daten bleiben verschlüsselt und lokal auf Ihrem Gerät gespeichert – sicher und privat. Sie können diese jederzeit ändern.",
+    "error": "Bitte fülle alle Felder aus"
+  },
+  "ownName": "Ihren Vor- und Nachnamen",
+  "ownStreet": "Ihre Straße und Hausnummer",
+  "ownCity": "Ihre PLZ und Ort",
+  "buy1": "0,29 € (40 Coins)",
+  "ad": "Werbung (4 Coins)",
+  "download": {
+    "titleFirma": "Firmenliste herunterladen",
+    "messageFirma": "Möchten Sie das Verzeichnis für ca. 5.3 Millionen Namen von Firmen bzw. Unternehmen in Deutschland herunterladen? (Keine Adressen)",
+    "titleStreet": "Firmenliste herunterladen",
+    "messageStreet": "Möchten Sie alle Straßennamen von Deutschland herunterladen?",
+    "titleCity": "Firmenliste herunterladen",
+    "messageCity": "Möchten Sie alle Städte inklsuiver ihrer Postleitzahl herunterladen?",
+    "titleJob": "Berufsliste herunterladen",
+    "messageJob": "Möchten Sie über 3500 Berufe-Namen herunterladen?",
+    "button": "Herunterladen"
+  },
+  "success": {
+    "title": "Erfolgreich",
+    "applicationSent": "Deine Bewerbungsmappe wurde erfolgreich versendet"
+  },
+  "upload": {
+    
 
-
+    "title": "Erfolgreich",
+    "info": "Dateien wurden erfolgreich gespeichert.",
+    "error":"Zuviele Dateien ausgewählt. Bitte nur maximal 11 Dateien auswählen."
+  },
+  "profil": {
+    "title": "Erfolgreich",
+    "infoData": "Deine Daten wurden erfolgreich gespeichert.",
+    "infoEmail": "Deine E-Mail-Einstellungen wurden erfolgreich gespeichert.",
+    "error": "Fehler",
+    "errorDataEmail": "Bitte alle Felder ausfüllen.",
+    "errorEmail": "Deine E-Mail-Einstellungen konnten nicht gespeichert werden.",
+    "languageError": "Bitte wähle Sie eine Sprache aus.",
+    "languageSaved": "Ihre ausgewählte Sprache ist nun verfügbar",
+    "buyCancel": "Kauf wurde abgebrochen."
+  },
+        "emailDelete": "Email erfolgreich gelöscht"
 
 }

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { router } from 'expo-router';
 import { sha512 } from 'js-sha512';
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -24,6 +24,7 @@ import RNFS from 'react-native-fs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
+import { runQuery } from '../inc/db.js';
 import useKeyboardAnimation from '../inc/Keyboard.js';
 const Bewerbung = () => {
   const { t } = useTranslation();
@@ -31,6 +32,7 @@ const Bewerbung = () => {
   const [inputValue, setInputValue] = useState('');
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('helvetica');
+  const [optionenView, setOptionenView] = useState(false);
   const [message, setMessage] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [skillsNew, setSkillsNew] = useState([]);
@@ -44,8 +46,9 @@ const Bewerbung = () => {
   const [selectedOption3, setSelectedOption3] = useState('');
   const [popup, setPopup] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dots, setDots] = useState("")
+  const [dots, setDots] = useState('');
   const [seeFlatList, setSeeFlatList] = useState(false);
+  const [seeFlatListErfahrung, setSeeFlatListErfahrung] = useState(false);
   const [isFlatListVisible, setIsFlatListVisible] = useState(false);
   const [isFlatListVisibleSkills, setIsFlatListVisibleSkills] = useState(false);
   const [userSelectedSuggestion, setUserSelectedSuggestion] = useState(false);
@@ -105,7 +108,17 @@ const Bewerbung = () => {
         setJobsDbExist(true);
         console.log('cityDb', jobsDbExist);
       }
-    };
+     else {
+        const dest = `${RNFS.LibraryDirectoryPath}/LocalDatabase/jobs.db`;
+        const url = `https://api.jobapp2.de/download?file=jobs.db`;
+            const res = await RNFS.downloadFile({ fromUrl: url, toFile: dest }).promise;
+          if (res.statusCode !== 200) throw new Error("Download failed");
+    console.log('download function called');
+            setJobsDbExist(true);
+
+  };
+      }
+    
     const setDb = async () => {
       if (jobsDbExist) {
         const db1 = await SQLite.openDatabase({
@@ -129,11 +142,13 @@ const Bewerbung = () => {
           name: DB_NAME,
           location: 'default',
         });
-        const result = await db.executeSql(
+        const result = await runQuery(
+          db,
           'SELECT skills FROM files WHERE ident = ?',
           [deviceId],
         );
-        const rawData = result[0]?.rows?.raw()?.[0];
+        const rawData = result?.rows?.raw()?.[0];
+        console.log('rawData', rawData);
 
         if (!rawData) {
           console.error('Fehler: Kein gültiges Datenobjekt gefunden');
@@ -143,7 +158,12 @@ const Bewerbung = () => {
         const files = rawData.skills;
 
         if (typeof files === 'string' && files.length > 0) {
-          setSkills(files.split('#'));
+           
+          const array = files.split('#');
+if (array[array.length - 1] === '') {
+      array.pop();
+      setSkills(array);
+    }
         } else {
           setSkills([]); // Falls keine Daten vorhanden sind, leere Liste setzen
         }
@@ -152,14 +172,30 @@ const Bewerbung = () => {
       }
     };
     selectDb();
-  }, [erfahrung, inputValue]);
+  }, [erfahrung]);
 
+  useEffect(() => {
+    console.log('skills', skills);
+  }, [skills]); 
   const toChange = async text => {
     await EncryptedStorage.setItem('result', 'change');
     router.replace('change');
   };
 
   const handleChange = async value => {
+    const regexMuster = /[\/"() &$-:]/;
+
+    if (value.length === 0) {
+      value = '';
+      setInputValue(value);
+      return;
+    }
+    if (regexMuster.test(value)) {
+      setInputValue(value);
+          setIsFlatListVisible(false);
+    setSeeFlatList(false);
+      return;
+    }
     try {
       if (!dbRefJobs.current) {
         console.log('dbRef.current is null');
@@ -167,7 +203,8 @@ const Bewerbung = () => {
         return;
       }
       setInputValue(value);
-      const [res] = await dbRefJobs.current.executeSql(
+      const res = await runQuery(
+        dbRefJobs.current,
         'SELECT rowid, text FROM eintraege WHERE eintraege MATCH ? LIMIT 20',
         [`${value}*`],
       );
@@ -203,7 +240,6 @@ const Bewerbung = () => {
 
       return;
     }
-    setSeeFlatList(true);
     setIsFlatListVisibleSkills(true);
     setUserSelectedSuggestion(false);
   };
@@ -273,12 +309,14 @@ const Bewerbung = () => {
   };
 
   const handleGeneratePDF = async () => {
+    setIsFlatListVisible(false);
+    setIsFlatListVisibleSkills(false);
     let count = 0;
-setLoading(true)
-      const interval = setInterval(() => {
-    count = (count + 1) % 4;
-    setDots(".".repeat(count));
-  }, 500);
+    setLoading(true);
+    const interval = setInterval(() => {
+      count = (count + 1) % 4;
+      setDots('.'.repeat(count));
+    }, 500);
     await EncryptedStorage.setItem('font', value);
     console.log('Application:' + (await EncryptedStorage.getItem('font')));
     setSeeFlatList(false);
@@ -459,12 +497,11 @@ setLoading(true)
  `;
 
       try {
-        
         await EncryptedStorage.setItem('choices', selectedOption2);
         const deviceId = await DeviceInfo.getUniqueId();
         const key = sha512(deviceId);
 
-        const response = await axios.post('https://jobape.de/getText', {
+        const response = await axios.post('https://api.jobapp2.de/getText', {
           prompt1: prompt1,
           key: key,
         });
@@ -474,8 +511,8 @@ setLoading(true)
         toChange();
         setPopupVisible(false);
         console.log(text);
-        setDots("")
-      clearInterval(interval);
+        setDots('');
+        clearInterval(interval);
       } catch (error) {
         setPopupVisible(false);
         if (error.response) {
@@ -515,6 +552,7 @@ setLoading(true)
         [erfahrung, deviceId],
       );
       setSkillButton(false);
+      setSeeFlatList(false);
     } catch (err) {
       console.error('Error combining files:', err);
     }
@@ -533,6 +571,7 @@ setLoading(true)
       ]);
 
       setSaveButton(false);
+      setSeeFlatList(false);
     } catch (err) {
       console.error('Error combining files:', err);
     }
@@ -545,6 +584,90 @@ setLoading(true)
       useNativeDriver: true,
     }).start();
   };
+
+const delteSkill = async skill => {
+    const deviceId = await DeviceInfo.getUniqueId();
+ const key = await EncryptedStorage.getItem('key');
+const db = await SQLite.openDatabase({
+  name: DB_NAME,
+  location: 'default',
+});
+    try {
+    const filteredEmails = skills.filter(item => item !== skill);
+    console.log('Filtered mails:', filteredEmails);
+    if (filteredEmails[filteredEmails.length - 1] === '') {
+      filteredEmails.pop();
+    }
+    if (filteredEmails.length > 0) {
+      const updatedEmails = filteredEmails.join('#');
+      console.log('Updated mails string:', updatedEmails);
+      db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE files SET skills = ? WHERE ident = ?',
+          [updatedEmails, deviceId],
+        )
+    });
+      setSkills(filteredEmails);
+      console.log('Skills after deletion:', skills);  
+    }
+    else {
+    
+       db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE files SET skills = ? WHERE ident = ?',
+          [null, deviceId],
+        )
+    });
+      setSkills([]);
+      console.log('Skills after deletion:', skills);  
+    }
+    } catch (err) {
+      console.error('Error combining files:', err);
+    }
+  }
+    
+  const deleteJob = async job => {
+    const deviceId = await DeviceInfo.getUniqueId();
+ const key = await EncryptedStorage.getItem('key');
+const db = await SQLite.openDatabase({
+  name: DB_NAME,
+  location: 'default',
+});
+    try {
+    const filteredJobs = jobs.filter(item => item !== job);
+    console.log('Filtered mails:', filteredJobs);
+    if (filteredJobs[filteredJobs.length - 1] === '') {
+      filteredJobs.pop();
+    }
+    if (filteredJobs.length > 0) {
+      const updatedJobs = filteredJobs.join('#');
+      console.log('Updated mails string:', updatedJobs);
+       dbRefJobs.current.transaction(tx => {
+        tx.executeSql(
+'DELETE FROM eintraege WHERE rowid = ?',
+          [job.rowid],
+        )
+    });
+      setJobs(filteredJobs);
+      console.log('Skills after deletion:', jobs);  
+    }
+    else {
+    
+       db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE files SET jobs = ? WHERE ident = ?',
+          [null, deviceId],
+        )
+    });
+      setJobs([]);
+      console.log('Skills after deletion:', jobs);  
+    }
+    } catch (err) {
+      console.error('Error combining files:', err);
+    }
+  }
+    
+
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.container}>
@@ -590,7 +713,7 @@ setLoading(true)
               selectTextOnFocus={!isDisabled}
               autoCorrect={false}
               onFocus={() => {
-                changeView(-105);
+                changeView(-50);
               }}
             />
             {errors.anrede ? (
@@ -605,13 +728,16 @@ setLoading(true)
               placeholder={t('beruf')}
               placeholderTextColor={'gray'}
               value={inputValue}
+              onBlur={() => setSeeFlatList(false)}
               onFocus={() => {
-                changeView(-180);
+                changeView(-100);
               }}
               onChangeText={handleChange}
               autoCorrect={false}
             />
-            {errors.job ? <Text style={styles.error1}>{errors.job}</Text> : null}
+            {errors.job ? (
+              <Text style={styles.error1}>{errors.job}</Text>
+            ) : null}
 
             {saveButton && inputValue.length > 0 && (
               <>
@@ -623,19 +749,28 @@ setLoading(true)
                 </TouchableOpacity>
               </>
             )}
-            
+
             {inputValue.length > 0 && seeFlatList && jobs.length > 0 && (
               <FlatList
                 data={jobs}
                 keyboardShouldPersistTaps="handled"
                 keyExtractor={(item, index) => index}
                 renderItem={({ item }) => (
+                   <View style={{position:'relative'}}>
+                     <TouchableOpacity
+                                        onPress={() => {deleteJob(item); console.log('item', item);}}
+                                        
+                                        style={styles.suggestionItemContainerDelete}
+                                      >
+                                        <Text style={styles.suggestionItemDelete}>X</Text>
+                                      </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleSuggestionClick(item)}
                     style={styles.suggestionItemContainer}
                   >
                     <Text style={styles.suggestionItem}>{item.text}</Text>
                   </TouchableOpacity>
+                  </View>
                 )}
                 style={[
                   styles.suggestionsList,
@@ -653,8 +788,10 @@ setLoading(true)
                   placeholderTextColor={'gray'}
                   value={erfahrung}
                   onChangeText={handleErfahrung}
+                  onBlur={() => setIsFlatListVisibleSkills(false)}
+
                   onFocus={() => {
-                    changeView(-255);
+                    changeView(-125);
                   }}
                   autoCorrect={false}
                 />
@@ -672,111 +809,142 @@ setLoading(true)
                   </>
                 )}
               </View>
-              {erfahrung.length > 0 && seeFlatList && skillsNew.length > 0 && (
-                 <FlatList
-                data={skillsNew}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleSuggestionClickSkill(item)} style={styles.suggestionItemContainer}>
-                    <Text style={styles.suggestionItem}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-                keyboardShouldPersistTaps="handled"
-                style={[styles.suggestionsListSkill, { display: isFlatListVisibleSkills ? 'flex' : 'none' }]}
-              />
+              {erfahrung.length > 0 && isFlatListVisibleSkills && skills.length > 0 && (
+                <FlatList
+                  data={skills}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <View style={{position:'relative'}}>
+                     <TouchableOpacity
+                                        onPress={() => delteSkill(item)}
+                                        style={styles.suggestionItemContainerDelete}
+                                      >
+                                        <Text style={styles.suggestionItemDelete}>X</Text>
+                                      </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleSuggestionClickSkill(item)}
+                      style={styles.suggestionItemContainer}
+                    >
+                      <Text style={styles.suggestionItem}>{item}</Text>
+                    </TouchableOpacity>
+                    </View>
+                  )}
+                  keyboardShouldPersistTaps="handled"
+                  style={[
+                    styles.suggestionsListSkill,
+                    { display: isFlatListVisibleSkills ? 'flex' : 'none' },
+                  ]}
+                />
               )}
+              {optionenView && (
+                <>
+                  <View style={styles.section}>
+                    <View style={styles.radioContainer}>
+                      {employmentOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          onPress={() => {
+                            handleOptionChange(option);
+                            Keyboard.dismiss();
+                          }}
+                          style={[
+                            styles.radioButton,
+                            selectedOption === option &&
+                              styles.radioOptionSelected,
+                          ]}
+                        >
+                          <Text
+                            style={
+                              selectedOption === option
+                                ? styles.radioOptionTextSelected
+                                : styles.radioOptionText
+                            }
+                          >
+                            {t(option)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
 
-            <View style={styles.section}>
-              <View style={styles.radioContainer}>
-                {employmentOptions.map(option => (
-                  <TouchableOpacity
-                    key={option}
-                    onPress={() => {
-                      handleOptionChange(option);
-                      Keyboard.dismiss();
-                    }}
-                    style={[
-                      styles.radioButton,
-                      selectedOption === option && styles.radioOptionSelected,
-                    ]}
-                  >
-                    <Text
-                      style={
-                        selectedOption === option
-                          ? styles.radioOptionTextSelected
-                          : styles.radioOptionText
-                      }
-                    >
-                      {t(option)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                  <View style={styles.section2}>
+                    <View style={styles.radioContainer}>
+                      {applicationOptions.map(option => (
+                        <TouchableOpacity
+                          key={option}
+                          onPress={() => {
+                            handleOptionChange2(option);
+                            Keyboard.dismiss();
+                          }}
+                          style={[
+                            styles.radioButton,
+                            selectedOption2 === option &&
+                              styles.radioOptionSelected,
+                          ]}
+                        >
+                          <Text
+                            style={
+                              selectedOption2 === option
+                                ? styles.radioOptionTextSelected
+                                : styles.radioOptionText
+                            }
+                          >
+                            {t(option)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={{ width: '100%', marginTop: 20, marginBottom: 10 }}>
+                    <DropDownPicker
+                      open={open}
+                      value={value}
+                      items={items}
+                      setOpen={setOpen}
+                      setValue={setValue}
+                      placeholder={t('fontPlaceholder')}
+                      style={styles.dropdown}
+                      dropDownContainerStyle={styles.dropDownContainer}
+                      textStyle={{ color: '#C9C1C1', fontSize: 16 }}
+                      dropDownDirection="TOP"
+                    />
+                  </View>
+                </>
+              )}
+                   
+              <View style={styles.sectionButton}>
+         
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    // optional: visuelles Feedback
+                  ]}
+                  onPress={handleGeneratePDF}
+                  disabled={loading && Object.values(errors).length === 0} // 👈 Button ist deaktiviert!
+                >
+                  <Text style={styles.buttonText}>
+                    {loading && Object.values(errors).length === 0
+                      ? `${t('pleaseWait')}${dots}`
+                      : t('generateCoverLetter')}
+                  </Text>
+                </TouchableOpacity>
+                 <TouchableOpacity
+                  style={{  marginTop: 15 }}
+                  onPress={() => {
+                    setOptionenView(!optionenView);
+                    Keyboard.dismiss();
+                  }}><Text style={{alignSelf: 'center',justifyContent: 'center', color: 'white', fontSize: 16 }}>
+                    Optionen
+                      
+                      
+                  </Text>
+                    </TouchableOpacity>  
               </View>
             </View>
-                
-            <View style={styles.section2}>
-              <View style={styles.radioContainer}>
-                {applicationOptions.map(option => (
-                  <TouchableOpacity
-                    key={option}
-                    onPress={() => {
-                      handleOptionChange2(option);
-                      Keyboard.dismiss();
-                    }}
-                    style={[
-                      styles.radioButton,
-                      selectedOption2 === option && styles.radioOptionSelected,
-                    ]}
-                  >
-                    <Text
-                      style={
-                        selectedOption2 === option
-                          ? styles.radioOptionTextSelected
-                          : styles.radioOptionText
-                      }
-                    >
-                      {t(option)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
           </View>
-
-          <View style={{ width: '100%' }}>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              placeholder={t('fontPlaceholder')}
-              style={styles.dropdown}
-              dropDownContainerStyle={styles.dropDownContainer}
-              textStyle={{ color: '#C9C1C1', fontSize: 16 }}
-              dropDownDirection="TOP"
-            />
-          </View>
-
-          <View style={styles.section}>
-            <TouchableOpacity
-             style={[
-               styles.button,
-                // optional: visuelles Feedback
-             ]}
-             onPress={handleGeneratePDF}
-             disabled={loading && Object.values(errors).length === 0}  // 👈 Button ist deaktiviert!
-           >
-             <Text style={styles.buttonText}>
-               {loading && Object.values(errors).length === 0 ? `Bitte warten${dots}` : t('generateCoverLetter')}
-             </Text>
-           </TouchableOpacity>
-          </View>
-            </View>
-
         </Animated.View>
       </View>
-      
     </SafeAreaView>
   );
 };
@@ -791,21 +959,35 @@ const styles = StyleSheet.create({
     top: '7%',
     left: '1%',
   },
-    error1: {
+    suggestionItemContainerDelete: {
+    padding: 10,
+    backgroundColor: colors.card3,
+    right: 0,
+    position: 'absolute',
+    zIndex: 20,
+  },
+  error1: {
     color: 'red',
     fontSize: 12,
     position: 'abosulte',
     top: '1%',
     left: '1%',
   },
+    suggestionItemDelete: {
+    fontSize: 16,
+    color: 'white',
+  },
   section: {
     position: 'relative',
     marginBottom: 20,
   },
+  sectionButton: {
+    position: 'relative',
+  },
   section2: {
     position: 'relative',
   },
-  
+
   container: {
     width: width,
     height: height,
@@ -826,27 +1008,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card3,
     color: 'white',
   },
-  dropdownAbsolute: {
-    position: 'absolute',
-    top: 50,
-
-    width: '100%',
-    backgroundColor: colors.card3,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    zIndex: 9999,
-  },
-  item: {
-    height: 30,
-    justifyContent: 'center',
-  },
-  itemText: {
-    fontSize: 16,
-    color: 'white',
-  },
   skillInputContainer: {
     position: 'relative',
-    marginTop:20,
+    marginTop: 20,
     marginBottom: 20,
   },
   disabledInput: {
@@ -926,7 +1090,7 @@ const styles = StyleSheet.create({
     elevation: 10, // für Android Touch / Zeichnen
     overflow: 'hidden',
   },
-   suggestionsListSkill: {
+  suggestionsListSkill: {
     position: 'absolute',
     top: 70,
     width: '100%',
@@ -942,11 +1106,11 @@ const styles = StyleSheet.create({
   },
   suggestionItemContainer: {
     paddingVertical: 10,
-    paddingHorizontal:10,
+    paddingHorizontal: 10,
     backgroundColor: colors.card3,
-    borderWidth:0,
-    borderColor:"gray",
-    borderBottomWidth:1,
+    borderWidth: 0,
+    borderColor: 'gray',
+    borderBottomWidth: 1,
   },
   suggestionItem: {
     fontSize: 16,
@@ -969,7 +1133,6 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
     shadowColor: 'gray',
     shadowOffset: {
       width: 0,

@@ -20,43 +20,20 @@ SQLite.enablePromise(true);
 
 const DB_NAME = 'firstNew.db';
 const StartScreen = () => {
-  const anredeOptions = ['Herr', 'Damen und Herren', 'Frau'];
   const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [yourName, setYourName] = useState('');
   const [yourStreet, setYourStreet] = useState('');
   const [yourCity, setYourCity] = useState('');
   const [name, setName] = useState('');
   const [finishMessage, setFinishMessage] = useState('');
-  const [inputState, setInputState] = useState(false);
   const [value, setValue] = useState(null);
   const { animated, reset } = useKeyboardAnimation();
-  const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
-  const jobRef2 = useRef(null);
-  const nameRef = useRef(null);
-  const [manual, setManual] = useState(false);
-  const [selectedOption3, setSelectedOption3] = useState('');
-  const [results, setResults] = useState([]);
-  const [resultsStreet, setResultsStreet] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [streetSuggestions, setStreetSuggestions] = useState([]);
   const [cit, setCit] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [downloading, setDownloading] = useState(false);
   const cityRef = useRef(null);
-  const [dbExists, setDbExists] = useState(false);
-  const [job, setJob] = useState(0);
  const [open, setOpen] = useState(false);
-  const downloadCancelRef = useRef(null);
-  const [resume, setResume] = useState(false);
   const [isFlatListVisible, setIsFlatListVisible] = useState(false);
   const streetRef = useRef(null);
-  const [citySuggestion, setCitySuggestion] = useState([]);
   const [ad, setAd] = useState(false);
-  const [street, setStreet] = useState("");
-  const [city, setCity] = useState("");
   const jobRef = useRef(null);
-  const jobRef3 = useRef(null);
   const { t, i18n } = useTranslation();
   const [suggestionsStreet, setSuggestionsStreet] = useState([]);
 const [ suggestionsCity, setSuggestionsCity] = useState([]);
@@ -105,8 +82,16 @@ const handleSuggestionClickStreet = (suggestion) => {
 
   };
   const handleMyStreet = async value => {
-    try {
-      setYourStreet(value);
+    try { 
+      if (value.includes(",")) {
+        console.log("1")
+        setYourStreet(value.split(",")[0]);
+        setYourCity(value.split(", ")[1]);
+      } 
+      else {
+        console.log("2")
+        setYourStreet(value);
+      } 
      
     } catch (err) {
       console.warn('Search error', err);
@@ -133,7 +118,7 @@ const hallo = async () => {
   const exists = (name) => RNFS.exists(`${DB_DIR}/${name}`);
 
   const download = async (name) => {
-    const url = `https://jobape.de/download?file=${name}`;
+    const url = `https://api.jobapp2.de/download?file=${name}`;
     const dest = `${DB_DIR}/${name}`;
     const res = await RNFS.downloadFile({ fromUrl: url, toFile: dest }).promise;
     if (res.statusCode !== 200) throw new Error("Download failed");
@@ -156,7 +141,7 @@ hallo();
   const init = async () => {
     try {
       if (!name || !yourStreet || !yourCity) {
-        Alert.alert('Bitte füllen Sie alle Felder aus.');
+        Alert.alert(t('first.error'));
         return;
       }
       // Datenbank erstellen
@@ -272,20 +257,19 @@ hallo();
       console.log('Data inserted');
     
       console.log('Datenbank initialisiert und Tabelle erstellt.');
-      router.push('uploadFirst');
+      router.dismissTo('uploadFirst');
 
     } catch (err) {
       console.error('Fehler bei der Datenbankinitialisierung:', err);
     }
   }
 
-  const image = { uri: 'https://legacy.reactjs.org/logo-og.png' };
   return (
     <SafeAreaView style={styles.container}>
 
       <Animated.View
         style={[
-  { transform: [{ translateY: Animated.multiply(Animated.divide(animated, 2.1), -1) }] },        ]}
+  { transform: [{ translateY: Animated.multiply(Animated.divide(animated, 2.1), -1) }], alignItems: 'center'},        ]}
       >
         <Text style={styles.text1}>{t('first.heading')}</Text>
         <TextInput
@@ -298,7 +282,7 @@ hallo();
         autoComplete='name'
         />
         {name.length > 0 && (
-          <ClearButton value={name} setValue={setName} top={59} />
+          <ClearButton value={name} setValue={setName} top={59} right={25} />
         )}
 
        
@@ -316,7 +300,7 @@ hallo();
           autoCorrect={false}
           ref={streetRef}
         />
-        {yourStreet.length > 0 && <ClearButton value={yourStreet} setValue={setYourStreet} top={114} />}
+        {yourStreet.length > 0 && <ClearButton value={yourStreet} setValue={setYourStreet} top={114} right={25} />}
  {yourStreet.length > 0 && suggestionsStreet.length > 0 && (
     
                <FlatList
@@ -343,7 +327,7 @@ hallo();
           onFocus={() => setCit(true)}
         />
         {yourCity.length > 0 && (
-          <ClearButton value={yourCity} setValue={setYourCity} top={169} />
+          <ClearButton value={yourCity} setValue={setYourCity} top={169} right={25} />
         )}
         {yourCity.length > 0 && suggestionsCity.length > 0 && (
     
@@ -388,7 +372,7 @@ hallo();
 />
         {/* Button zum Generieren der Bewerbung */}
         <TouchableOpacity style={styles.buttonNext} onPress={init}>
-          <Text style={styles.buttonText}>Speichern</Text>
+          <Text style={styles.buttonText}>{t('save')}</Text>
         </TouchableOpacity>
          
         <Text style={styles.text2}>{t('first.theDrop')}</Text>
@@ -417,8 +401,9 @@ const styles = StyleSheet.create({
   text2: {
     fontSize: 12,
     color: colors.textColor,
-    marginTop: 10,
+    marginTop: 20,
     textAlign: 'center',
+    maxWidth: '80%',
 
 
   },
@@ -428,6 +413,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   inputSecondary: {
+    width: width * 0.8,
     marginTop: 10,
     textAlign: 'center',
     backgroundColor: colors.card3,
@@ -435,7 +421,7 @@ const styles = StyleSheet.create({
     padding: 13,
     borderColor: 'gray',
     borderWidth: 1,
-    fontSize: 14,
+    fontSize: 14,  
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -447,8 +433,9 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   dropdown: {
-    alignSelf: 'center',
-    height: 50,
+    width: width * 0.8,
+
+    height: 50, 
     backgroundColor:colors.card3,
     borderRadius: 15,
     paddingHorizontal: 15,
@@ -457,7 +444,6 @@ const styles = StyleSheet.create({
     elevation: 2,
     zIndex: 3000,
     borderColor: 'gray',
-    width: width * 0.9,
     marginTop: 10,
   },
   dropDownContainer: {
@@ -501,7 +487,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   buttonNext: {
-width: width * 0.9,
+    width: width * 0.8,
     backgroundColor: colors.card3,
     padding: 12,
     borderRadius: 12,

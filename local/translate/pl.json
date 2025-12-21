@@ -1,284 +1,325 @@
 {
-    "BewerbungGenerieren": "Utwórz nowe podanie",
-    "BewerbungGenerierenText": "Szybko i łatwo stwórz profesjonalne podanie o pracę dopasowane do Ciebie.",
-    "BewerbungRecycel": "Ponownie użyj podania",
-    "BewerbungRecycelText": "Wykorzystaj swoje poprzednie podanie, aby szybko dostosować je do innego stanowiska.",
-    "personalData": "Dane osobowe",
-    "personalDataDescription": "Edytuj tutaj swój adres osobisty do podania.",
-    "configureEmail": "Skonfiguruj e-mail",
-    "configureEmailDescription": "Skonfiguruj swój e-mail do wysyłki podań.",
-    "sortAttachments": "Sortuj załączniki",
-    "sortAttachmentsDescription": "Posortuj swoje załączniki w teczce podaniowej.",
-    "placeholderName": "Moje imię i nazwisko",
-    "placeholderStreet": "Ulica i numer domu",
-    "placeholderZip": "Kod pocztowy i miejscowość",
-    "placeholderEmail": "E-mail",
-    "placeholderPassword": "Hasło",
-    "placeholderEmailServer": "Wybierz serwer e-mail",
-    "saveAndClose": "Zapisz i zamknij",
-    "activateAndClose": "Aktywuj",
-    "deactivateAndClose": "Dezaktywuj",
-    "save": "Zapisz",
-    "downloadProgress": "",
-    "bwnzg": "Twoja teczka podaniowa jest właśnie przygotowywana.",
-    "uploadFiles": "Wybierz pliki",
-    "selectFilesToUpload": "Wybierz załączniki, które chcesz użyć w swojej teczce podaniowej.",
-    "addAttachment": "Dodaj załącznik",
-    "addAttachmentsToApplication": "Dodaj wybrane załączniki do istniejącej teczki podaniowej.",
-    "replaceOldFiles": "Zastąp stare załączniki",
-    "replaceExistingAttachments": "Zastąp istniejące załączniki nowo wybranymi.",
-    "selectedFiles": "Wybrane pliki",
-    "searchCompany": "Wyszukaj adres tutaj",
-    "searchCompanyOld": "Szukaj adresu firmy...",
-    "companyName": "Nazwa firmy",
-    "companyStreet": "Ulica i numer firmy",
-    "companyStreet2": "Ulica i numer firmy",
-    "companyCity": "Kod pocztowy i miasto siedziby firmy",
-    "continue": "Dalej",
-    "enterManually": "Wprowadź ręcznie",
-    "nameAnsprechpartner": "Nazwisko, osoba kontaktowa",
-    "beruf": "Zawód",
-    "skillsErfahrung": "Umiejętności / doświadczenie",
-    "fontPlaceholder": "Helvetica (czcionka domyślna)",
-    "generateCoverLetter": "Generuj list motywacyjny",
-    "next": "Dalej",
-    "toHome": "Zamknij",
-    "ok": "Tak, jasne!",
-    "cancel": "Nie",
-    "ownName": "Twoje imię i nazwisko",
-    "ownStreet": "Twoja ulica i numer domu",
-    "ownCity": "Twój kod pocztowy i miejscowość",
-    "download": {
-      "titleFirma": "Pobierz listę firm",
-      "messageFirma": "Czy chcesz pobrać katalog ok. 5,3 miliona nazw firm w Niemczech? (bez adresów)",
-      "titleStreet": "Pobierz listę ulic",
-      "messageStreet": "Czy chcesz pobrać wszystkie nazwy ulic w Niemczech?",
-      "titleCity": "Pobierz listę miast",
-      "messageCity": "Czy chcesz pobrać wszystkie miasta wraz z ich kodem pocztowym?",
-      "titleJob": "Pobierz listę zawodów",
-      "messageJob": "Czy chcesz pobrać ponad 3500 nazw zawodów?",
-      "button": "Pobierz"
+  "BewerbungGenerieren": "Utwórz nowe podanie",
+  "BewerbungGenerierenText": "Szybko i łatwo stwórz profesjonalne podanie o pracę.",
+  "BewerbungRecycel": "Wykorzystaj ponownie",
+  "BewerbungRecycelText": "Użyj poprzedniego podania, aby szybko dopasować je do innej oferty.",
+  "personalData": "Dane osobowe",
+  "personalDataDescription": "Edytuj tutaj swój adres do podania.",
+  "configureEmail": "Konfiguracja e-maila",
+  "configureEmailDescription": "Skonfiguruj e-mail do wysyłania podań.",
+  "sortAttachments": "Sortowanie załączników",
+  "sortAttachmentsDescription": "Posortuj załączniki do swojej teczki aplikacyjnej.",
+  "placeholderName": "Moje imię i nazwisko",
+  "placeholderStreet": "Ulica i numer domu",
+  "placeholderZip": "Kod pocztowy i miejscowość",
+  "placeholderEmail": "E-mail",
+  "placeholderPassword": "Hasło",
+  "placeholderEmailServer": "Wybierz serwer e-mail",
+  "saveAndClose": "Zapisz i zamknij",
+  "activateAndClose": "Aktywuj",
+  "deactivateAndClose": "Dezaktywuj",
+  "save": "Zapisz",
+  "downloadProgress": "",
+  "bwnzg": "Twoja teczka aplikacyjna jest teraz przygotowywana.",
+  "uploadFiles": "Wybierz pliki",
+  "selectFilesToUpload": "Wybierz załączniki, których chcesz użyć w swojej teczce aplikacyjnej.",
+  "addAttachment": "Dodaj załącznik",
+  "addAttachmentsToApplication": "Dodaj wybrane załączniki do istniejącej teczki aplikacyjnej.",
+  "replaceOldFiles": "Zastąp stare załączniki",
+  "replaceExistingAttachments": "Zastąp dotychczasowe załączniki nowo wybranymi.",
+  "selectedFiles": "Wybrany(e) plik(i)",
+  "searchCompany": "Wyszukaj tutaj adres",
+  "searchCompanyOld": "Wyszukaj adres firmy...",
+  "companyName": "Nazwa firmy",
+  "companyStreet": "Ulica i numer budynku firmy",
+  "companyStreet2": "Ulica i numer budynku firmy",
+  "companyCity": "Kod pocztowy i miejscowość siedziby",
+  "continue": "Dalej",
+  "enterManually": "Wpisz ręcznie",
+  "nameAnsprechpartner": "Imię i nazwisko osoby kontaktowej",
+  "beruf": "Stanowisko",
+  "skillsErfahrung": "Umiejętności / doświadczenie",
+  "fontPlaceholder": "Helvetica (czcionka domyślna)",
+  "generateCoverLetter": "Wygeneruj list motywacyjny",
+  "next": "Dalej",
+  "toHome": "Zamknij",
+  "ok": "Tak, jasne!",
+  "cancel": "Nie",
+  "pleaseWait": "Proszę czekać",
+
+  "Bewerbung": "Podanie",
+  "Profile": "Profil",
+  "Anlagen": "Załączniki",
+  "Info": "Informacje",
+
+  "Fortsetzen": "Kontynuuj",
+
+  "employmentOptions": {
+    "vollzeit": "Pełny etat",
+    "teilzeit": "Część etatu",
+    "minijob": "Minijob"
+  },
+  "applicationOptions": {
+    "initiativ": "Aplikacja spontaniczna",
+    "regulär": "Standardowa",
+    "praktikum": "Praktyka"
+  },
+  "anredeOptions": {
+    "herr": "Pan",
+    "damenUndHerren": "Szanowni Państwo",
+    "frau": "Pani"
+  },
+  "salutation": {
+    "herr": "Szanowny Panie ",
+    "frau": "Szanowna Pani ",
+    "default": "Szanowni Państwo,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Aplikacja spontaniczna na stanowisko ",
+    "regulär": "Podanie o pracę na stanowisko ",
+    "praktikum": "Podanie o praktykę na stanowisko ",
+    "default": "Podanie o pracę na stanowisko "
+  },
+  "employmentChoice": {
+    "fulltime": "na pełny etat",
+    "parttime": "na część etatu",
+    "minijob": "w formie minijobu",
+    "default": ""
+  },
+  "enterText": "Wpisz tutaj swój tekst...",
+  "saveCoverLetter": "Zapisz list motywacyjny",
+  "merge": "Połącz",
+  "viewApplication": "Podgląd podania",
+  "viewApplicationDescription": "Sprawdź teczkę aplikacyjną, aby uniknąć błędów przed pobraniem lub wysłaniem.",
+
+  "downloadDescription": "Zapisz teczkę aplikacyjną jako PDF na swoim urządzeniu i wyślij ją na wybrane stanowisko.",
+  "sendEmail": "Wyślij e-mailem",
+  "sendEmailDescription": "Wyślij teczkę aplikacyjną bezpośrednio e-mailem. Treść wiadomości generuje się automatycznie, ale możesz ją edytować przed wysyłką. ✉️",
+  "terms": {
+    "title": "Ogólne warunki korzystania",
+    "section1": {
+      "heading": "1. Zakres obowiązywania",
+      "content": "Niniejsze ogólne warunki obowiązują podczas korzystania z narzędzia do tworzenia podań. Narzędzie tworzy podania z wykorzystaniem sztucznej inteligencji (AI), dostarczanej przez zewnętrznych dostawców."
     },
-    "Bewerbung": "Podanie",
-    "Profile": "Profil",
-    "Anlagen": "Załączniki",
-    "Info": "Informacja",
-    "Fortsetzen": "Kontynuuj",
-    "profil": {
-      "coinTitle": "Nagroda w monetach",
-      "coinText": "Chcesz zdobywać monety za oglądanie reklam?"
+    "section2": {
+      "heading": "2. Ochrona danych i bezpieczeństwo",
+      "content": "Wszystkie dane osobowe są przechowywane lokalnie i zabezpieczone szyfrowaniem AES-256."
     },
-    "employmentOptions": {
-      "vollzeit": "Pełny etat",
-      "teilzeit": "Pół etatu",
-      "minijob": "Minijob"
+    "section3": {
+      "heading": "3. Wyłączenie odpowiedzialności",
+      "content": "Dostawca nie ponosi odpowiedzialności za poprawność ani kompletność wygenerowanych podań."
     },
-    "applicationOptions": {
-      "initiativ": "Inicjatywne",
-      "regulär": "Standardowe",
-      "praktikum": "Praktyka"
+    "section4": {
+      "heading": "4. Prawa do korzystania",
+      "content": "Korzystanie z narzędzia nie ma charakteru wyłącznego ani przenoszalnego. Zabrania się modyfikacji lub odsprzedaży."
     },
-    "anredeOptions": {
-      "herr": "Pan",
-      "damenUndHerren": "Szanowni Państwo",
-      "frau": "Pani"
-    },
-    "salutation": {
-      "herr": "Szanowny Panie ",
-      "frau": "Szanowna Pani ",
-      "default": "Szanowni Państwo,"
-    },
-    "applicationOptions2": {
-      "initiativ": "Podanie z własnej inicjatywy jako ",
-      "regulär": "Podanie na ogłoszone stanowisko jako ",
-      "praktikum": "Podanie o praktykę jako ",
-      "default": "Podanie na ogłoszone stanowisko jako "
-    },
-    "employmentChoice": {
-      "fulltime": "na pełen etat w Państwa firmie",
-      "parttime": "na część etatu w Państwa firmie",
-      "minijob": "na podstawie minijobu",
-      "default": "w Państwa firmie"
-    },
-    "enterText": "Wpisz tutaj swój tekst...",
-    "saveCoverLetter": "Zapisz list motywacyjny",
-    "merge": "Połącz",
-    "viewApplication": "Zobacz podanie",
-    "viewApplicationDescription": "Przejrzyj teczkę, aby uniknąć błędów przed pobraniem lub wysłaniem.",
-    "downloadDescription": "Zapisz teczkę jako PDF na swoim urządzeniu i wyślij ją na wybrane stanowisko.",
-    "sendEmail": "Wyślij e-mailem",
-    "sendEmailDescription": "Wyślij teczkę bezpośrednio e-mailem. Treść wiadomości jest generowana automatycznie, ale można ją dostosować przed wysyłką. ✉️",
-    "terms": {
-      "title": "Ogólne warunki handlowe",
-      "section1": {
-        "heading": "1. Zakres obowiązywania",
-        "content": "Niniejsze Ogólne Warunki Handlowe dotyczą korzystania z narzędzia do tworzenia podań. Narzędzie generuje podania przy pomocy sztucznej inteligencji (SI) dostarczanej przez zewnętrznych dostawców."
-      },
-      "section2": {
-        "heading": "2. Ochrona danych i bezpieczeństwo",
-        "content": "Wszystkie dane osobowe są zapisywane lokalnie i zabezpieczone szyfrowaniem AES-256."
-      },
-      "section3": {
-        "heading": "3. Wyłączenie odpowiedzialności",
-        "content": "Dostawca nie ponosi odpowiedzialności za poprawność ani kompletność wygenerowanych podań."
-      },
-      "section4": {
-        "heading": "4. Prawa użytkowania",
-        "content": "Korzystanie z narzędzia ma charakter niewyłączny i nieprzenoszalny. Zmiany lub odsprzedaż są zabronione."
-      },
-      "section5": {
-        "heading": "5. Postanowienia końcowe",
-        "content": "Obowiązuje prawo Republiki Federalnej Niemiec."
-      },
-      "email": {
-        "placeholder": "E-mail",
-        "sendButton": "Wyślij e-mail"
-      },
-      "subject": {
-        "placeholder": "Temat"
-      },
-      "message": {
-        "placeholder": "Wiadomość"
-      },
-      "messageText": "Szanowni Państwo,\n\nniniejszym aplikuję na stanowisko {{jobTitle}} w firmie {{companyName}}.\n\nZ poważaniem,\n{{applicantName}}"
-    },
-    "emailSent": {
-      "success": "E-mail wysłany pomyślnie!",
-      "error": "Błąd podczas wysyłania e-maila. Spróbuj ponownie."
-    },
-    "emailConfig": {
-      "server": {
-        "placeholder": "Serwer e-mail"
-      },
-      "port": {
-        "placeholder": "Port"
-      },
-      "username": {
-        "placeholder": "Nazwa użytkownika"
-      },
-      "password": {
-        "placeholder": "Hasło"
-      }
-    },
-    "faq": {
-      "heading": "Najczęściej zadawane pytania",
-      "entry1": {
-        "subheading": "Jak są przechowywane moje dane?",
-        "paragraph": "Twoje dane są u nas bezpieczne. Wszystkie informacje są przechowywane wyłącznie lokalnie na Twoim telefonie w bazie SQLite i chronione silnym szyfrowaniem AES 256-bit. Zapewnia to, że nikt poza Tobą nie ma do nich dostępu. Przywiązujemy dużą wagę do ochrony prywatności i świadomie rezygnujemy z zapisywania Twoich danych na zewnętrznych serwerach lub ich przekazywania.\n\nJeśli korzystasz z usługi e-mail, Twój adres e-mail, hasło i serwer poczty są również chronione tym samym silnym szyfrowaniem, zanim dane zostaną przetworzone. W ten sposób Twoje wrażliwe informacje są zawsze maksymalnie zabezpieczone. Twoja prywatność jest dla nas najwyższym priorytetem – w każdej chwili zachowujesz pełną kontrolę nad swoimi danymi."
-      },
-      "entry2": {
-        "subheading": "Jak działa serwer e-mail?",
-        "paragraph": "Dzięki naszej usłudze e-mail możesz łatwo wysłać swoją teczkę podaniową bezpośrednio na adres e-mail wybranej firmy – wystarczy podać odpowiedni adres kontaktowy. Temat oraz szablon treści wiadomości są generowane automatycznie, dzięki czemu wysyłka jest szybka i prosta.\n\nTwoje dane są przesyłane na nasz serwer z bezpiecznym szyfrowaniem 2048-bit, który odszyfrowuje teczkę i przesyła ją bezpośrednio do odbiorcy. Nie są tworzone żadne logi, a dane nie są przechowywane trwale – informacje znajdują się jedynie tymczasowo w pamięci podręcznej i są natychmiast usuwane po przekazaniu.\n\nPracujemy już nad w pełni lokalną wersją tej usługi, aby w przyszłości dać Ci jeszcze większą kontrolę nad Twoimi danymi. Usługa jest całkowicie bezpłatna i opcjonalna – to Ty decydujesz, czy chcesz z niej korzystać."
-      },
-      "entry3": {
-        "subheading": "Tworzenie i ponowne wykorzystanie podań",
-        "paragraph": "Masz możliwość stworzenia zupełnie nowego listu motywacyjnego lub ponownego wykorzystania istniejącego. Za jedyne około 1 cent za generowanie możesz otrzymać list motywacyjny dostosowany do wybranego stanowiska. Alternatywnie możesz ponownie użyć wcześniejszego listu, wybierając firmę, ponownie definiując osobę kontaktową i edytując tekst według własnych potrzeb. Dzięki temu oszczędzasz czas i pozostajesz elastyczny, aby dostosować każde podanie."
-      }
-    },
-    "privacy": {
-      "heading": "Polityka prywatności",
-      "entry1": {
-        "title": "1. Informacje ogólne",
-        "text": "Niniejsza polityka prywatności wyjaśnia, w jaki sposób narzędzie do tworzenia podań przetwarza dane osobowe."
-      },
-      "entry2": {
-        "title": "2. Zbieranie i przetwarzanie danych",
-        "text": "Narzędzie gromadzi tylko dane niezbędne do stworzenia podania:\n• Wybrane stanowisko\n• Odpowiednie umiejętności (skills)\n• Rodzaj podania"
-      },
-      "entry3": {
-        "title": "3. Przechowywanie i bezpieczeństwo",
-        "text": "Wszystkie dane osobowe są przechowywane wyłącznie na urządzeniu i zabezpieczone szyfrowaniem AES-256-bit."
-      },
-      "entry4": {
-        "title": "4. Przekazywanie osobom trzecim",
-        "text": "Dane osobowe nie są przekazywane osobom trzecim. Jedynie zanonimizowane dane do tworzenia podania są przesyłane do dostawców usług SI."
-      },
-      "entry5": {
-        "title": "5. Prawa użytkowników",
-        "text": "Użytkownicy mają prawo do informacji, sprostowania i usunięcia swoich lokalnie przechowywanych danych."
-      },
-      "entry6": {
-        "title": "6. Zmiany polityki prywatności",
-        "text": "Polityka prywatności może zostać zaktualizowana. Aktualna wersja jest zawsze dostępna w aplikacji."
-      }
-    },
-    "imprint": {
-      "heading": "Nota prawna",
-      "entry1": {
-        "title": "Informacje zgodnie z § 5 TMG",
-        "text": "Rick Wächter\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nNiemcy"
-      },
-      "entry2": {
-        "title": "Kontakt",
-        "text": "Telefon: 01234/56789\nE-mail: kontakt@musterapp.de\nStrona: www.musterapp.de"
-      },
-      "entry3": {
-        "title": "Wyłączenie odpowiedzialności",
-        "text": "Zawartość tej aplikacji została stworzona z najwyższą starannością. Nie możemy jednak zagwarantować poprawności, kompletności ani aktualności treści. Korzystanie z aplikacji odbywa się na własne ryzyko."
-      },
-      "entry4": {
-        "title": "Prawo autorskie",
-        "text": "Wszystkie treści tej aplikacji są chronione prawem autorskim. Używanie jest dozwolone wyłącznie do celów prywatnych i niekomercyjnych. Wszelkie inne wykorzystanie, w szczególności komercyjne, wymaga wyraźnej zgody właściciela praw."
-      }
-    },
-    "navigation": {
-      "faq": "FAQ",
-      "contact": "Kontakt",
-      "agb": "OWH",
-      "privacy": "Prywatność",
-      "impressum": "Nota prawna"
-    },
-    "validation": {
-      "job": {
-        "required": "Zawód jest wymagany!"
-      },
-      "skill": {
-        "required": "Podaj swoje doświadczenie"
-      },
-      "name": {
-        "required": "Podaj swoje imię i nazwisko",
-        "minWords": "Imię i nazwisko muszą składać się z co najmniej 2 słów!"
-      },
-      "generating": "Proszę czekać.\n Twój tekst podania jest generowany."
-    },
-    "alerts": {
-      "error": {
-        "title": "Błąd",
-        "attachments": "Wystąpiły problemy z Twoimi załącznikami, prześlij je ponownie.",
-        "emailSettings": "Sprawdź swoje ustawienia e-mail.",
-        "unknown": "Nieznany błąd"
-      },
-      "success": {
-        "title": "Sukces",
-        "applicationSent": "Twoja teczka podaniowa została pomyślnie wysłana"
-      }
-    },
-    "common": {
-      "ok": "OK"
-    },
-    "upload": {
-      "title": "Sukces",
-      "info": "Pliki zostały pomyślnie zapisane."
-    },
-    "settings": {
-      "title": "Ustawienia",
-      "language": "Język",
-      "theme": "Motyw",
-      "darkMode": "Tryb ciemny",
-      "lightMode": "Tryb jasny",
-      "languageSaved": "Język zapisany",
-      "languageChange": "Zmień język",
-      "apiKey": "Użyj własnego API",
-      "apiKeyKey": "Wprowadź klucz API",
-      "changeMode": "Włącz tryb ciemny",
-      "pleaseApi": "Wybierz proszę API.",
-      "changeApiText": "Użyj klucza API",
-      "apiText": "Użyj swojego klucza OpenAI do indywidualnych listów motywacyjnych.",
-      "apiGoogleText": "Użyj swojego klucza API do wyszukiwania firm i adresów Google.",
-      "languageText": "Zmień język aplikacji (nie dotyczy podań)."
+    "section5": {
+      "heading": "5. Postanowienia końcowe",
+      "content": "Obowiązuje prawo Republiki Federalnej Niemiec."
     },
     "email": {
-      "sendButton": "Wyślij",
-      "placeholder": "Adres e-mail"
+      "placeholder": "E-mail",
+      "sendButton": "Wyślij e-mail"
+    },
+    "subject": {
+      "placeholder": "Temat"
+    },
+    "message": {
+      "placeholder": "Wiadomość"
+    },
+    "messageText": "Szanowni Państwo,\n\nniniejszym aplikuję na stanowisko {{jobTitle}} w firmie {{companyName}}.\n\nZ poważaniem,\n{{applicantName}}"
+  },
+  "emailSent": {
+    "success": "E-mail został wysłany!",
+    "error": "Błąd podczas wysyłania e-maila. Spróbuj ponownie."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "Serwer e-mail"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Nazwa użytkownika"
+    },
+    "password": {
+      "placeholder": "Hasło"
     }
+  },
+  "faq": {
+    "heading": "Najczęściej zadawane pytania",
+    "entry1": {
+      "subheading": "Jak przechowywane są moje dane?",
+      "paragraph": "Twoje dane są u nas bezpieczne. Wszystkie informacje są przechowywane wyłącznie lokalnie na Twoim telefonie w bazie SQLite i chronione silnym szyfrowaniem AES 256-bit. Dzięki temu nikt poza Tobą nie ma do nich dostępu. Przywiązujemy ogromną wagę do prywatności i świadomie rezygnujemy z zapisywania Twoich danych na zewnętrznych serwerach lub udostępniania ich dalej.\n\nJeśli korzystasz z usługi e-mail, Twój adres e-mail, hasło oraz serwer poczty są również chronione tym samym silnym szyfrowaniem, zanim dane zostaną przetworzone. Dzięki temu Twoje wrażliwe informacje pozostają jak najlepiej zabezpieczone. Twoja prywatność jest dla nas priorytetem – zawsze masz pełną kontrolę nad swoimi danymi."
+    },
+    "entry2": {
+      "subheading": "Jak działa serwer e-mail?",
+      "paragraph": "Dzięki naszej usłudze e-mail możesz łatwo wysłać swoją teczkę aplikacyjną bezpośrednio na adres e-mail wybranej firmy – potrzebujesz jedynie właściwego adresu kontaktowego. Temat oraz szablon treści wiadomości generują się automatycznie, dzięki czemu wysyłka jest szybka i wygodna.\n\nTwoje dane są przesyłane na nasz serwer z bezpiecznym szyfrowaniem 2048-bit, a serwer odszyfrowuje teczkę aplikacyjną i przekazuje ją bezpośrednio do odbiorcy. Nie tworzymy logów ani nie przechowujemy danych na stałe – informacje pozostają tylko tymczasowo w pamięci podręcznej i są usuwane natychmiast po przekazaniu.\n\nPracujemy już nad w pełni lokalną wersją tej usługi, aby w przyszłości zapewnić Ci jeszcze większą kontrolę nad danymi. Usługa jest całkowicie darmowa i opcjonalna – to Ty decydujesz, czy chcesz z niej korzystać."
+    },
+    "entry3": {
+      "subheading": "Tworzenie podania i ponowne użycie",
+      "paragraph": "Możesz stworzyć zupełnie nowy list motywacyjny albo ponownie wykorzystać istniejący. Za około 1 cent za wygenerowanie możesz otrzymać list motywacyjny dopasowany do wybranej oferty. Alternatywnie możesz użyć wcześniejszego listu i go zmodyfikować: wybierz firmę, ustaw na nowo osobę kontaktową i edytuj tekst według własnych potrzeb. Dzięki temu oszczędzasz czas i nadal możesz elastycznie dopasować każde podanie."
+    }
+  },
+  "privacy": {
+    "heading": "Polityka prywatności",
+    "entry1": {
+      "title": "1. Informacje ogólne",
+      "text": "Niniejsza polityka prywatności wyjaśnia, w jaki sposób narzędzie do tworzenia podań przetwarza dane osobowe."
+    },
+    "entry2": {
+      "title": "2. Zbieranie i przetwarzanie danych",
+      "text": "Narzędzie zbiera tylko dane niezbędne do stworzenia podania:\n• Pożądane stanowisko\n• Istotne umiejętności (skills)\n• Rodzaj aplikacji"
+    },
+    "entry3": {
+      "title": "3. Przechowywanie i bezpieczeństwo",
+      "text": "Wszystkie dane osobowe są przechowywane wyłącznie na urządzeniu i zabezpieczone szyfrowaniem AES-256-bit."
+    },
+    "entry4": {
+      "title": "4. Przekazywanie danych stronom trzecim",
+      "text": "Dane osobowe nie są przekazywane stronom trzecim. Do dostawców AI przekazywane są jedynie zanonimizowane dane potrzebne do wygenerowania podania."
+    },
+    "entry5": {
+      "title": "5. Prawa użytkowników",
+      "text": "Użytkownicy mają prawo do wglądu, poprawienia oraz usunięcia danych zapisanych lokalnie."
+    },
+    "entry6": {
+      "title": "6. Zmiany polityki prywatności",
+      "text": "Niniejsza polityka prywatności może być aktualizowana. Aktualna wersja jest zawsze dostępna w aplikacji."
+    }
+  },
+  "imprint": {
+    "heading": "Impressum",
+    "entry1": {
+      "title": "Dane zgodnie z § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nNiemcy"
+    },
+    "entry2": {
+      "title": "Kontakt",
+      "text": "E-mail: kontakt@jobape.de\nStrona: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Wyłączenie odpowiedzialności",
+      "text": "Treści w tej aplikacji przygotowano z najwyższą starannością. Nie możemy jednak zagwarantować ich poprawności, kompletności ani aktualności. Korzystanie z aplikacji odbywa się na własne ryzyko."
+    },
+    "entry4": {
+      "title": "Prawa autorskie",
+      "text": "Wszystkie treści tej aplikacji są chronione prawem autorskim. Dozwolone jest korzystanie wyłącznie do celów prywatnych i niekomercyjnych. Każde dalsze użycie, w szczególności komercyjne wykorzystanie, wymaga wyraźnej zgody właściciela praw autorskich."
+    }
+  },
+  "navigation": {
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "agb": "Regulamin",
+    "privacy": "Prywatność",
+    "impressum": "Impressum"
+  },
+  "validation": {
+    "job": {
+      "required": "Stanowisko jest wymagane!"
+    },
+    "skill": {
+      "required": "Podaj proszę swoje doświadczenie"
+    },
+    "name": {
+      "required": "Wpisz proszę imię i nazwisko",
+      "minWords": "Imię i nazwisko musi składać się z co najmniej 2 słów!"
+    },
+    "nameCompany": {
+      "required": "Wpisz proszę nazwę firmy"
+    },
+    "city": {
+      "required": "Podaj proszę kod pocztowy i miasto."
+    },
+    "street": {
+      "required": "Podaj proszę ulicę i numer domu.",
+      "minWords": "Wpis musi składać się z co najmniej 2 słów!"
+    },
+    "email": {
+      "required": "Wpisz proszę adres e-mail",
+      "invalid": "Wpisz proszę poprawny adres e-mail"
+    },
+    "generating": "Proszę czekać.\nTwój tekst podania jest generowany."
+  },
+  "alerts": {
+    "error": {
+      "title": "Błąd",
+      "attachments": "Wystąpiły problemy z załącznikami. Prześlij je ponownie.",
+      "emailSettings": "Sprawdź ustawienia e-mail.",
+      "unknown": "Nieznany błąd"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+
+  "email": {
+    "sendButton": "Wyślij",
+    "placeholder": "Adres e-mail"
+  },
+  "offlineHeader": "Utwórz podanie lokalnie",
+  "offlineMain": "Twórz swoje podanie łatwo i profesjonalnie — całkowicie lokalnie na urządzeniu",
+
+  "settings": {
+    "title": "Ustawienia",
+    "language": "Język menu",
+    "theme": "Motyw",
+    "darkMode": "Tryb ciemny",
+    "lightMode": "Tryb jasny",
+    "languageSaved": "Język zapisany",
+    "languageChange": "Zmień język",
+    "apiKey": "Użyj własnego API",
+    "apiKeyKey": "Wpisz klucz API",
+    "changeMode": "Włącz tryb ciemny",
+    "pleaseApi": "Wybierz proszę API.",
+    "changeApiText": "Użyj klucza API",
+    "apiText": "Użyj swojego klucza OpenAI do spersonalizowanych listów motywacyjnych.",
+    "apiGoogleText": "Użyj swojego klucza API do wyszukiwania firm i adresów w Google.",
+    "languageText": "Zmień język aplikacji (nie dotyczy podań)."
+  },
+  "saveFile": "Zapisz plik",
+  "saveFileText": "Zapisz załączniki, aby móc użyć ich później w swoich teczkach aplikacyjnych.",
+  "Continue": "Pomiń",
+  "first": {
+    "heading": "Witamy w JobApp 2.0",
+    "theDrop": "Wszystkie dane pozostają zaszyfrowane i są przechowywane lokalnie na Twoim urządzeniu – bezpiecznie i prywatnie. Możesz je w każdej chwili zmienić.",
+    "error": "Uzupełnij proszę wszystkie pola"
+  },
+  "ownName": "Twoje imię i nazwisko",
+  "ownStreet": "Twoja ulica i numer domu",
+  "ownCity": "Twój kod pocztowy i miejscowość",
+  "buy1": "0,29 € (40 monet)",
+  "ad": "Reklama (4 monety)",
+  "download": {
+    "titleFirma": "Pobierz listę firm",
+    "messageFirma": "Czy chcesz pobrać katalog ok. 5,3 miliona nazw firm i przedsiębiorstw w Niemczech? (bez adresów)",
+    "titleStreet": "Pobierz listę",
+    "messageStreet": "Czy chcesz pobrać wszystkie nazwy ulic w Niemczech?",
+    "titleCity": "Pobierz listę",
+    "messageCity": "Czy chcesz pobrać wszystkie miasta wraz z kodami pocztowymi?",
+    "titleJob": "Pobierz listę zawodów",
+    "messageJob": "Czy chcesz pobrać ponad 3500 nazw zawodów?",
+    "button": "Pobierz"
+  },
+  "success": {
+    "title": "Sukces",
+    "applicationSent": "Twoja teczka aplikacyjna została pomyślnie wysłana"
+  },
+  "upload": {
+    "title": "Sukces",
+    "info": "Pliki zostały pomyślnie zapisane.",
+    "error": "Wybrano zbyt wiele plików. Wybierz maksymalnie 11 plików."
+  },
+  "profil": {
+    "title": "Sukces",
+    "infoData": "Twoje dane zostały pomyślnie zapisane.",
+    "infoEmail": "Ustawienia e-mail zostały pomyślnie zapisane.",
+    "error": "Błąd",
+    "errorDataEmail": "Wypełnij proszę wszystkie pola.",
+    "errorEmail": "Nie udało się zapisać ustawień e-mail.",
+    "languageError": "Wybierz proszę język.",
+    "languageSaved": "Wybrany język jest teraz dostępny",
+    "buyCancel": "Zakup został anulowany."
   }
+}

@@ -1,6 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   Alert,
   Animated,
@@ -28,6 +29,7 @@ export default function StartApp() {
   const [isButtonVisible,setIsButtonVisible] = useState(false);
   const [isNewerPhone, setIsNewerPhone] = useState(false);
   const DB_NAME = "firstNew.db";
+  const lastClickTime = useRef(0);
   const keyboardHeight = useKeyboardAnimation();
   const anim = useRef(new Animated.Value(0)).current;
   const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -60,6 +62,9 @@ useFocusEffect(() =>  {
      if (await EncryptedStorage.getItem('result')) {
       setIsButtonVisible(true)
      }
+     else {
+      setIsButtonVisible(false)
+     }
    }
    a()
   }
@@ -82,6 +87,12 @@ if (!exists) {
 
 const Application = async () => {
   try{
+       const now = Date.now();
+    if (now - lastClickTime.current < 1000) {
+      console.log("Zu schnell! Doppelklick verhindert.");
+      return;
+    }
+    lastClickTime.current = now;
 const googleKey = await EncryptedStorage.getItem('googleApi');
   const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
   console.log('Database opened');
@@ -170,29 +181,59 @@ useEffect(() => {
 func();
 }, []);
 const OldApplication = () => {
+        const now = Date.now();
+    if (now - lastClickTime.current < 1000) {
+      console.log("Zu schnell! Doppelklick verhindert.");
+      return;
+    }
+        lastClickTime.current = now;
+
    router.push("/old");
 }
+
 const nameOff = () => {
    
 }
 
 const next = async() => {
-
+ const now = Date.now();
+    if (now - lastClickTime.current < 1000) {
+      console.log("Zu schnell! Doppelklick verhindert.");
+      return;
+    }
  switch (await EncryptedStorage.getItem('result')) {
     case 'name':
         router.push("/name");
+        lastClickTime.current = now;
       break;
+        case 'nameOld':
+        router.push("/nameOld");
+        lastClickTime.current = now;
+      break;
+        case 'changeOld':
+        router.push("/changeOld");
+        lastClickTime.current = now;
+      break;
+
       case 'application':
         router.push("/application");
+                lastClickTime.current = now;
+
       break;
       case 'change':
         router.push("/change");
+        lastClickTime.current = now;
+
         break;
       case 'collect':
         router.push("/collect");
-      break;
+        lastClickTime.current = now;
+
+        break;
       case 'email':
         router.push("/email");
+        lastClickTime.current = now;
+
         break;
     default:
       break;
@@ -375,6 +416,9 @@ width:width * 0.9,
     fontWeight: "bold",
     color: "rgb(179, 176, 184)",
     marginBottom: 10,
+    maxWidth: '80%',
+        lineHeight:19,
+
   },
   entryPress: {
     backgroundColor: colors.card3,

@@ -39,11 +39,8 @@ const ChangeScreen = () => {
   const [pdfUri, setPdfUri] = useState(null);
   const [dots, setDots] = useState("");
   const [loading, setLoading] = useState(false);
-  const [collectTag, setCollectTag] = useState(false);
-  const [firstView, setFirstView] = useState(false);
   
   const [popupVisible, setPopupVisible] = useState(true);
-  const [popup, setPopup] = useState('jdbkjsabdkjsadkjsa');
   const {keyboardHeight, reset} = useKeyboardAnimation();
 const [subject, setSubject] = useState('');
   const DB_NAME = 'firstNew.db';
@@ -163,22 +160,24 @@ db.transaction(tx => {
       const myKey = await EncryptedStorage.getItem('key');
    
       const lebenslaufDecryp = await decryp(firstFile.lebenslauf, myKey);
-      console.log('Decrypted Lebenslauf:', lebenslaufDecryp);
-      const extract = lebenslaufDecryp.match(regex);
-      console.log('Extracted filename:', extract);
-       const output = RNFS.LibraryDirectoryPath + '/' + extract[0];
+    
+
+       const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
+      console.log('Lebenslauf path:', output);
        console.log('Output path:', output);
        console.log('Output path:', output);
       const name = await EncryptedStorage.getItem('yourName');
       const anschreibenPath = await decryp(firstFile.anschreiben, myKey);
-
+console.log('Anschreiben path:', anschreibenPath);
       const filePaths = [anschreibenPath, output];
 
       for (let i = 1; i <= 10; i++) {
         const addField = firstFile[`add${i}`];
         if (addField) {
           const addPath = await decryp(addField, myKey);
-          filePaths.push(addPath);
+          const newAddPath = `${RNFS.LibraryDirectoryPath}/${addPath}`;
+          console.log(`Anlage ${i} path:`, newAddPath);
+          filePaths.push(newAddPath);
         }
       }
 
@@ -261,9 +260,9 @@ db.transaction(tx => {
         setPopupVisible(false);
         Alert.alert(
           'Fehler',
-          'Es gab Probleme mit Ihren Anlagen, bitte laden Sie sie erneut hoch.',
+          'Es gab Probleme mit Ihren Anlagen, bitte laden Sie sie erneut hoch. Oder überprüfen Sie im beim Sortieren ob alle funktionieren.',
         );
-         router.push('upload');
+         router.dismissTo('upload');
       }
       return;
     }
@@ -357,10 +356,10 @@ db.transaction(tx => {
 
       const line1 = splitTextIntoLinesWithoutFont(objectSubject, 95);
       line1.forEach(line1 => {
-        page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize, font: helveticaBold });
+        page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
         currentY -= lineHeight;
       });
-      currentY -= 2 * lineHeight;
+      currentY -= 1 * lineHeight;
       console.log('Added subject to PDF');
 
       const paragraphs = text.split('\n\n');
@@ -415,7 +414,7 @@ const {height} = Dimensions.get('window');
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 <SafeAreaView style={styles.innerContainer}>
 
-<Animated.View style={{  height: height * 0.85 -  keyboardHeight * 1.03 }} >
+<Animated.View style={{  height: height * 0.85 -  keyboardHeight * 1.0 }} >
     <TextInput
       style={styles.textArea}
       value={text}
@@ -439,7 +438,7 @@ const {height} = Dimensions.get('window');
       <Card.Title
         title={
           loading
-            ? `Bitte warten${dots}`   // 👈 animierter Text
+            ? `${t('pleaseWait')}${dots}`   // 👈 animierter Text
             : t('saveCoverLetter')
         }
         titleStyle={styles.job}
@@ -465,7 +464,8 @@ const { height, width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   innerContainer: {
     backgroundColor: colors.background,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     justifyContent: 'center',
     
   },
@@ -519,24 +519,13 @@ width:width * 0.9,
     padding: 15,
     textAlignVertical: 'top',
     marginBottom: 2,
-    backgroundColor: colors.card,
+    backgroundColor: colors.card3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     color: 'white',
-  },
-  button: {
-    backgroundColor:colors.card,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
   },
   message: {
     color: 'red',

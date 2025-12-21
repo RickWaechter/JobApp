@@ -1,270 +1,343 @@
 {
-    "BewerbungGenerieren": "Create new application",
-    "BewerbungGenerierenText": "Quickly and easily create a professional application tailored to your skills and preferences.",
-    "BewerbungRecycel": "Resume application",
-    "BewerbungRecycelText": "Use your previous application to quickly adapt a new one for another position.",
-    "personalData": "Personal data",
-    "personalDataDescription": "Edit your personal address information for your application here.",
-    "configureEmail": "Configure e‑mail",
-    "configureEmailDescription": "Set up your e‑mail for sending applications.",
-    "sortAttachments": "Sort attachments",
-    "sortAttachmentsDescription": "Order the attachments for your application package.",
-    "placeholderName": "My name",
-    "placeholderStreet": "Street and house number",
-    "placeholderZip": "Postal code and city",
-    "placeholderEmail": "E‑mail",
-    "placeholderPassword": "Password",
-    "placeholderEmailServer": "Select an e‑mail server",
-    "saveAndClose": "Save & Close",
-    "activateAndClose": "Activate",
-    "deactivateAndClose": "Deactivate",
-    "save": "Save",
-    "uploadFiles": "Select files",
-    "selectFilesToUpload": "Select the PDF attachments you want to use for your application package.",
-    "addAttachment": "Add attachment",
-    "addAttachmentsToApplication": "Add the selected attachments to your existing application package.",
-    "replaceOldFiles": "Replace old attachments",
-    "replaceExistingAttachments": "Replace your existing attachments with the newly selected ones.",
-    "selectedFiles": "Selected file(s)",
-    "searchCompany": "Search address here",
-    "searchCompanyOld": "Search company address...",
-    "companyName": "Company name",
-    "companyStreet": "Search company address",
-    "companyStreet2": "Company street and house number",
-    "companyCity": "Postal code and city of company location",
-    "continue": "Continue",
-    "enterManually": "Enter manually",
-    "nameAnsprechpartner": "Name, contact person",
-    "beruf": "Occupation",
-    "skillsErfahrung": "Skills / Experience",
-    "fontPlaceholder": "Helvetica (default font)",
-    "generateCoverLetter": "Generate cover letter",
-    "next": "Next",
-    "toHome": "Close",
-    "profil": {
-  "coinTitle": "Earn Coins",
-  "coinText": "Would you like to earn coins by watching an ad?"
-},
-    "employmentOptions": {
-      "vollzeit": "Full‑time",
-      "teilzeit": "Part‑time",
-      "minijob": "Mini‑job"
+  "BewerbungGenerieren": "Create new application",
+  "BewerbungGenerierenText": "Create a professional job application quickly and easily.",
+  "BewerbungRecycel": "Reuse",
+  "BewerbungRecycelText": "Use a previous application to quickly adapt it for another position.",
+  "personalData": "Personal details",
+  "personalDataDescription": "Edit your personal address details for your application here.",
+  "configureEmail": "Configure email",
+  "configureEmailDescription": "Set up your email for sending applications.",
+  "sortAttachments": "Sort attachments",
+  "sortAttachmentsDescription": "Arrange the attachments for your application package.",
+  "placeholderName": "My name",
+  "placeholderStreet": "Street and house number",
+  "placeholderZip": "Postal code and city",
+  "placeholderEmail": "Email",
+  "placeholderPassword": "Password",
+  "placeholderEmailServer": "Select an email server",
+  "saveAndClose": "Save & close",
+  "activateAndClose": "Enable",
+  "deactivateAndClose": "Disable",
+  "save": "Save",
+  "downloadProgress": "",
+  "bwnzg": "Your application package is now being compiled.",
+  "uploadFiles": "Select files",
+  "selectFilesToUpload": "Choose the documents you want to include in your application package.",
+  "addAttachment": "Add attachment",
+  "addAttachmentsToApplication": "Add the selected attachments to your existing application package.",
+  "replaceOldFiles": "Replace old attachments",
+  "replaceExistingAttachments": "Replace your existing attachments with the newly selected ones.",
+  "selectedFiles": "Selected file(s)",
+  "searchCompany": "Search address here",
+  "searchCompanyOld": "Search for the company address...",
+  "companyName": "Company name",
+  "companyStreet": "Company street and house number",
+  "companyStreet2": "Company street and house number",
+  "companyCity": "Company postal code and city",
+  "continue": "Continue",
+  "enterManually": "Enter manually",
+  "nameAnsprechpartner": "Contact person name",
+  "beruf": "Job title",
+  "skillsErfahrung": "Skills / experience",
+  "fontPlaceholder": "Helvetica (default font)",
+  "generateCoverLetter": "Generate cover letter",
+  "next": "Next",
+  "toHome": "Close",
+  "ok": "Yes, sure!",
+  "cancel": "No",
+  "pleaseWait": "Please wait",
+
+  "Bewerbung": "Application",
+  "Profile": "Profile",
+  "Anlagen": "Attachments",
+  "Info": "Information",
+
+  "Fortsetzen": "Continue",
+
+  "employmentOptions": {
+    "vollzeit": "Full-time",
+    "teilzeit": "Part-time",
+    "minijob": "Mini-job"
+  },
+  "applicationOptions": {
+    "initiativ": "Speculative",
+    "regulär": "Standard",
+    "praktikum": "Internship"
+  },
+  "anredeOptions": {
+    "herr": "Mr",
+    "damenUndHerren": "Ladies and gentlemen",
+    "frau": "Ms"
+  },
+  "salutation": {
+    "herr": "Dear Mr ",
+    "frau": "Dear Ms ",
+    "default": "Dear Sir or Madam,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Speculative application for the position of ",
+    "regulär": "Application for the position of ",
+    "praktikum": "Internship application for the position of ",
+    "default": "Application for the position of "
+  },
+  "employmentChoice": {
+    "fulltime": "for a full-time position",
+    "parttime": "for a part-time position",
+    "minijob": "on a mini-job basis",
+    "default": ""
+  },
+  "enterText": "Enter your text here...",
+  "saveCoverLetter": "Save cover letter",
+  "merge": "Merge",
+  "viewApplication": "View application",
+  "viewApplicationDescription": "Review your application package to spot any mistakes before downloading or sending.",
+
+  "downloadDescription": "Save the application package as a PDF on your device and send it to your desired position.",
+  "sendEmail": "Send via email",
+  "sendEmailDescription": "Send your application package directly via email. The message text is generated automatically but can be edited before sending.",
+
+  "terms": {
+    "title": "Terms and Conditions",
+    "section1": {
+      "heading": "1. Scope",
+      "content": "These Terms and Conditions apply to the use of the application tool. The tool creates job applications using artificial intelligence (AI) provided by external third-party providers."
     },
-    "applicationOptions": {
-      "initiativ": "Speculative",
-      "regulär": "Regular",
-      "praktikum": "Internship"
+    "section2": {
+      "heading": "2. Data protection and security",
+      "content": "All personal data is stored locally and secured with AES-256 encryption."
     },
-    "anredeOptions": {
-      "herr": "Mr",
-      "damenUndHerren": "Ladies and Gentlemans",
-      "frau": "Ms"
+    "section3": {
+      "heading": "3. Disclaimer",
+      "content": "The provider assumes no liability for the accuracy or completeness of the generated applications."
     },
-    "salutation": {
-      "herr": "Dear Mr ",
-      "frau": "Dear Ms ",
-      "default": "Dear Sir or Madam,"
+    "section4": {
+      "heading": "4. Rights of use",
+      "content": "Use of the tool is non-exclusive and non-transferable. Modifications or resale are prohibited."
     },
-    "applicationOptions2": {
-      "initiativ": "Speculative application as ",
-      "regulär": "Application for the advertised position as ",
-      "praktikum": "Internship application as ",
-      "default": "Application for the advertised position as "
+    "section5": {
+      "heading": "5. Final provisions",
+      "content": "The law of the Federal Republic of Germany shall apply."
     },
-    "employmentChoice": {
-      "fulltime": "for full time employment at your company",
-      "parttime": "for part time employment at your company",
-      "minijob": "on a mini job basis",
-      "default": "at your company"
-    },
-    "enterText": "Enter your text here...",
-    "saveCoverLetter": "Save cover letter",
-    "merge": "Merge",
-    "Fortsetzen" : "Continue",
-    "viewApplication": "View application",
-    "viewApplicationDescription": "Check your application package for errors before downloading or sending.",
-    "download": "Download",
-    "downloadDescription": "Save the application package as a PDF on your device and send it for your desired position.",
-    "sendEmail": "Send by e‑mail",
-    "sendEmailDescription": "Send your application package directly via e‑mail. The message text is generated automatically, but you can adjust it before sending. ✉️",
-    "terms": {
-      "title": "Terms and Conditions",
-      "section1": {
-        "heading": "1. Scope",
-        "content": "These Terms and Conditions apply to the use of the application tool. The tool creates applications using artificial intelligence (AI) provided by external third‑party providers."
-      },
-      "section2": {
-        "heading": "2. Data Protection and Security",
-        "content": "All personal data is stored locally and secured with AES‑256 encryption."
-      },
-      "section3": {
-        "heading": "3. Disclaimer of Liability",
-        "content": "The provider accepts no liability for the accuracy or completeness of the generated applications."
-      },
-      "section4": {
-        "heading": "4. Rights of Use",
-        "content": "Use of the tool is non‑exclusive and non‑transferable. Modifications or resale are prohibited."
-      },
-      "section5": {
-        "heading": "5. Final Provisions",
-        "content": "The law of the Federal Republic of Germany applies."
-      },
-      "email": {
-        "placeholder": "E‑mail",
-        "sendButton": "Send e‑mail"
-      },
-      "subject": {
-        "placeholder": "Subject"
-      },
-      "message": {
-        "placeholder": "Message"
-      },
-      "messageText": "Dear Sir or Madam,\n\nI hereby apply for the position of {{jobTitle}} at {{companyName}}.\n\nKind regards,\n{{applicantName}}"
-    },
-    "emailSent": {
-      "success": "E‑mail sent successfully!",
-      "error": "Error sending e‑mail. Please try again."
-    },
-    "emailConfig": {
-      "server": {
-        "placeholder": "E‑mail server"
-      },
-      "port": {
-        "placeholder": "Port"
-      },
-      "username": {
-        "placeholder": "Username"
-      },
-      "password": {
-        "placeholder": "Password"
-      }
-    },
-    "faq": {
-      "heading": "Frequently Asked Questions",
-      "entry1": {
-        "subheading": "How is my data stored?",
-        "paragraph": "Your data is safe with us. All your information is stored solely on your phone in an SQLite database and protected with strong 256‑bit AES encryption. This ensures that no one but you has access to it. We place great importance on data protection and deliberately refrain from storing or sharing your data on external servers.\n\nIf you use the e‑mail service, your e‑mail address, password and mail server are also protected with the same strong encryption before any processing. This keeps your sensitive information as secure as possible at all times. Your privacy is our top priority – you always retain full control over your data."
-      },
-      "entry2": {
-        "subheading": "How does the e‑mail server work?",
-        "paragraph": "With our e‑mail service you can easily send your application package directly to the e‑mail address of your desired company – all you need is the relevant contact address. The subject line and a template for the e‑mail text are generated automatically so the process is quick and straightforward.\n\nYour data is transferred to our server using secure 2048‑bit encryption, where the application package is decrypted and forwarded directly to the recipient. No logs are created and no data is stored permanently – the information remains only temporarily in cache and is deleted immediately after forwarding.\n\nWe are already working on a fully local version of this service so you will have even more control over your data in the future. The service is completely free and optional – you decide whether you want to use it."
-      },
-      "entry3": {
-        "subheading": "Application creation and recycling",
-        "paragraph": "You can either have a completely new cover letter created or reuse an existing one. For only about 1 cent per generation, you can have a cover letter tailored to the desired position produced. Alternatively, you can reuse and modify a previous cover letter by selecting the company, redefining the contact person and editing the text as you wish. This saves you time while keeping every application flexible to adapt."
-      }
-    },
-    "upload": {
-  "title": "Success",
-  "info": "Files have been saved successfully."
-},
-    "privacy": {
-      "heading": "Privacy Policy",
-      "entry1": {
-        "title": "1. General Information",
-        "text": "This privacy policy explains how the application tool processes personal data."
-      },
-      "entry2": {
-        "title": "2. Collection and Processing of Data",
-        "text": "The tool only collects the data necessary to create an application:\n• Desired position\n• Relevant skills\n• Type of application"
-      },
-      "entry3": {
-        "title": "3. Storage and Security",
-        "text": "All personal data is stored exclusively on the device and secured with AES‑256‑bit encryption."
-      },
-      "entry4": {
-        "title": "4. Disclosure to Third Parties",
-        "text": "No personal data is passed on to third parties. Only anonymised data is transmitted to AI service providers for generating the application."
-      },
-      "entry5": {
-        "title": "5. Users' Rights",
-        "text": "Users have the right to access, rectify and delete their locally stored data."
-      },
-      "entry6": {
-        "title": "6. Changes to the Privacy Policy",
-        "text": "This privacy policy may be updated. The current version is always available in the app."
-      }
-    },
-    "imprint": {
-      "heading": "Legal Notice",
-      "entry1": {
-        "title": "Information according to § 5 TMG",
-        "text": "Rick Wächter\nEduard‑Spranger‑Straße 7\n71634 Ludwigsburg\nGermany"
-      },
-      "entry2": {
-        "title": "Contact",
-        "text": "Phone: 01234/56789\nE‑mail: kontakt@musterapp.de\nWebsite: www.musterapp.de"
-      },
-      "entry3": {
-        "title": "Disclaimer",
-        "text": "The contents of this app were created with the greatest possible care. However, we cannot guarantee the correctness, completeness or up‑to‑dateness of the contents. The use of the app is at your own risk."
-      },
-      "entry4": {
-        "title": "Copyright",
-        "text": "All contents of this app are protected by copyright. Use is permitted only for private and non‑commercial purposes. Any further use, in particular commercial exploitation, requires the express consent of the copyright holder."
-      }
-    },
-    "navigation": {
-      "faq": "FAQ",
-      "contact": "Contact",
-      "agb": "Terms",
-      "privacy": "Privacy",
-      "impressum": "Imprint"
-    },
-    "validation": {
-      "job": {
-        "required": "Occupation is required!"
-      },
-      "skill": {
-        "required": "Please enter your experience"
-      },
-      "name": {
-        "required": "Please enter your name",
-        "minWords": "The name must consist of at least 2 words!"
-      },
-      "generating": "Please wait. Your application text is being generated."
-    },
-    "alerts": {
-      "error": {
-        "title": "Error",
-        "attachments": "There were problems with your attachments, please upload them again.",
-        "emailSettings": "Please check your e‑mail settings.",
-        "unknown": "Unknown error"
-      },
-      "success": {
-        "title": "Success",
-        "applicationSent": "Your application package was sent successfully"
-      }
-    },
-    "common": {
-      "ok": "OK"
-    },
-    "settings": {
-      "title": "Settings",
-      "language": "Language",
-      "theme": "Theme",
-      "darkMode": "Dark mode",
-      "lightMode": "Light mode",
-      "languageSaved": "Language saved",
-      "languageChange": "Change language",
-      "apiKey": "Use own API",
-      "apiKeyKey": "Enter API key",
-      "changeMode": "Enable dark mode",
-      "pleaseApi": "Please select an API.",
-      "changeApiText": "Use API key",
-      "apiText": "Use your OpenAI key, for example, for individual cover letters.",
-      "apiGoogleText": "Use your Google API key for Google company and address search.",
-      "languageText": "Change the app language (does not affect applications).",
-      "googlePlaces": "Google Places API"
-      
-    },
-    "Bewerbung": "Application",
-    "Profile": "Profil",
-    "Anlagen": "Attachments",
-    "Info": "Info",
-    
     "email": {
-      "sendButton": "Send",
-      "placeholder": "E‑mail address"
+      "placeholder": "Email",
+      "sendButton": "Send email"
+    },
+    "subject": {
+      "placeholder": "Subject"
+    },
+    "message": {
+      "placeholder": "Message"
+    },
+    "messageText": "Dear Sir or Madam,\n\nI am applying for the position as {{jobTitle}} at {{companyName}}.\n\nKind regards,\n{{applicantName}}"
+  },
+
+  "emailSent": {
+    "success": "Email sent successfully!",
+    "error": "Error sending the email. Please try again."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "Email server"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Username"
+    },
+    "password": {
+      "placeholder": "Password"
     }
+  },
+
+  "faq": {
+    "heading": "Frequently asked questions",
+    "entry1": {
+      "subheading": "How is my data stored?",
+      "paragraph": "Your data is in safe hands. All your information is stored exclusively locally on your phone in a SQLite database and protected with strong 256-bit AES encryption. This ensures that no one but you can access it. We place great importance on privacy and deliberately avoid storing or sharing your data on external servers.\n\nIf you use the email service, your email address, password, and mail server are also protected with the same strong encryption before the data is processed. This keeps your sensitive information as secure as possible. Your privacy is our top priority — you always remain in full control of your data."
+    },
+    "entry2": {
+      "subheading": "How does the email server work?",
+      "paragraph": "With our email service, you can easily send your application package directly to your chosen company's email address — all you need is the correct contact email. The subject line and an email template are generated automatically, making sending fast and convenient.\n\nYour data is transmitted to our server using secure 2048-bit encryption. The server decrypts the application package and forwards it directly to the recipient. No logs are created and no data is stored permanently — the information is only held temporarily in cache and deleted immediately after forwarding.\n\nWe are already working on a fully local version of this service so you will have even more control over your data in the future. The service is completely free and optional — you decide whether you want to use it."
+    },
+    "entry3": {
+      "subheading": "Application creation and reuse",
+      "paragraph": "You can either create a completely new cover letter or reuse an existing one. For only about 1 cent per generation, you can have a cover letter generated that is tailored to the position you want. Alternatively, you can reuse and modify a previous cover letter by selecting the company, redefining the contact person, and editing the text as you like. This saves time while still allowing you to adapt each application as needed."
+    }
+  },
+
+  "privacy": {
+    "heading": "Privacy policy",
+    "entry1": {
+      "title": "1. General information",
+      "text": "This privacy policy explains how the application tool processes personal data."
+    },
+    "entry2": {
+      "title": "2. Collection and processing of data",
+      "text": "The tool only collects the data necessary to create an application:\n• Desired job position\n• Relevant skills\n• Type of application"
+    },
+    "entry3": {
+      "title": "3. Storage and security",
+      "text": "All personal data is stored exclusively on the device and protected with AES-256-bit encryption."
+    },
+    "entry4": {
+      "title": "4. Disclosure to third parties",
+      "text": "No personal data is shared with third parties. Only anonymized data used to generate the application is transmitted to AI service providers."
+    },
+    "entry5": {
+      "title": "5. User rights",
+      "text": "Users have the right to access, correct, and delete their locally stored data."
+    },
+    "entry6": {
+      "title": "6. Changes to the privacy policy",
+      "text": "This privacy policy may be updated. The current version is always available in the app."
+    }
+  },
+
+  "imprint": {
+    "heading": "Legal notice",
+    "entry1": {
+      "title": "Information according to § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermany"
+    },
+    "entry2": {
+      "title": "Contact",
+      "text": "Email: kontakt@jobape.de\nWebsite: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Disclaimer",
+      "text": "The contents of this app have been created with the greatest possible care. However, we cannot guarantee the accuracy, completeness, or timeliness of the content. Use of the app is at your own risk."
+    },
+    "entry4": {
+      "title": "Copyright",
+      "text": "All content in this app is protected by copyright. Use is permitted for private and non-commercial purposes only. Any further use, in particular commercial exploitation, requires the express consent of the copyright holder."
+    }
+  },
+
+  "navigation": {
+    "faq": "FAQ",
+    "contact": "Contact",
+    "agb": "Terms",
+    "privacy": "Privacy",
+    "impressum": "Legal notice"
+  },
+
+  "validation": {
+    "job": {
+      "required": "Job title is required!"
+    },
+    "skill": {
+      "required": "Please enter your experience"
+    },
+    "name": {
+      "required": "Please enter your name",
+      "minWords": "The name must contain at least 2 words!"
+    },
+    "nameCompany": {
+      "required": "Please enter the company name"
+    },
+    "city": {
+      "required": "Please enter the postal code and city."
+    },
+    "street": {
+      "required": "Please enter the street and house number.",
+      "minWords": "The street must contain at least 2 words!"
+    },
+    "email": {
+      "required": "Please enter an email address",
+      "invalid": "Please enter a valid email address"
+    },
+    "generating": "Please wait.\nYour application text is being generated."
+  },
+
+  "alerts": {
+    "error": {
+      "title": "Error",
+      "attachments": "There were issues with your attachments. Please upload them again.",
+      "emailSettings": "Please check your email settings.",
+      "unknown": "Unknown error"
+    }
+  },
+
+  "common": {
+    "ok": "OK"
+  },
+
+  "email": {
+    "sendButton": "Send",
+    "placeholder": "Email address"
+  },
+
+  "offlineHeader": "Create an application locally",
+  "offlineMain": "Create your application easily and professionally — fully locally on your device",
+
+  "settings": {
+    "title": "Settings",
+    "language": "Menu language",
+    "theme": "Theme",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "languageSaved": "Language saved",
+    "languageChange": "Change language",
+    "apiKey": "Use your own API",
+    "apiKeyKey": "Enter API key",
+    "changeMode": "Enable dark mode",
+    "pleaseApi": "Please choose an API.",
+    "changeApiText": "Use API key",
+    "apiText": "Use your OpenAI key for customized cover letters.",
+    "apiGoogleText": "Use your API key for Google company and address search.",
+    "languageText": "Change the app language (does not affect the applications)."
+  },
+
+  "saveFile": "Save file",
+  "saveFileText": "Save attachments so you can use them later for your application packages.",
+  "Continue": "Skip",
+
+  "first": {
+    "heading": "Welcome to JobApp 2.0",
+    "theDrop": "All data remains encrypted and stored locally on your device — secure and private. You can change this at any time.",
+    "error": "Please fill in all fields"
+  },
+
+  "ownName": "Your first and last name",
+  "ownStreet": "Your street and house number",
+  "ownCity": "Your postal code and city",
+
+  "buy1": "$ 0.29 (40 coins)",
+  "ad": "Ad (4 coins)",
+
+  "download": {
+    "titleFirma": "Download company list",
+    "messageFirma": "Would you like to download the directory of approx. 5.3 million company names in Germany? (No addresses)",
+    "titleStreet": "Download list",
+    "messageStreet": "Would you like to download all street names in Germany?",
+    "titleCity": "Download list",
+    "messageCity": "Would you like to download all cities including their postal codes?",
+    "titleJob": "Download job list",
+    "messageJob": "Would you like to download more than 3,500 job titles?",
+    "button": "Download"
+  },
+
+  "success": {
+    "title": "Success",
+    "applicationSent": "Your application package was sent successfully"
+  },
+
+  "upload": {
+    "title": "Success",
+    "info": "Files were saved successfully.",
+    "error": "Too many files selected. Please select a maximum of 11 files."
+  },
+
+  "profil": {
+    "title": "Success",
+    "infoData": "Your data was saved successfully.",
+    "infoEmail": "Your email settings were saved successfully.",
+    "error": "Error",
+    "errorDataEmail": "Please fill in all fields.",
+    "errorEmail": "Your email settings could not be saved.",
+    "languageError": "Please select a language.",
+    "languageSaved": "Your selected language is now available",
+    "buyCancel": "Purchase was cancelled."
   }
+}
