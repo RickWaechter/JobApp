@@ -1,0 +1,172 @@
+Date : 2025-12-31 11:38:22
+Directory : /home/rick/jobape
+Total : 100 files,  159804 codes, 354 comments, 14730 blanks, all 174888 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| MS SQL             |          2 |    128,902 |          0 |     13,067 |    141,969 |
+| JSON               |         18 |     19,513 |          0 |        108 |     19,621 |
+| JavaScript         |         41 |     10,221 |        280 |      1,335 |     11,836 |
+| TypeScript JSX     |         15 |        421 |         17 |         65 |        503 |
+| Swift              |          2 |        244 |          9 |         60 |        313 |
+| JSON with Comments |          3 |        143 |          0 |          3 |        146 |
+| TypeScript         |          8 |        110 |         18 |         31 |        159 |
+| JavaScript JSX     |          2 |         96 |          0 |         12 |        108 |
+| Kotlin             |          2 |         48 |         21 |         13 |         82 |
+| Groovy             |          1 |         35 |          4 |          5 |         44 |
+| Markdown           |          1 |         31 |          0 |         20 |         51 |
+| Ruby               |          2 |         29 |          4 |          8 |         41 |
+| XML                |          2 |         11 |          1 |          2 |         14 |
+| PostCSS            |          1 |          0 |          0 |          1 |          1 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                   |        100 |    159,804 |        354 |     14,730 |    174,888 |
+| . (Files)                                                                                           |         16 |     15,890 |         10 |         46 |     15,946 |
+| __tests__                                                                                           |          1 |          8 |          3 |          3 |         14 |
+| app                                                                                                 |         16 |      7,669 |        147 |        932 |      8,748 |
+| app (Files)                                                                                         |         12 |      5,235 |         67 |        556 |      5,858 |
+| app/(tabs)                                                                                          |          4 |      2,434 |         80 |        376 |      2,890 |
+| assets                                                                                              |          1 |          9 |          1 |          1 |         11 |
+| assets/images                                                                                       |          1 |          9 |          1 |          1 |         11 |
+| backup                                                                                              |          1 |        837 |          5 |        118 |        960 |
+| comp                                                                                                |          2 |         96 |          0 |         12 |        108 |
+| components                                                                                          |          9 |        290 |         14 |         38 |        342 |
+| components (Files)                                                                                  |          6 |        193 |          3 |         25 |        221 |
+| components/ui                                                                                       |          3 |         97 |         11 |         13 |        121 |
+| constants                                                                                           |          1 |         41 |          8 |          5 |         54 |
+| hooks                                                                                               |          3 |         28 |          7 |         11 |         46 |
+| inc                                                                                                 |         14 |        871 |         94 |        149 |      1,114 |
+| local                                                                                               |         16 |      4,476 |         11 |        192 |      4,679 |
+| local (Files)                                                                                       |          2 |        601 |          9 |         85 |        695 |
+| local/translate                                                                                     |         14 |      3,875 |          2 |        107 |      3,984 |
+| modules                                                                                             |         16 |        451 |         38 |        114 |        603 |
+| modules/expo-mapkit                                                                                 |         16 |        451 |         38 |        114 |        603 |
+| modules/expo-mapkit (Files)                                                                         |          3 |         24 |          2 |          3 |         29 |
+| modules/expo-mapkit/android                                                                         |          4 |         85 |         25 |         19 |        129 |
+| modules/expo-mapkit/android (Files)                                                                 |          1 |         35 |          4 |          5 |         44 |
+| modules/expo-mapkit/android/src                                                                     |          3 |         50 |         21 |         14 |         85 |
+| modules/expo-mapkit/android/src/main                                                                |          3 |         50 |         21 |         14 |         85 |
+| modules/expo-mapkit/android/src/main (Files)                                                        |          1 |          2 |          0 |          1 |          3 |
+| modules/expo-mapkit/android/src/main/java                                                           |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo                                                      |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo/modules                                              |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo/modules/mapkit                                       |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/ios                                                                             |          3 |        263 |         10 |         64 |        337 |
+| modules/expo-mapkit/src                                                                             |          6 |         79 |          1 |         28 |        108 |
+| nav                                                                                                 |          1 |        147 |          6 |         28 |        181 |
+| scripts                                                                                             |          1 |         89 |         10 |         14 |        113 |
+| www                                                                                                 |          2 |    128,902 |          0 |     13,067 |    141,969 |
++-----------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                            | language           | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| /home/rick/jobape/.eslintrc.js                                                                      | JavaScript         |          4 |          0 |          1 |          5 |
+| /home/rick/jobape/.prettierrc.js                                                                    | JavaScript         |          5 |          0 |          1 |          6 |
+| /home/rick/jobape/.watchmanconfig                                                                   | JSON               |          1 |          0 |          1 |          2 |
+| /home/rick/jobape/App.js                                                                            | JavaScript         |          4 |          3 |          3 |         10 |
+| /home/rick/jobape/Gemfile                                                                           | Ruby               |         10 |          3 |          4 |         17 |
+| /home/rick/jobape/README.md                                                                         | Markdown           |         31 |          0 |         20 |         51 |
+| /home/rick/jobape/__tests__/App.test.tsx                                                            | TypeScript JSX     |          8 |          3 |          3 |         14 |
+| /home/rick/jobape/app.json                                                                          | JSON with Comments |        105 |          0 |          1 |        106 |
+| /home/rick/jobape/app/(tabs)/_layout.tsx                                                            | TypeScript JSX     |         44 |          0 |          4 |         48 |
+| /home/rick/jobape/app/(tabs)/index.js                                                               | JavaScript         |        385 |          2 |         63 |        450 |
+| /home/rick/jobape/app/(tabs)/profil.js                                                              | JavaScript         |      1,165 |         24 |        166 |      1,355 |
+| /home/rick/jobape/app/(tabs)/upload.js                                                              | JavaScript         |        840 |         54 |        143 |      1,037 |
+| /home/rick/jobape/app/_layout.tsx                                                                   | TypeScript JSX     |         32 |          0 |          9 |         41 |
+| /home/rick/jobape/app/application.js                                                                | JavaScript         |      1,074 |          6 |         74 |      1,154 |
+| /home/rick/jobape/app/change.js                                                                     | JavaScript         |        450 |          5 |         83 |        538 |
+| /home/rick/jobape/app/changeOld.js                                                                  | JavaScript         |        423 |         14 |         70 |        507 |
+| /home/rick/jobape/app/collect.js                                                                    | JavaScript         |        400 |         11 |         69 |        480 |
+| /home/rick/jobape/app/email.js                                                                      | JavaScript         |        675 |          5 |         39 |        719 |
+| /home/rick/jobape/app/first.js                                                                      | JavaScript         |        433 |          7 |         74 |        514 |
+| /home/rick/jobape/app/modal.tsx                                                                     | TypeScript JSX     |         26 |          0 |          4 |         30 |
+| /home/rick/jobape/app/name.js                                                                       | JavaScript         |        412 |          5 |         24 |        441 |
+| /home/rick/jobape/app/nameOld.js                                                                    | JavaScript         |        399 |          5 |         20 |        424 |
+| /home/rick/jobape/app/old.js                                                                        | JavaScript         |        375 |          3 |         21 |        399 |
+| /home/rick/jobape/app/uploadFirst.js                                                                | JavaScript         |        536 |          6 |         69 |        611 |
+| /home/rick/jobape/assets/images/background.svg                                                      | XML                |          9 |          1 |          1 |         11 |
+| /home/rick/jobape/babel.config.js                                                                   | JavaScript         |         10 |          0 |          1 |         11 |
+| /home/rick/jobape/backup/application.js                                                             | JavaScript         |        837 |          5 |        118 |        960 |
+| /home/rick/jobape/comp/clearButton.jsx                                                              | JavaScript JSX     |         25 |          0 |          4 |         29 |
+| /home/rick/jobape/comp/sorter.jsx                                                                   | JavaScript JSX     |         71 |          0 |          8 |         79 |
+| /home/rick/jobape/components/external-link.tsx                                                      | TypeScript JSX     |         21 |          2 |          3 |         26 |
+| /home/rick/jobape/components/haptic-tab.tsx                                                         | TypeScript JSX     |         16 |          1 |          2 |         19 |
+| /home/rick/jobape/components/hello-wave.tsx                                                         | TypeScript JSX     |         18 |          0 |          2 |         20 |
+| /home/rick/jobape/components/parallax-scroll-view.tsx                                               | TypeScript JSX     |         73 |          0 |          7 |         80 |
+| /home/rick/jobape/components/themed-text.tsx                                                        | TypeScript JSX     |         55 |          0 |          6 |         61 |
+| /home/rick/jobape/components/themed-view.tsx                                                        | TypeScript JSX     |         10 |          0 |          5 |         15 |
+| /home/rick/jobape/components/ui/collapsible.tsx                                                     | TypeScript JSX     |         40 |          0 |          6 |         46 |
+| /home/rick/jobape/components/ui/icon-symbol.ios.tsx                                                 | TypeScript JSX     |         31 |          0 |          2 |         33 |
+| /home/rick/jobape/components/ui/icon-symbol.tsx                                                     | TypeScript JSX     |         26 |         11 |          5 |         42 |
+| /home/rick/jobape/constants/theme.ts                                                                | TypeScript         |         41 |          8 |          5 |         54 |
+| /home/rick/jobape/eas.json                                                                          | JSON with Comments |         21 |          0 |          1 |         22 |
+| /home/rick/jobape/eslint.config.js                                                                  | JavaScript         |          8 |          1 |          2 |         11 |
+| /home/rick/jobape/hooks/use-color-scheme.ts                                                         | TypeScript         |          1 |          0 |          1 |          2 |
+| /home/rick/jobape/hooks/use-color-scheme.web.ts                                                     | TypeScript         |         13 |          3 |          6 |         22 |
+| /home/rick/jobape/hooks/use-theme-color.ts                                                          | TypeScript         |         14 |          4 |          4 |         22 |
+| /home/rick/jobape/inc/CutLine.js                                                                    | JavaScript         |          5 |          0 |          2 |          7 |
+| /home/rick/jobape/inc/Keyboard.js                                                                   | JavaScript         |         31 |          1 |         11 |         43 |
+| /home/rick/jobape/inc/ba.css                                                                        | PostCSS            |          0 |          0 |          1 |          1 |
+| /home/rick/jobape/inc/colors.js                                                                     | JavaScript         |         15 |          0 |          1 |         16 |
+| /home/rick/jobape/inc/cryp.js                                                                       | JavaScript         |         78 |          9 |         20 |        107 |
+| /home/rick/jobape/inc/crypNew.js                                                                    | JavaScript         |         50 |         34 |         12 |         96 |
+| /home/rick/jobape/inc/date.js                                                                       | JavaScript         |          9 |          2 |          4 |         15 |
+| /home/rick/jobape/inc/db.js                                                                         | JavaScript         |        144 |          1 |         32 |        177 |
+| /home/rick/jobape/inc/downloadDb.js                                                                 | JavaScript         |         50 |          3 |          8 |         61 |
+| /home/rick/jobape/inc/downloader.js                                                                 | JavaScript         |        173 |         31 |         24 |        228 |
+| /home/rick/jobape/inc/header.js                                                                     | JavaScript         |        122 |          0 |         13 |        135 |
+| /home/rick/jobape/inc/pan.js                                                                        | JavaScript         |         28 |          8 |          3 |         39 |
+| /home/rick/jobape/inc/popup.js                                                                      | JavaScript         |         82 |          4 |         11 |         97 |
+| /home/rick/jobape/inc/popupDownload.js                                                              | JavaScript         |         84 |          1 |          7 |         92 |
+| /home/rick/jobape/index.js                                                                          | JavaScript         |          4 |          3 |          3 |         10 |
+| /home/rick/jobape/jest.config.js                                                                    | JavaScript         |          3 |          0 |          1 |          4 |
+| /home/rick/jobape/local/First.js                                                                    | JavaScript         |        556 |          7 |         81 |        644 |
+| /home/rick/jobape/local/i18n.js                                                                     | JavaScript         |         45 |          2 |          4 |         51 |
+| /home/rick/jobape/local/translate/ar.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/de.json                                                           | JSON               |        320 |          0 |         11 |        331 |
+| /home/rick/jobape/local/translate/en.json                                                           | JSON               |        319 |          0 |         24 |        343 |
+| /home/rick/jobape/local/translate/fr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/gr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/i18n.js                                                           | JavaScript         |         45 |          2 |          4 |         51 |
+| /home/rick/jobape/local/translate/it.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/jp.json                                                           | JSON               |        319 |          0 |          8 |        327 |
+| /home/rick/jobape/local/translate/new.json                                                          | JSON               |          1 |          0 |          4 |          5 |
+| /home/rick/jobape/local/translate/nl.json                                                           | JSON               |        319 |          0 |          8 |        327 |
+| /home/rick/jobape/local/translate/pl.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/ru.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/tr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/local/translate/ua.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/jobape/metro.config.js                                                                   | JavaScript         |          6 |          0 |          4 |         10 |
+| /home/rick/jobape/modules/expo-mapkit/android/build.gradle                                          | Groovy             |         35 |          4 |          5 |         44 |
+| /home/rick/jobape/modules/expo-mapkit/android/src/main/AndroidManifest.xml                          | XML                |          2 |          0 |          1 |          3 |
+| /home/rick/jobape/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt | Kotlin             |         27 |         16 |          8 |         51 |
+| /home/rick/jobape/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt   | Kotlin             |         21 |          5 |          5 |         31 |
+| /home/rick/jobape/modules/expo-mapkit/expo-module.config.json                                       | JSON               |          9 |          0 |          1 |         10 |
+| /home/rick/jobape/modules/expo-mapkit/index.ts                                                      | TypeScript         |          3 |          2 |          1 |          6 |
+| /home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkit.podspec                                        | Ruby               |         19 |          1 |          4 |         24 |
+| /home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkitModule.swift                                    | Swift              |        214 |          7 |         53 |        274 |
+| /home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkitView.swift                                      | Swift              |         30 |          2 |          7 |         39 |
+| /home/rick/jobape/modules/expo-mapkit/package.json                                                  | JSON               |         12 |          0 |          1 |         13 |
+| /home/rick/jobape/modules/expo-mapkit/src/ExpoMapkit.types.ts                                       | TypeScript         |         15 |          0 |          5 |         20 |
+| /home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitModule.ts                                       | TypeScript         |          8 |          1 |          4 |         13 |
+| /home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitModule.web.ts                                   | TypeScript         |         15 |          0 |          5 |         20 |
+| /home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitView.tsx                                        | TypeScript JSX     |          8 |          0 |          4 |         12 |
+| /home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitView.web.tsx                                    | TypeScript JSX     |         13 |          0 |          3 |         16 |
+| /home/rick/jobape/modules/expo-mapkit/src/index.js                                                  | JavaScript         |         20 |          0 |          7 |         27 |
+| /home/rick/jobape/nav/navigator.js                                                                  | JavaScript         |        147 |          6 |         28 |        181 |
+| /home/rick/jobape/package-lock.json                                                                 | JSON               |     15,555 |          0 |          1 |     15,556 |
+| /home/rick/jobape/package.json                                                                      | JSON               |        106 |          0 |          1 |        107 |
+| /home/rick/jobape/scripts/reset-project.js                                                          | JavaScript         |         89 |         10 |         14 |        113 |
+| /home/rick/jobape/tsconfig.json                                                                     | JSON with Comments |         17 |          0 |          1 |         18 |
+| /home/rick/jobape/www/city.db                                                                       | MS SQL             |     12,619 |          0 |      2,057 |     14,676 |
+| /home/rick/jobape/www/street.db                                                                     | MS SQL             |    116,283 |          0 |     11,010 |    127,293 |
+| Total                                                                                               |                    |    159,804 |        354 |     14,730 |    174,888 |
++-----------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

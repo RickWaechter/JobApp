@@ -1,0 +1,102 @@
+"filename", "language", "TypeScript JSX", "XML", "JSON", "JavaScript", "JavaScript JSX", "JSON with Comments", "PostCSS", "Swift", "Ruby", "Groovy", "TypeScript", "Markdown", "Kotlin", "MS SQL", "comment", "blank", "total"
+"/home/rick/jobape/.eslintrc.js", "JavaScript", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/home/rick/jobape/.prettierrc.js", "JavaScript", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/home/rick/jobape/.watchmanconfig", "JSON", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"/home/rick/jobape/App.js", "JavaScript", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 10
+"/home/rick/jobape/Gemfile", "Ruby", 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 3, 4, 17
+"/home/rick/jobape/README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 20, 51
+"/home/rick/jobape/__tests__/App.test.tsx", "TypeScript JSX", 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 14
+"/home/rick/jobape/app.json", "JSON with Comments", 0, 0, 0, 0, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 106
+"/home/rick/jobape/app/(tabs)/_layout.tsx", "TypeScript JSX", 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 48
+"/home/rick/jobape/app/(tabs)/index.js", "JavaScript", 0, 0, 0, 385, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 63, 450
+"/home/rick/jobape/app/(tabs)/profil.js", "JavaScript", 0, 0, 0, 1165, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 166, 1355
+"/home/rick/jobape/app/(tabs)/upload.js", "JavaScript", 0, 0, 0, 840, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 143, 1037
+"/home/rick/jobape/app/_layout.tsx", "TypeScript JSX", 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 41
+"/home/rick/jobape/app/application.js", "JavaScript", 0, 0, 0, 1074, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 74, 1154
+"/home/rick/jobape/app/change.js", "JavaScript", 0, 0, 0, 450, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 83, 538
+"/home/rick/jobape/app/changeOld.js", "JavaScript", 0, 0, 0, 423, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 70, 507
+"/home/rick/jobape/app/collect.js", "JavaScript", 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 69, 480
+"/home/rick/jobape/app/email.js", "JavaScript", 0, 0, 0, 675, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 39, 719
+"/home/rick/jobape/app/first.js", "JavaScript", 0, 0, 0, 433, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 74, 514
+"/home/rick/jobape/app/modal.tsx", "TypeScript JSX", 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 30
+"/home/rick/jobape/app/name.js", "JavaScript", 0, 0, 0, 412, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 24, 441
+"/home/rick/jobape/app/nameOld.js", "JavaScript", 0, 0, 0, 399, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20, 424
+"/home/rick/jobape/app/old.js", "JavaScript", 0, 0, 0, 375, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21, 399
+"/home/rick/jobape/app/uploadFirst.js", "JavaScript", 0, 0, 0, 536, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 69, 611
+"/home/rick/jobape/assets/images/background.svg", "XML", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 11
+"/home/rick/jobape/babel.config.js", "JavaScript", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/home/rick/jobape/backup/application.js", "JavaScript", 0, 0, 0, 837, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 118, 960
+"/home/rick/jobape/comp/clearButton.jsx", "JavaScript JSX", 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/home/rick/jobape/comp/sorter.jsx", "JavaScript JSX", 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 79
+"/home/rick/jobape/components/external-link.tsx", "TypeScript JSX", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 26
+"/home/rick/jobape/components/haptic-tab.tsx", "TypeScript JSX", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 19
+"/home/rick/jobape/components/hello-wave.tsx", "TypeScript JSX", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 20
+"/home/rick/jobape/components/parallax-scroll-view.tsx", "TypeScript JSX", 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 80
+"/home/rick/jobape/components/themed-text.tsx", "TypeScript JSX", 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 61
+"/home/rick/jobape/components/themed-view.tsx", "TypeScript JSX", 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/home/rick/jobape/components/ui/collapsible.tsx", "TypeScript JSX", 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 46
+"/home/rick/jobape/components/ui/icon-symbol.ios.tsx", "TypeScript JSX", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 33
+"/home/rick/jobape/components/ui/icon-symbol.tsx", "TypeScript JSX", 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 5, 42
+"/home/rick/jobape/constants/theme.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 8, 5, 54
+"/home/rick/jobape/eas.json", "JSON with Comments", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 22
+"/home/rick/jobape/eslint.config.js", "JavaScript", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 11
+"/home/rick/jobape/hooks/use-color-scheme.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 2
+"/home/rick/jobape/hooks/use-color-scheme.web.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 3, 6, 22
+"/home/rick/jobape/hooks/use-theme-color.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 4, 4, 22
+"/home/rick/jobape/inc/CutLine.js", "JavaScript", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7
+"/home/rick/jobape/inc/Keyboard.js", "JavaScript", 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11, 43
+"/home/rick/jobape/inc/ba.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/home/rick/jobape/inc/colors.js", "JavaScript", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16
+"/home/rick/jobape/inc/cryp.js", "JavaScript", 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 20, 107
+"/home/rick/jobape/inc/crypNew.js", "JavaScript", 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 12, 96
+"/home/rick/jobape/inc/date.js", "JavaScript", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 15
+"/home/rick/jobape/inc/db.js", "JavaScript", 0, 0, 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 32, 177
+"/home/rick/jobape/inc/downloadDb.js", "JavaScript", 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 61
+"/home/rick/jobape/inc/downloader.js", "JavaScript", 0, 0, 0, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 24, 228
+"/home/rick/jobape/inc/header.js", "JavaScript", 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 135
+"/home/rick/jobape/inc/pan.js", "JavaScript", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 3, 39
+"/home/rick/jobape/inc/popup.js", "JavaScript", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11, 97
+"/home/rick/jobape/inc/popupDownload.js", "JavaScript", 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 92
+"/home/rick/jobape/index.js", "JavaScript", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 10
+"/home/rick/jobape/jest.config.js", "JavaScript", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/home/rick/jobape/local/First.js", "JavaScript", 0, 0, 0, 556, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 81, 644
+"/home/rick/jobape/local/i18n.js", "JavaScript", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 51
+"/home/rick/jobape/local/translate/ar.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/de.json", "JSON", 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 331
+"/home/rick/jobape/local/translate/en.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 343
+"/home/rick/jobape/local/translate/fr.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/gr.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/i18n.js", "JavaScript", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 51
+"/home/rick/jobape/local/translate/it.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/jp.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 327
+"/home/rick/jobape/local/translate/new.json", "JSON", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5
+"/home/rick/jobape/local/translate/nl.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 327
+"/home/rick/jobape/local/translate/pl.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/ru.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/tr.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/local/translate/ua.json", "JSON", 0, 0, 319, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 325
+"/home/rick/jobape/metro.config.js", "JavaScript", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"/home/rick/jobape/modules/expo-mapkit/android/build.gradle", "Groovy", 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 4, 5, 44
+"/home/rick/jobape/modules/expo-mapkit/android/src/main/AndroidManifest.xml", "XML", 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3
+"/home/rick/jobape/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt", "Kotlin", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 16, 8, 51
+"/home/rick/jobape/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt", "Kotlin", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 5, 5, 31
+"/home/rick/jobape/modules/expo-mapkit/expo-module.config.json", "JSON", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/home/rick/jobape/modules/expo-mapkit/index.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 1, 6
+"/home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkit.podspec", "Ruby", 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 1, 4, 24
+"/home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkitModule.swift", "Swift", 0, 0, 0, 0, 0, 0, 0, 214, 0, 0, 0, 0, 0, 0, 7, 53, 274
+"/home/rick/jobape/modules/expo-mapkit/ios/ExpoMapkitView.swift", "Swift", 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 2, 7, 39
+"/home/rick/jobape/modules/expo-mapkit/package.json", "JSON", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13
+"/home/rick/jobape/modules/expo-mapkit/src/ExpoMapkit.types.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 5, 20
+"/home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitModule.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 1, 4, 13
+"/home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitModule.web.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 5, 20
+"/home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitView.tsx", "TypeScript JSX", 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/home/rick/jobape/modules/expo-mapkit/src/ExpoMapkitView.web.tsx", "TypeScript JSX", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/home/rick/jobape/modules/expo-mapkit/src/index.js", "JavaScript", 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 27
+"/home/rick/jobape/nav/navigator.js", "JavaScript", 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 28, 181
+"/home/rick/jobape/package-lock.json", "JSON", 0, 0, 15555, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15556
+"/home/rick/jobape/package.json", "JSON", 0, 0, 106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 107
+"/home/rick/jobape/scripts/reset-project.js", "JavaScript", 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 14, 113
+"/home/rick/jobape/tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18
+"/home/rick/jobape/www/city.db", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12619, 0, 2057, 14676
+"/home/rick/jobape/www/street.db", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116283, 0, 11010, 127293
+"Total", "-", 421, 11, 19513, 10221, 96, 143, 0, 244, 29, 35, 110, 31, 48, 128902, 354, 14730, 174888

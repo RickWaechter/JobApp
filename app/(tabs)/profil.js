@@ -13,7 +13,7 @@ import { Card, Divider } from 'react-native-paper';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../../inc/colors.js';
 import { decryp, encryp } from '../../inc/cryp.js';
-import CutLine from '../../inc/CutLine.js';
+import CutLine from '../../inc/CutTheLine.js';
 import { runQuery } from '../../inc/db.js';
 import useKeyboardAnimation from '../../inc/Keyboard.js';
 import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
@@ -526,7 +526,7 @@ useEffect(() => {
             <Text style={styles.coins}>
   {coins != null ? (
     <>
-      <Text style={styles.plus}>+</Text>{` ${coins} Coins`}
+      <Text style={styles.plus}>+</Text>{` ${coins || 0 } Coins`}
     </>
   ) : (
     'Coins nicht verfügbar'
@@ -605,6 +605,8 @@ useEffect(() => {
         animationOut="zoomOut"
         animationInTiming={475}
         animationOutTiming={475}
+        onModalShow={() => loadThings()}
+
         onBackdropPress={() => setModalAdVisible(false)}
         style={{ margin: 0, justifyContent: 'center' }}
         swipeDirection={['down']}
@@ -674,6 +676,8 @@ useEffect(() => {
         animationIn="zoomIn"
         animationOut="zoomOut"
         animationInTiming={475}
+        onModalShow={() => loadThings()}
+
         animationOutTiming={475}
         onBackdropPress={() => setModalEmailVisible(false)}
         style={{ margin: 0, justifyContent: 'center' }}

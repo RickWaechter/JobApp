@@ -2,7 +2,7 @@
   "expo": {
     "name": "JobApp 2",
     "slug": "jobape",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -83,7 +83,8 @@
       ],
       "expo-asset",
       "expo-web-browser",
-      "expo-iap"
+      "expo-iap",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -92,7 +93,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
+        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
       }
     },
     "runtimeVersion": {

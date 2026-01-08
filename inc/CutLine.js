@@ -1,7 +1,5 @@
-import { Dimensions, View, Keyboard, Text, TextInput, Button, StyleSheet, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
-
-const CutLine = ({ color = 'gray', thickness = 1, margin = 10 }) => {
-    return <View style={{ borderBottomWidth: thickness, borderBottomColor: color, marginVertical: margin, width: '100%' }} />;
-  };
-  
-  export default CutLine;
+export const sanitize = (name) => {
+  if (!name) return "Dokument";
+  // Entfernt Sonderzeichen und ersetzt sie durch normale Buchstaben oder entfernt sie
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "_");
+};

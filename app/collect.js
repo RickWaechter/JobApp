@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Share from 'react-native-share';
 import SQLite from 'react-native-sqlite-storage';
 import colors from '../inc/colors.js';
+import { sanitize } from '../inc/CutLine.js';
 import {
   decryptBase,
 } from '../inc/cryp.js';
@@ -154,62 +155,85 @@ RNFS.exists(outputPath)
       });
 }
 
-  const download = async () => {
-    try {
-                    const myKey = await EncryptedStorage.getItem('key');
+ const download = async () => {
+  console.log("--- Start Download-Prozess ---");
+  try {
+    const myKey = await EncryptedStorage.getItem('key');
+    console.log("Key geladen:", myKey ? "Vorhanden" : "Nicht gefunden");
 
-      if (await EncryptedStorage.getItem('merge')) {
+    const mergeName = await EncryptedStorage.getItem('merge');
+    console.log("Merge Name aus Storage:", mergeName);
 
-        const mergeName = await EncryptedStorage.getItem('merge');
-              const data = `${RNFS.LibraryDirectoryPath}/${(mergeName)}`;
- const outputPath = `${RNFS.LibraryDirectoryPath}/${mergeName}_Bewerbungsmappe.pdf`;
-      const encData = await RNFS.readFile(data, 'base64');
+    let finalPath = "";
+
+    if (mergeName) {
+      console.log("Modus: Merge-Name gefunden");
+      const safeName = sanitize(mergeName);
+      const dataPath = `${RNFS.LibraryDirectoryPath}/${mergeName}`;
+      const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName}_Bewerbungsmappe.pdf`;
+      console.log("Lese Quelldatei:", dataPath);
+
+      const encData = await RNFS.readFile(dataPath, 'base64');
+      console.log("Datei 1 geladen, Länge:", encData.length);
+
       const decryptedData = await decryptBase(encData, myKey);
-      const encData2 = await RNFS.readFile(data + '_1', 'base64');
-      const encData3 = decryptedData + encData2;
+      console.log("Datei 1 entschlüsselt");
 
-      await RNFS.writeFile(outputPath, encData3, 'base64');
+      const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
+      console.log("Datei 2 (Anhang) geladen, Länge:", encData2.length);
 
-      try {
-        await Share.open({
-          url: `file://${outputPath}`,
-          saveToFiles: true, // Erzwingt Speichern in der "Dateien"-App
-        });
-      } catch (err) {
-        console.error('Fehler beim Teilen der Datei:', err);
-      }
-      }
-      setPopup('Ihre Bewerbungsmappe wird im Download Ordner gespeichert');
-      setPopupVisible(true);
-      const name = await EncryptedStorage.getItem('yourName');
-   
-      const data = `${RNFS.LibraryDirectoryPath}/${(name)}_Bewerbungsmappe.pdf`;
+      const combinedData = decryptedData + encData2;
+      await RNFS.writeFile(outputPath, combinedData, 'base64');
+      console.log("Datei erfolgreich geschrieben unter:", outputPath);
       
-      const outputPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbung.pdf`;
-      const encData = await RNFS.readFile(data, 'base64');
+      finalPath = outputPath;
+    } 
+    else {
+      console.log("Modus: Normaler Download (kein Merge)");
+      setPopup('Ihre Bewerbungsmappe wird vorbereitet...');
+      setPopupVisible(true);
+
+      const name = await EncryptedStorage.getItem('yourName');
+      console.log("Nutzername aus Storage:", name);
+const safeName2 = sanitize(name);
+      const dataPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbungsmappe.pdf`;
+      const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName2}_Bewerbung.pdf`;
+      console.log("Lese Pfad:", dataPath);
+
+      const encData = await RNFS.readFile(dataPath, 'base64');
       const decryptedData = await decryptBase(encData, myKey);
-      const encData2 = await RNFS.readFile(data + '_1', 'base64');
-      const encData3 = decryptedData + encData2;
+      const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
 
-      await RNFS.writeFile(outputPath, encData3, 'base64');
+      const combinedData = decryptedData + encData2;
+      await RNFS.writeFile(outputPath, combinedData, 'base64');
+      console.log("Output-Datei geschrieben:", outputPath);
 
-      try {
-        await Share.open({
-          url: `file://${outputPath}`,
-          saveToFiles: true, // Erzwingt Speichern in der "Dateien"-App
-        });
-      } catch (err) {
-        console.error('Fehler beim Teilen der Datei:', err);
-      }
-
+      finalPath = outputPath;
       setPopupVisible(false);
       setFileUri(outputPath);
-
-    } catch (err) {
-      console.error('Fehler beim Kombinieren der Dateien:', err);
-      console.log("Fehler beim Speichern der Datei:", err);
     }
-  };
+
+    // WICHTIG: Kleiner Timeout für iOS
+    if (finalPath) {
+      console.log("Starte Share-Dialog für:", finalPath);
+     
+        try {
+          const shareResponse = await Share.open({
+            url: `file://${finalPath}`,
+            type: 'application/pdf', // Hilft iOS das Namensfeld anzuzeigen
+            saveToFiles: true,
+          });
+          console.log("Share erfolgreich beendet:", shareResponse);
+        } catch (shareErr) {
+          console.log("Share vom User abgebrochen oder Fehler:", shareErr);
+        }
+    }
+
+  } catch (err) {
+    console.error('KRITISCHER FEHLER im Hauptprozess:', err);
+    setPopupVisible(false);
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1,  backgroundColor: "rgb(8, 12, 32)" }}>
