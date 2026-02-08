@@ -234,7 +234,7 @@ if (array[array.length - 1] === '') {
       skill.toLowerCase().includes(value.toLowerCase()),
     );
     setSkillsNew(newOne);
-    if (skills.length < 1) {
+    if (skillsNew.length < 1) {
       setSeeFlatList(false);
       setIsFlatListVisibleSkills(false);
 
@@ -809,9 +809,9 @@ const db = await SQLite.openDatabase({
                   </>
                 )}
               </View>
-              {erfahrung.length > 0 && isFlatListVisibleSkills && skills.length > 0 && (
+              {erfahrung.length > 0 && isFlatListVisibleSkills && skillsNew.length > 0 && (
                 <FlatList
-                  data={skills}
+                  data={skillsNew}
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={({ item }) => (
                     <View style={{position:'relative'}}>

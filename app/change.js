@@ -45,7 +45,7 @@ const ChangeScreen = () => {
 const [subject, setSubject] = useState('');
   const DB_NAME = 'firstNew.db';
   useEffect(() => {
-    
+    // Load data from encrypted storage and compose the full text
     const loadText = async () => {
       try {
         const anrede = await EncryptedStorage.getItem('anrede');
@@ -75,6 +75,7 @@ const [subject, setSubject] = useState('');
 
 
   const saveText = async () => {
+    // Store cover-letter metadata encrypted in the DB and append to history
     let encData = '';
     const db = await SQLite.openDatabase({
       name: DB_NAME,
@@ -93,7 +94,7 @@ const job = await EncryptedStorage.getItem('beruf');
 const join = `${job}#${date}#${time}#${myType}#${subject}#${text}&`;
 const deviceId = await DeviceInfo.getUniqueId();
 
-// 1️⃣ SELECT first (transaction OK)
+// 1) Read existing entries
 const oldData = await new Promise((resolve, reject) => {
   db.transaction(tx => {
     tx.executeSql(
@@ -105,7 +106,7 @@ const oldData = await new Promise((resolve, reject) => {
   });
 });
 
-// 2️⃣ async/await OUTSIDE transaction
+// 2) Decrypt and prepare new data
 let decrypted = "";
 
 if (oldData) {
@@ -114,7 +115,7 @@ if (oldData) {
 console.log('Decrypted old data:', decrypted);
 const encryptedNew = await encryp(decrypted + join, myKey);
 
-// 3️⃣ update in SEPARATE transaction
+// 3) Write update in a separate transaction
 db.transaction(tx => {
   tx.executeSql(
     "UPDATE files SET old = ? WHERE ident = ?;",
@@ -125,6 +126,7 @@ db.transaction(tx => {
   }
 
   const mergeFilesFromDB = async () => {
+  // Load all relevant PDFs from the DB, decrypt, and merge them
   let count = 0;
 
       const interval = setInterval(() => {
@@ -268,16 +270,18 @@ console.log('Anschreiben path:', anschreibenPath);
     }
   };
   const toCollect = async () => {
+    // After saving, switch to the collection view
     router.replace('collect');
     await EncryptedStorage.setItem('result', 'collect');
   };
   const splitTextIntoLinesWithoutFont = (text2, maxChars) => {
+    // Split text into lines without font metrics (simple word wrapping)
     const words = text2.split(' ');
     const lines = [];
     let currentLine = '';
 
     words.forEach(word => {
-      // Prüfe, ob das Hinzufügen des nächsten Wortes die maxChars überschreitet
+      
       if ((currentLine + ' ' + word).trim().length > maxChars) {
         lines.push(currentLine.trim());
         currentLine = word;
@@ -293,6 +297,7 @@ console.log('Anschreiben path:', anschreibenPath);
   };
 
   const generate = async () => {
+    // Generate a new cover-letter PDF, encrypt it, and record it in the DB
     console.log('Starting PDF generation process');
  if (loading) return; // doppelklick verhindern
   setLoading(true);
@@ -415,6 +420,7 @@ const {height} = Dimensions.get('window');
 <SafeAreaView style={styles.innerContainer}>
 
 <Animated.View style={{  height: height * 0.85 -  keyboardHeight * 1.0 }} >
+    {/* Input field for the cover letter */}
     <TextInput
       style={styles.textArea}
       value={text}

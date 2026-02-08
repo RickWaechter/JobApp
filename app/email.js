@@ -18,8 +18,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import ClearButton from '../comp/clearButton.jsx';
 
+import ClearButton from '../comp/clearButton.jsx';
 import DeviceInfo from 'react-native-device-info';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
@@ -214,6 +214,7 @@ const ContactForm = () => {
         );
         return;
       }
+      setIsLoaded(true);
       console.log('handleSubmit: start');
       const response = await fetch('https://api.jobapp2.de/emailNativ', {
         method: 'POST',
@@ -237,7 +238,9 @@ const ContactForm = () => {
                 await EncryptedStorage.removeItem('merge');
               }
               console.log('handleSubmit: navigation reset');
+
               router.dismissTo('(tabs)');
+              setIsLoaded(false);
             },
           },
         ]);
@@ -518,8 +521,8 @@ const newEmails = safeDecMails.includes('#')
               <MaterialIcons name="save" size={24} color="white" />
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>{t('email.sendButton')}</Text>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={isLoaded}>
+            <Text style={styles.buttonText}>{isLoaded ? t('pleaseWait') : t('email.sendButton')}</Text>
           </TouchableOpacity>
         </View>
 

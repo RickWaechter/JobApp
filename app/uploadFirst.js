@@ -182,6 +182,7 @@ console.log("buttonOne:" + buttonOne);
                              name: theFilePath,
                              size: file.size,
                              path: filePath,
+                             filename: file.name,
                            };
             } catch (err) {
               console.error(
@@ -351,7 +352,7 @@ console.log("buttonOne:", buttonOne, "files:", files.length);
           <Text style={styles.fileListTitle}>{t('selectedFiles')}:</Text>
           {files.map((file, index) => (
             <Text key={index} style={styles.fileName}>
-              {file.name} ({(file.size / 1024).toFixed(0)} KByte)
+              {file.filename} ({(file.size / 1024).toFixed(0)} KByte)
             </Text>
           ))}
         </View>

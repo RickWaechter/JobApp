@@ -2,7 +2,7 @@
   "expo": {
     "name": "JobApp 2",
     "slug": "jobape",
-    "version": "1.1.2",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -24,7 +24,7 @@
         "googleMobileAdsAppId": "ca-app-pub-1715349546414110~5908012388"
       },
       "icon": "./assets/images/icon.png",
-      "buildNumber": "12",
+      "buildNumber": "1",
       "bundleIdentifier": "com.ricky1993.jobape",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -84,7 +84,14 @@
       "expo-asset",
       "expo-web-browser",
       "expo-iap",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-1715349546414110~5908012388",
+          "iosAppId": "ca-app-pub-1715349546414110~5908012388"
+        }
+      ],
     ],
     "experiments": {
       "typedRoutes": true,

@@ -25,7 +25,7 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-1715349546414110/9198789045';
+const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-1715349546414110/1930235080';
 
 const rewarded = RewardedAd.createForAdRequest(adUnitId, {
   keywords: ['fashion', 'clothing'],
@@ -145,6 +145,7 @@ const [adLoadedState, setAdLoadedState] = useState(false);
         console.log('User earned reward of ', reward);
         putCoins(4)
         setLoadedAd(false); 
+        setLoaded(false);
 
       },  
     );
@@ -188,6 +189,7 @@ const handlePurchase = async (productId) => {
   const pan = useRef(new Animated.ValueXY()).current;
 
  const showRewarded = () => {
+  setLoaded(true);
   if (!adLoaded.current) {
     setAdDisabled(true);
 setSource(!source);
@@ -233,9 +235,9 @@ rewarded.load();
           console.error("Fehler beim Abrufen der Coins:", error);
         }
       };
-      setTimeout(() => {
+     
         fetchCoins();
-      }, 800);
+    
       // Deine Funktion hier ausführen
 
 
@@ -506,13 +508,29 @@ useEffect(() => {
   }
 
   const loadThings = async() => {
-    setMyName(await EncryptedStorage.getItem('name'));
-    setMyCity(await EncryptedStorage.getItem('city'));
-    setMyStreet(await EncryptedStorage.getItem('street'));
-    setEmail(await EncryptedStorage.getItem('email'));
-    setPassword(await EncryptedStorage.getItem('emailPassword'));
-    setValue(await EncryptedStorage.getItem('emailServer'));
+ try {
+    // Wir holen uns alle Daten parallel (effizienter)
+    const [name, city, street, emailNew, passwordNew, server] = await Promise.all([
+      EncryptedStorage.getItem('name'),
+      EncryptedStorage.getItem('city'),
+      EncryptedStorage.getItem('street'),
+      EncryptedStorage.getItem('email'),
+      EncryptedStorage.getItem('emailPassword'),
+      EncryptedStorage.getItem('emailServer')
+    ]);
 
+    // Nur setzen, wenn der Wert nicht null oder undefined ist
+    if (name !== null) setMyName(name);
+    if (city !== null) setMyCity(city);
+    if (street !== null) setMyStreet(street);
+    if (emailNew !== null ) setEmail(email);
+    if (passwordNew !== null) setPassword(password);
+    if (server !== null) setValue(server);
+    console.log("Daten erfolgreich geladen");
+  } catch (error) {
+    console.error("Fehler beim Laden aus dem EncryptedStorage:", error);
+    // Optional: Benutzer informieren, dass Daten nicht geladen werden konnten
+  }
   }
   return (
     <View style={styles.container}>
@@ -627,8 +645,13 @@ useEffect(() => {
                 backgroundColor: "transparent", // Damit es sichtbar bleibt
                 justifyContent: 'center',
                 alignItems: 'center',
-                transform: [{ translateY: Animated.multiply(keyboardHeight / 3, -1) }],
-                opacity: isAnimating ? 1 : 0,
+// Ändere dies im Style deiner Modals:
+transform: [{ 
+  translateY: Animated.multiply(
+    Animated.divide(keyboardHeight, 3), // Korrekte Division für Animated Nodes
+    -1
+  ) 
+}],                opacity: isAnimating ? 1 : 0,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
               }
@@ -700,8 +723,13 @@ useEffect(() => {
                 backgroundColor: "transparent", // Damit es sichtbar bleibt
                 justifyContent: 'center',
                 alignItems: 'center',
-                transform: [{ translateY: Animated.multiply(keyboardHeight / 3, -1) }],
-                opacity: isAnimating ? 1 : 0,
+// Ändere dies im Style deiner Modals:
+transform: [{ 
+  translateY: Animated.multiply(
+    Animated.divide(keyboardHeight, 3), // Korrekte Division für Animated Nodes
+    -1
+  ) 
+}],                opacity: isAnimating ? 1 : 0,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
               }
@@ -854,6 +882,22 @@ transparent
                     ]}>
                <Card.Title
                             title={loaded ? `${t('pleaseWait')}${dots}` : t('buy1')}
+                            titleStyle={styles.job}/>
+                    </View>
+          )}
+          </Pressable>
+
+                 <Pressable
+            onPress={() => showRewarded()} 
+            disabled={loaded}       // Grund‑Style 
+          >
+          {({ pressed }) => (
+           <View style={[
+                      styles.entryAd,                // Grund‑Layout
+                      pressed && styles.entryPressAd // nur solange gedrückt
+                    ]}>
+               <Card.Title
+                            title={loaded ? `${t('pleaseWait')}${dots}` : t('ad')}
                             titleStyle={styles.job}/>
                     </View>
           )}
