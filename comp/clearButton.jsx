@@ -16,7 +16,7 @@ const ClearButton = ({ value, setValue, top = 16, right }) => {
       <MaterialIcons name="cancel" size={25} color="gray" />
     </TouchableOpacity>
   );
-};
+}; 
 
 const styles = StyleSheet.create({
   clearButton: {

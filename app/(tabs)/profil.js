@@ -130,7 +130,7 @@ const [adLoadedState, setAdLoadedState] = useState(false);
         console.log(adLoaded.current)
       if (adLoadedState) {
       rewarded.show();
-      console.log("super")
+      console.log("super") 
         setAdLoadedState(false);
         console.log("super1")
         adLoaded.current = false;

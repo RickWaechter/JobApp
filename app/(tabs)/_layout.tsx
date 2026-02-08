@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-SplashScreen.setOptions({
+SplashScreen.setOptions({ 
   duration: 1000,
   fade: true,
 });

@@ -15,7 +15,7 @@ const iv = await AES.randomKey(16);
 const cipher = await AES.encrypt(text, key, iv, "aes-256-cbc");
 const cipherIv = iv + ':' + cipher
 return cipherIv;
-}
+} 
 
 export const genIv = () => {
     const randomBytes = CryptoJS.lib.WordArray.random(16); // 16 Bytes = 128 Bits

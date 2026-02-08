@@ -702,7 +702,7 @@ const close = async () => {
           propagateSwipe={true}
       >
           <Animated.View
-            style={[
+            style={[ 
 
               {
                 height:  data.length < 8 ? 40 + (data.length / 1 * 80) : 40 + (8 * 80),
