@@ -224,7 +224,7 @@ const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
     // 3️⃣ Grundeinstellungen
     const fontSize = 11;
     const leftMargin = 60;
-    const maxChars = 100; // Maximale Zeichenanzahl pro Zeile (als grobe Schätzung)
+    const maxChars = 90; // Maximale Zeichenanzahl pro Zeile (als grobe Schätzung)
     const lineHeight = fontSize + 4;
     let currentY = height - 60;
     const textWidth = 450; // Hier definieren wir textWidth
@@ -273,9 +273,9 @@ const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
 
 
 
-    const line1 = splitTextIntoLinesWithoutFont(subject, 95);
+    const line1 = splitTextIntoLinesWithoutFont(subject, 70);
     line1.forEach(line1 => {
-      page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize, font: helveticaBold });
+      page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
       currentY -= lineHeight;
     });
       currentY -= 1 * lineHeight;

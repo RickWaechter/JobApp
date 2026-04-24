@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ClearButton from "../comp/clearButton.jsx";
 import colors from "../inc/colors.js";
 import useKeyboardAnimation from "../inc/Keyboard.js";
+import Info from "../comp/info.js";
 import "../local/i18n.js";
 const Name = () => {
   const [yourName, setYourName] = useState("");
@@ -30,6 +31,7 @@ const Name = () => {
   const navigation = useNavigation();
   const { keyboardHeight, reset } = useKeyboardAnimation();
   const { t, i18n } = useTranslation();
+ 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [address, setAddress] = useState("");
@@ -349,7 +351,7 @@ const styles = StyleSheet.create({
     error: {
     color: 'red',
     fontSize: 12,
-    position: 'abosulte',
+    position: 'absolute',
     top: '2%',
     left: '1%',
   },

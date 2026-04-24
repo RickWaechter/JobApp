@@ -118,18 +118,25 @@ const hallo = async () => {
   const exists = (name) => RNFS.exists(`${DB_DIR}/${name}`);
 
   const download = async (name) => {
-    const url = `https://api.jobapp2.de/download?file=${name}`;
-    const dest = `${DB_DIR}/${name}`;
-    const res = await RNFS.downloadFile({ fromUrl: url, toFile: dest }).promise;
-    if (res.statusCode !== 200) throw new Error("Download failed");
-    console.log('download function called');
-  };
+     const folderPath = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
+          const dest = `${folderPath}/jobs.db`;
+   const getUrl = `https://api.jobapp2.de/get-secure-link/jobs.db`;
+             const response = await fetch(getUrl);
+             const data = await response.json();
+             const secureUrl = data.url.replace('http://', 'https://');
+   
+             const res = await RNFS.downloadFile({
+               fromUrl: secureUrl,
+               toFile: dest,
+             }).promise;
+             if (res.statusCode !== 200) throw new Error('Download failed');
+             console.log('Download abgeschlossen');
+           }
 
   const setup = async () => {
     await ensureDir();
     console.log('setup function called');
     for (const name of DB_NAMES) if (!(await exists(name))) await download(name);
-    console.log(`download function called for file '+ name`)
   };
 
   await setup();

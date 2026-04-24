@@ -2,7 +2,7 @@
   "expo": {
     "name": "JobApp 2",
     "slug": "jobape",
-    "version": "1.2.2",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -91,7 +91,7 @@
           "androidAppId": "ca-app-pub-1715349546414110~5908012388",
           "iosAppId": "ca-app-pub-1715349546414110~5908012388"
         }
-      ],
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -100,7 +100,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
+        "projectId": "d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
       }
     },
     "runtimeVersion": {

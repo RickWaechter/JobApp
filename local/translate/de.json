@@ -325,6 +325,8 @@
     "languageSaved": "Ihre ausgewählte Sprache ist nun verfügbar",
     "buyCancel": "Kauf wurde abgebrochen."
   },
-        "emailDelete": "Email erfolgreich gelöscht"
-
+        "emailDelete": "Email erfolgreich gelöscht",
+"deleteTitle": "Eintrag löschen",
+"deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+"delete": "Löschen"
 }

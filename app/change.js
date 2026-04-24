@@ -267,7 +267,12 @@ console.log('Anschreiben path:', anschreibenPath);
          router.dismissTo('upload');
       }
       return;
-    }
+    }finally {
+    // Wird IMMER ausgeführt, egal ob Erfolg oder Absturz
+    clearInterval(interval);
+    setDots("");
+    setLoading(false); // Wichtig! Button wieder freigeben
+  }
   };
   const toCollect = async () => {
     // After saving, switch to the collection view
@@ -315,18 +320,28 @@ console.log('Anschreiben path:', anschreibenPath);
 
       const fontSize = 11;
       const leftMargin = 60;
-      const maxChars = 100;
+      const maxChars = 90;
       const lineHeight = fontSize + 4;
       let currentY = height - 60;
       const textWidth = 450;
       console.log('Initialized PDF settings');
 
-      const myName = await EncryptedStorage.getItem('name');
-      const myStreet = await EncryptedStorage.getItem('street');
-      const myCity = await EncryptedStorage.getItem('city');
-      const yourCompany = await EncryptedStorage.getItem('yourName');
-      const yourStreet = await EncryptedStorage.getItem('yourStreet');
-      const yourCity = await EncryptedStorage.getItem('yourCity');
+     // Statt 10x await hintereinander:
+const [
+  myName, myStreet, myCity, 
+  yourCompany, yourStreet, yourCity, 
+  objectSubject, anrede, myKey
+] = await Promise.all([
+  EncryptedStorage.getItem('name'),
+  EncryptedStorage.getItem('street'),
+  EncryptedStorage.getItem('city'),
+  EncryptedStorage.getItem('yourName'),
+  EncryptedStorage.getItem('yourStreet'),
+  EncryptedStorage.getItem('yourCity'),
+  EncryptedStorage.getItem('subject'),
+  EncryptedStorage.getItem('anrede'),
+  EncryptedStorage.getItem('key')
+]);
       const today = new Date().toLocaleDateString('de-DE', {
         day: '2-digit',
         month: 'long',
@@ -334,8 +349,6 @@ console.log('Anschreiben path:', anschreibenPath);
       });
 
       const date = today;
-      const objectSubject = await EncryptedStorage.getItem('subject');
-      const anrede = await EncryptedStorage.getItem('anrede');
       console.log('Retrieved personal and recipient data');
 
       page.drawText(myName, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
@@ -359,7 +372,7 @@ console.log('Anschreiben path:', anschreibenPath);
       currentY -= 2 * lineHeight;
       console.log('Added date to PDF');
 
-      const line1 = splitTextIntoLinesWithoutFont(objectSubject, 95);
+      const line1 = splitTextIntoLinesWithoutFont(objectSubject, 70);
       line1.forEach(line1 => {
         page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
         currentY -= lineHeight;
@@ -378,7 +391,6 @@ console.log('Anschreiben path:', anschreibenPath);
       });
       console.log('Added body text to PDF');
 
-      const myKey = await EncryptedStorage.getItem('key');
       const pdfBase641 = await pdfDoc1.saveAsBase64();
       console.log('PDF saved as base64');
 

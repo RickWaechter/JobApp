@@ -144,6 +144,7 @@ const ContactForm = () => {
             const base64String = await RNFS.readFile(data, 'base64');
             const abc = await decryptBase(base64String, key);
             const base64String2 = await RNFS.readFile(data + '_1', 'base64');
+            
             Object.keys(formData).forEach(key => {
               console.log(key, formData[key]);
             });
@@ -249,21 +250,10 @@ const ContactForm = () => {
         console.log('handleSu@@@@@@@@@@@@@@@@@@', formData.yourEmail);
       } else {
         console.log('handleSubmit: response not ok');
-        const { message } = await response.json();
+        const errorData = await response.json();
+        console.log('handleSubmit: error data received', errorData);
         console.log('handleSubmit: error message received');
-        switch (message) {
-          case 'Error sending mail or querying database':
-            console.log(
-              'handleSubmit: error sending mail or querying database',
-            );
-            Alert.alert(t('alerts.error.emailSettings'));
-            router.dismissTo('/profil');
-            break;
-          default:
-            console.log('handleSubmit: unknown error');
-            Alert.alert(t('alerts.error.unknown'));
-            break;
-        }
+        
       }
     } catch (error) {
       console.log('handleSubmit: error caught');

@@ -705,7 +705,7 @@ const close = async () => {
             style={[ 
 
               {
-                height:  data.length < 8 ? 40 + (data.length / 1 * 80) : 40 + (8 * 80),
+                height:  data.length < 8 ? 40 + (data.length / 1 * 100) : 40 + (8 * 80),
                 backgroundColor: colors.background, // Damit es sichtbar bleibt
                 justifyContent: 'center',
                 alignItems: 'center',

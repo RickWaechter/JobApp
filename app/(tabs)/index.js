@@ -180,6 +180,25 @@ useEffect(() => {
   }
 func();
 }, []);
+const deleteDatabase = async () => {
+  const dest = `${RNFS.LibraryDirectoryPath}/LocalDatabase/jobs.db`;
+
+  try {
+    // 1. Prüfen, ob die Datei überhaupt existiert
+    const exists = await RNFS.exists(dest);
+
+    if (exists) {
+      // 2. Datei löschen
+      await RNFS.unlink(dest);
+      console.log('Datei erfolgreich gelöscht:', dest);
+    } else {
+      console.log('Datei existiert nicht, kein Löschen notwendig.');
+    }
+  } catch (error) {
+    // Falls die Datei geschützt ist oder ein Systemfehler auftritt
+    console.error('Fehler beim Löschen der Datei:', error.message);
+  }
+};
 const OldApplication = () => {
         const now = Date.now();
     if (now - lastClickTime.current < 1000) {
