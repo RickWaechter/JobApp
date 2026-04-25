@@ -345,7 +345,7 @@ const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
 
 <Animated.View style={{  height: height * 0.75 -  keyboardHeight * 0.93 }} >
    <TextInput
-      style={[styles.subjectInput, { height: subject.split("").length > 35 ? height * 0.08 : height * 0.05 }]}
+      style={[styles.subjectInput, { height: subject.split("").length > 35? height * 0.08 : height * 0.05 }]}
       value={subject}
       onChangeText={setSubject}
       placeholder={t('placeholderText')}

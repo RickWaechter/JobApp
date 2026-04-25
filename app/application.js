@@ -16,6 +16,9 @@ import {
   Modal,
   ActivityIndicator,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   View,
 } from 'react-native';
 import { extractScript, meinestadtScript, agenturScript, jobvectorScript, stepstoneScript } from '../inc/scrapper.js';
@@ -723,8 +726,9 @@ console.log('Gefundene Plattform:', platformRef.current);
   };
 
   const changeView = (wert) => {
+      const offset = wert * (height * 0.08); // dynamisch je nach Screen
     Animated.timing(animView, {
-      toValue: wert,
+      toValue: offset,
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -822,400 +826,341 @@ console.log('Gefundene Plattform:', platformRef.current);
   // ============================================
   // RENDER
   // ============================================
-  return (
-    <SafeAreaView style={styles.safeAreaView}>
-      <Info visible={infoState} onClose={() => {setInfoState(false)}} message={"Erstellen Sie Ihre maßgeschneiderte Bewerbung in Sekunden. Kopieren Sie einfach den Link der Stellenausschreibung (von Indeed, Stepstone, Jobvector, der Arbeitsagentur oder meinestadt.de) hier hinein. \n\nAlternativ können Sie auch einfach Ihre Berufsbezeichnung angeben – wir generieren basierend darauf ein professionelles Anschreiben für Sie."} />
-      <View style={styles.container}>
-        <Animated.View style={[{ transform: [{ translateY: animView }] }]}>
-          {/* Anrede */}
-          <View style={styles.section}>
-            <View style={styles.radioContainer}>
-              {anredeOptions.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  onPress={() => handleOptionChange3(option)}
-                  style={[
-                    styles.radioOption,
-                    selectedOption3 === option && styles.radioOptionSelected,
-                  ]}
-                >
-                  <Text
-                    style={
-                      selectedOption3 === option
-                        ? styles.radioOptionTextSelected
-                        : styles.radioOptionText
-                    }
-                  >
-                    {t(option)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+return (
+  <SafeAreaView style={styles.safeAreaView}>
+      <Animated.View
+      style={[
+        { flex: 1 },
+        { transform: [{ translateY: animView }] }
+      ]}
+    >
+            <Info visible={infoState} onClose={() => {setInfoState(false)}} message={"Erstellen Sie Ihre maßgeschneiderte Bewerbung in Sekunden. Kopieren Sie einfach den Link der Stellenausschreibung (von Indeed, Stepstone, Jobvector, der Arbeitsagentur oder meinestadt.de) hier hinein. \n\nAlternativ können Sie auch einfach Ihre Berufsbezeichnung angeben – wir generieren basierend darauf ein professionelles Anschreiben für Sie."} />
+    
 
-          {/* Name */}
-          <View style={styles.section}>
-            <TextInput
-              ref={jobRef2}
-              style={[styles.input, isDisabled && styles.disabledInput]}
-              placeholder={t('nameAnsprechpartner')}
-              placeholderTextColor={'gray'}
-              value={name}
-              onChangeText={handleNameChange}
-              editable={!isDisabled}
-              selectTextOnFocus={!isDisabled}
-              autoCorrect={false}
-              onFocus={() => changeView(-50)}
-            />
-            {errors.anrede ? (
-              <Text style={styles.error}>{errors.anrede}</Text>
-            ) : null}
-          </View>
-
-          {/* Beruf */}
-          <View style={styles.section}>
-            <TextInput
-              ref={jobRef}
-              style={[
-                styles.input,
-                { paddingRight: inputValue.includes('indeed.com') ? 50 : 15 },
-              ]}
-              placeholder={t('beruf')}
-              placeholderTextColor={'gray'}
-              value={inputValue}
-              onBlur={() => setSeeFlatList(false)}
-              onFocus={() => changeView(-100)}
-              onChangeText={handleChange}
-              autoCorrect={false}
-            />
-
-            {inputValue.includes('https://') && (
+    
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ===== ANREDE ===== */}
+        <View style={styles.section}>
+          <View style={styles.radioContainer}>
+            {anredeOptions.map((option) => (
               <TouchableOpacity
-                onPress={startExtraction}
-                style={styles.extractButton}
-                disabled={isExtracting}
+                key={option}
+                onPress={() => handleOptionChange3(option)}
+                style={[
+                  styles.radioOption,
+                  selectedOption3 === option && styles.radioOptionSelected,
+                ]}
               >
-                {isExtracting ? (
-                  <Text style={{ color: 'white', fontSize: 12 }}>Läd...</Text>
-                ) : (
-                  <MaterialIcons
-                    name="auto-fix-high"
-                    size={24}
-                    color="white"
-                  />
-                )}
+                <Text
+                  style={
+                    selectedOption3 === option
+                      ? styles.radioOptionTextSelected
+                      : styles.radioOptionText
+                  }
+                >
+                  {t(option)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* ===== NAME ===== */}
+        <View style={styles.section}>
+          <TextInput
+            ref={jobRef2}
+            style={[styles.input, isDisabled && styles.disabledInput]}
+            placeholder={t('nameAnsprechpartner')}
+            placeholderTextColor={'gray'}
+            value={name}
+            onFocus={() => {changeView(-1.4)}}
+            onChangeText={handleNameChange}
+            editable={!isDisabled}
+            selectTextOnFocus={!isDisabled}
+            autoCorrect={false}
+          />
+          {!!errors.anrede && <Text style={styles.error}>{errors.anrede}</Text>}
+        </View>
+
+        {/* ===== BERUF / URL ===== */}
+        <View style={[styles.section, { zIndex: 10 }]}>
+          <TextInput
+            ref={jobRef}
+            style={[
+              styles.input,
+              { paddingRight: inputValue.includes('https://') ? 50 : 15 },
+            ]}
+            placeholder={t('beruf')}
+            placeholderTextColor={'gray'}
+            value={inputValue}
+              onFocus={() => {changeView(-2.2)}}
+            // Delay, damit FlatList-Tap noch erkannt wird
+            onBlur={() => setTimeout(() => setSeeFlatList(false), 200)}
+            onChangeText={handleChange}
+            autoCorrect={false}
+          />
+
+          {/* ---- Nur EIN Button gleichzeitig ---- */}
+          {inputValue.includes('https://') ? (
+            <TouchableOpacity
+              onPress={startExtraction}
+              style={styles.extractButton}
+              disabled={isExtracting}
+            >
+              {isExtracting ? (
+                <Text style={{ color: 'white', fontSize: 12 }}>Läd...</Text>
+              ) : (
+                <MaterialIcons name="auto-fix-high" size={24} color="white" />
+              )}
+            </TouchableOpacity>
+          ) : saveButton && inputValue.length > 0 ? (
+            <TouchableOpacity onPress={handleSaveJob} style={styles.saveButton}>
+              <MaterialIcons name="save" size={24} color="white" />
+            </TouchableOpacity>
+          ) : inputValue.length === 0 ? (
+            <TouchableOpacity
+              onPress={() => {
+                setInfoState(true);
+                Keyboard.dismiss();
+              }}
+              style={styles.saveButton}
+            >
+              <MaterialIcons name="info" size={24} color="white" />
+            </TouchableOpacity>
+          ) : null}
+
+          {!!errors.job && <Text style={styles.error}>{errors.job}</Text>}
+
+          {/* Job-Vorschläge */}
+          {inputValue.length > 0 && seeFlatList && jobs.length > 0 && (
+            <FlatList
+              data={jobs}
+              keyboardShouldPersistTaps="handled"
+              keyExtractor={(item, index) =>
+                item.rowid ? String(item.rowid) : String(index)
+              }
+              renderItem={({ item }) => (
+                <View>
+                  <TouchableOpacity
+                    onPress={() => deleteJob(item)}
+                    style={styles.suggestionItemContainerDelete}
+                  >
+                    <Text style={styles.suggestionItemDelete}>X</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleSuggestionClick(item)}
+                    style={styles.suggestionItemContainer}
+                  >
+                    <Text style={styles.suggestionItem}>{item.text}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              style={styles.suggestionsList}
+            />
+          )}
+        </View>
+
+        {/* ===== SKILLS (EIGENE Section, NICHT verschachtelt!) ===== */}
+        <View style={[styles.section, { zIndex: 5 }]}>
+          <View style={styles.skillInputContainer}>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              placeholder={t('skillsErfahrung')}
+              placeholderTextColor={'gray'}
+              value={erfahrung}
+              onChangeText={handleErfahrung}
+              onBlur={() =>
+                setTimeout(() => setIsFlatListVisibleSkills(false), 200)
+              }
+              autoCorrect={false}
+            />
+            {!!errors.skill && <Text style={styles.error}>{errors.skill}</Text>}
+            {skillButton && (
+              <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+                <MaterialIcons name="save" size={24} color="white" />
               </TouchableOpacity>
             )}
+          </View>
 
-            {errors.job ? (
-              <Text style={styles.error1}>{errors.job}</Text>
-            ) : null}
-
-            {saveButton &&
-              inputValue.length > 0 &&
-              !inputValue.includes('https://') && (
-                <TouchableOpacity
-                  onPress={handleSaveJob}
-                  style={styles.saveButton}
-                >
-                  <MaterialIcons name="save" size={24} color="white" />
-                </TouchableOpacity>
-              )}
-              {inputValue.length === 0  && (
-                <TouchableOpacity
-                  onPress={() => {setInfoState(true); Keyboard.dismiss();}}
-                  style={styles.saveButton}
-                >
-                  <MaterialIcons name="info" size={24} color="white" />
-                </TouchableOpacity>
-              )}
-
-            {inputValue.length > 0 && seeFlatList && jobs.length > 0 && (
+          {erfahrung.length > 0 &&
+            isFlatListVisibleSkills &&
+            skillsNew.length > 0 && (
               <FlatList
-                data={jobs}
+                data={skillsNew}
+                keyExtractor={(item, index) => String(index)}
                 keyboardShouldPersistTaps="handled"
-                keyExtractor={(item, index) =>
-                  item.rowid ? String(item.rowid) : String(index)
-                }
                 renderItem={({ item }) => (
                   <View>
                     <TouchableOpacity
-                      onPress={() => deleteJob(item)}
+                      onPress={() => deleteSkill(item)}
                       style={styles.suggestionItemContainerDelete}
                     >
                       <Text style={styles.suggestionItemDelete}>X</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      onPress={() => handleSuggestionClick(item)}
+                      onPress={() => handleSuggestionClickSkill(item)}
                       style={styles.suggestionItemContainer}
                     >
-                      <Text style={styles.suggestionItem}>{item.text}</Text>
+                      <Text style={styles.suggestionItem}>{item}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
-                style={[
-                  styles.suggestionsList,
-                  { display: isFlatListVisible ? 'flex' : 'none' },
-                ]}
+                style={styles.suggestionsListSkill}
               />
             )}
+        </View>
 
-            {/* Skills */}
+        {/* ===== OPTIONEN ===== */}
+        {optionenView && (
+          <>
             <View style={styles.section}>
-              <View style={styles.skillInputContainer}>
-                <TextInput
-                  ref={inputRef}
-                  style={styles.input}
-                  placeholder={t('skillsErfahrung')}
-                  placeholderTextColor={'gray'}
-                  value={erfahrung}
-                  onChangeText={handleErfahrung}
-                  onBlur={() => setIsFlatListVisibleSkills(false)}
-                  onFocus={() => changeView(-125)}
-                  autoCorrect={false}
-                />
-                {errors.skill ? (
-                  <Text style={styles.error}>{errors.skill}</Text>
-                ) : null}
-                {skillButton && (
+              <View style={styles.radioContainer}>
+                {employmentOptions.map((option) => (
                   <TouchableOpacity
-                    onPress={handleSave}
-                    style={styles.saveButton}
-                  >
-                    <MaterialIcons name="save" size={24} color="white" />
-                  </TouchableOpacity>
-                )}
-              </View>
-              {erfahrung.length > 0 &&
-                isFlatListVisibleSkills &&
-                skillsNew.length > 0 && (
-                  <FlatList
-                    data={skillsNew}
-                    keyExtractor={(item, index) => String(index)}
-                    renderItem={({ item }) => (
-                      <View>
-                        <TouchableOpacity
-                          onPress={() => deleteSkill(item)}
-                          style={styles.suggestionItemContainerDelete}
-                        >
-                          <Text style={styles.suggestionItemDelete}>X</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleSuggestionClickSkill(item)}
-                          style={styles.suggestionItemContainer}
-                        >
-                          <Text style={styles.suggestionItem}>{item}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                    keyboardShouldPersistTaps="handled"
+                    key={option}
+                    onPress={() => {
+                      handleOptionChange(option);
+                      Keyboard.dismiss();
+                    }}
                     style={[
-                      styles.suggestionsListSkill,
-                      { display: isFlatListVisibleSkills ? 'flex' : 'none' },
+                      styles.radioButton,
+                      selectedOption === option && styles.radioOptionSelected,
                     ]}
-                  />
-                )}
-
-              {optionenView && (
-                <>
-                  <View style={styles.section}>
-                    <View style={styles.radioContainer}>
-                      {employmentOptions.map((option) => (
-                        <TouchableOpacity
-                          key={option}
-                          onPress={() => {
-                            handleOptionChange(option);
-                            Keyboard.dismiss();
-                          }}
-                          style={[
-                            styles.radioButton,
-                            selectedOption === option &&
-                              styles.radioOptionSelected,
-                          ]}
-                        >
-                          <Text
-                            style={
-                              selectedOption === option
-                                ? styles.radioOptionTextSelected
-                                : styles.radioOptionText
-                            }
-                          >
-                            {t(option)}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View style={styles.section2}>
-                    <View style={styles.radioContainer}>
-                      {applicationOptions.map((option) => (
-                        <TouchableOpacity
-                          key={option}
-                          onPress={() => {
-                            handleOptionChange2(option);
-                            Keyboard.dismiss();
-                          }}
-                          style={[
-                            styles.radioButton,
-                            selectedOption2 === option &&
-                              styles.radioOptionSelected,
-                          ]}
-                        >
-                          <Text
-                            style={
-                              selectedOption2 === option
-                                ? styles.radioOptionTextSelected
-                                : styles.radioOptionText
-                            }
-                          >
-                            {t(option)}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View
-                    style={{
-                      width: '100%',
-                      marginTop: 20,
-                      marginBottom: 10,
-                    }}
                   >
-                    <DropDownPicker
-                      open={open}
-                      value={value}
-                      items={items}
-                      setOpen={setOpen}
-                      setValue={setValue}
-                      placeholder={t('fontPlaceholder')}
-                      style={styles.dropdown}
-                      dropDownContainerStyle={styles.dropDownContainer}
-                      textStyle={{ color: '#C9C1C1', fontSize: 16 }}
-                      dropDownDirection="TOP"
-                    />
-                  </View>
-                </>
-              )}
-
-              <View style={styles.sectionButton}>
-                <TouchableOpacity
-                  style={[styles.button]}
-                  onPress={handleGeneratePDF}
-                  disabled={loading && Object.values(errors).length === 0}
-                >
-                  <Text style={styles.buttonText}>
-                    {loading && Object.values(errors).length === 0
-                      ? `${t('pleaseWait')}${dots}`
-                      : t('generateCoverLetter')}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => {
-                    setOptionenView(!optionenView);
-                    Keyboard.dismiss();
-                  }}
-                >
-                  <Text
-                    style={{
-                      alignSelf: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: 16,
-                    }}
-                  >
-                    Optionen
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={
+                        selectedOption === option
+                          ? styles.radioOptionTextSelected
+                          : styles.radioOptionText
+                      }
+                    >
+                      {t(option)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
-          </View>
-        </Animated.View>
-      </View>
 
-      {/* ===================================== */}
-      {/* EXTRAKTIONS-MODAL (mit echtem Modal!) */}
-      {/* ===================================== */}
-     {isExtracting && (
-  <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-    {/* WebView: sichtbar im Layout, aber vom Overlay verdeckt */}
-    {!!webViewUrl && (
-      <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: width,
-          height: height,
-        }}
-      >
-        <WebView
-          ref={webViewRef}
-          source={{ uri: webViewUrl }}
-          style={{ flex: 1 }}
-         
-          onLoadEnd={injectPlatformScript}
-          onMessage={handleWebViewMessage}
-          onError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-            setIsExtracting(false);
-            setWebViewUrl('');
-            Alert.alert('Fehler', 'Seite konnte nicht geladen werden.');
-          }}
-          onHttpError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView HTTP error: ', nativeEvent.statusCode);
-          }}
-                  javaScriptEnabled={true}
+            <View style={styles.section}>
+              <View style={styles.radioContainer}>
+                {applicationOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => {
+                      handleOptionChange2(option);
+                      Keyboard.dismiss();
+                    }}
+                    style={[
+                      styles.radioButton,
+                      selectedOption2 === option && styles.radioOptionSelected,
+                    ]}
+                  >
+                    <Text
+                      style={
+                        selectedOption2 === option
+                          ? styles.radioOptionTextSelected
+                          : styles.radioOptionText
+                      }
+                    >
+                      {t(option)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
-        />
+            {/* DropDownPicker braucht HOHE zIndex! */}
+            <View style={{  marginBottom: 10, zIndex: 1000 }}>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                placeholder={t('fontPlaceholder')}
+                style={styles.dropdown}
+                dropDownContainerStyle={styles.dropDownContainer}
+                textStyle={{ color: '#C9C1C1', fontSize: 16 }}
+                dropDownDirection="TOP"
+                listMode="SCROLLVIEW"  // wichtig bei ScrollView!
+              />
+            </View>
+          </>
+        )}
+
+        {/* ===== SUBMIT ===== */}
+        <View style={styles.sectionButton}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleGeneratePDF}
+            disabled={loading}   // ← vereinfacht
+          >
+            <Text style={styles.buttonText}>
+              {loading
+                ? `${t('pleaseWait')}${dots}`
+                : t('generateCoverLetter')}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{ marginTop: 15 }}
+            onPress={() => {
+              setOptionenView(!optionenView);
+              Keyboard.dismiss();
+            }}
+          >
+            <Text style={styles.optionenText}>Optionen</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+</Animated.View>
+    {/* ===== EXTRAKTIONS-OVERLAY ===== */}
+    {isExtracting && (
+      <View style={StyleSheet.absoluteFill}>
+        {/* WebView unsichtbar im Hintergrund */}
+        {!!webViewUrl && (
+          <WebView
+            ref={webViewRef}
+            source={{ uri: webViewUrl }}
+            style={{ ...StyleSheet.absoluteFillObject, opacity: 0 }}
+            onLoadEnd={injectPlatformScript}
+            onMessage={handleWebViewMessage}
+            javaScriptEnabled
+            onError={({ nativeEvent }) => {
+              console.warn('WebView error:', nativeEvent);
+              setIsExtracting(false);
+              setWebViewUrl('');
+              Alert.alert('Fehler', 'Seite konnte nicht geladen werden.');
+            }}
+            userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
+          />
+        )}
+
+        {/* Overlay */}
+        <View style={styles.extractingOverlay}>
+          <ActivityIndicator size="large" color="#ffffff" />
+          <Text style={styles.extractingText}>
+            Stellenanzeige wird analysiert...
+          </Text>
+          <TouchableOpacity
+            style={{ marginTop: 30, padding: 10 }}
+            onPress={() => {
+              setIsExtracting(false);
+              setWebViewUrl('');
+            }}
+          >
+            <Text style={{ color: '#f76266', fontSize: 16 }}>Abbrechen</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     )}
-
-    {/* Overlay deckt WebView ab */}
-    <View                                                                                     
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        opacity: 1,
-        backgroundColor: 'rgb(0, 0, 0)',
-        justifyContent: 'center',
-        alignItems: 'center',                                                                                       
-      }}
-    >
-      <ActivityIndicator size="large" color="#ffffff" />
-      <Text
-        style={{
-          color: 'white',
-          fontSize: 18,
-          marginTop: 20,
-          fontWeight: 'bold',
-        }}
-      >
-        Stellenanzeige wird analysiert...
-      </Text>
-
-      <TouchableOpacity
-        style={{ marginTop: 30, padding: 10 }}
-        onPress={() => {
-          setIsExtracting(false);
-          setWebViewUrl('');
-        }}
-      >
-        <Text style={{ color: '#f76266', fontSize: 16 }}>Abbrechen</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-)}
-    </SafeAreaView>
-  );
+  </SafeAreaView>
+);  
 };
 
 const { width, height } = Dimensions.get('window');
@@ -1229,7 +1174,7 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     position: 'absolute',
-    top: '7%',
+    top: '105%',
     left: '1%',
   },
   extractButton: {
@@ -1252,7 +1197,7 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     position: 'absolute',
-    top: '1%',
+    top: 70,
     left: '1%',
   },
   suggestionItemDelete: {
@@ -1269,13 +1214,32 @@ const styles = StyleSheet.create({
   section2: {
     position: 'relative',
   },
-  container: {
-    width: width,
-    height: height,
-    backgroundColor: 'rgb(8, 12, 32)',
-    padding: 20,
-    justifyContent: 'center',
-  },
+container: {
+  flexGrow: 1,                 // ← statt fixer height
+  backgroundColor: 'rgb(8, 12, 32)',
+  padding: 20,
+  paddingTop: 40,
+  paddingBottom: 60,
+      gap: 2,               // ⭐ Symmetrischer Abstand zwischen ALLEN Sections
+      justifyContent: 'center', // ⭐ Zentriert vertikal, wenn genug Platz
+},
+extractingOverlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'rgb(0, 0, 0)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+extractingText: {
+  color: 'white',
+  fontSize: 18,
+  marginTop: 20,
+  fontWeight: 'bold',
+},
+optionenText: {
+  alignSelf: 'center',
+  color: 'white',
+  fontSize: 16,
+},
   input: {
     width: '100%',
     height: 50,
@@ -1289,8 +1253,6 @@ const styles = StyleSheet.create({
   },
   skillInputContainer: {
     position: 'relative',
-    marginTop: 20,
-    marginBottom: 20,
   },
   disabledInput: {
     backgroundColor: 'rgb(16, 27, 43)',
@@ -1332,7 +1294,6 @@ const styles = StyleSheet.create({
   },
   dropDownContainer: {
     position: 'absolute',
-    marginBottom: 11,
     backgroundColor: colors.card3,
     borderColor: 'gray',
     borderWidth: 1,

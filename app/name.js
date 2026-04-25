@@ -348,13 +348,12 @@ const styles = StyleSheet.create({
     elevation: 5,
     color: "white",
   },
-    error: {
-    color: 'red',
-    fontSize: 12,
-    position: 'absolute',
-    top: '2%',
-    left: '1%',
-  },
+error: {
+  color: 'red',
+  fontSize: 12,
+  marginTop: 5,
+  marginLeft: 6,
+},
   suggestionsContainerCity: {
     position: "absolute",
     top: 50,
