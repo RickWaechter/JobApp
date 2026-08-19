@@ -1,0 +1,113 @@
+{
+  "expo": {
+    "name": "JobApp 2",
+    "slug": "jobape",
+    "version": "1.4.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#002D6F"
+    },
+    "scheme": "jobape",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": false,
+      "splash": {
+        "image": "./assets/images/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#002D6F"
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-1715349546414110~5908012388"
+      },
+      "icon": "./assets/images/icon.png",
+      "buildNumber": "1",
+      "bundleIdentifier": "com.ricky1993.jobape",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app needs access to your camera to allow taking pictures.",
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to allow audio recording.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library so you can select and upload images.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to save images to your photo library.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to display relevant nearby content.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app may use your location to provide continuous location-based features.",
+        "NSContactsUsageDescription": "This app needs access to your contacts to connect with other users.",
+        "NSCalendarsUsageDescription": "This app needs access to your calendars to manage events.",
+        "NSRemindersUsageDescription": "This app needs access to reminders to keep tasks synced.",
+        "NSBluetoothPeripheralUsageDescription": "This app needs access to Bluetooth to connect to nearby devices.",
+        "NSBluetoothAlwaysUsageDescription": "This app needs Bluetooth permission to maintain connectivity with accessories.",
+        "NSLocalNetworkUsageDescription": "This app needs access to devices on your local network.",
+        "NSFaceIDUsageDescription": "This app uses Face ID to securely authenticate your identity.",
+        "NSDocumentsFolderUsageDescription": "This app needs access to your documents to upload files."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ricky1993.jobape",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "@config-plugins/react-native-blob-util",
+      "@config-plugins/react-native-pdf",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "width": 200,
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "expo-asset",
+      "expo-web-browser",
+      "expo-iap",
+      "expo-secure-store",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-1715349546414110~5908012388",
+          "iosAppId": "ca-app-pub-1715349546414110~5908012388"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": false
+    }
+  }
+}

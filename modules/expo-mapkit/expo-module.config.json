@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ExpoMapkitModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.mapkit.ExpoMapkitModule"]
+  }
+}

@@ -1,0 +1,325 @@
+{
+  "BewerbungGenerieren": "Yeni başvuru oluştur",
+  "BewerbungGenerierenText": "Hızlı ve kolay bir şekilde profesyonel bir iş başvurusu hazırla.",
+  "BewerbungRecycel": "Yeniden kullan",
+  "BewerbungRecycelText": "Önceki başvurunu kullanarak başka bir pozisyon için hızlıca yenisini oluştur.",
+  "personalData": "Kişisel Bilgiler",
+  "personalDataDescription": "Başvurularında kullanmak üzere kişisel adres bilgilerini buradan düzenle.",
+  "configureEmail": "E-Posta Ayarları",
+  "configureEmailDescription": "Başvurularını göndermek için e-posta hesabını yapılandır.",
+  "sortAttachments": "Ekleri Sırala",
+  "sortAttachmentsDescription": "Başvuru dosyan için eklediğin belgeleri sırala.",
+  "placeholderName": "Adım Soyadım",
+  "placeholderStreet": "Cadde ve Kapı No",
+  "placeholderZip": "Posta Kodu ve Şehir",
+  "placeholderEmail": "E-Posta",
+  "placeholderPassword": "Şifre",
+  "placeholderEmailServer": "Bir E-Posta sunucusu seç",
+  "saveAndClose": "Kaydet ve Kapat",
+  "activateAndClose": "Etkinleştir",
+  "deactivateAndClose": "Devre Dışı Bırak",
+  "save": "Kaydet",
+  "downloadProgress": "",
+  "bwnzg": "Başvuru dosyanız şu anda hazırlanıyor.",
+  "uploadFiles": "Dosyaları Seç",
+  "selectFilesToUpload": "Başvuru dosyanda kullanmak istediğin ekleri seç.",
+  "addAttachment": "Ek Ekle",
+  "addAttachmentsToApplication": "Seçilen ekleri mevcut başvuru dosyana ekle.",
+  "replaceOldFiles": "Eski Ekleri Değiştir",
+  "replaceExistingAttachments": "Mevcut eklerini yeni seçtiklerinle değiştir.",
+  "selectedFiles": "Seçilen dosya(lar)",
+  "searchCompany": "Burada adres ara",
+  "searchCompanyOld": "Firma adresi ara...",
+  "companyName": "Firma Adı",
+  "companyStreet": "Firmanın Caddesi ve Kapı No",
+  "companyStreet2": "Firmanın Caddesi ve Kapı No",
+  "companyCity": "Firmanın Posta Kodu ve Şehri",
+  "continue": "Devam Et",
+  "enterManually": "Elle Gir",
+  "nameAnsprechpartner": "İlgili Kişi Adı",
+  "beruf": "Meslek",
+  "skillsErfahrung": "Yetenekler / Deneyim",
+  "fontPlaceholder": "Helvetica (Standart Yazı Tipi)",
+  "generateCoverLetter": "Ön Yazı Oluştur",
+  "next": "İleri",
+  "toHome": "Kapat",
+  "ok": "Evet, tabii!",
+  "cancel": "Hayır",
+  "pleaseWait": "Lütfen bekle",
+
+  "Bewerbung": "Başvuru",
+  "Profile": "Profil",
+  "Anlagen": "Ekler",
+  "Info": "Bilgi",
+
+  "Fortsetzen": "Devam Et",
+
+  "employmentOptions": {
+    "vollzeit": "Tam Zamanlı",
+    "teilzeit": "Yarı Zamanlı",
+    "minijob": "Minijob"
+  },
+  "applicationOptions": {
+    "initiativ": "Genel Başvuru",
+    "regulär": "Normal",
+    "praktikum": "Staj"
+  },
+  "anredeOptions": {
+    "herr": "Bay",
+    "damenUndHerren": "Sayın Yetkili",
+    "frau": "Bayan"
+  },
+  "salutation": {
+    "herr": "Sayın Bay ",
+    "frau": "Sayın Bayan ",
+    "default": "Sayın Yetkili,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Genel başvuru (Initiativ): ",
+    "regulär": "Şu pozisyon için başvuru: ",
+    "praktikum": "Staj başvurusu: ",
+    "default": "Başvuru: "
+  },
+  "employmentChoice": {
+    "fulltime": "tam zamanlı çalışma için",
+    "parttime": "yarı zamanlı çalışma için",
+    "minijob": "Minijob bazında",
+    "default": ""
+  },
+  "enterText": "Metnini buraya gir...",
+  "saveCoverLetter": "Ön yazıyı kaydet",
+  "merge": "Birleştir",
+  "viewApplication": "Başvuruyu Görüntüle",
+  "viewApplicationDescription": "İndirmeden veya göndermeden önce hataları önlemek için başvuru dosyanı kontrol et.",
+
+  "downloadDescription": "Başvuru dosyanı PDF olarak cihazına kaydet ve istediğin yere gönder.",
+  "sendEmail": "E-Posta ile Gönder",
+  "sendEmailDescription": "Başvuru dosyanı doğrudan E-Posta ile gönder. Mesaj metni otomatik oluşturulur ancak göndermeden önce düzenlenebilir. ✉️",
+  "terms": {
+    "title": "Genel Şartlar ve Koşullar",
+    "section1": {
+      "heading": "1. Kapsam",
+      "content": "Bu genel şartlar ve koşullar, başvuru aracının kullanımı için geçerlidir. Bu araç, harici üçüncü taraf sağlayıcılar tarafından sunulan yapay zeka (YZ) yardımıyla başvurular oluşturur."
+    },
+    "section2": {
+      "heading": "2. Gizlilik ve Güvenlik",
+      "content": "Tüm kişisel veriler yerel olarak saklanır ve AES-256 şifreleme ile korunur."
+    },
+    "section3": {
+      "heading": "3. Sorumluluk Reddi",
+      "content": "Sağlayıcı, oluşturulan başvuruların doğruluğu veya eksiksizliği konusunda hiçbir sorumluluk kabul etmez."
+    },
+    "section4": {
+      "heading": "4. Kullanım Hakları",
+      "content": "Aracın kullanımı münhasır değildir ve devredilemez. Değişiklik yapmak veya yeniden satmak yasaktır."
+    },
+    "section5": {
+      "heading": "5. Son Hükümler",
+      "content": "Almanya Federal Cumhuriyeti yasaları geçerlidir."
+    },
+    "email": {
+      "placeholder": "E-Posta",
+      "sendButton": "E-Posta Gönder"
+    },
+    "subject": {
+      "placeholder": "Konu"
+    },
+    "message": {
+      "placeholder": "Mesaj"
+    },
+    "messageText": "Sayın Yetkili,\n\nEkteki dosya ile {{companyName}} bünyesindeki {{jobTitle}} pozisyonuna başvurumu iletiyorum.\n\nSaygılarımla,\n{{applicantName}}"
+  },
+  "emailSent": {
+    "success": "E-Posta başarıyla gönderildi!",
+    "error": "E-Posta gönderilirken hata oluştu. Lütfen tekrar dene."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "E-Posta Sunucusu"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Kullanıcı Adı"
+    },
+    "password": {
+      "placeholder": "Şifre"
+    }
+  },
+  "faq": {
+    "heading": "Sıkça Sorulan Sorular",
+    "entry1": {
+      "subheading": "Verilerim nasıl saklanıyor?",
+      "paragraph": "Verilerin bizimle güvende. Tüm bilgilerin yalnızca cep telefonunda yerel bir SQLite veritabanında saklanır ve güçlü bir 256-bit AES şifreleme ile korunur. Bu, senden başka kimsenin verilere erişemeyeceğini garanti eder. Gizliliğe büyük önem veriyoruz ve verilerini harici sunucularda saklamaktan veya paylaşmaktan bilinçli olarak kaçınıyoruz.\n\nEğer E-Posta hizmetini kullanırsan, e-posta adresin, şifren ve posta sunucun da veriler işlenmeden önce aynı güçlü şifreleme ile korunur. Böylece hassas bilgilerin her zaman en iyi şekilde korunur. Gizliliğin bizim için en yüksek önceliktir – verilerin üzerinde her zaman tam kontrole sahipsin."
+    },
+    "entry2": {
+      "subheading": "E-Posta sunucusu nasıl çalışır?",
+      "paragraph": "E-Posta servisimizle başvuru dosyanı doğrudan hedeflediğin şirketin e-posta adresine kolayca gönderebilirsin – tek ihtiyacın olan ilgili iletişim adresidir. Konu satırı ve e-posta metni taslağı senin için otomatik olarak oluşturulur, böylece gönderim hızlı ve sorunsuz gerçekleşir.\n\nVerilerin, güvenli bir 2048-bit şifreleme ile sunucumuza iletilir; sunucu başvuru dosyasını şifresini çözerek doğrudan alıcıya iletir. Bu süreçte hiçbir kayıt (log) tutulmaz ve veriler kalıcı olarak saklanmaz – bilgiler sadece geçici olarak önbellekte kalır ve iletimden hemen sonra silinir.\n\nBu hizmetin tamamen yerel (cihaz içinde çalışan) bir versiyonu üzerinde de çalışıyoruz, böylece gelecekte verilerin üzerinde daha da fazla kontrole sahip olacaksın. Bu hizmet tamamen ücretsiz ve isteğe bağlıdır – kullanıp kullanmamak senin kararına bağlıdır."
+    },
+    "entry3": {
+      "subheading": "Başvuru oluşturma ve Yeniden Kullanım",
+      "paragraph": "Tamamen yeni bir ön yazı oluşturma veya mevcut bir tanesini yeniden kullanma seçeneğine sahipsin. Sadece yaklaşık 1 cent karşılığında, istediğin pozisyona özel olarak hazırlanmış bir ön yazı oluşturtabilirsin. Alternatif olarak, önceki bir ön yazıyı yeniden kullanabilir; firmayı seçip, ilgili kişiyi yeniden tanımlayarak ve metni isteklerine göre düzenleyerek modifiye edebilirsin. Böylece zamandan tasarruf ederken, her başvuruyu ihtiyaca göre uyarlama esnekliğini korursun."
+    }
+  },
+  "privacy": {
+    "heading": "Gizlilik Politikası",
+    "entry1": {
+      "title": "1. Genel Bilgiler",
+      "text": "Bu gizlilik politikası, başvuru aracının kişisel verileri nasıl işlediğini açıklar."
+    },
+    "entry2": {
+      "title": "2. Verilerin Toplanması ve İşlenmesi",
+      "text": "Araç, yalnızca bir başvuru oluşturmak için gerekli olan verileri toplar:\n• İstenen iş pozisyonu\n• İlgili yetenekler (Skills)\n• Başvuru türü"
+    },
+    "entry3": {
+      "title": "3. Saklama ve Güvenlik",
+      "text": "Tüm kişisel veriler yalnızca cihazda saklanır ve AES-256 bit şifreleme ile güvence altına alınır."
+    },
+    "entry4": {
+      "title": "4. Üçüncü Taraflara Aktarım",
+      "text": "Kişisel veriler üçüncü taraflara aktarılmaz. Yalnızca başvurunun oluşturulması için anonimleştirilmiş veriler yapay zeka hizmet sağlayıcılarına iletilir."
+    },
+    "entry5": {
+      "title": "5. Kullanıcı Hakları",
+      "text": "Kullanıcılar, yerel olarak saklanan verileri hakkında bilgi alma, düzeltme ve silme hakkına sahiptir."
+    },
+    "entry6": {
+      "title": "6. Gizlilik Politikasındaki Değişiklikler",
+      "text": "Bu gizlilik politikası güncellenebilir. Güncel sürüm her zaman uygulamada mevcuttur."
+    }
+  },
+  "imprint": {
+    "heading": "Künye",
+    "entry1": {
+      "title": "Alman Telemedya Yasası (TMG) § 5 uyarınca bilgiler",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nAlmanya"
+    },
+    "entry2": {
+      "title": "İletişim",
+      "text": "E-Posta: kontakt@jobape.de\nWeb sitesi: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Sorumluluk Reddi",
+      "text": "Bu uygulamanın içeriği büyük bir özenle hazırlanmıştır. Ancak içeriklerin doğruluğu, eksiksizliği ve güncelliği konusunda garanti veremeyiz. Uygulamanın kullanımı kullanıcının kendi sorumluluğundadır."
+    },
+    "entry4": {
+      "title": "Telif Hakkı",
+      "text": "Bu uygulamanın tüm içeriği telif hakkı ile korunmaktadır. Kullanım sadece özel ve ticari olmayan amaçlar için izinlidir. Başta ticari kullanım olmak üzere diğer her türlü kullanım, telif hakkı sahibinin açık onayını gerektirir."
+    }
+  },
+  "navigation": {
+    "faq": "SSS",
+    "contact": "İletişim",
+    "agb": "GŞK (AGB)",
+    "privacy": "Gizlilik",
+    "impressum": "Künye"
+  },
+  "validation": {
+    "job": {
+      "required": "Meslek bilgisi gerekli!"
+    },
+    "skill": {
+      "required": "Lütfen deneyimini belirt."
+    },
+    "name": {
+      "required": "Lütfen adını gir.",
+      "minWords": "İsim en az 2 kelimeden oluşmalı!"
+    },
+     "nameCompany": {
+      "required": "Lütfen firma adını gir."
+    },
+    "city": {
+      "required": "Lütfen posta kodu ve şehri gir."
+    },
+    "street": {
+      "required": "Lütfen cadde ve kapı numarasını gir.",
+      "minWords": "İsim en az 2 kelimeden oluşmalı!"
+    },
+    "email": {
+      "required": "Lütfen bir E-Posta adresi gir.",
+      "invalid": "Lütfen geçerli bir E-Posta adresi gir."
+    },
+    "generating": "Lütfen bekle. \n Başvuru metnin oluşturuluyor."
+  },
+  "alerts": {
+    "error": {
+      "title": "Hata",
+      "attachments": "Eklerinde sorun oluştu, lütfen tekrar yükle.",
+      "emailSettings": "Lütfen E-Posta ayarlarını kontrol et.",
+      "unknown": "Bilinmeyen hata"
+    }
+  },
+  "common": {
+    "ok": "Tamam"
+  },
+
+  "email": {
+    "sendButton": "Gönder",
+    "placeholder": "E-Posta Adresi"
+  },
+  "offlineHeader": "Yerel Başvuru Oluştur",
+  "offlineMain": "Başvurunu kolayca ve profesyonelce, tamamen cihazında yerel olarak oluştur.",
+
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Menü Dili",
+    "theme": "Tema",
+    "darkMode": "Karanlık Mod",
+    "lightMode": "Aydınlık Mod",
+    "languageSaved": "Dil kaydedildi",
+    "languageChange": "Dili Değiştir",
+    "apiKey": "Kendi API anahtarını kullan",
+    "apiKeyKey": "Api-Key gir",
+    "changeMode": "Karanlık modu etkinleştir",
+    "pleaseApi": "Lütfen bir API seç.",
+    "changeApiText": "API-Key kullan",
+    "apiText": "Kişisel başvuru yazıları için kendi OpenAI anahtarını kullan.",
+    "apiGoogleText": "Google firma ve adres araması için API anahtarını kullan.",
+    "languageText": "Uygulamanın dilini değiştir (oluşturulan başvuruları etkilemez)."
+  },
+  "saveFile": "Dosyayı Kaydet",
+  "saveFileText": "Eklerini daha sonra başvuru dosyalarında kullanmak üzere kaydet.",
+  "Continue": "Atla",
+  "first": {
+    "heading": "JobApp 2.0'a Hoş Geldin",
+    "theDrop": "Tüm veriler şifrelenmiş olarak ve yerel olarak cihazında saklanır – güvenli ve özel. Bunları istediğin zaman değiştirebilirsin.",
+    "error": "Lütfen tüm alanları doldur"
+  },
+  "ownName": "Adın ve Soyadın",
+  "ownStreet": "Cadden ve Kapı Numaran",
+  "ownCity": "Posta Kodun ve Şehrin",
+  "buy1": "0,29 € (40 Coin)",
+  "ad": "Reklam (4 Coin)",
+  "download": {
+    "titleFirma": "Firma listesini indir",
+    "messageFirma": "Almanya'daki yaklaşık 5.3 milyon şirket/firma ismini içeren dizini indirmek ister misin? (Adresler dahil değildir)",
+    "titleStreet": "Cadde listesini indir",
+    "messageStreet": "Almanya'daki tüm cadde isimlerini indirmek ister misin?",
+    "titleCity": "Şehir listesini indir",
+    "messageCity": "Tüm şehirleri ve posta kodlarını indirmek ister misin?",
+    "titleJob": "Meslek listesini indir",
+    "messageJob": "3500'den fazla meslek ismini indirmek ister misin?",
+    "button": "İndir"
+  },
+  "success": {
+    "title": "Başarılı",
+    "applicationSent": "Başvuru dosyan başarıyla gönderildi"
+  },
+  "upload": {
+    "title": "Başarılı",
+    "info": "Dosyalar başarıyla kaydedildi.",
+    "error":"Çok fazla dosya seçildi. Lütfen en fazla 11 dosya seç."
+  },
+  "profil": {
+    "title": "Başarılı",
+    "infoData": "Verilerin başarıyla kaydedildi.",
+    "infoEmail": "E-Posta ayarların başarıyla kaydedildi.",
+    "error": "Hata",
+    "errorDataEmail": "Lütfen tüm alanları doldur.",
+    "errorEmail": "E-Posta ayarların kaydedilemedi.",
+    "languageError": "Lütfen bir dil seç.",
+    "languageSaved": "Seçtiğin dil artık kullanılabilir.",
+    "buyCancel": "Satın alma iptal edildi."
+  }
+}
