@@ -1,84 +1,172 @@
+// ProfilScreen.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { useIAP } from 'expo-iap';
 import { sha512 } from 'js-sha512';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Animated, Dimensions, Platform, Pressable,ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  UIManager,
+  View,
+} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import DropDownPicker from 'react-native-dropdown-picker';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import Modal from 'react-native-modal';
-import { Card, Divider } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
+
 import colors from '../../inc/colors.js';
 import { decryp, encryp } from '../../inc/cryp.js';
-import CutLine from '../../inc/CutTheLine.js';
 import { runQuery } from '../../inc/db.js';
-import useKeyboardAnimation from '../../inc/Keyboard.js';
-import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import '../../local/i18n.js';
-import {useIAP} from 'expo-iap';
+
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-1715349546414110/1930235080';
+
+const { height, width } = Dimensions.get('window');
+
+const adUnitId = __DEV__
+  ? TestIds.REWARDED
+  : 'ca-app-pub-1715349546414110/1930235080';
 
 const rewarded = RewardedAd.createForAdRequest(adUnitId, {
   keywords: ['fashion', 'clothing'],
-    requestNonPersonalizedAdsOnly: true,
+  requestNonPersonalizedAdsOnly: true,
 });
+
+const itemsLang = [
+  { label: 'Deutsch', value: 'de', flag: '🇩🇪' },
+  { label: 'English', value: 'en', flag: '🇬🇧' },
+  { label: 'Türkçe', value: 'tr', flag: '🇹🇷' },
+  { label: 'العربية', value: 'ar', flag: '🇸🇦' },
+  { label: 'Français', value: 'fr', flag: '🇫🇷' },
+  { label: 'Italiano', value: 'it', flag: '🇮🇹' },
+  { label: 'Nederlands', value: 'nl', flag: '🇳🇱' },
+  { label: 'Polski', value: 'pl', flag: '🇵🇱' },
+  { label: 'Română', value: 'ro', flag: '🇷🇴' },
+  { label: 'Українська', value: 'uk', flag: '🇺🇦' },
+  { label: 'Ελληνικά', value: 'el', flag: '🇬🇷' },
+  { label: '日本語', value: 'ja', flag: '🇯🇵' },
+];
+
+const emailServers = [
+  { label: 'mail.de (smtp.mail.de)', value: 'smtp.mail.de' },
+  { label: 'web.de (smtp.web.de)', value: 'Smtp.web.de' },
+  { label: 't-online.de (securesmtp.t-online.de)', value: 'Securesmtp.t-online.de' },
+  { label: 'gmail.com (smtp.gmail.com)', value: 'Smtp.gmail.com' },
+];
+
+/* ── Wiederverwendbare Einstellungs-Kachel ──────────────── */
+const SettingsCard = memo(({ title, description, iconName, onPress, badgeText }) => (
+  <Pressable
+    onPress={onPress}
+    style={({ pressed }) => [styles.settingsCard, pressed && styles.cardPressed]}
+  >
+    <View style={styles.settingsIconWrap}>
+      <MaterialIcons name={iconName} size={22} color="#60A5FA" />
+    </View>
+
+    <View style={styles.settingsContent}>
+      <View style={styles.settingsTitleRow}>
+        <Text style={styles.settingsTitle} numberOfLines={1}>
+          {title}
+        </Text>
+        {Boolean(badgeText) && (
+          <View style={styles.inlineBadge}>
+            <Text style={styles.inlineBadgeText}>{badgeText}</Text>
+          </View>
+        )}
+      </View>
+      {Boolean(description) && (
+        <Text style={styles.settingsDescription} numberOfLines={1}>
+          {description}
+        </Text>
+      )}
+    </View>
+
+    <MaterialIcons
+      name="chevron-right"
+      size={22}
+      color="rgba(255, 255, 255, 0.3)"
+    />
+  </Pressable>
+));
+
+/* ── Memoisiertes Eingabefeld für Modals ────────────────── */
+const ModalInput = memo(({ icon, placeholder, value, onChangeText, secureTextEntry = false }) => (
+  <View style={styles.inputContainer}>
+    <MaterialIcons name={icon} size={20} color="rgba(255,255,255,0.4)" style={styles.inputIcon} />
+    <TextInput
+      style={styles.textInputField}
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor="rgba(255,255,255,0.35)"
+      secureTextEntry={secureTextEntry}
+      autoCorrect={false}
+    />
+    {Boolean(value?.length) && (
+      <TouchableOpacity
+        onPress={() => onChangeText('')}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <MaterialIcons name="cancel" size={18} color="rgba(255,255,255,0.35)" />
+      </TouchableOpacity>
+    )}
+  </View>
+));
+
 const ProfilScreen = () => {
-    const { i18n } = useTranslation();
-const adLoaded = useRef(false);
-  const [payModal, setPayModal] = useState(false);
-    const [openLang, setOpenLang] = useState(false);
-  const [valueLang, setValueLang] = useState(null);
-  const { t } = useTranslation();
-  const [data, setData] = useState([]);
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+
+  /* ── State: Profil & Daten ───────────────────────────── */
   const [myName, setMyName] = useState('');
+  const [myStreet, setMyStreet] = useState('');
   const [myCity, setMyCity] = useState('');
   const [email, setEmail] = useState('');
-  const [loaded, setLoaded] = useState(false);
-  const [dots, setDots] = useState('');
   const [password, setPassword] = useState('');
-  const [myStreet, setMyStreet] = useState('');
-  const [langModal, setLangModal] = useState(false); 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [emailServer, setEmailServer] = useState("smtp.mail.de");
-  const [isModalAdVisible, setModalAdVisible] = useState(false);
-  const [coins, setCoins] = useState('');
-  const [isModalEmailVisible, setModalEmailVisible] = useState(false);
-  const [db, setDb] = useState(null);
-  const { keyboardHeight, reset } = useKeyboardAnimation(300);
-  const DB_NAME = 'firstNew.db';
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [source, setSource] = useState(false);
-const [loadedAd, setLoadedAd] = useState(false);
-const [adDisabled, setAdDisabled] = useState(false);
-const [adLoadedState, setAdLoadedState] = useState(false);
-  const {
-    connected,
-    products,
-    fetchProducts,
-    requestPurchase,
-    finishTransaction,
-  } = useIAP({
-    onPurchaseSuccess: async (purchase) => {
-      console.log('Purchase successful:', purchase.productId);
-     setCoins(coins => coins + 40); 
-     setLoaded(false);
-      // IMPORTANT: Verify receipt on your backend before finishing transaction
-      const isValid = await putCoinsIAP(purchase.productId);
-      console.log('isValid:');
+  const [emailServerValue, setEmailServerValue] = useState('smtp.mail.de');
+  const [openServerDropdown, setOpenServerDropdown] = useState(false);
 
+  /* ── State: Coins & Ads ──────────────────────────────── */
+  const [coins, setCoins] = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const [source, setSource] = useState(false);
+  const [adLoadedState, setAdLoadedState] = useState(false);
+  const adLoaded = useRef(false);
+
+  /* ── State: Modals ───────────────────────────────────── */
+  const [isModalDataVisible, setModalDataVisible] = useState(false);
+  const [isModalEmailVisible, setModalEmailVisible] = useState(false);
+  const [isModalLangVisible, setModalLangVisible] = useState(false);
+  const [isModalPayVisible, setModalPayVisible] = useState(false);
+
+  /* ── In-App Purchases (IAP) ──────────────────────────── */
+  const { requestPurchase, finishTransaction } = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      setCoins((prev) => (Number(prev) || 0) + 40);
+      setLoaded(false);
+      const isValid = await putCoinsIAP(purchase.productId);
       if (isValid) {
-        await finishTransaction({purchase, isConsumable: true});
+        await finishTransaction({ purchase, isConsumable: true });
       }
     },
     onPurchaseError: (error) => {
@@ -88,1315 +176,1059 @@ const [adLoadedState, setAdLoadedState] = useState(false);
     },
   });
 
-  const productIds = 'JA2C0002';
-  const putCoinsIAP = async productId => {
-      try{
-       const deviceId = await DeviceInfo.getUniqueId();
-          const key = sha512(deviceId);
-          const response = await axios.post('https://api.jobapp2.de/putCoinsIAP', {
-            username: key,
-            productId: productId
-          });
-          console.log(response.data);
-          // Loggt die komplette Antwort
-          console.log("Antwort vom Server:", response.data);
-          
-        return true}
-      catch (error) {
-        console.error("Fehler beim Abrufen der Coins:", error);
-      }
+  const putCoinsIAP = async (productId) => {
+    try {
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = sha512(deviceId);
+      await axios.post('https://api.jobapp2.de/putCoinsIAP', {
+        username: key,
+        productId: productId,
+      });
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Übermitteln des IAP:', error);
+      return false;
     }
-  useEffect(() => {
-    const putCoins = async coins => {
-      try{
-       const deviceId = await DeviceInfo.getUniqueId();
-          const key = sha512(deviceId);
-          const response = await axios.post('https://api.jobapp2.de/putCoins', {
-            username: key,
-            coins:coins
-          });
+  };
 
-          // Loggt die komplette Antwort
-          console.log("Antwort vom Server:", response.data);
-          setCoins(coins => coins +4); }
-      catch (error) {
-        console.error("Fehler beim Abrufen der Coins:", error);
-      }
+  const handlePurchase = async (productId) => {
+    setLoaded(true);
+    try {
+      await requestPurchase({
+        request: {
+          ios: { sku: productId },
+        },
+      });
+    } catch (error) {
+      console.error('Purchase request failed:', error);
+      setLoaded(false);
     }
-    const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
-      console.log('Rewarded ad is loaded');
-          console.log(adLoadedState)
-        adLoaded.current = true;  
-        console.log(adLoaded.current)
-      if (adLoadedState) {
-      rewarded.show();
-      console.log("super") 
-        setAdLoadedState(false);
-        console.log("super1")
-        adLoaded.current = false;
-        console.log("2")
-        setAdDisabled(false);
+  };
+
+  /* ── Rewarded Ads ────────────────────────────────────── */
+  useEffect(() => {
+    const putCoins = async (amount) => {
+      try {
+        const deviceId = await DeviceInfo.getUniqueId();
+        const key = sha512(deviceId);
+        await axios.post('https://api.jobapp2.de/putCoins', {
+          username: key,
+          coins: amount,
+        });
+        setCoins((prev) => (Number(prev) || 0) + amount);
+      } catch (error) {
+        console.error('Fehler beim Gutschreiben der Coins:', error);
       }
-       
+    };
+
+    const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      adLoaded.current = true;
+      if (adLoadedState) {
+        rewarded.show();
+        setAdLoadedState(false);
+        adLoaded.current = false;
+      }
     });
+
     const unsubscribeEarned = rewarded.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
-      reward => {
-        console.log('User earned reward of ', reward);
-        putCoins(4)
-        setLoadedAd(false); 
+      () => {
+        putCoins(4);
         setLoaded(false);
-
-      },  
+      }
     );
 
-    // Start loading the rewarded ad straight away
     rewarded.load();
 
-    // Unsubscribe from events on unmount
     return () => {
       unsubscribeLoaded();
       unsubscribeEarned();
     };
-  }, [source]);
-useEffect(() => {
-  console.log(adLoadedState)
-}, [adLoadedState])
-  const items = [
-    { label: 'mail.de', value: 'smtp.mail.de' },
-    { label: 'web.de', value: 'Smtp.web.de' },
-    { label: 't-online.de', value: 'Securesmtp.t-online.de' },
-    { label: 'gmail.com', value: 'Smtp.gmail.com' },
-  ];
-const handlePurchase = async (productId) => {
-  setLoaded(true);
-  try {
-    await requestPurchase({
-      request: {
-        ios: {
-          sku: productId,
-        },
-      },
-    });
-  } catch (error) {
-    console.error('Purchase failed:', error);
-    setLoaded(false);
-  }
-};
-  const deleteItem = (idToDelete) => {
-    setData(prevData => prevData.filter(item => item.id !== idToDelete));
+  }, [source, adLoadedState]);
+
+  const showRewarded = () => {
+    setLoaded(true);
+    if (!adLoaded.current) {
+      setSource(!source);
+      rewarded.load();
+      setAdLoadedState(true);
+      return;
+    }
+    rewarded.show();
+    adLoaded.current = false;
   };
-  const pan = useRef(new Animated.ValueXY()).current;
 
- const showRewarded = () => {
-  setLoaded(true);
-  if (!adLoaded.current) {
-    setAdDisabled(true);
-setSource(!source);
-rewarded.load();  
-          setAdLoadedState(true);
-
-    console.log("Ad ist noch nicht geladen");
-    return;
-  }
-  rewarded.show();
-      adLoaded.current = false;
-      setAdDisabled(false);
-
-};
-
+  /* ── Coins Laden ─────────────────────────────────────── */
+  const fetchCoins = async () => {
+    try {
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = sha512(deviceId);
+      const response = await axios.post('https://api.jobapp2.de/getCoins', { key });
+      setCoins(response.data?.response ?? 0);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Coins:', error);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      console.log("Drawer-Screen geöffnet oder erneut geöffnet!");
-
-
-      const fetchCoins = async () => {
-        try {
-          console.log("fetchCoins");
-          const deviceId = await DeviceInfo.getUniqueId();
-          const key = sha512(deviceId);
-          console.log("key", key)
-          const response = await axios.post('https://api.jobapp2.de/getCoins', {
-            key: key
-          });
-
-          // Loggt die komplette Antwort
-          console.log("Antwort vom Server:", response.data);
-
-          // Greift auf das erwartete Feld zu
-          const coins = response.data.response;
-
-          // Loggt die extrahierten Coins
-          console.log("Coins:", coins);
-
-          // Coins ins State setzen
-          setCoins(coins);
-        } catch (error) {
-          console.error("Fehler beim Abrufen der Coins:", error);
-        }
-      };
-     
-        fetchCoins();
-    
-      // Deine Funktion hier ausführen
-
-
-      return () => {
-        console.log("Drawer-Screen wird verlassen.");
-      };
+      fetchCoins();
     }, [])
   );
 
-
-useEffect(() => {
-  const load = async () => {
+  /* ── Daten initial aus DB / Storage synchronisieren ──── */
+  const loadLocalData = async () => {
     try {
-      console.log("⏳ Lade Daten…");
+      const key = await EncryptedStorage.getItem('key');
+      if (!key) return;
 
-      let email = null;
-      let emailPassword = null;
-      let emailServer = null;
-
-      // 1) Key
-      const key = await EncryptedStorage.getItem("key");
-      if (!key) {
-        console.log("⚠️ Kein Key gefunden");
-        return;
-      }
-
-      // 2) Device ID
       const deviceId = await DeviceInfo.getUniqueId();
-
-      // 3) DB öffnen
       const db = await SQLite.openDatabase({
-        name: "firstNew.db",
-        location: "default",
+        name: 'firstNew.db',
+        location: 'default',
       });
 
-      // 4) Query
       const result = await runQuery(
         db,
-        "SELECT * FROM files WHERE ident = ?",
+        'SELECT * FROM files WHERE ident = ?',
         [deviceId]
-      ).catch((e) => {
-        console.log("❌ SQL Fehler:", e);
-        return null;
-      });
+      ).catch(() => null);
 
-      // Wenn keine DB-Daten → danach load2()
-      if (!result || !result.rows || result.rows.length === 0) {
-        console.log("⚠️ Kein DB-Eintrag gefunden → Lade aus Storage");
-        load2();
-        return;
-      }
+      if (result?.rows?.length > 0) {
+        const row = result.rows.raw()[0];
 
-      const row = result.rows.raw()[0];
+        const safeDecrypt = async (val) => {
+          if (!val) return null;
+          try {
+            return await decryp(val, key);
+          } catch {
+            return null;
+          }
+        };
 
-      // Helper: safeDecrypt
-      const safeDecrypt = async (value) => {
-        try {
-          if (!value) return null;
-          return await decryp(value, key);
-        } catch {
-          return null;
-        }
-      };
+        const decName = await safeDecrypt(row.name);
+        const decStreet = await safeDecrypt(row.street);
+        const decCity = await safeDecrypt(row.city);
+        const decEmail = await safeDecrypt(row.email);
+        const decPassword = await safeDecrypt(row.emailPassword);
+        const decServer = await safeDecrypt(row.emailServer);
 
-      // 5) Basisdaten
-      const name = await safeDecrypt(row.name);
-      const street = await safeDecrypt(row.street);
-      const city = await safeDecrypt(row.city);
+        if (decName) setMyName(decName);
+        if (decStreet) setMyStreet(decStreet);
+        if (decCity) setMyCity(decCity);
+        if (decEmail) setEmail(decEmail);
+        if (decPassword) setPassword(decPassword);
+        if (decServer) setEmailServerValue(decServer);
+      } else {
+        const [n, s, c, em, pw, srv] = await Promise.all([
+          EncryptedStorage.getItem('name'),
+          EncryptedStorage.getItem('street'),
+          EncryptedStorage.getItem('city'),
+          EncryptedStorage.getItem('email'),
+          EncryptedStorage.getItem('emailPassword'),
+          EncryptedStorage.getItem('emailServer'),
+        ]);
 
-      if (name && street && city) {
-        await EncryptedStorage.setItem("name", name);
-        await EncryptedStorage.setItem("street", street);
-        await EncryptedStorage.setItem("city", city);
-
-        setMyName(name);
-        setMyCity(city);
-        setMyStreet(street);
-      }
-
-      console.log("☀️ Basisdaten:", { name, street, city });
-
-      // 6) Email-Daten
-      if (row.email && row.emailPassword && row.emailServer) {
-        email = await safeDecrypt(row.email);
-        emailPassword = await safeDecrypt(row.emailPassword);
-        emailServer = await safeDecrypt(row.emailServer);
-
-        console.log("☀️ E-Mail Daten:", {
-          email,
-          emailPassword,
-          emailServer,
-        });
-
-        if (email && emailPassword && emailServer) {
-          await EncryptedStorage.setItem("email", email);
-          await EncryptedStorage.setItem("emailPassword", emailPassword);
-          await EncryptedStorage.setItem("emailServer", emailServer);
-
-          setEmail(email);
-          setPassword(emailPassword);
-          setValue(emailServer);
-        }
+        if (n) setMyName(n);
+        if (s) setMyStreet(s);
+        if (c) setMyCity(c);
+        if (em) setEmail(em);
+        if (pw) setPassword(pw);
+        if (srv) setEmailServerValue(srv);
       }
     } catch (err) {
-      console.log("❌ Fehler in load():", err);
+      console.error('Fehler beim Laden lokaler Daten:', err);
     }
   };
 
-  const load2 = async () => {
-    console.log("📦 Lade E-Mail aus Storage…");
+  useEffect(() => {
+    loadLocalData();
+  }, []);
 
-    const email = await EncryptedStorage.getItem("email");
-    const password = await EncryptedStorage.getItem("emailPassword");
-    const emailServer = await EncryptedStorage.getItem("emailServer");
-
-    if (email && password && emailServer) {
-      setEmail(email);
-      setPassword(password);
-      setValue(emailServer);
-
-      console.log("☀️ E-Mail Daten aus Storage:", {
-        email,
-        password,
-        emailServer,
-      });
-    } else {
-      console.log("⚠️ Keine E-Mail Daten in Storage gefunden");
-    }
-  };
-
-  load();
-  load2()
-}, []);
-
-
-
-
-
-
-
- 
-
-  const handleEmail = (value) => {
-    setEmail(value);
-  }
-
-  const handlePassword = (value) => {
-    setPassword(value);
-  }
-
-  const handleEmailServer = (value) => {
-    setEmailServer(value);
-    console.log(emailServer)
-  }
-
-  const handleSaveChangesEmail = async () => {
+  /* ── Speichern: Persönliche Daten ────────────────────── */
+  const handleSavePersonalData = async () => {
     try {
-      if (!value || !email  || !password) {
-        Alert.alert(
-           t("profil.error"),
-          t("profil.errorDataEmail"),
-        );
+      if (!myName?.trim() || !myCity?.trim() || !myStreet?.trim()) {
+        Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
         return;
       }
 
       const deviceId = await DeviceInfo.getUniqueId();
       const key = await EncryptedStorage.getItem('key');
-      await EncryptedStorage.setItem('email', email);
-      await EncryptedStorage.setItem('emailPassword', password);
-      await EncryptedStorage.setItem('emailServer', value);
-      const myEmailEnc = await encryp(email, key)
-      const myEmailPassword = await encryp(password, key)
-      const emailServer = await encryp(value, key)
+
+      const trimmedName = myName.trim();
+      const trimmedStreet = myStreet.trim();
+      const trimmedCity = myCity.trim();
+
+      await EncryptedStorage.setItem('name', trimmedName);
+      await EncryptedStorage.setItem('street', trimmedStreet);
+      await EncryptedStorage.setItem('city', trimmedCity);
+
+      const encName = await encryp(trimmedName, key);
+      const encCity = await encryp(trimmedCity, key);
+      const encStreet = await encryp(trimmedStreet, key);
+
+      const db = await SQLite.openDatabase({
+        name: 'firstNew.db',
+        location: 'default',
+      });
+      await db.executeSql(
+        'UPDATE files SET name = ?, city = ?, street = ? WHERE ident = ?',
+        [encName, encCity, encStreet, deviceId]
+      );
+
+      Alert.alert(t('profil.title'), t('profil.infoData'), [
+        { text: 'OK', onPress: () => setModalDataVisible(false) },
+      ]);
+    } catch (error) {
+      console.error('Fehler beim Speichern der Stammdaten:', error);
+      Alert.alert(t('profil.error'), 'Fehler beim Speichern');
+    }
+  };
+
+  /* ── Speichern: E-Mail Konfiguration ─────────────────── */
+  const handleSaveEmailConfig = async () => {
+    try {
+      if (!emailServerValue || !email?.trim() || !password?.trim()) {
+        Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
+        return;
+      }
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = await EncryptedStorage.getItem('key');
+
+      const trimmedEmail = email.trim();
+      const trimmedPw = password.trim();
+
+      await EncryptedStorage.setItem('email', trimmedEmail);
+      await EncryptedStorage.setItem('emailPassword', trimmedPw);
+      await EncryptedStorage.setItem('emailServer', emailServerValue);
+
+      const encEmail = await encryp(trimmedEmail, key);
+      const encPw = await encryp(trimmedPw, key);
+      const encServer = await encryp(emailServerValue, key);
+
       const db = await SQLite.openDatabase({
         name: 'firstNew.db',
         location: 'default',
       });
       await db.executeSql(
         'UPDATE files SET email = ?, emailPassword = ?, emailServer = ? WHERE ident = ?',
-        [myEmailEnc, myEmailPassword, emailServer, deviceId],
+        [encEmail, encPw, encServer, deviceId]
       );
-      Alert.alert(
-        t("profil.title"),
-        t("profil.infoEmail"),
-        [
-          {
-            text: "OK",
-            onPress: () => {
 
-              setModalEmailVisible(false);
-            },
-          },
-        ]
-      );
+      Alert.alert(t('profil.title'), t('profil.infoEmail'), [
+        { text: 'OK', onPress: () => setModalEmailVisible(false) },
+      ]);
     } catch (error) {
-      console.error('Error:', error);
-      setFinishMessage('Fehler beim Speichern');
+      console.error('Fehler beim Speichern der Maildaten:', error);
+      Alert.alert(t('profil.error'), 'Fehler beim Speichern');
     }
   };
-const itemsLang = [
-  { label: 'English',    value: 'en', flag: '🇬🇧' },
-  { label: 'Deutsch',    value: 'de', flag: '🇩🇪' },
-  { label: 'Turkish',    value: 'tr', flag: '🇹🇷' },
-  { label: 'Arabic',     value: 'ar', flag: '🇸🇦' },
-  { label: 'Greek',      value: 'el', flag: '🇬🇷' },
-  { label: 'French',     value: 'fr', flag: '🇫🇷' },
-  { label: 'Italian',    value: 'it', flag: '🇮🇹' },
-  { label: 'Japanese',   value: 'ja', flag: '🇯🇵' },
-  { label: 'Dutch',      value: 'nl', flag: '🇳🇱' },
-  { label: 'Ukrainian',  value: 'uk', flag: '🇺🇦' },
-  { label: 'Polish',     value: 'pl', flag: '🇵🇱' },
-  { label: 'Romania',    value: 'ro', flag: '🇷🇴' },
-];
-  const handleSaveChangesName = async () => {
+
+  /* ── Speichern: Sprache ──────────────────────────────── */
+  const handleChangeLanguage = async (langCode) => {
     try {
-       if (!myName || !myCity || !myStreet) {
-        Alert.alert(
-           t("profil.error"),
-          t("profil.errorDataEmail"),
-        );
-        return;
-      }
-      const deviceId = await DeviceInfo.getUniqueId();
-      const key = await EncryptedStorage.getItem('key');
-      await EncryptedStorage.setItem('name', myName.trimStart());
-      await EncryptedStorage.setItem('city', myCity.trimStart());
-      await EncryptedStorage.setItem('street', myStreet.trimStart());
-      const myNameEnc = await encryp(myName.trimStart(), key)
-      const myCityEnc = await encryp(myCity.trimStart(), key)
-      const myStreetEnc = await encryp(myStreet.trimStart(), key)
-
-      const db = await SQLite.openDatabase({
-        name: 'firstNew.db',
-        location: 'default',
-      });
-      await db.executeSql(
-        'UPDATE files SET name = ?, city = ?, street = ?  WHERE ident = ?',
-        [myNameEnc, myCityEnc, myStreetEnc, deviceId],
-      );
-      Alert.alert(
-        t("profil.title"),
-        t("profil.infoData"),
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              setModalAdVisible(false);
-
-            },
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Error:', error);
-      setFinishMessage('Fehler beim Speichern');
+      await i18n.changeLanguage(langCode);
+      await EncryptedStorage.setItem('lang', langCode);
+      setModalLangVisible(false);
+    } catch (err) {
+      console.error('Sprachwechsel fehlgeschlagen:', err);
     }
   };
-const handleSaveChanges = async (lang) => {
-  try {
-    await i18n.changeLanguage(lang);
-    await EncryptedStorage.setItem("lang", lang);
 
-    Alert.alert(
-      i18n.t('profil.title'),
-      i18n.t('profil.languageSaved'),
-      [{ text: 'OK', onPress: () => setLangModal(false) }],
-      { cancelable: false }
-    );
-  } catch (err) {
-    console.error('Sprachwechsel fehlgeschlagen:', err);
-  }
-};
+  const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
 
-  const loadThings = async() => {
- try {
-    // Wir holen uns alle Daten parallel (effizienter)
-    const [name, city, street, emailNew, passwordNew, server] = await Promise.all([
-      EncryptedStorage.getItem('name'),
-      EncryptedStorage.getItem('city'),
-      EncryptedStorage.getItem('street'),
-      EncryptedStorage.getItem('email'),
-      EncryptedStorage.getItem('emailPassword'),
-      EncryptedStorage.getItem('emailServer')
-    ]);
-
-    // Nur setzen, wenn der Wert nicht null oder undefined ist
-    if (name !== null) setMyName(name);
-    if (city !== null) setMyCity(city);
-    if (street !== null) setMyStreet(street);
-if (emailNew !== null) setEmail(emailNew);
-if (passwordNew !== null) setPassword(passwordNew);
-if (server !== null) setValue(server);
-    console.log("Daten erfolgreich geladen");
-  } catch (error) {
-    console.error("Fehler beim Laden aus dem EncryptedStorage:", error);
-    // Optional: Benutzer informieren, dass Daten nicht geladen werden konnten
-  }
-  }
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Profil-Header Card ── */}
+        <View style={styles.profileHeaderCard}>
+          <View style={styles.profileInfoRow}>
+            <View style={styles.avatarWrap}>
+              <MaterialIcons name="person" size={26} color="#FFFFFF" />
+            </View>
+            <View style={styles.nameWrap}>
+              <Text style={styles.greetingLabel}>Willkommen zurück</Text>
+              <Text style={styles.userName} numberOfLines={1}>
+                {myName ? myName : 'Mein Profil'}
+              </Text>
+            </View>
+          </View>
 
+          {/* Interaktives Coin-Badge */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setModalPayVisible(true)}
+            style={styles.coinBadge}
+          >
+            <View style={styles.coinIconCircle}>
+              <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
+            </View>
+            <Text style={styles.coinText}>
+              {coins !== null ? `${coins} Coins` : '… Coins'}
+            </Text>
+            <View style={styles.coinAddBtn}>
+              <MaterialIcons name="add" size={14} color="#FFFFFF" />
+            </View>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.inputsContainer}>
-        <View style={styles.headerOut}>
-          <View style={styles.header}>
-            <Text style={styles.name2}>{myName != null ? 'Hey, ' + myName : "Kein Name"}</Text>
-            <TouchableOpacity onPress={() => setPayModal(true)} >
-            <Text style={styles.coins}>
-  {coins != null ? (
-    <>
-      <Text style={styles.plus}>+</Text>{` ${coins || 0 } Coins`}
-    </>
-  ) : (
-    'Coins nicht verfügbar'
-  )}
-</Text>
-            </TouchableOpacity>
+        {/* ── Settings Liste ── */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>EINSTELLUNGEN & DATEN</Text>
+
+          <View style={styles.cardGroup}>
+            <SettingsCard
+              iconName="badge"
+              title={t('personalData') || 'Persönliche Daten'}
+              description={myName ? `${myStreet}, ${myCity}` : (t('personalDataDescription') || 'Adresse & Name hinterlegen')}
+              onPress={() => {
+                loadLocalData();
+                setModalDataVisible(true);
+              }}
+            />
+
+            <View style={styles.divider} />
+
+            <SettingsCard
+              iconName="alternate-email"
+              title={t('configureEmail') || 'E-Mail Server'}
+              description={email ? email : (t('configureEmailDescription') || 'SMTP-Daten für direkten Versand')}
+              onPress={() => {
+                loadLocalData();
+                setModalEmailVisible(true);
+              }}
+            />
+
+            <View style={styles.divider} />
+
+            <SettingsCard
+              iconName="translate"
+              title={t('settings.languageChange') || 'Sprache'}
+              description={currentLangObj?.label || 'Deutsch'}
+              badgeText={`${currentLangObj?.flag || '🇩🇪'} ${currentLangObj?.value?.toUpperCase()}`}
+              onPress={() => setModalLangVisible(true)}
+            />
           </View>
         </View>
-        <Card style={{ backgroundColor: "transparent", elevation: 0, shadowOpacity: 0, borderWidth: 'none' }}>
-          <Pressable
-            onPress={() => {setModalAdVisible(true); loadThings()}}        // Grund‑Style 
+
+        {/* ── Coin Shop Banner ── */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>GUTHABEN AUFLADEN</Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setModalPayVisible(true)}
+            style={styles.shopBanner}
           >
-          {({ pressed }) => (
-            <View style={[
-                      styles.entry,                // Grund‑Layout
-                      pressed && styles.entryPress // nur solange gedrückt
-                    ]}>
-              <Card.Title
-               title={t('personalData')}
-               titleStyle={styles.job}/>
-                 <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-              <Text style={styles.name}>{t('personalDataDescription')}</Text>
-            </View>
-          )}
-          </Pressable>
-
-                    <Pressable
-            onPress={() => {setModalEmailVisible(true); loadThings()}}        // Grund‑Style 
-          >
-          {({ pressed }) => (
-            <View style={[
-                      styles.entry,                // Grund‑Layout
-                      pressed && styles.entryPress // nur solange gedrückt
-                    ]}>
-              <Card.Title
-               title={t('configureEmail')}
-               titleStyle={styles.job}/>
-                 <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-              <Text style={styles.name}>{t('configureEmailDescription')}</Text>
-            </View>
-          )}
-          </Pressable>
-           <Pressable
-            onPress={() => setLangModal(true)}        // Grund‑Style 
-          >
-          {({ pressed }) => (
-           <View style={[
-                      styles.entryNew,                // Grund‑Layout
-                      pressed && styles.entryPressNew // nur solange gedrückt
-                    ]}>
-               <Card.Title
-                            title={t('settings.languageChange')}
-                            titleStyle={styles.job}/>
-                    </View>
-          )}
-          </Pressable>
-
-
-
-        </Card>
-
-      </View>
-
-
-
-      {/* Modal für persönliche Daten */}
-      <Modal
-        isVisible={isModalAdVisible}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={475}
-        animationOutTiming={475}
-        onModalShow={() => loadThings()}
-
-        onBackdropPress={() => setModalAdVisible(false)}
-        style={{ margin: 0, justifyContent: 'center' }}
-        swipeDirection={['down']}
-        onSwipeComplete={() => setModalAdVisible(false)}
-        // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
-        backdropTransitionOutTiming={1}
-        useNativeDriver={false}
-        backdropOpacity={0.9}
-      >
-        <TouchableWithoutFeedback onPress={() => setModalAdVisible(false)}>
-          <Animated.View
-            style={[
-
-              {
-                height: 300,
-                backgroundColor: "transparent", // Damit es sichtbar bleibt
-                justifyContent: 'center',
-                alignItems: 'center',
-// Ändere dies im Style deiner Modals:
-transform: [{ 
-  translateY: Animated.multiply(
-    Animated.divide(keyboardHeight, 3), // Korrekte Division für Animated Nodes
-    -1
-  ) 
-}],                opacity: isAnimating ? 1 : 0,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }
-            ]}>
-            <View style={styles.modalBackground} onStartShouldSetResponder={() => true} >
-              <View style={styles.modalContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={myName}
-                  onChangeText={setMyName}
-                  placeholder={t('placeholderName')}
-                  placeholderTextColor="gray"
-                />
-                {(myName?.length ?? 0) > 0 && (
-                  <TouchableOpacity onPress={() => setMyName('')} style={styles.clearButton}>
-                    <MaterialIcons name="cancel" size={25} color="gray" />
-                  </TouchableOpacity>
-                )}
-                <CutLine />
-                <TextInput style={styles.input} value={myStreet} onChangeText={setMyStreet} placeholder={t('placeholderStreet')} placeholderTextColor="gray" />
-                {(myStreet.length ?? 0) > 0 && (
-                  <TouchableOpacity onPress={() => setMyStreet('')} style={styles.clearButton2}>
-                    <MaterialIcons name="cancel" size={25} color="gray" />
-                  </TouchableOpacity>
-                )}
-                <CutLine />
-                <TextInput style={styles.input} value={myCity} onChangeText={setMyCity} placeholder={t('placeholderZip')} placeholderTextColor="gray" />
-                {(myCity.length ?? 0) > 0 && (
-                  <TouchableOpacity onPress={() => setMyCity('')} style={styles.clearButton3}>
-                    <MaterialIcons name="cancel" size={25} color="gray" />
-                  </TouchableOpacity>
-                )}
+            <View style={styles.shopBannerGlow} />
+            <View style={styles.shopBannerContent}>
+              <View style={styles.shopIconContainer}>
+                <MaterialIcons name="stars" size={24} color="#F59E0B" />
               </View>
-              <TouchableOpacity style={styles.buttonNew} onPress={() => handleSaveChangesName()}>
-                <Text style={styles.buttonText}>{t('saveAndClose')}</Text>
-              </TouchableOpacity>
+              <View style={{ flex: 1, paddingHorizontal: 12 }}>
+                <Text style={styles.shopBannerTitle}>Coins verwalten</Text>
+                <Text style={styles.shopBannerSubtitle}>
+                  Erhalte neue Coins per Video oder Sofort-Aufladung
+                </Text>
+              </View>
+              <MaterialIcons name="arrow-forward-ios" size={14} color="rgba(255,255,255,0.4)" />
             </View>
-          </Animated.View>
-        </TouchableWithoutFeedback>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAL 1: Persönliche Daten
+      ═══════════════════════════════════════════════════════════════ */}
+      <Modal
+        isVisible={isModalDataVisible}
+   animationIn="zoomIn"
+        animationOut="zoomOut"
+        animationInTiming={260}
+        animationOutTiming={400}
+        backdropTransitionInTiming={260}
+        backdropTransitionOutTiming={400}
+        backdropOpacity={0.75}
+        hideModalContentWhileAnimating={true}
+        useNativeDriver={true}
+        useNativeDriverForBackdrop={true}
+        onBackdropPress={() => setModalDataVisible(false)}
+        onBackButtonPress={() => setModalDataVisible(false)}
+        style={styles.modalBackdrop}
+      >
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={styles.modalTitle}>{t('personalData') || 'Persönliche Daten'}</Text>
+              <Text style={styles.modalSubtitle}>Diese Daten werden im Anschreiben genutzt</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => setModalDataVisible(false)}
+              style={styles.modalCloseBtn}
+            >
+              <MaterialIcons name="close" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalBody}>
+            <ModalInput
+              icon="person"
+              placeholder={t('placeholderName') || 'Vollständiger Name'}
+              value={myName}
+              onChangeText={setMyName}
+            />
+            <ModalInput
+              icon="home"
+              placeholder={t('placeholderStreet') || 'Straße & Hausnummer'}
+              value={myStreet}
+              onChangeText={setMyStreet}
+            />
+            <ModalInput
+              icon="location-city"
+              placeholder={t('placeholderZip') || 'PLZ & Stadt'}
+              value={myCity}
+              onChangeText={setMyCity}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleSavePersonalData}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryButtonText}>{t('saveAndClose') || 'Speichern'}</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
 
-      {/* Modal für E-Mail */}
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAL 2: E-Mail Konfiguration
+      ═══════════════════════════════════════════════════════════════ */}
       <Modal
         isVisible={isModalEmailVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
-        animationInTiming={475}
-        onModalShow={() => loadThings()}
-
-        animationOutTiming={475}
+        animationInTiming={260}
+        animationOutTiming={400}
+        backdropTransitionInTiming={260}
+        backdropTransitionOutTiming={400}
+        backdropOpacity={0.75}
+        hideModalContentWhileAnimating={true}
+        useNativeDriver={true}
+        useNativeDriverForBackdrop={true}
         onBackdropPress={() => setModalEmailVisible(false)}
-        style={{ margin: 0, justifyContent: 'center' }}
-        swipeDirection={['down']}
-        onSwipeComplete={() => setModalEmailVisible(false)}
-        // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
-        backdropTransitionOutTiming={1}
-        useNativeDriver={false}
-        backdropOpacity={0.9}
+        onBackButtonPress={() => setModalEmailVisible(false)}
+        style={styles.modalBackdrop}
       >
-        <TouchableWithoutFeedback onPress={() => setModalEmailVisible(false)}>
-          <Animated.View
-            style={[
-
-              {
-
-                height: 320,
-                backgroundColor: "transparent", // Damit es sichtbar bleibt
-                justifyContent: 'center',
-                alignItems: 'center',
-// Ändere dies im Style deiner Modals:
-transform: [{ 
-  translateY: Animated.multiply(
-    Animated.divide(keyboardHeight, 3), // Korrekte Division für Animated Nodes
-    -1
-  ) 
-}],                opacity: isAnimating ? 1 : 0,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }
-
-            ]}>
-            <View style={styles.modalBackground} onStartShouldSetResponder={() => true} >
-              <View style={[styles.modalContainer, { zIndex: 2000 }]}>
-                <TextInput style={styles.input} placeholder={t('placeholderEmail')} value={email} onChangeText={setEmail} placeholderTextColor="gray" />
-                {email.length > 0 && (
-                  <TouchableOpacity onPress={() => setEmail('')} style={styles.clearButton}>
-                    <MaterialIcons name="cancel" size={25} color="gray" />
-                  </TouchableOpacity>
-                )}
-                <CutLine />
-                <TextInput style={styles.input} placeholder={t('placeholderPassword')} value={password} onChangeText={setPassword} placeholderTextColor="gray" />
-
-                <CutLine />
-                {password.length > 0 && (
-                  <TouchableOpacity onPress={() => setPassword('')} style={styles.clearButton2}>
-                    <MaterialIcons name="cancel" size={25} color="gray" />
-                  </TouchableOpacity>
-                )}
-                <View style={{ zIndex: 3000, width: "100%" }}>
-                  <DropDownPicker
-                    open={open}
-                    value={value}
-                    items={items}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    hideSelectedItemIcon={true}
-                    showArrowIcon={false}
-                    showTickIcon={false}
-                    placeholder={t('placeholderEmailServer')}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropDownContainer}
-                    textStyle={{ color: "white", fontSize: 20, textAlign: 'center' }}
-                  />
-                </View>
-              </View>
-              <TouchableOpacity style={styles.buttonNew} onPress={() => handleSaveChangesEmail()}>
-                <Text style={styles.buttonText}>{t('saveAndClose')}</Text>
-              </TouchableOpacity>
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={styles.modalTitle}>{t('configureEmail') || 'E-Mail Versand'}</Text>
+              <Text style={styles.modalSubtitle}>Absenderdaten für automatische Bewerbungen</Text>
             </View>
-          </Animated.View>
-        </TouchableWithoutFeedback>
+            <TouchableOpacity
+              onPress={() => setModalEmailVisible(false)}
+              style={styles.modalCloseBtn}
+            >
+              <MaterialIcons name="close" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalBody}>
+            <ModalInput
+              icon="mail"
+              placeholder={t('placeholderEmail') || 'E-Mail Adresse'}
+              value={email}
+              onChangeText={setEmail}
+            />
+
+            <ModalInput
+              icon="lock"
+              placeholder={t('placeholderPassword') || 'App-Passwort / Kennwort'}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            />
+
+            <View style={{ zIndex: 3000, marginTop: 4 }}>
+              <DropDownPicker
+                open={openServerDropdown}
+                value={emailServerValue}
+                items={emailServers}
+                setOpen={setOpenServerDropdown}
+                setValue={setEmailServerValue}
+                placeholder={t('placeholderEmailServer') || 'SMTP Server auswählen'}
+                style={styles.dropdown}
+                dropDownContainerStyle={styles.dropdownContainer}
+                textStyle={{ color: '#FFFFFF', fontSize: 14 }}
+                arrowIconStyle={{ tintColor: '#FFFFFF' }}
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.primaryButton, { marginTop: 16 }]}
+            onPress={handleSaveEmailConfig}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryButtonText}>{t('saveAndClose') || 'Speichern'}</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
 
-
-      {/* Modal für Anlagen sortieren */}
- <Modal
-        isVisible={langModal}
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAL 3: Sprachauswahl
+      ═══════════════════════════════════════════════════════════════ */}
+      <Modal
+        isVisible={isModalLangVisible}
         animationIn="zoomIn"
         animationOut="zoomOut"
-        animationInTiming={475}
-        animationOutTiming={475}
-        onBackdropPress={() => setLangModal(false)}
-        style={{ margin: 0,  width: width, justifyContent: 'center', alignSelf: 'center' }}
-        onSwipeComplete={() => setLangModal(false)}
-        // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
-   hardwareAccelerated={true}
-        backdropTransitionOutTiming={1}
-transparent
-      animationType="fade"
-        propagateSwipe={true}            // ← MUSS für Scroll
+        animationInTiming={260}
+        animationOutTiming={400}
+        backdropTransitionInTiming={260}
+        backdropTransitionOutTiming={400}
+        backdropOpacity={0.75}
+        hideModalContentWhileAnimating={true}
+        useNativeDriver={true}
+        useNativeDriverForBackdrop={true}
+        onBackdropPress={() => setModalLangVisible(false)}
+        onBackButtonPress={() => setModalLangVisible(false)}
+        style={styles.modalBackdrop}
       >
-  <Animated.View
-    style={[
-      {
-        // 50 % der Bildschirmhöhe
-        height: height * 0.5,
-        maxHeight: height * 0.5,
-        width: width * 0.85,
-        backgroundColor: 'transparent',
-        justifyContent: 'center',
-        alignSelf: 'center',
-        opacity: isAnimating ? 1 : 0,
-      },
-    ]}
-  >
-    <View style={styles.modalContainerLang}>
-      {/* Titel */}
-      <Text style={styles.langTitle}>{t('settings.languageChange')}</Text>
-
-      {/* Scrollbare Sprachliste */}
-      <ScrollView
-        style={styles.languageList}
-        contentContainerStyle={styles.languageListContent}
-        showsVerticalScrollIndicator={true}
-        nestedScrollEnabled={true}
-        keyboardShouldPersistTaps="handled"
-      >
-        {itemsLang.map((item) => {
-          const isActive = valueLang === item.value;
-          return (
+        <View style={[styles.modalSheet, { maxHeight: height * 0.58 }]}>
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={styles.modalTitle}>{t('settings.languageChange') || 'Sprache wählen'}</Text>
+              <Text style={styles.modalSubtitle}>Wähle deine bevorzugte Sprache</Text>
+            </View>
             <TouchableOpacity
-              key={item.value}
-              onPress={() => {setValueLang(item.value); handleSaveChanges(item.value)}}
-              style={[
-                styles.languageOption,
-                isActive && styles.languageOptionActive,
-              ]}
+              onPress={() => setModalLangVisible(false)}
+              style={styles.modalCloseBtn}
             >
-              <View style={styles.languageOptionLeft}>
-                <Text style={styles.languageFlag}>{item.flag}</Text>
-                <Text style={styles.languageOptionText}>{item.label}</Text>
+              <MaterialIcons name="close" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            style={styles.langList}
+            showsVerticalScrollIndicator={false}
+          >
+            {itemsLang.map((item) => {
+              const isSelected = i18n.language === item.value;
+              return (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => handleChangeLanguage(item.value)}
+                  style={[styles.langOption, isSelected && styles.langOptionActive]}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.langOptionLeft}>
+                    <Text style={styles.langFlag}>{item.flag}</Text>
+                    <Text style={[styles.langText, isSelected && styles.langTextActive]}>
+                      {item.label}
+                    </Text>
+                  </View>
+                  {isSelected && (
+                    <MaterialIcons name="check-circle" size={20} color="#3B82F6" />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAL 4: Coins Shop & Video Belohnung
+      ═══════════════════════════════════════════════════════════════ */}
+      <Modal
+        isVisible={isModalPayVisible}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        animationInTiming={260}
+        animationOutTiming={400}
+        backdropTransitionInTiming={260}
+        backdropTransitionOutTiming={400}
+        backdropOpacity={0.75}
+        hideModalContentWhileAnimating={true}
+        useNativeDriver={true}
+        useNativeDriverForBackdrop={true}
+        onBackdropPress={() => setModalPayVisible(false)}
+        onBackButtonPress={() => setModalPayVisible(false)}
+        style={styles.modalBackdrop}
+      >
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={styles.modalTitle}>Coins aufladen</Text>
+              <Text style={styles.modalSubtitle}>Nutze Coins für das Erstellen von Bewerbungen</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => setModalPayVisible(false)}
+              style={styles.modalCloseBtn}
+            >
+              <MaterialIcons name="close" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ gap: 12, marginVertical: 14 }}>
+            {/* Option 1: In-App Purchase */}
+            <TouchableOpacity
+              onPress={() => handlePurchase('JA2C0002')}
+              disabled={loaded}
+              activeOpacity={0.8}
+              style={styles.payOptionCard}
+            >
+              <View style={styles.payOptionIconWrap}>
+                <MaterialIcons name="shopping-bag" size={22} color="#FFFFFF" />
               </View>
-              {isActive && (
-                <MaterialIcons name="check" size={20} color="#ffffff" />
+              <View style={{ flex: 1, paddingHorizontal: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.payOptionTitle}>+40 Coins Paket</Text>
+                  <View style={styles.bestValueBadge}>
+                    <Text style={styles.bestValueBadgeText}>BELIEBT</Text>
+                  </View>
+                </View>
+                <Text style={styles.payOptionDesc}>Sofortige Freischaltung ohne Werbung</Text>
+              </View>
+              {loaded ? (
+                <ActivityIndicator size="small" color="#3B82F6" />
+              ) : (
+                <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
               )}
             </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
 
-      {/* Speichern-Button */}
-     
-    </View>
-  </Animated.View>
-
+            {/* Option 2: Rewarded Video */}
+            <TouchableOpacity
+              onPress={showRewarded}
+              disabled={loaded}
+              activeOpacity={0.8}
+              style={styles.adOptionCard}
+            >
+              <View style={styles.adOptionIconWrap}>
+                <MaterialIcons name="play-circle-filled" size={24} color="#F59E0B" />
+              </View>
+              <View style={{ flex: 1, paddingHorizontal: 12 }}>
+                <Text style={styles.payOptionTitle}>+4 Coins gratis</Text>
+                <Text style={styles.payOptionDesc}>Kurzes Werbevideo ansehen</Text>
+              </View>
+              {loaded ? (
+                <ActivityIndicator size="small" color="#F59E0B" />
+              ) : (
+                <MaterialIcons name="arrow-forward" size={18} color="rgba(255,255,255,0.4)" />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
-
-<Modal
-        isVisible={payModal}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={475}
-        animationOutTiming={475}
-        onBackdropPress={() => setPayModal(false)}
-        style={{ margin: 0,  width: width, justifyContent: 'center', alignSelf: 'center' }}
-        onSwipeComplete={() => setPayModal(false)}
-        // Add these handlers:
-        onModalWillShow={() => setIsAnimating(true)}
-        onModalHide={() => setIsAnimating(false)}
-   hardwareAccelerated={true}
-        backdropTransitionOutTiming={1}
-transparent
-      animationType="fade"
-        propagateSwipe={true}            // ← MUSS für Scroll
-      >
-<View style={{backgroundColor: "transparent", justifyContent: 'center', alignItems: 'center', opacity: isAnimating ? 1 : 0, borderTopLeftRadius: 20, borderTopRightRadius: 20,}}>
-        
-
-
-
-
-                 <Pressable
-            onPress={() => handlePurchase('JA2C0002')} 
-            disabled={loaded}       // Grund‑Style 
-          >
-          {({ pressed }) => (
-           <View style={[
-                      styles.entryAd,                // Grund‑Layout
-                      pressed && styles.entryPressAd // nur solange gedrückt
-                    ]}>
-               <Card.Title
-                            title={loaded ? `${t('pleaseWait')}${dots}` : t('buy1')}
-                            titleStyle={styles.job}/>
-                    </View>
-          )}
-          </Pressable>
-
-                 <Pressable
-            onPress={() => showRewarded()} 
-            disabled={loaded}       // Grund‑Style 
-          >
-          {({ pressed }) => (
-           <View style={[
-                      styles.entryAd,                // Grund‑Layout
-                      pressed && styles.entryPressAd // nur solange gedrückt
-                    ]}>
-               <Card.Title
-                            title={loaded ? `${t('pleaseWait')}${dots}` : t('ad')}
-                            titleStyle={styles.job}/>
-                    </View>
-          )}
-          </Pressable>
-
-</View>
-      </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
-
-
-
-
-
-
-
-
-
-const { height, width } = Dimensions.get("window");
-
+/* ── Styles ─────────────────────────────────────────────── */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background || '#0F1117',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 40,
+  },
+
+  /* ── Profile Header Card ── */
+  profileHeaderCard: {
+    backgroundColor: '#171B26',
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 26,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  profileInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  avatarWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#3B82F6',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  plus: {
-    marginBottom: 10,
-  },
-  modalContainerLang: {
-    flex: 1,
-    backgroundColor: '#1e1e2e',
-    borderRadius: 16,
-    padding: 16,
-    width: '100%',
-    alignSelf: 'center',
-    borderWidth: 1,
-    borderColor: 'gray',
-    maxHeight: height * 0.5,
-  },
-  langTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  languageList: {
-    flex: 1,
-    marginBottom: 10,
-  },
-  languageListContent: {
-    paddingVertical: 4,
-  },
-  languageOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  languageOptionActive: {
-    backgroundColor: '#4a6fa5',
-    borderWidth: 1,
-    borderColor: '#ffffff44',
-  },
-  languageOptionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  languageFlag: {
-    fontSize: 22,
     marginRight: 12,
   },
-  languageOptionText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
+  nameWrap: {
+    flex: 1,
   },
-  buttonNewLang: {
-    width: width * 0.8,
-    backgroundColor: colors.card3,
-    padding: 15,
-    borderRadius: 12,
+  greetingLabel: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  userName: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  coinBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: 10,
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'gray',
-    shadowColor: 'gray',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    gap: 6,
   },
-  buttonTextLang: {
-    color: 'white',
-    fontSize: 16,
+  coinIconCircle: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coinText: {
+    color: '#FBBF24',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  coinAddBtn: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#F59E0B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  /* ── Sections & Cards ── */
+  sectionWrap: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 10,
+    paddingLeft: 4,
+  },
+  cardGroup: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+  },
+  settingsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  cardPressed: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  settingsIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  settingsContent: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  settingsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  settingsTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '600',
   },
-  dropDownContainerLang: {
-    borderRadius: 15,
-    borderColor: 'gray',
-    width: width * 0.8,
-    alignSelf: 'center',
-    marginTop: 10,
-    backgroundColor: colors.card3,
+  inlineBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
   },
-  dropdownLang: {
-    alignSelf: 'center',
-    height: 50,
-    backgroundColor: colors.card3,
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    color: 'white',
-    elevation: 2,
-    zIndex: 3000,
-    borderColor: 'gray',
-    width: width * 0.8,
-    marginTop: 10,
+  inlineBadgeText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 11,
+    fontWeight: '700',
   },
-  deleteButtonLang: {
+  settingsDescription: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginLeft: 68,
+  },
+
+  /* ── Shop Banner ── */
+  shopBanner: {
+    position: 'relative',
+    backgroundColor: '#151923',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+    overflow: 'hidden',
+  },
+  shopBannerGlow: {
     position: 'absolute',
-    top: -16,
-    right: '50%',
+    top: -30,
+    right: -30,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
   },
-  entry: {
-    backgroundColor: colors.card3,
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: 'gray',
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  shopBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  shopIconContainer: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shopBannerTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  shopBannerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  /* ── Modals General (Symmetrisch & Flackerfrei) ── */
+  modalBackdrop: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 0,
+    paddingHorizontal: 16,
+  },
+  modalSheet: {
+    width: '100%',
+    maxWidth: 460,
+    backgroundColor: colors.background || '#121620',
+    borderRadius: 22,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'gray',
-    width: width * 0.9,
-  },
-  entryNew: {
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    borderRadius: 10,
-    shadowColor: 'gray',
-    borderWidth: 1,
-    borderColor: 'gray',
-    width: width * 0.9,
-  },
-  entryPress: {
-    backgroundColor: colors.card3,
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 30,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 16,
   },
-  entryPressNew: {
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
-  },
-  entryPressAd: {
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    marginTop: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
-  },
-  entryAd: {
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    borderRadius: 10,
-    marginTop: 10,
-    shadowColor: 'gray',
-    borderWidth: 1,
-    borderColor: 'gray',
-    width: width * 0.7,
-  },
-  header: {
-    marginBottom: 30,
+  modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.card3,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    shadowColor: 'white',
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'gray',
-    padding: 15,
-    alignSelf: 'flex-end',
-    width: width * 0.9,
-  },
-  name2: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  coins: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'right',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  clearButton: {
-    position: 'absolute',
-    right: 12,
-    top: 18,
-    padding: 5,
-  },
-  clearButton2: {
-    position: 'absolute',
-    right: 12,
-    top: 76,
-    padding: 5,
-  },
-  clearButton3: {
-    position: 'absolute',
-    right: 12,
-    top: 135,
-    padding: 5,
-  },
-  clearText: {
-    color: 'gray',
-    fontSize: 16,
-  },
-  popup: {
-    width: '90%',
-    height: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pdf: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#E74C3C',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  buttonContainer: {
-    marginBottom: height * 0.05,
-    width: width * 0.8,
-  },
-  dropDownContainer: {
-    borderColor: 'gray',
-    textAlign: 'center',
-    backgroundColor: colors.card3,
-    borderRadius: 10,
-    width: '100%',
-  },
-  listContainer: {
-    flex: 1,
-    marginBottom: 20,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    maxHeight: '75%',
-    width: width * 0.8,
-    height: 50,
-    borderRadius: 15,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card3,
-    borderRadius: 10,
-    padding: 12,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  CardContainer: {
-    borderWidth: 0,
-    backgroundColor: 'transparent',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  deleteButton: {
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 10,
-    position: 'absolute',
-    right: 10,
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  inputsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  formContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  input: {
-    height: 35,
-    backgroundColor: colors.card3,
-    fontSize: 18,
-    color: 'white',
-    width: '80%',
-    textAlign: 'center',
-  },
-  button: {
-    width: '100%',
-    backgroundColor: colors.card3,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-    shadowColor: 'gray',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  job2: {
-    width: '100%',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
-  },
-  buttonNew: {
-    width: width * 0.8,
-    backgroundColor: colors.card3,
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-    shadowColor: 'gray',
-    borderWidth: 1,
-    borderColor: 'gray',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonText: {
-    color: '#C8C8C8',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  name: {
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: 'rgb(179, 176, 184)',
-    marginBottom: 5,
-    lineHeight: 19,
-  },
-  job: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'rgb(220, 221, 232)',
-  },
-  text: {
-    textAlign: 'center',
-    color: '#C8C8C8',
-    marginBottom: 5,
-  },
-  user: {
-    marginVertical: 10,
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
   },
-  modalContainer: {
-    width: width * 0.8,
-    backgroundColor: colors.card3,
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: 'gray',
+  modalSubtitle: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-    zIndex: 2000,
-    shadowColor: 'gray',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    marginLeft: 8,
+  },
+  modalBody: {
+    gap: 12,
+    marginVertical: 14,
+  },
+
+  /* ── Inputs ── */
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  textInputField: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    height: '100%',
   },
   dropdown: {
-    height: 40,
-    backgroundColor: colors.card3,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 19,
-    color: '#C8C8C8',
-    elevation: 2,
-    zIndex: 3000,
-    borderWidth: 0,
-    textAlign: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    height: 48,
   },
-  modalButton: {
-    backgroundColor: '#7D26CD',
-    padding: 10,
-    borderRadius: 10,
-    marginTop: 15,
+  dropdownContainer: {
+    backgroundColor: '#1A1E29',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 14,
+  },
+
+  /* ── Buttons ── */
+  primaryButton: {
     width: '100%',
+    height: 48,
+    backgroundColor: '#3B82F6',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  /* ── Language List ── */
+  langList: {
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  langOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginBottom: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  langOptionActive: {
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+  },
+  langOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  langFlag: {
+    fontSize: 20,
+  },
+  langText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  langTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+
+  /* ── Coin Shop Cards ── */
+  payOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  payOptionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#3B82F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bestValueBadge: {
+    backgroundColor: '#3B82F6',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+  },
+  bestValueBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  payOptionTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  payOptionDesc: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  adOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  adOptionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
 });

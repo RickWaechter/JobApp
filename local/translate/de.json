@@ -218,6 +218,11 @@
     "impressum": "Impressum"
   },
   "validation": {
+    "salutation": {
+      "required": "Bitte Anrede wählen",
+      "contactRequired": "Bitte Ansprechpartner eintragen"
+    },
+  
     "job": {
       "required": "Beruf ist erforderlich!"
     },
@@ -228,6 +233,7 @@
       "required": "Bitte gib deinen Namen ein",
       "minWords": "Der Name muss mindestens aus 2 Wörtern bestehen!"
     },
+
      "nameCompany": {
       "required": "Bitte gib den Firmennamen ein"
     },
@@ -329,5 +335,94 @@
         "emailDelete": "Email erfolgreich gelöscht",
 "deleteTitle": "Eintrag löschen",
 "deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
-"delete": "Löschen"
+"delete": "Löschen",
+
+
+
+"emailSearch": "Emails werden gesucht.",
+"bewerbung": {
+    "stepBadge": "SCHRITT 1 VON 2",
+    "mainTitle": "Bewerbung konfigurieren",
+    "sectionSalutation": "ANREDE & ANSPRECHPARTNER",
+    "sectionJob": "BERUF ODER STELLEN-LINK",
+    "sectionSkills": "KENNTNISSE & ERFAHRUNG",
+    "sectionAccordion": "Erweiterte Einstellungen",
+    "labelEmployment": "ANSTELLUNGSART",
+    "labelAppType": "BEWERBUNGSTYP",
+    "labelFont": "SCHRIFTART IM PDF",
+    "placeholderSalutation": "Nachname Ansprechpartner (z.B. Schmidt)",
+    "placeholderJob": "Berufsbezeichnung oder Link einfügen...",
+    "placeholderSkills": "z.B. 3 Jahre React Native, Teamleitung...",
+    "placeholderFont": "Schriftart wählen",
+    "btnAnalyze": "Analysieren",
+    "btnGenerate": "Anschreiben generieren",
+    "creatingApplication": "Bewerbung wird erstellt",
+    "btnCancel": "Abbrechen",
+    "infoModalMessage": "Kopiere einfach den Link einer Stellenanzeige (Indeed, StepStone, Arbeitsagentur, etc.) in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!\n\nAlternativ reicht auch einfach deine Berufsbezeichnung.",
+    "extractingTitle": "Stellenanzeige wird analysiert...",
+    "extractingSubtitle": "Wir extrahieren Keywords & Aufgaben der Stelle",
+    "extractSuccessTitle": "Erfolg!",
+    "extractSuccessMsg": "Stellenanzeige wurde erfolgreich analysiert.",
+    "extractHintTitle": "Hinweis",
+    "extractDefaultError": "Konnte keine Daten extrahieren.",
+    "invalidLinkTitle": "Ungültiger Link",
+    "invalidLinkMsg": "Bitte füge einen vollständigen Link zur Stellenanzeige ein.",
+    "timeoutTitle": "Timeout",
+    "timeoutMsg": "Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.",
+    "savedTitle": "Gespeichert",
+    "jobSavedMsg": "Berufsbezeichnung für Vorschläge gemerkt.",
+    "skillSavedMsg": "Kenntnis für Vorschläge gemerkt.",
+    "networkError": "Netzwerkfehler beim Erstellen des Textes.",
+    "salutationDearAll": "Sehr geehrte Damen und Herren,",
+    "salutationDearMr": "Sehr geehrter Herr {{name}},",
+    "salutationDearMrs": "Sehr geehrte Frau {{name}},",
+    "subjectCoverLetterFor": "e Bewerbung als ",
+    "subjectCoverLetter": "Bewerbung als ",
+    "errorTitle": "Fehler",
+    "errorLoadJob": "Stellenanzeige konnte nicht geladen werden.",
+    "fonts": {
+      "helvetica": "Helvetica (Modern & Klar)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Klassisch Serif)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Monospace)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+  
+  "startApp": {
+    "badgeHub": "BEWERBUNGS-ASSISTENT",
+    "titleMain": "Wie möchtest du starten?",
+    "badgeRecommended": "EMPFOHLEN",
+    "primaryFooter": "Jetzt starten",
+    "resumeSubtitle": "Klicke hier, um fortzufahren",
+    "alertMissingProfileTitle": "Profil fehlt",
+    "alertMissingProfileMsg": "Bitte lege zuerst dein Profil an.",
+    "alertIncompleteProfileTitle": "Profil unvollständig",
+    "alertIncompleteProfileMsg": "Bitte trage deine Adresse auf der Profilseite ein.",
+    "alertMissingCvTitle": "Lebenslauf fehlt",
+    "alertMissingCvMsg": "Bitte lade zuerst deinen Lebenslauf hoch.",
+    "alertErrorTitle": "Fehler",
+    "alertDbLoadError": "Fehler beim Laden der Daten.",
+    "alertDbConnectionError": "Datenbankverbindung fehlgeschlagen."
+  },
+  "companySearchModal": {
+    "badgeManual": "ADRESSE PRÜFEN",
+    "badgeAuto": "AUTO-SUCHE",
+    "titleManual": "Firmendaten",
+    "titleAuto": "Unternehmen finden",
+    "searchPlaceholder": "Firmenname oder Ort eingeben...",
+    "promptTypeSuggestions": "Tippe, um Vorschläge anzuzeigen",
+    "searching": "Suche nach Orten...",
+    "noResults": "Keine Treffer gefunden",
+    "btnManual": "Manuell eingeben",
+    "namePlaceholder": "Firmenname",
+    "streetPlaceholder": "Straße & Hausnummer",
+    "cityPlaceholder": "PLZ & Ort",
+    "btnContinue": "Übernehmen",
+    "btnBackToSearch": "Zurück zur Suche",
+    "errorTitle": "Fehler",
+    "saveErrorMsg": "Deine Daten konnten nicht gespeichert werden.",
+    "btnOk": "OK"
+  }
 }

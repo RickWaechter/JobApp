@@ -1,503 +1,509 @@
+// CollectScreen.js
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { router } from 'expo-router';
-import { useEffect, useState, useRef } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
-import { Card, Divider } from 'react-native-paper';
 import Pdf from 'react-native-pdf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Share from 'react-native-share';
 import SQLite from 'react-native-sqlite-storage';
-import colors from '../inc/colors.js';
+
 import { sanitize } from '../inc/CutLine.js';
-import {
-  decryptBase,
-} from '../inc/cryp.js';
-// Aktivieren des Debug-Modus (optional)
+import colors from '../inc/colors.js';
+import { decryptBase } from '../inc/cryp.js';
+
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
+const { width, height } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
 
+/* ── Wiederverwendbare Action-Kachel ────────────────────── */
+const CollectActionCard = memo(({ title, description, iconName, onPress, isPrimary = false }) => (
+  <Pressable
+    onPress={onPress}
+    style={({ pressed }) => [
+      styles.actionCard,
+      isPrimary && styles.primaryActionCard,
+      pressed && styles.cardPressed,
+    ]}
+  >
+    <View style={[styles.iconContainer, isPrimary && styles.primaryIconContainer]}>
+      <MaterialIcons
+        name={iconName}
+        size={22}
+        color={isPrimary ? '#FFFFFF' : '#60A5FA'}
+      />
+    </View>
+
+    <View style={styles.cardTextContainer}>
+      <Text style={[styles.cardTitle, isPrimary && styles.primaryCardTitle]} numberOfLines={1}>
+        {title}
+      </Text>
+      <Text style={styles.cardDescription} numberOfLines={2}>
+        {description}
+      </Text>
+    </View>
+
+    <MaterialIcons
+      name="chevron-right"
+      size={22}
+      color={isPrimary ? 'rgba(255,255,255,0.6)' : 'rgba(255, 255, 255, 0.3)'}
+    />
+  </Pressable>
+));
+
 const CollectScreen = () => {
+  const { t } = useTranslation();
 
-        const { t } = useTranslation();
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popup, setPopup] = useState('');
-  const [fileUri, setFileUri] = useState('');
+  /* ── States ──────────────────────────────────────────── */
   const [pdfView, setPdfView] = useState(false);
-  const lastTimeClick = useRef(0);
-const [source, setSource] = useState({});
-  useEffect(() => {
-    console.log(fileUri)
-    console.log(source)
-  },
-    [fileUri, source]);
+  const [source, setSource] = useState({});
+  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
+  const lastTimeClick = useRef(0);
+
+  /* ── Navigation: E-Mail ───────────────────────────────── */
   const email = async () => {
-     const now = Date.now();
-      if (now - lastTimeClick.current < 1000) {
-        console.log('Zu schnell! Doppelklick verhindert.');
-        return;
-      }
-      lastTimeClick.current = now;
-    console.log("email Funktion aufgerufen, Navigation zu Email-Screen");
+    const now = Date.now();
+    if (now - lastTimeClick.current < 1000) return;
+    lastTimeClick.current = now;
+
     try {
-      await EncryptedStorage.setItem("result", "collect") 
+      await EncryptedStorage.setItem('result', 'collect');
       router.push('/email');
     } catch (err) {
-      console.error('Error opening database:', err);
+      console.error('Error saving state:', err);
     }
   };
-  
+
+  /* ── Navigation: Zurück zur Startseite ───────────────── */
   const toHome = async () => {
-    console.log("toHome Funktion aufgerufen, Navigation zu Home-Screen");
-    if (await EncryptedStorage.getItem('result')) {
-    await EncryptedStorage.removeItem('result')
+    try {
+      if (await EncryptedStorage.getItem('result')) {
+        await EncryptedStorage.removeItem('result');
+      }
+      if (await EncryptedStorage.getItem('merge')) {
+        await EncryptedStorage.removeItem('merge');
+      }
+      router.dismissTo('(tabs)');
+    } catch (err) {
+      console.error('Error navigating home:', err);
     }
-    if (await EncryptedStorage.getItem('merge')) {
-      await EncryptedStorage.removeItem('merge')
-    }
-    router.dismissTo('(tabs)');
-    console.log("Navigation zu MainTabs abgeschlossen");
-  }
-  
+  };
+
+  /* ── PDF Vorschau anzeigen ───────────────────────────── */
   const lookAtIt = async () => {
-  console.log("lookAtIt Funktion aufgerufen");
+    const now = Date.now();
+    if (now - lastTimeClick.current < 1000) return;
+    lastTimeClick.current = now;
 
-  try {
-    // 1) Key einmal laden
-    const myKey = await EncryptedStorage.getItem('key');
-    const yourName = await EncryptedStorage.getItem('yourName');
-    const mergeName = await EncryptedStorage.getItem('merge');
+    setLoadingPdf(true);
+    try {
+      const myKey = await EncryptedStorage.getItem('key');
+      const yourName = await EncryptedStorage.getItem('yourName');
+      const mergeName = await EncryptedStorage.getItem('merge');
 
-    console.log(`Key: ${myKey}`);
-    console.log(`YourName: ${yourName}`);
-    console.log(`MergeName: ${mergeName}`);
+      const filename = mergeName || `${yourName}_Bewerbungsmappe.pdf`;
+      const base = `${RNFS.LibraryDirectoryPath}/${filename}`;
+      const base2 = `${base}_1`;
+      const temp = `${RNFS.LibraryDirectoryPath}/${yourName}_Bewerbungsmappe_temp.pdf`;
 
-    // 2) PDF-Name bestimmen (merge oder normal)
-    let filename = "";
-    if (mergeName) {
-      filename = mergeName;
-      console.log("Merge-Datei gefunden");
-    } else {
-      filename = `${yourName}_Bewerbungsmappe.pdf`;
-      console.log("Keine Merge-Datei -> Standard");
+      const encData = await RNFS.readFile(base, 'base64');
+      const decrypted = await decryptBase(encData, myKey);
+      const encData2 = await RNFS.readFile(base2, 'base64');
+      const combined = decrypted + encData2;
+
+      await RNFS.writeFile(temp, combined, 'base64');
+      setSource({ uri: `file://${temp}` });
+      setPdfView(true);
+
+      await EncryptedStorage.setItem('result', 'collect');
+    } catch (err) {
+      console.error('Fehler beim Öffnen der PDF:', err);
+      Alert.alert('Fehler', 'PDF-Vorschau konnte nicht geladen werden.');
+    } finally {
+      setLoadingPdf(false);
     }
+  };
 
-    // 3) Paths vorbereiten
-    const base = `${RNFS.LibraryDirectoryPath}/${filename}`;
-    const base2 = base + "_1"; // zweiter Teil
-    const temp = `${RNFS.LibraryDirectoryPath}/${yourName}_Bewerbungsmappe_temp.pdf`;
-
-    console.log("PDF Pfade:");
-    console.log("base:", base);
-    console.log("base2:", base2);
-    console.log("temp:", temp);
-
-    // 4) Lesen + decrypten
-    const encData = await RNFS.readFile(base, "base64");
-    console.log("encData:", encData);
-    const decrypted = await decryptBase(encData, myKey);
-    console.log("decrypted Data erhalten");
-
-    const encData2 = await RNFS.readFile(base2, "base64");
-    console.log("encData2:", encData2);
-    // ⚠️ Hier klebst du PDFs zusammen – das kann fehlerhaft sein
-    const combined = decrypted + encData2;
-    console.log("PDFs kombiniert");
-    // 5) Neue Datei schreiben
-    await RNFS.writeFile(temp, combined, "base64");
-    console.log("Temp-Datei geschrieben:", temp);
-    // 6) Checken ob sie existiert
-    const exists = await RNFS.exists(temp);
-    console.log("Temp-Datei existiert:", exists);
-
-    // 7) PDF anzeigen
-    setSource({ uri: `file://${temp}` });
-    setPdfView(true);
-
-    // 8) Flag setzen
-    await EncryptedStorage.setItem("result", "collect");
-  } 
-  catch (err) {
-    console.error("Fehler beim Öffnen der PDF:", err);
-  }
-};
-
-const deleteIt = async () => {
-  setPdfView(false)
-  const name = await EncryptedStorage.getItem('yourName');
- 
-  const blue = `${(name)}_Bewerbungsmappe`;
-  const myKey = await EncryptedStorage.getItem('key');
-const outputPath = `${RNFS.LibraryDirectoryPath}/${blue}_temp.pdf`;
-RNFS.exists(outputPath)
-    .then( (result) => {
-        console.log("file exists: ", result);
-
-        if(result){
-          return RNFS.unlink(outputPath)
-            .then(() => {
-              console.log('FILE DELETED');
-              setPopupVisible(false)
-            })
-            // `unlink` will throw an error, if the item to unlink does not exist
-            .catch((err) => {
-              console.log(err.message);
-            });
-        }
-
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-}
-
- const download = async () => {
-  console.log("--- Start Download-Prozess ---");
-  try {
-    const myKey = await EncryptedStorage.getItem('key');
-    console.log("Key geladen:", myKey ? "Vorhanden" : "Nicht gefunden");
-
-    const mergeName = await EncryptedStorage.getItem('merge');
-    console.log("Merge Name aus Storage:", mergeName);
-
-    let finalPath = "";
-
-    if (mergeName) {
-      console.log("Modus: Merge-Name gefunden");
-      const safeName = sanitize(mergeName);
-      const dataPath = `${RNFS.LibraryDirectoryPath}/${mergeName}`;
-      const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName}_Bewerbungsmappe.pdf`;
-      console.log("Lese Quelldatei:", dataPath);
-
-      const encData = await RNFS.readFile(dataPath, 'base64');
-      console.log("Datei 1 geladen, Länge:", encData.length);
-
-      const decryptedData = await decryptBase(encData, myKey);
-      console.log("Datei 1 entschlüsselt");
-
-      const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
-      console.log("Datei 2 (Anhang) geladen, Länge:", encData2.length);
-
-      const combinedData = decryptedData + encData2;
-      await RNFS.writeFile(outputPath, combinedData, 'base64');
-      console.log("Datei erfolgreich geschrieben unter:", outputPath);
-      
-      finalPath = outputPath;
-    } 
-    else {
-      console.log("Modus: Normaler Download (kein Merge)");
-      setPopup('Ihre Bewerbungsmappe wird vorbereitet...');
-      setPopupVisible(true);
-
+  /* ── PDF Vorschau schließen & Temp löschen ──────────── */
+  const deleteIt = async () => {
+    setPdfView(false);
+    try {
       const name = await EncryptedStorage.getItem('yourName');
-      console.log("Nutzername aus Storage:", name);
-const safeName2 = sanitize(name);
-      const dataPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbungsmappe.pdf`;
-      const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName2}_Bewerbung.pdf`;
-      console.log("Lese Pfad:", dataPath);
-
-      const encData = await RNFS.readFile(dataPath, 'base64');
-      const decryptedData = await decryptBase(encData, myKey);
-      const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
-
-      const combinedData = decryptedData + encData2;
-      await RNFS.writeFile(outputPath, combinedData, 'base64');
-      console.log("Output-Datei geschrieben:", outputPath);
-
-      finalPath = outputPath;
-      setPopupVisible(false);
-      setFileUri(outputPath);
+      const outputPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbungsmappe_temp.pdf`;
+      const exists = await RNFS.exists(outputPath);
+      if (exists) {
+        await RNFS.unlink(outputPath);
+      }
+    } catch (err) {
+      console.error('Fehler beim Löschen der temporären PDF:', err);
     }
+  };
 
-    // WICHTIG: Kleiner Timeout für iOS
-    if (finalPath) {
-      console.log("Starte Share-Dialog für:", finalPath);
-     
-        try {
-          const shareResponse = await Share.open({
-            url: `file://${finalPath}`,
-            type: 'application/pdf', // Hilft iOS das Namensfeld anzuzeigen
-            saveToFiles: true,
-          });
-          console.log("Share erfolgreich beendet:", shareResponse);
-        } catch (shareErr) {
-          console.log("Share vom User abgebrochen oder Fehler:", shareErr);
-        }
+  /* ── PDF Teilen & Herunterladen ──────────────────────── */
+  const download = async () => {
+    const now = Date.now();
+    if (now - lastTimeClick.current < 1000) return;
+    lastTimeClick.current = now;
+
+    setSharing(true);
+    try {
+      const myKey = await EncryptedStorage.getItem('key');
+      const mergeName = await EncryptedStorage.getItem('merge');
+      let finalPath = '';
+
+      if (mergeName) {
+        const safeName = sanitize(mergeName);
+        const dataPath = `${RNFS.LibraryDirectoryPath}/${mergeName}`;
+        const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName}_Bewerbungsmappe.pdf`;
+
+        const encData = await RNFS.readFile(dataPath, 'base64');
+        const decryptedData = await decryptBase(encData, myKey);
+        const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
+        const combinedData = decryptedData + encData2;
+
+        await RNFS.writeFile(outputPath, combinedData, 'base64');
+        finalPath = outputPath;
+      } else {
+        const name = await EncryptedStorage.getItem('yourName');
+        const safeName2 = sanitize(name);
+        const dataPath = `${RNFS.LibraryDirectoryPath}/${name}_Bewerbungsmappe.pdf`;
+        const outputPath = `${RNFS.LibraryDirectoryPath}/${safeName2}_Bewerbung.pdf`;
+
+        const encData = await RNFS.readFile(dataPath, 'base64');
+        const decryptedData = await decryptBase(encData, myKey);
+        const encData2 = await RNFS.readFile(dataPath + '_1', 'base64');
+        const combinedData = decryptedData + encData2;
+
+        await RNFS.writeFile(outputPath, combinedData, 'base64');
+        finalPath = outputPath;
+      }
+
+      if (finalPath) {
+        await Share.open({
+          url: `file://${finalPath}`,
+          type: 'application/pdf',
+          saveToFiles: true,
+        });
+      }
+    } catch (err) {
+      if (err?.message && !err.message.includes('User did not share')) {
+        console.error('Fehler beim Exportieren:', err);
+      }
+    } finally {
+      setSharing(false);
     }
-
-  } catch (err) {
-    console.error('KRITISCHER FEHLER im Hauptprozess:', err);
-    setPopupVisible(false);
-  }
-};
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1,  backgroundColor: "rgb(8, 12, 32)" }}>
-            <View style={styles.container}>
-          
-  <Modal
-    visible={pdfView}
-    animationType="fade"
-    onRequestClose={deleteIt} // wichtig für Android Back-Button
-  >
-    <View style={styles.overlay}>
-      <View style={styles.popup}>
-        <Pdf
-        
-          source={source}
-          style={styles.pdf}
-        />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.successBadge}>
+            <MaterialIcons name="check-circle" size={15} color="#10B981" />
+            <Text style={styles.successBadgeText}>FERTIGGESTELLT</Text>
+          </View>
+          <Text style={styles.titleMain}>Bewerbungsmappe bereit!</Text>
+          <Text style={styles.subtitleMain}>
+            Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt.
+          </Text>
+        </View>
 
-        <TouchableOpacity
-          onPress={deleteIt}
-          style={styles.closeButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text style={styles.closeText}>✕</Text>
-        </TouchableOpacity>
+        {/* ── Action Cards ── */}
+        <View style={styles.cardsWrapper}>
+          <CollectActionCard
+            title={t('viewApplication') || 'Vorschau ansehen'}
+            description={t('viewApplicationDescription') || 'Überprüfe deine fertige Mappe vor dem Absenden.'}
+            iconName="visibility"
+            onPress={lookAtIt}
+          />
+
+          <CollectActionCard
+            isPrimary={true}
+            title={t('download.button') || 'Speichern & Teilen'}
+            description={t('downloadDescription') || 'Als PDF exportieren, in Dateien sichern oder teilen.'}
+            iconName="file-download"
+            onPress={download}
+          />
+
+          <CollectActionCard
+            title={t('sendEmail') || 'Direkt per E-Mail'}
+            description={t('sendEmailDescription') || 'Mit deinen hinterlegten SMTP-Daten sofort versenden.'}
+            iconName="send"
+            onPress={email}
+          />
+        </View>
+
+        {/* ── Footer Button ── */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={toHome}
+            activeOpacity={0.75}
+          >
+            <MaterialIcons name="home" size={18} color="rgba(255,255,255,0.7)" style={{ marginRight: 6 }} />
+            <Text style={styles.homeButtonText}>{t('toHome') || 'Zurück zur Übersicht'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  </Modal>
 
-  
-      
+      {/* ── PDF Preview Modal ── */}
+      <Modal
+        visible={pdfView}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={deleteIt}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderTitleWrap}>
+                <MaterialIcons name="picture-as-pdf" size={20} color="#60A5FA" />
+                <Text style={styles.modalHeaderTitle} numberOfLines={1}>
+                  Bewerbungsmappe.pdf
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={deleteIt}
+                style={styles.modalCloseBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <MaterialIcons name="close" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
 
-
-
-
-<View style={styles.container2}>
- <Card style={{  backgroundColor: colors.background, shadowColor: 'transparent' }}>
-<Pressable onPress={lookAtIt}>
-  {({ pressed }) => (
-    <View style={[
-      styles.entry,
-      pressed && styles.entryPress
-    ]}>
-      <Card.Title
-        title={t('viewApplication')}
-        titleStyle={styles.job}
-      />
-      <Divider
-        color='gray'
-        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
-      />
-      <Text style={styles.name}>{t('viewApplicationDescription')}</Text>
-    </View>
-  )}
-</Pressable>
-
-<Pressable onPress={download}>
-  {({ pressed }) => (
-    <View style={[
-      styles.entry,
-      pressed && styles.entryPress
-    ]}>
-      <Card.Title
-        title={t('download.button')}
-        titleStyle={styles.job}
-      />
-      <Divider
-        color='gray'
-        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
-      />
-      <Text style={styles.name}>{t('downloadDescription')}</Text>
-    </View>
-  )}
-</Pressable>
-
-<Pressable onPress={email}>
-  {({ pressed }) => (
-    <View style={[
-      styles.entry,
-      pressed && styles.entryPress
-    ]}>
-      <Card.Title
-        title={t('sendEmail')}
-        titleStyle={styles.job}
-      />
-      <Divider
-        color='gray'
-        style={{ justifyContent: 'center', marginBottom: 15, width: '80%', alignSelf: 'center' }}
-      />
-      <Text style={styles.name}>{t('sendEmailDescription')}</Text>
-    </View>
-  )}
-</Pressable>
-
-<Pressable onPress={toHome}>
-  {({ pressed }) => (
-    <View style={[
-      styles.finishButton,                // Dein Basis-Style für den Home-Button
-      pressed && styles.finishButtonPress        // Der Effekt beim Drücken (oder hier styles.finishButtonPress nutzen)
-    ]}>
-      <Text style={styles.finishText}>{t('toHome')}</Text>
-    </View>
-  )}
-</Pressable>
-</Card>
-</View>
-    </View>
-
-
-</SafeAreaView>
-
+            {/* PDF View Component */}
+            <View style={styles.pdfWrapper}>
+              <Pdf
+                source={source}
+                style={styles.pdf}
+                activityIndicator={<ActivityIndicator size="large" color="#3B82F6" />}
+                onError={(error) => {
+                  console.error('PDF Render Error:', error);
+                  Alert.alert('Fehler', 'PDF konnte nicht gerendert werden.');
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 };
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
 
+/* ── Styles ─────────────────────────────────────────────── */
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background || '#0F1117',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-   
-    padding: 16,
-
-    
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
+    justifyContent: 'space-between',
   },
-  container2: {
-    flex: 1,
-    backgroundColor: colors.background,
-   justifyContent:'center',
-   alignItems:'center',
 
-    
+  /* ── Header ── */
+  header: {
+    marginTop: 8,
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.background,
-  
-    justifyContent: 'center',
+  successBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  popup: {
-    width: '90%',
-    height: '90%',
-    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 20,
-    
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10, // Schatten für Android
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    marginBottom: 10,
+    gap: 6,
+  },
+  successBadgeText: {
+    color: '#10B981',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  titleMain: {
+    color: '#FFFFFF',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  subtitleMain: {
+    color: 'rgba(255, 255, 255, 0.55)',
+    fontSize: 13.5,
+    marginTop: 6,
+    lineHeight: 19,
+  },
+
+  /* ── Action Cards ── */
+  cardsWrapper: {
+    gap: 14,
+    marginVertical: 'auto',
+  },
+  actionCard: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#171B26',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  primaryActionCard: {
+    backgroundColor: 'rgba(59, 130, 246, 0.14)',
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+    shadowColor: '#3B82F6',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  cardPressed: {
+    transform: [{ scale: 0.985 }],
+    opacity: 0.9,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  primaryIconContainer: {
+    backgroundColor: '#3B82F6',
+  },
+  cardTextContainer: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 3,
+  },
+  primaryCardTitle: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  cardDescription: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12.5,
+    lineHeight: 17,
+  },
+
+  /* ── Footer ── */
+  footer: {
+    marginTop: 10,
+  },
+  homeButton: {
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  homeButtonText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  /* ── PDF Modal ── */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 7, 12, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalContainer: {
+    width: width * 0.94,
+    height: height * 0.88,
+    backgroundColor: '#171B26',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  modalHeaderTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  modalHeaderTitle: {
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '700',
+  },
+  modalCloseBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  pdfWrapper: {
+    flex: 1,
+    backgroundColor: '#0F1117',
   },
   pdf: {
     flex: 1,
     width: '100%',
     height: '100%',
-    borderRadius: 10, // Optional für abgerundete Ecken
-  },
-
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#E74C3C',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  closeText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
- 
-  entry: {
-      flexDirection: "column",
-    backgroundColor: colors.card3,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth:1,
-    borderColor:'gray',
-justifyContent:'center',
-width:width * 0.9,
-
-  },
-    entryPress: {
-    backgroundColor: colors.card3,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
-    wdith:width * 0.9,
-  
-
-  },
-  finishButton: {
-    backgroundColor: colors.card3,
-alignSelf: 'center',
-    padding: 15,
-    borderRadius: 10,
-   width: width * 0.9,
-    marginBottom: height * 0.05,
-
-    
-    shadowColor: "gray",
-    borderWidth:1,
-    borderColor:'gray',
-
-  },
-   finishButtonPress: {
-    backgroundColor: colors.card3,
-alignSelf: 'center',
-    padding: 15,
-    borderRadius: 10,
-   width: width * 0.9,
-    marginBottom: height * 0.05,
-
-        borderWidth: 1,
-    borderColor: 'white',
-    shadowColor: "gray",
-
-
-  },
-  name: {
-    textAlign: "center",
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "rgb(179, 176, 184)",
-    marginBottom: 5,
-    lineHeight:19,
-  },
-  finishText: {
-    textAlign: "center",
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#C8C8C8",
-   
-  },
-  job: {
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#E5E5E5",
-  
+    backgroundColor: 'transparent',
   },
 });
+
 export default CollectScreen;

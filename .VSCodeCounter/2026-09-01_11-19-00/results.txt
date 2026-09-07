@@ -1,0 +1,217 @@
+Date : 2026-09-01 11:19:00
+Directory : /home/rick/Dokumente/git/JobApp
+Total : 127 files,  164594 codes, 748 comments, 14990 blanks, all 180332 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| MS SQL             |          2 |    128,902 |          0 |     13,067 |    141,969 |
+| JSON               |         18 |     19,969 |          0 |        113 |     20,082 |
+| JavaScript         |         55 |     13,477 |        483 |      1,357 |     15,317 |
+| Go                 |          1 |        691 |         16 |        136 |        843 |
+| TypeScript JSX     |         15 |        459 |         17 |         71 |        547 |
+| Swift              |          2 |        244 |          9 |         60 |        313 |
+| Groovy             |          4 |        188 |         75 |         41 |        304 |
+| JSON with Comments |          3 |        157 |          0 |          3 |        160 |
+| TypeScript         |          8 |        110 |         18 |         31 |        159 |
+| JavaScript JSX     |          2 |         96 |          0 |         12 |        108 |
+| XML                |          6 |         84 |         24 |          5 |        113 |
+| Ruby               |          3 |         75 |          7 |         20 |        102 |
+| Kotlin             |          2 |         48 |         21 |         13 |         82 |
+| Batch              |          1 |         41 |         32 |         22 |         95 |
+| Markdown           |          1 |         31 |          0 |         20 |         51 |
+| Properties         |          2 |         21 |         37 |         16 |         74 |
+| Dotenv             |          1 |          1 |          9 |          2 |         12 |
+| PostCSS            |          1 |          0 |          0 |          1 |          1 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                              | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                 |        127 |    164,594 |        748 |     14,990 |    180,332 |
+| . (Files)                                                                                                         |         14 |     16,243 |         10 |         45 |     16,298 |
+| __tests__                                                                                                         |          1 |          8 |          3 |          3 |         14 |
+| android                                                                                                           |         10 |        288 |        163 |         77 |        528 |
+| android (Files)                                                                                                   |          4 |        108 |         70 |         48 |        226 |
+| android/app                                                                                                       |          5 |        173 |         93 |         28 |        294 |
+| android/app (Files)                                                                                               |          1 |        100 |         70 |         25 |        195 |
+| android/app/src                                                                                                   |          4 |         73 |         23 |          3 |         99 |
+| android/app/src/main                                                                                              |          4 |         73 |         23 |          3 |         99 |
+| android/app/src/main (Files)                                                                                      |          1 |         39 |          0 |          0 |         39 |
+| android/app/src/main/res                                                                                          |          3 |         34 |         23 |          3 |         60 |
+| android/app/src/main/res/drawable                                                                                 |          1 |         12 |         23 |          3 |         38 |
+| android/app/src/main/res/values                                                                                   |          2 |         22 |          0 |          0 |         22 |
+| android/gradle                                                                                                    |          1 |          7 |          0 |          1 |          8 |
+| android/gradle/wrapper                                                                                            |          1 |          7 |          0 |          1 |          8 |
+| api                                                                                                               |          6 |      1,535 |         65 |        273 |      1,873 |
+| app                                                                                                               |         16 |      8,911 |        215 |        724 |      9,850 |
+| app (Files)                                                                                                       |         12 |      6,046 |        154 |        494 |      6,694 |
+| app/(tabs)                                                                                                        |          4 |      2,865 |         61 |        230 |      3,156 |
+| assets                                                                                                            |          1 |          9 |          1 |          1 |         11 |
+| assets/images                                                                                                     |          1 |          9 |          1 |          1 |         11 |
+| backup                                                                                                            |          1 |        109 |          1 |         15 |        125 |
+| comp                                                                                                              |          5 |      1,154 |         43 |        122 |      1,319 |
+| components                                                                                                        |          9 |        290 |         14 |         38 |        342 |
+| components (Files)                                                                                                |          6 |        193 |          3 |         25 |        221 |
+| components/ui                                                                                                     |          3 |         97 |         11 |         13 |        121 |
+| constants                                                                                                         |          1 |         41 |          8 |          5 |         54 |
+| hooks                                                                                                             |          3 |         28 |          7 |         11 |         46 |
+| inc                                                                                                               |         22 |      1,773 |        141 |        242 |      2,156 |
+| ios                                                                                                               |          2 |         47 |         12 |         14 |         73 |
+| local                                                                                                             |         16 |      4,569 |         11 |        197 |      4,777 |
+| local (Files)                                                                                                     |          2 |        601 |          9 |         85 |        695 |
+| local/translate                                                                                                   |         14 |      3,968 |          2 |        112 |      4,082 |
+| modules                                                                                                           |         16 |        451 |         38 |        114 |        603 |
+| modules/expo-mapkit                                                                                               |         16 |        451 |         38 |        114 |        603 |
+| modules/expo-mapkit (Files)                                                                                       |          3 |         24 |          2 |          3 |         29 |
+| modules/expo-mapkit/android                                                                                       |          4 |         85 |         25 |         19 |        129 |
+| modules/expo-mapkit/android (Files)                                                                               |          1 |         35 |          4 |          5 |         44 |
+| modules/expo-mapkit/android/src                                                                                   |          3 |         50 |         21 |         14 |         85 |
+| modules/expo-mapkit/android/src/main                                                                              |          3 |         50 |         21 |         14 |         85 |
+| modules/expo-mapkit/android/src/main (Files)                                                                      |          1 |          2 |          0 |          1 |          3 |
+| modules/expo-mapkit/android/src/main/java                                                                         |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo                                                                    |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo/modules                                                            |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/android/src/main/java/expo/modules/mapkit                                                     |          2 |         48 |         21 |         13 |         82 |
+| modules/expo-mapkit/ios                                                                                           |          3 |        263 |         10 |         64 |        337 |
+| modules/expo-mapkit/src                                                                                           |          6 |         79 |          1 |         28 |        108 |
+| nav                                                                                                               |          1 |        147 |          6 |         28 |        181 |
+| scripts                                                                                                           |          1 |         89 |         10 |         14 |        113 |
+| www                                                                                                               |          2 |    128,902 |          0 |     13,067 |    141,969 |
++-------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                          | language           | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| /home/rick/Dokumente/git/JobApp/App.js                                                                            | JavaScript         |          4 |          3 |          3 |         10 |
+| /home/rick/Dokumente/git/JobApp/Gemfile                                                                           | Ruby               |         10 |          3 |          4 |         17 |
+| /home/rick/Dokumente/git/JobApp/README.md                                                                         | Markdown           |         31 |          0 |         20 |         51 |
+| /home/rick/Dokumente/git/JobApp/__tests__/App.test.tsx                                                            | TypeScript JSX     |          8 |          3 |          3 |         14 |
+| /home/rick/Dokumente/git/JobApp/android/app/build.gradle                                                          | Groovy             |        100 |         70 |         25 |        195 |
+| /home/rick/Dokumente/git/JobApp/android/app/src/main/AndroidManifest.xml                                          | XML                |         39 |          0 |          0 |         39 |
+| /home/rick/Dokumente/git/JobApp/android/app/src/main/res/drawable/rn_edit_text_material.xml                       | XML                |         12 |         23 |          3 |         38 |
+| /home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/strings.xml                                       | XML                |          8 |          0 |          0 |          8 |
+| /home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/styles.xml                                        | XML                |         14 |          0 |          0 |         14 |
+| /home/rick/Dokumente/git/JobApp/android/build.gradle                                                              | Groovy             |         20 |          1 |          4 |         25 |
+| /home/rick/Dokumente/git/JobApp/android/gradle.properties                                                         | Properties         |         14 |         37 |         15 |         66 |
+| /home/rick/Dokumente/git/JobApp/android/gradle/wrapper/gradle-wrapper.properties                                  | Properties         |          7 |          0 |          1 |          8 |
+| /home/rick/Dokumente/git/JobApp/android/gradlew.bat                                                               | Batch              |         41 |         32 |         22 |         95 |
+| /home/rick/Dokumente/git/JobApp/android/settings.gradle                                                           | Groovy             |         33 |          0 |          7 |         40 |
+| /home/rick/Dokumente/git/JobApp/api/cryp.js                                                                       | JavaScript         |         40 |          5 |         18 |         63 |
+| /home/rick/Dokumente/git/JobApp/api/dbJob.js                                                                      | JavaScript         |         18 |          0 |          2 |         20 |
+| /home/rick/Dokumente/git/JobApp/api/first.js                                                                      | JavaScript         |        377 |         22 |         58 |        457 |
+| /home/rick/Dokumente/git/JobApp/api/jobapp.go                                                                     | Go                 |        691 |         16 |        136 |        843 |
+| /home/rick/Dokumente/git/JobApp/api/jobapp.js                                                                     | JavaScript         |        374 |         22 |         58 |        454 |
+| /home/rick/Dokumente/git/JobApp/api/package.json                                                                  | JSON               |         35 |          0 |          1 |         36 |
+| /home/rick/Dokumente/git/JobApp/app.config.js                                                                     | JavaScript         |         20 |          0 |          3 |         23 |
+| /home/rick/Dokumente/git/JobApp/app.json                                                                          | JSON with Comments |        113 |          0 |          1 |        114 |
+| /home/rick/Dokumente/git/JobApp/app/(tabs)/_layout.tsx                                                            | TypeScript JSX     |         63 |          0 |         10 |         73 |
+| /home/rick/Dokumente/git/JobApp/app/(tabs)/index.js                                                               | JavaScript         |        697 |         16 |         51 |        764 |
+| /home/rick/Dokumente/git/JobApp/app/(tabs)/profil.js                                                              | JavaScript         |      1,127 |         26 |         83 |      1,236 |
+| /home/rick/Dokumente/git/JobApp/app/(tabs)/upload.js                                                              | JavaScript         |        978 |         19 |         86 |      1,083 |
+| /home/rick/Dokumente/git/JobApp/app/_layout.tsx                                                                   | TypeScript JSX     |         51 |          0 |          9 |         60 |
+| /home/rick/Dokumente/git/JobApp/app/application.js                                                                | JavaScript         |      1,296 |         37 |        111 |      1,444 |
+| /home/rick/Dokumente/git/JobApp/app/change.js                                                                     | JavaScript         |        531 |         17 |         55 |        603 |
+| /home/rick/Dokumente/git/JobApp/app/changeOld.js                                                                  | JavaScript         |        535 |         17 |         64 |        616 |
+| /home/rick/Dokumente/git/JobApp/app/collect.js                                                                    | JavaScript         |        456 |         13 |         40 |        509 |
+| /home/rick/Dokumente/git/JobApp/app/email.js                                                                      | JavaScript         |        896 |         19 |         68 |        983 |
+| /home/rick/Dokumente/git/JobApp/app/first.js                                                                      | JavaScript         |        548 |         15 |         40 |        603 |
+| /home/rick/Dokumente/git/JobApp/app/modal.tsx                                                                     | TypeScript JSX     |         26 |          0 |          4 |         30 |
+| /home/rick/Dokumente/git/JobApp/app/nameOld.js                                                                    | JavaScript         |        401 |          5 |         20 |        426 |
+| /home/rick/Dokumente/git/JobApp/app/old.js                                                                        | JavaScript         |        621 |         14 |         37 |        672 |
+| /home/rick/Dokumente/git/JobApp/app/uploadFirst.js                                                                | JavaScript         |        505 |         11 |         37 |        553 |
+| /home/rick/Dokumente/git/JobApp/app/webview.js                                                                    | JavaScript         |        180 |          6 |          9 |        195 |
+| /home/rick/Dokumente/git/JobApp/assets/images/background.svg                                                      | XML                |          9 |          1 |          1 |         11 |
+| /home/rick/Dokumente/git/JobApp/babel.config.js                                                                   | JavaScript         |         10 |          0 |          0 |         10 |
+| /home/rick/Dokumente/git/JobApp/backup/ocrui.js                                                                   | JavaScript         |        109 |          1 |         15 |        125 |
+| /home/rick/Dokumente/git/JobApp/comp/clearButton.jsx                                                              | JavaScript JSX     |         25 |          0 |          4 |         29 |
+| /home/rick/Dokumente/git/JobApp/comp/info.js                                                                      | JavaScript         |         99 |          8 |         11 |        118 |
+| /home/rick/Dokumente/git/JobApp/comp/keyboardHeight.js                                                            | JavaScript         |         20 |          2 |          6 |         28 |
+| /home/rick/Dokumente/git/JobApp/comp/name.js                                                                      | JavaScript         |        939 |         33 |         93 |      1,065 |
+| /home/rick/Dokumente/git/JobApp/comp/sorter.jsx                                                                   | JavaScript JSX     |         71 |          0 |          8 |         79 |
+| /home/rick/Dokumente/git/JobApp/components/external-link.tsx                                                      | TypeScript JSX     |         21 |          2 |          3 |         26 |
+| /home/rick/Dokumente/git/JobApp/components/haptic-tab.tsx                                                         | TypeScript JSX     |         16 |          1 |          2 |         19 |
+| /home/rick/Dokumente/git/JobApp/components/hello-wave.tsx                                                         | TypeScript JSX     |         18 |          0 |          2 |         20 |
+| /home/rick/Dokumente/git/JobApp/components/parallax-scroll-view.tsx                                               | TypeScript JSX     |         73 |          0 |          7 |         80 |
+| /home/rick/Dokumente/git/JobApp/components/themed-text.tsx                                                        | TypeScript JSX     |         55 |          0 |          6 |         61 |
+| /home/rick/Dokumente/git/JobApp/components/themed-view.tsx                                                        | TypeScript JSX     |         10 |          0 |          5 |         15 |
+| /home/rick/Dokumente/git/JobApp/components/ui/collapsible.tsx                                                     | TypeScript JSX     |         40 |          0 |          6 |         46 |
+| /home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.ios.tsx                                                 | TypeScript JSX     |         31 |          0 |          2 |         33 |
+| /home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.tsx                                                     | TypeScript JSX     |         26 |         11 |          5 |         42 |
+| /home/rick/Dokumente/git/JobApp/constants/theme.ts                                                                | TypeScript         |         41 |          8 |          5 |         54 |
+| /home/rick/Dokumente/git/JobApp/eas.json                                                                          | JSON with Comments |         27 |          0 |          1 |         28 |
+| /home/rick/Dokumente/git/JobApp/eslint.config.js                                                                  | JavaScript         |          8 |          1 |          2 |         11 |
+| /home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.ts                                                         | TypeScript         |          1 |          0 |          1 |          2 |
+| /home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.web.ts                                                     | TypeScript         |         13 |          3 |          6 |         22 |
+| /home/rick/Dokumente/git/JobApp/hooks/use-theme-color.ts                                                          | TypeScript         |         14 |          4 |          4 |         22 |
+| /home/rick/Dokumente/git/JobApp/inc/CutLine.js                                                                    | JavaScript         |         13 |          3 |          4 |         20 |
+| /home/rick/Dokumente/git/JobApp/inc/CutTheLine.js                                                                 | JavaScript         |          5 |          0 |          2 |          7 |
+| /home/rick/Dokumente/git/JobApp/inc/Keyboard.js                                                                   | JavaScript         |         31 |          1 |         11 |         43 |
+| /home/rick/Dokumente/git/JobApp/inc/ba.css                                                                        | PostCSS            |          0 |          0 |          1 |          1 |
+| /home/rick/Dokumente/git/JobApp/inc/colors.js                                                                     | JavaScript         |         15 |          0 |          1 |         16 |
+| /home/rick/Dokumente/git/JobApp/inc/craw.js                                                                       | JavaScript         |         82 |          4 |         21 |        107 |
+| /home/rick/Dokumente/git/JobApp/inc/cryp.js                                                                       | JavaScript         |         83 |         17 |         20 |        120 |
+| /home/rick/Dokumente/git/JobApp/inc/crypNew.js                                                                    | JavaScript         |         50 |         34 |         12 |         96 |
+| /home/rick/Dokumente/git/JobApp/inc/date.js                                                                       | JavaScript         |          9 |          2 |          4 |         15 |
+| /home/rick/Dokumente/git/JobApp/inc/db.js                                                                         | JavaScript         |        144 |          1 |         32 |        177 |
+| /home/rick/Dokumente/git/JobApp/inc/documentPicker.js                                                             | JavaScript         |        111 |          8 |         17 |        136 |
+| /home/rick/Dokumente/git/JobApp/inc/downloadDb.js                                                                 | JavaScript         |         50 |          3 |          8 |         61 |
+| /home/rick/Dokumente/git/JobApp/inc/downloader.js                                                                 | JavaScript         |        173 |         31 |         24 |        228 |
+| /home/rick/Dokumente/git/JobApp/inc/header.js                                                                     | JavaScript         |        122 |          0 |         13 |        135 |
+| /home/rick/Dokumente/git/JobApp/inc/keyboardStorage.js                                                            | JavaScript         |         53 |         12 |         15 |         80 |
+| /home/rick/Dokumente/git/JobApp/inc/ocr.js                                                                        | JavaScript         |        135 |          6 |         25 |        166 |
+| /home/rick/Dokumente/git/JobApp/inc/palette.js                                                                    | JavaScript         |         21 |          4 |          4 |         29 |
+| /home/rick/Dokumente/git/JobApp/inc/pan.js                                                                        | JavaScript         |         28 |          8 |          3 |         39 |
+| /home/rick/Dokumente/git/JobApp/inc/popup.js                                                                      | JavaScript         |         82 |          4 |         11 |         97 |
+| /home/rick/Dokumente/git/JobApp/inc/popupDownload.js                                                              | JavaScript         |         84 |          1 |          7 |         92 |
+| /home/rick/Dokumente/git/JobApp/inc/raminfo.js                                                                    | JavaScript         |         47 |          2 |          6 |         55 |
+| /home/rick/Dokumente/git/JobApp/inc/scrapper.js                                                                   | JavaScript         |        435 |          0 |          1 |        436 |
+| /home/rick/Dokumente/git/JobApp/index.js                                                                          | JavaScript         |          4 |          3 |          3 |         10 |
+| /home/rick/Dokumente/git/JobApp/ios/.xcode.env                                                                    | Dotenv             |          1 |          9 |          2 |         12 |
+| /home/rick/Dokumente/git/JobApp/ios/Podfile                                                                       | Ruby               |         46 |          3 |         12 |         61 |
+| /home/rick/Dokumente/git/JobApp/jest.config.js                                                                    | JavaScript         |          3 |          0 |          1 |          4 |
+| /home/rick/Dokumente/git/JobApp/local/First.js                                                                    | JavaScript         |        556 |          7 |         81 |        644 |
+| /home/rick/Dokumente/git/JobApp/local/i18n.js                                                                     | JavaScript         |         45 |          2 |          4 |         51 |
+| /home/rick/Dokumente/git/JobApp/local/translate/ar.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/de.json                                                           | JSON               |        413 |          0 |         16 |        429 |
+| /home/rick/Dokumente/git/JobApp/local/translate/en.json                                                           | JSON               |        319 |          0 |         24 |        343 |
+| /home/rick/Dokumente/git/JobApp/local/translate/fr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/gr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/i18n.js                                                           | JavaScript         |         45 |          2 |          4 |         51 |
+| /home/rick/Dokumente/git/JobApp/local/translate/it.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/jp.json                                                           | JSON               |        319 |          0 |          8 |        327 |
+| /home/rick/Dokumente/git/JobApp/local/translate/new.json                                                          | JSON               |          1 |          0 |          4 |          5 |
+| /home/rick/Dokumente/git/JobApp/local/translate/nl.json                                                           | JSON               |        319 |          0 |          8 |        327 |
+| /home/rick/Dokumente/git/JobApp/local/translate/pl.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/ru.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/tr.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/local/translate/ua.json                                                           | JSON               |        319 |          0 |          6 |        325 |
+| /home/rick/Dokumente/git/JobApp/metro.config.js                                                                   | JavaScript         |          6 |          0 |          4 |         10 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/build.gradle                                          | Groovy             |         35 |          4 |          5 |         44 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/AndroidManifest.xml                          | XML                |          2 |          0 |          1 |          3 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt | Kotlin             |         27 |         16 |          8 |         51 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt   | Kotlin             |         21 |          5 |          5 |         31 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/expo-module.config.json                                       | JSON               |          9 |          0 |          1 |         10 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/index.ts                                                      | TypeScript         |          3 |          2 |          1 |          6 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkit.podspec                                        | Ruby               |         19 |          1 |          4 |         24 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitModule.swift                                    | Swift              |        214 |          7 |         53 |        274 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitView.swift                                      | Swift              |         30 |          2 |          7 |         39 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/package.json                                                  | JSON               |         12 |          0 |          1 |         13 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkit.types.ts                                       | TypeScript         |         15 |          0 |          5 |         20 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.ts                                       | TypeScript         |          8 |          1 |          4 |         13 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.web.ts                                   | TypeScript         |         15 |          0 |          5 |         20 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.tsx                                        | TypeScript JSX     |          8 |          0 |          4 |         12 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.web.tsx                                    | TypeScript JSX     |         13 |          0 |          3 |         16 |
+| /home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/index.js                                                  | JavaScript         |         20 |          0 |          7 |         27 |
+| /home/rick/Dokumente/git/JobApp/nav/navigator.js                                                                  | JavaScript         |        147 |          6 |         28 |        181 |
+| /home/rick/Dokumente/git/JobApp/package-lock.json                                                                 | JSON               |     15,870 |          0 |          1 |     15,871 |
+| /home/rick/Dokumente/git/JobApp/package.json                                                                      | JSON               |        120 |          0 |          1 |        121 |
+| /home/rick/Dokumente/git/JobApp/scripts/reset-project.js                                                          | JavaScript         |         89 |         10 |         14 |        113 |
+| /home/rick/Dokumente/git/JobApp/tsconfig.json                                                                     | JSON with Comments |         17 |          0 |          1 |         18 |
+| /home/rick/Dokumente/git/JobApp/www/city.db                                                                       | MS SQL             |     12,619 |          0 |      2,057 |     14,676 |
+| /home/rick/Dokumente/git/JobApp/www/street.db                                                                     | MS SQL             |    116,283 |          0 |     11,010 |    127,293 |
+| Total                                                                                                             |                    |    164,594 |        748 |     14,990 |    180,332 |
++-------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

@@ -7,7 +7,8 @@ export const extractScript = `
           '.jobsearch-JobComponent-description',
           '#vj-desc',
           '[id^="jobDescription"]',
-          '[data-testid="jobsearch-JobComponent-description"]'
+          '[data-testid="jobsearch-JobComponent-description"]',
+          'div.react-native-html-content.simple-job-description-html'
         ];
 
         let jobContainer = null;
@@ -72,8 +73,8 @@ export const extractScript = `
       }
     })();
     true;
-  `;
-  export const jobvectorScript = `
+`;
+    export const jobvectorScript = `
     (function() {
       try {
         // 1. DEN TEXT-CONTAINER SUCHEN

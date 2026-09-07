@@ -1,200 +1,248 @@
+// changeOld.js
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Dimensions,
   Keyboard,
-  Pressable,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
-import { Card } from 'react-native-paper';
-
 import DeviceInfo from 'react-native-device-info';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
-import * as Keychain from 'react-native-keychain';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
+
 import colors from '../inc/colors.js';
-import {
-  decryp,
-  decryptBase,
-  encryp,
-  encryptBase64,
-  genIv,
-} from '../inc/cryp.js';
+import { decryp, decryptBase, encryp, encryptBase64, genIv } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
-import useKeyboardAnimation from '../inc/Keyboard.js';
 import { runQuery } from '../inc/db.js';
-const ChangeScreen = () => {
+
+const { width } = Dimensions.get('window');
+const DB_NAME = 'firstNew.db';
+
+const ChangeScreenOld = ({ visible = false, onClose }) => {
   const { t } = useTranslation();
+
   const [text, setText] = useState('');
-  const [message, setMessage] = useState('');
-  const [pdfUri, setPdfUri] = useState(null);
+  const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
   const [dots, setDots] = useState('');
-  const [collectTag, setCollectTag] = useState(false);
-  const [firstView, setFirstView] = useState(false);
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popup, setPopup] = useState('');
-  const {keyboardHeight, reset} = useKeyboardAnimation();
-const [subject, setSubject] = useState('');
-  const DB_NAME = 'firstNew.db';
-  useEffect(() => {
-    
-    const loadText = async () => {
-       const anrede = await EncryptedStorage.getItem('anrede');
-           const name = await EncryptedStorage.getItem('name');
-           setSubject(await EncryptedStorage.getItem('subject'));
-           let myText = await EncryptedStorage.getItem('text');
-           myText = myText.replace(/^.*?\n/, anrede + '\n');
-         
 
-         
-      if (myText) {
-        setText(myText);
+  const animCardX = useRef(new Animated.Value(width)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.timing(animCardX, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(animCardX, {
+        toValue: width,
+        duration: 350,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, animCardX]);
+
+  useEffect(() => {
+    const loadText = async () => {
+      try {
+        const [anrede, name, subj, myText] = await Promise.all([
+          EncryptedStorage.getItem('anrede'),
+          EncryptedStorage.getItem('name'),
+          EncryptedStorage.getItem('subject'),
+          EncryptedStorage.getItem('text'),
+        ]);
+
+        if (subj) setSubject(subj);
+
+        if (myText) {
+          setText(myText);
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden des Textes:', error);
       }
     };
-    loadText();
-  }, [ pdfUri]);
 
+    if (visible) {
+      loadText();
+    }
+  }, [visible]);
 
-const saveText = async () => {
-  const date = getCurrentDateTime();
-  console.log(date)
-  const time = await EncryptedStorage.getItem('time')
-  const myType = await EncryptedStorage.getItem('type')
-  const text = await EncryptedStorage.getItem('text');
-  const subject = await EncryptedStorage.getItem('subject');
-  const yourName = await EncryptedStorage.getItem('yourName');
-  const job = await EncryptedStorage.getItem('beruf');
-  const deviceId = await DeviceInfo.getUniqueId();
-  
-  }
+  const wordCount = useMemo(() => {
+    if (!text.trim()) return 0;
+    return text.trim().split(/\s+/).length;
+  }, [text]);
 
+  const saveText = async () => {
+    try {
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+      const date = getCurrentDateTime();
+      const deviceId = await DeviceInfo.getUniqueId();
 
+      const [myKey, time, myType, storedText, storedSubject, job] = await Promise.all([
+        EncryptedStorage.getItem('key'),
+        EncryptedStorage.getItem('time'),
+        EncryptedStorage.getItem('type'),
+        EncryptedStorage.getItem('text'),
+        EncryptedStorage.getItem('subject'),
+        EncryptedStorage.getItem('beruf'),
+      ]);
+
+      const join = `${job}#${date}#${time}#${myType}#${storedSubject}#${storedText}&`;
+
+      const oldData = await new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+          tx.executeSql(
+            'SELECT old FROM files WHERE ident = ?;',
+            [deviceId],
+            (_, res) => resolve(res.rows.length ? res.rows.item(0).old : null),
+            (_, err) => reject(err)
+          );
+        });
+      });
+
+      let decrypted = '';
+      if (oldData) {
+        decrypted = await decryp(oldData, myKey);
+      }
+      const encryptedNew = await encryp(decrypted + join, myKey);
+
+      db.transaction((tx) => {
+        tx.executeSql('UPDATE files SET old = ? WHERE ident = ?;', [encryptedNew, deviceId]);
+      });
+    } catch (e) {
+      console.error('SaveText Error:', e);
+    }
+  };
 
   const mergeFilesFromDB = async () => {
+    let count = 0;
+    const interval = setInterval(() => {
+      count = (count + 1) % 4;
+      setDots('.'.repeat(count));
+    }, 200);
+
     try {
-       let count = 0;
-const interval = setInterval(() => {
-  count = (count + 1) % 4;
-  setDots(".".repeat(count));
-})
-      console.log('Starting to merge files from database');
-      const db = await SQLite.openDatabase({
-        name: DB_NAME,
-        location: 'default',
-      });
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
       const deviceId = await DeviceInfo.getUniqueId();
-      console.log('Device ID:', deviceId);
-        const result = await runQuery(
-              db,
-              'SELECT mergePdf, lebenslauf, anschreiben, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
-              [deviceId],
-            );
-      const files = result.rows.raw();
-      if (files.length < 1) {
-        console.log('⚠️ No files found in the database');
-        return;
-      }
+
+      const result = await runQuery(
+        db,
+        'SELECT mergePdf, lebenslauf, anschreiben, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
+        [deviceId]
+      );
+
+      const files = result?.rows?.raw() ?? [];
+      if (files.length < 1) return;
+
       const firstFile = files[0];
       const myKey = await EncryptedStorage.getItem('key');
-      const credentials = await Keychain.getGenericPassword();
+      const lebenslaufDecryp = await decryp(firstFile.lebenslauf, myKey);
+      const output = `${RNFS.LibraryDirectoryPath}/${lebenslaufDecryp}`;
 
-const lebenslaufDecryp = await decryp(firstFile.lebenslauf, myKey);
+      const name = await EncryptedStorage.getItem('yourName');
+      const anschreibenPath = await decryp(firstFile.anschreiben, myKey);
 
+      const filePaths = [anschreibenPath, output];
 
-const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
-      const outputAnschreiben = RNFS.LibraryDirectoryPath + '/' + "anschreiben.pdf";
-      const filePaths = [outputAnschreiben, output];
       for (let i = 1; i <= 10; i++) {
         const addField = firstFile[`add${i}`];
         if (addField) {
           const addPath = await decryp(addField, myKey);
-          const fullAddPath = RNFS.LibraryDirectoryPath + '/' + addPath;
-          filePaths.push(fullAddPath);
+          filePaths.push(`${RNFS.LibraryDirectoryPath}/${addPath}`);
         }
-      } 
+      }
 
-      console.log('List of files to merge:', filePaths);
       const pdfDocs = await Promise.all(
-        filePaths.map(async (filePath, index) => {
+        filePaths.map(async (filePath) => {
           const buffer = await RNFS.readFile(filePath, 'base64');
-          const buffer2 = await RNFS.readFile(filePath + '_1', 'base64');
+          const buffer2 = await RNFS.readFile(`${filePath}_1`, 'base64');
           const decoded = await decryptBase(buffer, myKey);
           const together = decoded + buffer2;
-          return PDFDocument.load(Buffer.from(together, 'base64'), {
-            ignoreEncryption: true,
-          });
-        }),
+          return PDFDocument.load(Buffer.from(together, 'base64'), { ignoreEncryption: true });
+        })
       );
-      const mergedPdf = await PDFDocument.create();
 
-      for (let i = 0; i < pdfDocs.length; i++) {
-        const doc = pdfDocs[i];
+      const mergedPdf = await PDFDocument.create();
+      for (const doc of pdfDocs) {
         const pages = await mergedPdf.copyPages(doc, doc.getPageIndices());
-        pages.forEach(page => mergedPdf.addPage(page));
+        pages.forEach((page) => mergedPdf.addPage(page));
       }
 
       const mergedPdfBytes = await mergedPdf.save();
-
-      const name = await EncryptedStorage.getItem('yourName');
-      console.log('Name:', name);
-      const blue = `${(name)}_Bewerbungsmappe`;
-
+      const blue = `${name || 'Bewerbung'}_Bewerbungsmappe`;
       const mergedPdfBase64 = Buffer.from(mergedPdfBytes).toString('base64');
       const merge1 = mergedPdfBase64.slice(0, 16);
       const merge2 = mergedPdfBase64.slice(16);
-
       const outputPath = `${RNFS.LibraryDirectoryPath}/${blue}.pdf`;
-      const iv = await genIv();
 
+      const iv = await genIv();
       const encrypFile = await encryptBase64(merge1, iv, myKey);
       await RNFS.writeFile(outputPath, encrypFile, 'base64');
-      await RNFS.writeFile(outputPath + '_1', merge2, 'base64');
-      await EncryptedStorage.setItem('merge', `${blue}.pdf`);
-      console.log('Merged PDF saved to:', outputPath);
-      await EncryptedStorage.setItem('subject', subject);
+      await RNFS.writeFile(`${outputPath}_1`, merge2, 'base64');
+
+      if (firstFile.mergePdf && firstFile.mergePdf.length > 5) {
+        const oldFilePath = await decryp(firstFile.mergePdf, myKey);
+        const FilePath = `${oldFilePath},${blue}`;
+        const encryptedFilePath = await encryp(FilePath, myKey);
+        await db.executeSql('UPDATE files SET mergePdf = ? WHERE ident = ?', [
+          encryptedFilePath,
+          deviceId,
+        ]);
+      } else {
+        const encryptedFilePath = await encryp(blue, myKey);
+        await db.executeSql('UPDATE files SET mergePdf = ? WHERE ident = ?', [
+          encryptedFilePath,
+          deviceId,
+        ]);
+      }
+
       await saveText();
-      setPopupVisible(false);
-      setFirstView(true);
-       clearInterval(interval);
-      setDots("");  
-      toCollect();
+      clearInterval(interval);
+      setDots('');
+      await EncryptedStorage.setItem('result', 'collect');
+      router.replace('collect');
     } catch (err) {
-      console.log('Error while merging files:', err);
-      if (err.message.includes("ENOENT")) {
-              setPopupVisible(false);
-              Alert.alert(
-                t('alerts.error.title'),
-                t('alerts.error.attachments'),
-              );
-            }
-            return;
-          }
-
+      console.error('Error during merging:', err);
+      if (err.message && err.message.includes('ENOENT')) {
+        Alert.alert(
+          'Anlagen-Fehler',
+          'Es gab ein Problem beim Lesen der Anlagen. Bitte überprüfe deine Dokumente im Anlagen-Menü.',
+          [{ text: 'OK', onPress: () => router.dismissTo('upload') }]
+        );
+      } else {
+        Alert.alert('Fehler', 'Bewerbungsmappe konnte nicht zusammengefügt werden.');
+      }
+    } finally {
+      clearInterval(interval);
+      setDots('');
+      setLoading(false);
+    }
   };
-  const toCollect = async () => {
-        await EncryptedStorage.setItem('result', 'collect');
 
-    router.replace('collect');
-  };
-  const splitTextIntoLinesWithoutFont = (text2, maxChars) => {
-    const words = text2.split(' ');
+  const splitTextIntoLinesWithoutFont = (textBlock, maxChars) => {
+    const words = textBlock.split(' ');
     const lines = [];
     let currentLine = '';
 
-    words.forEach(word => {
-      // Prüfe, ob das Hinzufügen des nächsten Wortes die maxChars überschreitet
+    words.forEach((word) => {
       if ((currentLine + ' ' + word).trim().length > maxChars) {
         lines.push(currentLine.trim());
         currentLine = word;
@@ -210,297 +258,383 @@ const output = RNFS.LibraryDirectoryPath + '/' + lebenslaufDecryp;
   };
 
   const generate = async () => {
- console.log('Starting PDF generation process');
- if (loading) return; // doppelklick verhindern
-  setLoading(true);
-    setPopup('Ihre Bewerbungsmappe wird nun zusammengestellt.');
-    const pdfDoc1 = await PDFDocument.create();
-    const helvetica = await pdfDoc1.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc1.embedFont(StandardFonts.HelveticaBold);
-    // 2️⃣ Eine Seite hinzufügen
-    const page = pdfDoc1.addPage([600, 800]);
-    const { height } = page.getSize();
-
-    // 3️⃣ Grundeinstellungen
-    const fontSize = 11;
-    const leftMargin = 60;
-    const maxChars = 90; // Maximale Zeichenanzahl pro Zeile (als grobe Schätzung)
-    const lineHeight = fontSize + 4;
-    let currentY = height - 60;
-    const textWidth = 450; // Hier definieren wir textWidth
-
-    // Persönliche und Empfänger-Daten
-    const myName = await EncryptedStorage.getItem('name');
-    const myStreet = await EncryptedStorage.getItem('street');
-    const myCity = await EncryptedStorage.getItem('city');
-    const yourCompany = await EncryptedStorage.getItem('yourName');
-    const yourStreet = await EncryptedStorage.getItem('yourStreet');
-    const yourCity = await EncryptedStorage.getItem('yourCity');
-    const today = new Date().toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
-
-    const date = today;
-      const anrede = await EncryptedStorage.getItem('anrede');
-    page.drawText(myName, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(myStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(myCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-
-    // Zwei Zeilen Abstand
-    currentY -= 4 * lineHeight;
-
-    // Empfänger-Daten
-
-    page.drawText(yourCompany, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(yourStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(yourCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-
-    // Zwei Zeilen Abstand
-    currentY -= 2 * lineHeight;
-
-    // Datum rechtsbündig positionieren
-    const dateX = leftMargin + textWidth - 50;
-    page.drawText(date, { x: dateX, y: currentY, size: fontSize, font: helvetica });
-
-    // Eine Zeile Abstand
-      currentY -= 2 * lineHeight;
-
-
-
-    const line1 = splitTextIntoLinesWithoutFont(subject, 70);
-    line1.forEach(line1 => {
-      page.drawText(line1, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
-      currentY -= lineHeight;
-    });
-      currentY -= 1 * lineHeight;
-
-
-
-    // 4️⃣ Absätze anhand von "\n" aufteilen und jeweils umbrechen
-    const paragraphs = text.split('\n\n');
-    paragraphs.forEach(paragraph => {
-      const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
-      lines.forEach(line => {
-        page.drawText(line, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-        currentY -= lineHeight;
-      });
-      // Zusätzlicher Abstand zwischen den Absätzen
-      currentY -= lineHeight;
-    });
-
-    // 5️⃣ PDF als Byte-Array speichern
-    const myKey = await EncryptedStorage.getItem('key');
-    const pdfBase641 = await pdfDoc1.saveAsBase64();
-
-    const iv = await genIv();
-
-    const Base64Part1 = pdfBase641.slice(0, 16);
-    const Base64Part2 = pdfBase641.slice(16);
-    const encrypted = await encryptBase64(Base64Part1, iv, myKey);
-
-    const outputPath = `${RNFS.LibraryDirectoryPath}/anschreiben.pdf`;
-
-    const outputPathNew = await encryp('anschreiben.pdf', myKey);
-
-    await EncryptedStorage.setItem('text', text);
-    await RNFS.writeFile(outputPath, encrypted, 'base64');
-    await RNFS.writeFile(outputPath + '_1', Base64Part2, 'base64');
+    if (loading) return;
+    setLoading(true);
 
     try {
-      const db = await SQLite.openDatabase({
-        name: DB_NAME,
-        location: 'default',
+      const pdfDoc1 = await PDFDocument.create();
+      const helvetica = await pdfDoc1.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc1.embedFont(StandardFonts.HelveticaBold);
+      const page = pdfDoc1.addPage([600, 800]);
+      const { height: pageH } = page.getSize();
+
+      const fontSize = 11;
+      const leftMargin = 60;
+      const maxChars = 90;
+      const lineHeight = fontSize + 4;
+      let currentY = pageH - 60;
+      const textWidth = 450;
+
+      const [myName, myStreet, myCity, yourCompany, yourStreet, yourCity, myKey] =
+        await Promise.all([
+          EncryptedStorage.getItem('name'),
+          EncryptedStorage.getItem('street'),
+          EncryptedStorage.getItem('city'),
+          EncryptedStorage.getItem('yourName'),
+          EncryptedStorage.getItem('yourStreet'),
+          EncryptedStorage.getItem('yourCity'),
+          EncryptedStorage.getItem('key'),
+        ]);
+
+      const today = new Date().toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
       });
 
-      // Führe PRAGMA table_info aus, um die Spalten zu überprüfen
+      // Absender
+      page.drawText(myName || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= lineHeight;
+      page.drawText(myStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= lineHeight;
+      page.drawText(myCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= 4 * lineHeight;
 
-      // Wenn die Spalte nicht existiert, füge sie hinzu
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
+      // Empfänger
+      page.drawText(yourCompany || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= lineHeight;
+      page.drawText(yourStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= lineHeight;
+      page.drawText(yourCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      currentY -= 2 * lineHeight;
 
-        await db.executeSql(
-          'UPDATE files SET anschreiben = ? WHERE ident = ?',
-          [outputPathNew, deviceId],
-        );
+      // Datum
+      const dateX = leftMargin + textWidth - 50;
+      page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
+      currentY -= 2 * lineHeight;
 
-        mergeFilesFromDB();
-      } catch (error) {
-        console.error('Fehler beim Aktualisieren der Dateien:', error);
-      }
+      // Betreff
+      const subjectLines = splitTextIntoLinesWithoutFont(subject || '', 70);
+      subjectLines.forEach((line) => {
+        page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
+        currentY -= lineHeight;
+      });
+      currentY -= 1 * lineHeight;
+
+      // Haupttext
+      const paragraphs = text.split('\n\n');
+      paragraphs.forEach((paragraph) => {
+        const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
+        lines.forEach((line) => {
+          page.drawText(line, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+          currentY -= lineHeight;
+        });
+        currentY -= lineHeight;
+      });
+
+      const pdfBase641 = await pdfDoc1.saveAsBase64();
+      const iv = await genIv();
+      const Base64Part1 = pdfBase641.slice(0, 16);
+      const Base64Part2 = pdfBase641.slice(16);
+      const encrypted = await encryptBase64(Base64Part1, iv, myKey);
+
+      const outputPath = `${RNFS.LibraryDirectoryPath}/anschreiben.pdf`;
+      const outputPathNew = await encryp(outputPath, myKey);
+
+      await Promise.all([
+        EncryptedStorage.setItem('subject', subject),
+        RNFS.writeFile(outputPath, encrypted, 'base64'),
+        RNFS.writeFile(`${outputPath}_1`, Base64Part2, 'base64'),
+      ]);
+
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+      const deviceId = await DeviceInfo.getUniqueId();
+      await db.executeSql('UPDATE files SET anschreiben = ? WHERE ident = ?', [
+        outputPathNew,
+        deviceId,
+      ]);
+
+      await mergeFilesFromDB();
     } catch (error) {
-      console.error('Fehler beim Zugriff auf die Datenbank:', error);
+      console.error('Error during PDF generation:', error);
+      setLoading(false);
+      Alert.alert('Fehler', 'PDF konnte nicht generiert werden.');
     }
-  }
+  };
 
   return (
+    <Animated.View
+      pointerEvents={visible ? 'auto' : 'none'}
+      style={[
+        styles.overlayContainer,
+        {
+          transform: [{ translateX: animCardX }],
+        },
+      ]}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <KeyboardAvoidingView
+            style={styles.keyboardView}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+          >
+            <View style={styles.container}>
+              {/* Header mit Schließen-Button */}
+              <View style={styles.header}>
+                <View style={styles.headerTopRow}>
+                  <View style={styles.stepBadge}>
+                    <View style={styles.stepDot} />
+                    <Text style={styles.stepBadgeText}>VORLAGE ANPASSEN</Text>
+                  </View>
 
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-<SafeAreaView style={styles.innerContainer}>
+                  {onClose && (
+                    <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                      <MaterialIcons name="close" size={22} color="rgba(255, 255, 255, 0.7)" />
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-<Animated.View style={{  height: height * 0.75 -  keyboardHeight * 0.93 }} >
-   <TextInput
-      style={[styles.subjectInput, { height: subject.split("").length > 35? height * 0.08 : height * 0.05 }]}
-      value={subject}
-      onChangeText={setSubject}
-      placeholder={t('placeholderText')}
-      multiline={true}
-      numberOfLines={2}
-    />
-    <View style={{ position: 'relative' }} >
-    <TextInput
-      style={styles.textArea}
-      value={text}
-      onChangeText={setText}
-      placeholder={t('placeholderText')}
-      multiline={true}
-      numberOfLines={30}
-    />
-    </View>
-    {message ? <Text style={styles.message}>{message}</Text> : null}
-  <Pressable
-   disabled={loading}
-   onPress={generate}
- >
-   {({ pressed }) => (
-     <View
-       style={[
-         styles.entryFort,
-         pressed && !loading && styles.entryPressFort, // nur wenn nicht loading
-       ]}
-     >
-       <Card.Title
-         title={
-           loading
-             ? `Bitte warten${dots}`   // 👈 animierter Text
-             : t('saveCoverLetter')
-         }
-         titleStyle={styles.job}
-       />
- 
-      
- 
-       {/* Optional: du kannst Loading hier auch zentriert anzeigen */}
-     </View>
-   )}
- </Pressable>
+              </View>
 
+              {/* Editor Card */}
+              <View style={styles.editorCard}>
+                <View style={styles.editorHeader}>
+                  <View style={styles.editorHeaderLeft}>
+                    <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
+                    <Text style={styles.editorHeaderText}>Betreff & Text</Text>
+                  </View>
+                  <View style={styles.wordBadge}>
+                    <Text style={styles.wordBadgeText}>{wordCount} Wörter</Text>
+                  </View>
+                </View>
 
+                <TextInput
+                  style={styles.subjectInput}
+                  value={subject}
+                  onChangeText={setSubject}
+                  placeholder="Betreff eingeben..."
+                  placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                  multiline={false}
+                  returnKeyType="next"
+                />
 
+                <View style={styles.divider} />
 
+                <TextInput
+                  style={styles.textArea}
+                  value={text}
+                  onChangeText={setText}
+                  placeholder={t('placeholderText') || 'Hier Text eingeben...'}
+                  placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                  multiline={true}
+                  textAlignVertical="top"
+                  showsVerticalScrollIndicator={true}
+                />
+              </View>
 
-  </Animated.View>
-</SafeAreaView>
-</TouchableWithoutFeedback>
+              {/* CTA Button */}
+              <View style={styles.actionContainer}>
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  disabled={loading}
+                  onPress={generate}
+                  activeOpacity={0.85}
+                >
+                  {loading ? (
+                    <View style={styles.loadingRow}>
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                      <Text style={styles.generateBtnText}>
+                        {`Bewerbungsmappe wird erstellt${dots}`}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={styles.loadingRow}>
+                      <MaterialIcons
+                        name="picture-as-pdf"
+                        size={20}
+                        color="#FFFFFF"
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={styles.generateBtnText}>
+                        {t('saveCoverLetter') || 'Mappe generieren & fortsetzen'}
+                      </Text>
+                      <MaterialIcons
+                        name="arrow-forward"
+                        size={18}
+                        color="#FFFFFF"
+                        style={{ marginLeft: 6 }}
+                      />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    </Animated.View>
   );
 };
-const { height, width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  innerContainer: {
-    backgroundColor: colors.background,
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.background || '#0F1117',
+    zIndex: 999,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
     paddingHorizontal: 20,
-    justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 12 : 18,
+    justifyContent: 'space-between',
+  },
+  header: {
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+marginTop: 6, },
+  closeBtn: {
+    padding: 4,
+  },
+  stepBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  stepDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#3B82F6',
+    marginRight: 6,
+  },
+  stepBadgeText: {
+    color: '#60A5FA',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  titleMain: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  subtitleMain: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12.5,
+    marginTop: 2,
+    lineHeight: 17,
+  },
+  editorCard: {
+    flex: 1,
+    backgroundColor: '#171B26',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  editorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingVertical: 10,
-    
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  editorHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  editorHeaderText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  wordBadge: {
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+  },
+  wordBadgeText: {
+    color: '#60A5FA',
+    fontSize: 11,
+    fontWeight: '700',
   },
   subjectInput: {
-    borderRadius: 10,
-    justifyContent: 'center',
- backgroundColor: colors.card3,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingLeft: 15,
-    paddingRight: 15,
-    textAlignVertical: 'center',
-    color: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    fontSize:16,
-    elevation: 3,
- marginBottom: 10,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
- entryFort: {
-      flexDirection: "column",
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    marginTop:10,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth:1,
-    borderColor:'gray',
-justifyContent:'center',
-width:width * 0.9,
-
-  },
-    job: {
-    justifyContent:'center',
-
-  textAlign: "center",
-    alignSelf: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "rgb(232, 228, 238)",
-  },
-  entryPressFort: {
-          flexDirection: "column",
-
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
-    wdith:width * 0.9,
-  justifyContent:'center',
-
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginHorizontal: 14,
   },
   textArea: {
-    borderRadius: 10,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 12,
-    paddingHorizontal: 14,
-    textAlignVertical: 'top',
-    marginBottom: 2,
-    backgroundColor: colors.card3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    color: 'white',
+    flex: 1,
+    padding: 14,
+    color: '#FFFFFF',
+    fontSize: 14,
+    lineHeight: 21,
   },
-  button: {
-    backgroundColor:colors.card,
-    padding: 15,
-    borderRadius: 8,
+  actionContainer: {
+    marginTop: 6,
+  },
+  generateButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#3B82F6',
+    borderRadius: 14,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  message: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
+  generateBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
 
-export default ChangeScreen;
+export default ChangeScreenOld;

@@ -4,14 +4,33 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import "../local/i18n"; // ← nur hier
-
+import { useEffect } from 'react';
+import { Keyboard } from 'react-native';
+import { saveKeyboardHeight } from '../inc/keyboardStorage';
+import { Platform } from 'react-native';
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+useEffect(() => {
+  const eventName =
+    Platform.OS === "ios"
+      ? "keyboardWillShow"
+      : "keyboardDidShow";
 
+  const subscription = Keyboard.addListener(
+    eventName,
+    (event) => {
+      saveKeyboardHeight(event.endCoordinates.height);
+    }
+  );
+
+  return () => {
+    subscription.remove();
+  };
+}, []);
  
 
   return (

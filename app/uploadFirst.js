@@ -1,611 +1,553 @@
-// Home.js
-
+// UploadFirstScreen.js / Home.js
+import MaterialIcons from "@react-native-vector-icons/material-icons";
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
 import * as Keychain from 'react-native-keychain';
-import { Card, Divider, Text } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
+
 import colors from '../inc/colors.js';
 import {
   decryp,
   encryp,
   encryptBase64,
-  genIv
+  genIv,
 } from '../inc/cryp.js';
-import useKeyboardAnimation from '../inc/Keyboard.js';
-// Aktivieren des Debug-Modus (optional)
+
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
+const { width, height } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
 
-const UploadScreen = ({ selectFilesText, addFilesText, replaceFilesText }) => {
-  const { t, i18n } = useTranslation();
-  const [files, setFiles] = useState([]);
-  const [error, setError] = useState('');
-  const [data, setData] = useState([]);
-  const [db, setDb] = useState(null);
-  const [buttonOne, setButtonOne] = useState(true);
-  const [buttonUpload, setButtonUpload] = useState(true);
-  const keyboardHeight = useKeyboardAnimation();
-  const orderedKeys = [
-    "lebenslauf",
-    "add1", "add2", "add3", "add4", "add5",
-    "add6", "add7", "add8", "add9", "add10"
-  ];
-  const router = useRouter();
-  const fetchData = async () => {
-    try {
-      console.log("Opening database...");
-      const database = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      setDb(database);
-      console.log("Database opened.");
+const orderedKeys = [
+  'lebenslauf',
+  'add1', 'add2', 'add3', 'add4', 'add5',
+  'add6', 'add7', 'add8', 'add9', 'add10',
+];
 
-      console.log("Retrieving key from EncryptedStorage...");
+/* ── Wiederverwendbare Upload Card ──────────────────────── */
+const UploadActionCard = memo(({ title, description, iconName, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    style={({ pressed }) => [
+      styles.actionCard,
+      pressed && styles.cardPressed,
+    ]}
+  >
+    <View style={styles.iconContainer}>
+      <MaterialIcons name={iconName} size={24} color="#FFFFFF" />
+    </View>
+
+    <View style={styles.cardTextContainer}>
+      <Text style={styles.cardTitle} numberOfLines={1}>
+        {title}
+      </Text>
+      <Text style={styles.cardDescription} numberOfLines={2}>
+        {description}
+      </Text>
+    </View>
+
+    <MaterialIcons
+      name="chevron-right"
+      size={22}
+      color="rgba(255, 255, 255, 0.3)"
+    />
+  </Pressable>
+));
+
+const UploadScreen = () => {
+  const { t } = useTranslation();
+  const router = useRouter();
+
+  /* ── States ──────────────────────────────────────────── */
+  const [files, setFiles] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  /* ── Document Picker ─────────────────────────────────── */
+  const handleFileChange = async () => {
+    try {
+      const results = await DocumentPicker.getDocumentAsync({
+        multiple: true,
+        type: '*/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (results.canceled || !results.assets || results.assets.length === 0) return;
+
+      if (results.assets.length > 11) {
+        Alert.alert(
+          t('profil.error') || 'Hinweis',
+          t('upload.error') || 'Du kannst maximal 11 Dokumente gleichzeitig hochladen.'
+        );
+        return;
+      }
+
+      setIsProcessing(true);
+      const documentsDir = RNFS.LibraryDirectoryPath;
       const credentials = await Keychain.getGenericPassword();
       const myKey = credentials.password;
-      console.log("Key retrieved.", await EncryptedStorage.getItem("key"));
 
-      console.log("Getting device ID...");
-      const deviceId = await DeviceInfo.getUniqueId();
-      console.log(`Device ID: ${deviceId}`);
+      const processedFiles = await Promise.all(
+        results.assets.map(async (file) => {
+          try {
+            const originalFilePath = decodeURI(file.uri);
+            const filePath = `${documentsDir}/${file.name}`;
+            const theFilePath = await encryp(file.name, myKey);
 
-      console.log("Executing SQL query...");
-      const res = await database.executeSql(
-        "SELECT lebenslauf, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?",
-        [deviceId]
-      );
+            const base64String = await RNFS.readFile(originalFilePath, 'base64');
+            const base641 = base64String.slice(0, 16);
+            const base642 = base64String.slice(16);
+            const iv = await genIv();
+            const encrypted = await encryptBase64(base641, iv, myKey);
 
-      const hallo = res[0].rows.raw();
-      console.log("Query result:", hallo);
+            if (encrypted) {
+              await RNFS.writeFile(filePath, encrypted, 'base64');
+              await RNFS.writeFile(`${filePath}_1`, base642, 'base64');
+            }
 
-      console.log("Decrypting values and removing nulls...");
-      const sortedArray = orderedKeys
-        .map((key) => hallo[0][key])
-        .filter((value) => value !== null);
-
-      console.log("Decrypting files...");
-      const decryptedFiles = await Promise.all(
-        sortedArray.map(async (frucht) => {
-          const decrypted = await decryp(frucht, myKey);
-          console.log(`Decrypted: ${decrypted}`);
-          return { key: decrypted, name: decrypted.match(/[^/]+$/)?.[0] || "Unbekannte Datei" };
+            return {
+              name: theFilePath,
+              size: file.size,
+              path: filePath,
+              filename: file.name,
+            };
+          } catch (err) {
+            console.error(`Fehler bei ${file.name}:`, err);
+            throw err;
+          }
         })
       );
 
-      console.log("Assigning unique IDs to each entry...");
-      const dataWithIds = decryptedFiles.map((item, index) => ({
-        ...item,
-        id: `${index}-${item.key}`
-      }));
-      setData(dataWithIds);
-      console.log("Data set successfully.");
-
+      setFiles(processedFiles);
     } catch (err) {
-      console.error("Error in fetchData:", err);
-    }
-  };
-   
-  useEffect(() => {
-console.log("useEffect triggered" + data.length);
-console.log("buttonOne:" + buttonOne);
-  }
-    , [data, buttonOne]);
-
- 
-  const sanitizeName = (name) => {
-    return name
-      .normalize('NFKD')              // strips diacritics so ü → u, etc.
-      .replace(/\s+/g, '_')           // whitespace → _
-      .replace(/[^\w.-]/g, '')        // keep only letters, numbers, _ . -
-      .replace(/_{2,}/g, '_')          // collapse multiple _
-      .replace(/^_+|_+$/g, '');        // trim leading/trailing _
-  };
-  // Löscht ein Element anhand seiner eindeutigen ID
-  const handleDragEnd = useCallback(({ data }) => {
-
-    setData(data);
-
-
-    console.log(data);
-  }, []);
- 
-  const handleFileChange = async () => {
-    console.log('handleFileChange called');
-    try {
-      console.log('Picking files...');
-      const results = await DocumentPicker.getDocumentAsync({
-      multiple: true,
-      type: "*/*",          // oder "image/*", "application/pdf"
-      copyToCacheDirectory: true,
-    });
-
-    if (results.canceled) {
-      console.log("❌ Abgebrochen");
-      return;
-    }
-
-    console.log("✅ Ausgewählt:", results.assets);
-
-    results.assets.forEach((file) => {
-      console.log("📄 File:", {
-        name: file.name,
-        uri: file.uri,
-        mimeType: file.mimeType,
-        size: file.size,
-      });
-    });
-
-      if (results.assets && results.assets.length > 0) {
-        console.log('Picked files:', results);
-        const documentsDir = RNFS.LibraryDirectoryPath;
-        console.log('Documents directory:', documentsDir);
-        const processedFiles = await Promise.all(
-          results.assets.map(async file => {
-            try {
-              console.log('Processing file:', file);
-                           const originalFilePath = decodeURI(file.uri);
-                           const filePath = `${documentsDir}/${file.name}`;
-                           console.log('Encrypting file to:', filePath);
-                           const credentials = await Keychain.getGenericPassword();
-                           const myKey = credentials.password;
-                           console.log('Using key:', myKey);
-                           const theFilePath = await encryp(file.name, myKey);
-                           console.log('Encrypted file path:', theFilePath);
-                           const base64String = await RNFS.readFile(
-                             originalFilePath,
-                             'base64',
-                           );
-                           console.log('Base64 string:', base64String);
-                           const base641 = base64String.slice(0, 16);
-                           console.log('Base64 string 1:', base641);
-                           const base642 = base64String.slice(16);
-                           console.log('Base64 string 2:', base642.substring(0, 100));
-                           const iv = await genIv();
-                           console.log('Generated IV:', iv);
-                           const encrypted = await encryptBase64(base641, iv, myKey);
-                           if (encrypted) {
-                             await RNFS.writeFile(filePath, encrypted, 'base64');
-                             await RNFS.writeFile(filePath + '_1', base642, 'base64');
-                             console.log('Encrypted file written to:', filePath);
-                           } else {
-                             console.error('Encryption failed: No data to write');
-                           }
-             
-                           return {
-                             name: theFilePath,
-                             size: file.size,
-                             path: filePath,
-                             filename: file.name,
-                           };
-            } catch (err) {
-              console.error(
-                `Fehler beim Speichern der Datei ${file.name}:`,
-                err,
-              );
-              throw new Error(`Fehler beim Speichern der Datei ${file.name}`);
-            }
-          }),
-        );
-        console.log('Processed files:', processedFiles);
-        setButtonUpload(false)
-        setButtonOne(false)
-console.log("buttonOne:", buttonOne, "files:", files.length);
-        setFiles(processedFiles);
-        setError('');
-      } else {
-        console.log('No files selected');
-        setError('Keine Dateien ausgewählt.');
-      }
-    } catch (err) {
-      console.error('Error in handleFileChange:', err);
+      console.error('Error picking files:', err);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
+  /* ── Speichern in SQLite & Weiterleitung ─────────────── */
   const handleSaveToDB = async () => {
-    if (files.length === 0) {
-      setError('Keine Dateien ausgewählt.');
-      return;
-    }
-    const deviceId = await DeviceInfo.getUniqueId();
-    const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+    if (files.length === 0) return;
+    setIsSaving(true);
 
     try {
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+
       await Promise.all(
         files.map((file, index) => {
           const column = index === 0 ? 'lebenslauf' : `add${index}`;
-
-          // Falls index > 10 ist, wird die Datei ignoriert
           if (index > 10) return Promise.resolve();
 
           return new Promise((resolve, reject) => {
             db.executeSql(
               `UPDATE files SET ${column} = ? WHERE ident = ?`,
               [file.name, deviceId],
-              (_, result) => {
-                console.log(`Updated ${column} with path: ${file.path}`);
-                resolve(result);
-              },
-              error => reject(error),
+              (_, result) => resolve(result),
+              (error) => reject(error)
             );
           });
-        }),
-      )
-        .then(() => console.log('All files updated successfully'))
-        .catch(error => console.error('Error updating files:', error));
-      setFiles([])
-      setButtonOne(true)
-      setButtonUpload(true)
-      fetchData();
-      Alert.alert(
-  t('upload.title'),
-  t('upload.info'),
-  [
-    {
-      text: "OK",
-      onPress: () => cont(),
-    }
-  ]
-);
+        })
+      );
 
-      console.log('Alle Dateien wurden aktualisiert.');
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Dateien:', error);
-    }
-    if (files.length < 10) {
-      for (let i = files.length - 1; i < 10; i++) {
-        db.executeSql(
-          `UPDATE files SET add${i + 1} = NULL WHERE ident = ?`,
-          [deviceId],
-          (_, result) => console.log(`Updated add${i + 1} with NULL`),
-          error => console.error('Fehler beim Aktualisieren:', error),
-        );
+      if (files.length < 10) {
+        for (let i = files.length - 1; i < 10; i++) {
+          await db.executeSql(
+            `UPDATE files SET add${i + 1} = NULL WHERE ident = ?`,
+            [deviceId]
+          );
+        }
       }
 
-      return;
+      setIsSaving(false);
+      Alert.alert(
+        t('upload.title') || 'Erfolg',
+        t('upload.info') || 'Deine Unterlagen wurden sicher verschlüsselt gespeichert.',
+        [{ text: 'OK', onPress: () => router.dismissTo('(tabs)') }]
+      );
+    } catch (error) {
+      setIsSaving(false);
+      console.error('Fehler beim Speichern:', error);
+      Alert.alert('Fehler', 'Dateien konnten nicht in der Datenbank gespeichert werden.');
     }
-    Alert.alert('Erfolg', 'Dateien wurden in der Datenbank gespeichert.');
-
   };
 
+  const handleSkipOrContinue = () => {
+    router.dismissTo('(tabs)');
+  };
 
-
- 
-  
-
-  const cont = () => {
-        router.dismissTo('(tabs)');
-    
-  }
   return (
-    <View style={styles.container}>
-      {buttonUpload && (
-        <>
-          <Pressable
-            onPress={handleFileChange}        // Grund‑Style 
-          >
-            {({ pressed }) => (
-              <View style={[
-                styles.entry2,                // Grund‑Layout
-                pressed && styles.entryPress // nur solange gedrückt
-              ]}>
-                <Card.Title
-                 title={t('uploadFiles')}
-                 titleStyle={styles.job}
-               />
-                  <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-                <Text style={styles.name}>{t('selectFilesToUpload')}</Text>
-              </View>
-            )}
-          </Pressable>
-          
-        </>
-      )}
-
-      {!buttonOne && (
-        <>
-         
-
-          <TouchableOpacity
-            onPress={handleSaveToDB}
-            style={files.length > 0 ? {} : styles.buttonDisabled}
-            disabled={files.length === 0}
-          >
-            <View style={styles.entry2}>
-             <Card.Title
-                 title={t('saveFile')}
-                 titleStyle={styles.job}
-               /> 
-           <Divider
- color='gray'
- style={{ justifyContent: 'center', marginBottom: 15 , width: '80%', alignSelf: 'center'  }}
-/>
-              <Text style={styles.name}>{t('saveFileText')}</Text>
-            </View>
-          </TouchableOpacity>
-        </>
-      )} 
- <TouchableOpacity
-                    onPress={cont}
-                 
-                  >
-<View style={styles.entryFort}>
-       <Card.Title
-        title={t('Continue')}
-        titleStyle={styles.job}>
-       </Card.Title>
-                  </View>
-                  </TouchableOpacity>
-
-      {error !== '' && <Text style={styles.errorText}>{error}</Text>}
-      {files.length > 0 && (
-        <View style={styles.fileList}>
-          <Text style={styles.fileListTitle}>{t('selectedFiles')}:</Text>
-          {files.map((file, index) => (
-            <Text key={index} style={styles.fileName}>
-              {file.filename} ({(file.size / 1024).toFixed(0)} KByte)
-            </Text>
-          ))}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <View style={styles.badgeHub}>
+            <View style={styles.statusDot} />
+            <Text style={styles.badgeHubText}>SCHRITT 2 VON 2</Text>
+          </View>
+          <Text style={styles.titleMain}>Lebenslauf & Anlagen</Text>
+          <Text style={styles.subtitleMain}>
+            Lade deine Bewerbungsunterlagen (Lebenslauf, Zeugnisse, Zertifikate) als PDF oder Bild hoch.
+          </Text>
         </View>
-      )}
-      
-     
-    </View>
+
+        {/* ── Modus 1: Keine Dateien ausgewählt ── */}
+        {files.length === 0 ? (
+          <View style={styles.centerContainer}>
+            <UploadActionCard
+              iconName="upload-file"
+              title={t('uploadFiles') || 'Dateien auswählen'}
+              description={t('selectFilesToUpload') || 'Erste Datei ist automatisch dein Hauptdokument (Lebenslauf).'}
+              onPress={handleFileChange}
+            />
+
+            <View style={styles.infoBox}>
+              <MaterialIcons name="lock-outline" size={18} color="#60A5FA" style={{ marginRight: 8 }} />
+              <Text style={styles.infoBoxText}>
+                Alle Dokumente werden Ende-zu-Ende verschlüsselt und ausschließlich lokal auf deinem Gerät gespeichert.
+              </Text>
+            </View>
+          </View>
+        ) : (
+          /* ── Modus 2: Dateien in Staging-Ansicht ── */
+          <View style={styles.stagedContainer}>
+            <View style={styles.stagedCard}>
+              <View style={styles.stagedHeader}>
+                <View style={styles.stagedHeaderLeft}>
+                  <MaterialIcons name="inventory-2" size={20} color="#60A5FA" />
+                  <Text style={styles.stagedTitle}>
+                    {files.length} {files.length === 1 ? 'Datei' : 'Dateien'} bereit
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setFiles([])}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.cancelText}>Neu wählen</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.stagedList} showsVerticalScrollIndicator={false}>
+                {files.map((file, index) => (
+                  <View key={index} style={styles.stagedItem}>
+                    <View style={[styles.fileBadge, index === 0 && styles.fileBadgeCv]}>
+                      <Text style={styles.fileBadgeText}>{index === 0 ? 'CV' : `${index}`}</Text>
+                    </View>
+                    <View style={styles.fileItemInfo}>
+                      <Text style={styles.stagedFileName} numberOfLines={1}>
+                        {file.filename}
+                      </Text>
+                      <Text style={styles.stagedFileSize}>
+                        {index === 0 ? 'Hauptdokument' : `Anhang ${index}`} • {(file.size / 1024).toFixed(0)} KB
+                      </Text>
+                    </View>
+                    <MaterialIcons name="check-circle" size={18} color="#10B981" />
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Speichern Button */}
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={handleSaveToDB}
+              disabled={isSaving || isProcessing}
+              activeOpacity={0.85}
+            >
+              {isSaving ? (
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <Text style={styles.primaryBtnText}>Wird verschlüsselt & gespeichert...</Text>
+                </View>
+              ) : (
+                <View style={styles.loadingRow}>
+                  <Text style={styles.primaryBtnText}>Speichern & Starten</Text>
+                  <MaterialIcons name="arrow-forward" size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Footer ── */}
+        {files.length === 0 && (
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.ghostBtn}
+              onPress={handleSkipOrContinue}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.ghostBtnText}>Später hinzufügen</Text>
+              <MaterialIcons name="arrow-forward-ios" size={13} color="rgba(255,255,255,0.4)" style={{ marginLeft: 6 }} />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
-const { width } = Dimensions.get('window');
+
+/* ── Styles ─────────────────────────────────────────────── */
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background || '#0F1117',
+  },
   container: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.card,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  itemTextActive: {
-    color: "rgb(203, 196, 196)",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
+    justifyContent: 'space-between',
   },
 
-  cardActive: {
-    borderWidth: 1,
-    borderColor: 'gray',
-
+  /* ── Header ── */
+  header: {
+    marginTop: 8,
   },
-  entryPress: {
-    backgroundColor: colors.card3,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'white',
-
-
-  },
-   entryFort: {
-      flexDirection: "column",
-    backgroundColor: colors.card3,
-    paddingTop: 5,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth:1,
-    borderColor:'gray',
-justifyContent:'center',
-width:width * 0.9,
-
-  },
-  popup: {
-
-
-    width: '90%',
-    height: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10, // Schatten für Android
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#E74C3C',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-
-  pdf: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10, // Optional für abgerundete Ecken
-  },
-  button: {
-    backgroundColor: colors.card3,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 8,
-    // Schatten (funktioniert auf Android und iOS)
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-  },
-  listContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    maxHeight: '90%',
-    width: width * 0.80,
- marginTop: 5,
-    borderRadius: 15,
-  },
-  deleteButton: {
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 10,
-    position: 'absolute',
-    right: 10
-
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  card: {
+  badgeHub: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card3,
-    borderRadius: 10,
-    padding: 12,
-    marginVertical: 8,
-    // Schatten für iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  dragArea: {
-    flex: 1,
-    backgroundColor: colors.card3,
-    color: colors.card,
-
-    padding: 10,
-
-  },
-
-  itemText: {
-    color: "rgb(232, 225, 247)",
-  },
-  entry: {
-    backgroundColor: colors.card3,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    shadowColor: "gray",
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'gray',
-    maxWidth: width * 0.90,
-
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 8,
   },
-  entry2: {
-    backgroundColor: colors.card3,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    shadowColor: "gray",
-    borderWidth: 1,
-    borderColor: 'gray',
-    width: width * 0.90,
-
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#3B82F6',
+    marginRight: 6,
   },
-  name: {
-    textAlign: "center",
+  badgeHubText: {
+    color: '#60A5FA',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  titleMain: {
+    color: '#FFFFFF',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  subtitleMain: {
+    color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 13,
-    fontWeight: "bold",
-    color: "#C8C8C8",
-    marginBottom: 10,
-    minWidth: width * 0.80,
-  },
-  job: {
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#E5E5E5",
-
+    marginTop: 4,
+    lineHeight: 18,
   },
 
-
-
-  buttonDisabled: {
-    opacity: 0.6,
+  /* ── Center Container (Initial Upload) ── */
+  centerContainer: {
+    marginVertical: 'auto',
+    gap: 16,
   },
-
-  errorText: {
-    color: 'red',
-    marginTop: 12,
+  actionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#171B26',
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
-  fileList: {
-    marginTop: 20,
-    width: '100%',
+  cardPressed: {
+    transform: [{ scale: 0.985 }],
+    opacity: 0.9,
+  },
+  iconContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#3B82F6',
     justifyContent: 'center',
-    alignItems: 'left',
+    alignItems: 'center',
+    marginRight: 14,
   },
-  fileListTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-    textAlign: 'left',
-    color: 'white'
+  cardTextContainer: {
+    flex: 1,
+    paddingRight: 8,
   },
-  deleteButton: {
-    backgroundColor: '#E74C3C',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 10,
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 16.5,
+    fontWeight: '800',
+    marginBottom: 3,
+  },
+  cardDescription: {
+    color: 'rgba(255, 255, 255, 0.55)',
+    fontSize: 12.5,
+    lineHeight: 17,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  infoBoxText: {
+    flex: 1,
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 12,
+    lineHeight: 16,
   },
 
-  fileName: {
-    fontSize: 16,
-    color: 'white',
-    marginBottom: 12,
+  /* ── Staging Modus ── */
+  stagedContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    marginVertical: 14,
+  },
+  stagedCard: {
+    backgroundColor: '#171B26',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    maxHeight: height * 0.52,
+  },
+  stagedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  stagedHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stagedTitle: {
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '700',
+  },
+  cancelText: {
+    color: '#60A5FA',
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+  stagedList: {
+    marginTop: 8,
+  },
+  stagedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  fileBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  fileBadgeCv: {
+    backgroundColor: '#3B82F6',
+  },
+  fileBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  fileItemInfo: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  stagedFileName: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '600',
+  },
+  stagedFileSize: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+
+  /* ── Buttons ── */
+  primaryBtn: {
+    width: '100%',
+    height: 52,
+    backgroundColor: '#3B82F6',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    marginTop: 10,
+  },
+  primaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    marginTop: 8,
+  },
+  ghostBtn: {
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ghostBtnText: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
+
 export default UploadScreen;

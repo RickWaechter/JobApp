@@ -403,6 +403,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card3,
     padding: 12,
     borderRadius: 12,
+    borderColor: "gray",
+    borderWidth: 1,
     alignItems: "center",
     marginTop: 10,
     shadowColor: "gray",
