@@ -115,6 +115,7 @@ export default function StartApp() {
   const [showCompanySearch, setShowCompanySearch] = useState(false);
   const [screenApp, setScreenApp] = useState(false);
   const [screenChange, setScreenChange] = useState(false);
+  const [screen, setScreen] = useState(false);
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
 const changeScreenRef = useRef(null);
   const lastClickTime = useRef(0);
@@ -126,7 +127,7 @@ const changeScreenRef = useRef(null);
 const animProgress = useRef(new Animated.Value(0)).current;   // Overlay Slide-In X (0 = draußen, 1 = sichtbar)
 const animProgressY = useRef(new Animated.Value(0)).current;  // Slide-Down Y (0 = normal, 1 = nach unten weg)
 const animStep = useRef(new Animated.Value(0)).current;
-  
+  const animProgressOpacity = useRef(new Animated.Value(0)).current;
   
 
   /* ── Cross-Platform DB Check ── */
@@ -193,6 +194,7 @@ const animStep = useRef(new Animated.Value(0)).current;
 const openBewerbung = useCallback(() => {
   setScreenApp(true);
   setScreenChange(false);
+  setScreen(true);
   
   // Werte vor Start zurücksetzen
   animProgress.setValue(0);
@@ -209,32 +211,24 @@ const openBewerbung = useCallback(() => {
 }, [animProgress, animProgressY, animStep]);
 
 // 2. Komplettes Overlay nach rechts schließen
-const closeBewerbung = useCallback(() => {
-  Keyboard.dismiss();
-  Animated.timing(animProgressY, {
-    toValue: 1,
-    duration: 260,
-    useNativeDriver: true,
-  }).start(() => {
-    setScreenApp(false);
-    setScreenChange(false);
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(0);  
-    });
-}, [animProgress, animProgressY, animStep]);
 
 // 3. Übergang zu Screen 2 (ChangeScreen)
+// 3. Übergang zu Screen 2 (ChangeScreen) mit nahtloser Tastatur-Übergabe
+// In StartApp.js: navigateToChange anpassen
 const navigateToChange = useCallback(() => {
+  // 1. Fokus SOFORT und synchron an ChangeScreen übergeben (ohne requestAnimationFrame!)
+  changeScreenRef.current?.focus();
+
+  // 2. Screen-Zustand umschalten
   setScreenChange(true);
 
+  // 3. Animation starten
   Animated.timing(animStep, {
     toValue: 1,
     duration: 300,
     useNativeDriver: true,
   }).start();
 }, [animStep]);
-
 // 4. Zurück von Screen 2 zu Screen 1 (optional, falls ChangeScreen einen Zurück-Pfeil hat)
 const backToBewerbung = useCallback(() => {
   Keyboard.dismiss();
@@ -249,20 +243,72 @@ const backToBewerbung = useCallback(() => {
 }, [animStep]);
 
 // 5. ChangeScreen nach unten wegschieben & schließen
-const closeChange = useCallback(() => {
+// Schließen aus Screen 1 (Bewerbung) mit weicher Aufhellung
+const closeBewerbung = useCallback(() => {
   Keyboard.dismiss();
 
-  Animated.timing(animProgressY, {
-    toValue: 1,
-    duration: 260,
-    useNativeDriver: true,
-  }).start(() => {
+  Animated.parallel([
+    Animated.timing(animProgressY, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }),
+    Animated.timing(animProgressOpacity, {
+      toValue: 0, // <-- Hellt den Backdrop sanft auf
+      duration: 260,
+      useNativeDriver: true,
+    }),
+  ]).start(() => {
+    setScreen(false);
     setScreenApp(false);
     setScreenChange(false);
     animProgress.setValue(0);
     animProgressY.setValue(0);
     animStep.setValue(0);
   });
+}, [animProgress, animProgressY, animStep]);
+
+// Schließen aus Screen 2 (Change) mit identischer weicher Aufhellung
+const closeChange = useCallback(() => {
+  Keyboard.dismiss();
+
+  Animated.parallel([
+    Animated.timing(animProgressY, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }),
+    Animated.timing(animProgressOpacity, {
+      toValue: 0, // <-- Hellt den Backdrop sanft auf
+      duration: 260,
+      useNativeDriver: true,
+    }),
+  ]).start(() => {
+    setScreen(false);
+    setScreenApp(false);
+    setScreenChange(false);
+    animProgress.setValue(0);
+    animProgressY.setValue(0);
+    animStep.setValue(0);
+  });
+}, [animProgress, animProgressY, animStep]);
+// Screen 2 (ChangeScreen) direkt öffnen & von rechts einfliegen lassen
+const openChange = useCallback(() => {
+  setScreenApp(false);
+  setScreen(true);
+  setScreenChange(true); // 1. Muss zwingend true sein
+
+  // 2. Y-Werte auf neutral (0) setzen, damit nichts nach oben weggeschoben ist
+  animProgress.setValue(0);
+  animProgressY.setValue(0);
+  animStep.setValue(1);
+
+  // 3. animProgress auf 1 animieren (Slide-In von rechts + Fade-In)
+  Animated.timing(animProgress, {
+    toValue: 1,
+    duration: 320,
+    useNativeDriver: true,
+  }).start();
 }, [animProgress, animProgressY, animStep]);
 
 /* ── Android Back-Handler Fix ── */
@@ -401,12 +447,13 @@ const handleOldApplication = async () => {
     try {
       const lastStep = await EncryptedStorage.getItem("result");
       const targetRoute = ROUTE_MAP[lastStep];
+      console.log("Target route:", targetRoute);
       if (!targetRoute) return;
 
       if (targetRoute === "/application") {
         openBewerbung();
-      } else {
-        router.push(targetRoute);
+      } else if (targetRoute === "/change") {
+        openChange();
       }
     } catch (e) {
       console.error("Routing error:", e);
@@ -512,14 +559,14 @@ const handleOldApplication = async () => {
       />
 
      {/* ══ Overlay & Slide-In Container ══ */}
-{screenApp && (
+{screen && (
   <View style={styles.bewerbungOverlay}>
-    {/* Backdrop: Opacity rein über animProgress */}
+    {/* Backdrop */}
     <Animated.View
       style={[
         styles.backdrop,
         {
-          opacity: animProgress.interpolate({
+          opacity: animProgressOpacity.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 1],
             extrapolate: "clamp",
@@ -530,7 +577,7 @@ const handleOldApplication = async () => {
       <Pressable style={StyleSheet.absoluteFill} onPress={closeBewerbung} />
     </Animated.View>
 
-    {/* Slide-In Container: Transform + kontrollierte eigene Opacity */}
+    {/* Haupt-Slide-In Container */}
     <Animated.View
       style={[
         styles.cardAnimatedWrap,
@@ -559,35 +606,66 @@ const handleOldApplication = async () => {
         },
       ]}
     >
-      {/* Screen 1: Bewerbung */}
-      <View style={StyleSheet.absoluteFillObject}>
+      {/* Screen 1: Bewerbung (fährt bei animStep: 1 nach links weg und wird unsichtbar) */}
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            opacity: animStep.interpolate({
+              inputRange: [0, 0.8, 1],
+              outputRange: [1, 0, 0],
+            }),
+            transform: [
+              {
+                translateX: animStep.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -width],
+                }),
+              },
+            ],
+          },
+        ]}
+        pointerEvents={screenChange ? "none" : "auto"}
+      >
         <Bewerbung
-          changeScreen={() => {
-            setScreenChange(true);
-          }}
+          changeScreen={navigateToChange}
           visibleApp={screenApp}
           isNextStep={screenChange}
           ref={bewerbungRef}
           onClose={closeBewerbung}
         />
-      </View>
+      </Animated.View>
 
-      {/* Screen 2: ChangeScreen */}
-      <View
+      {/* Screen 2: ChangeScreen (steht bei animStep: 1 direkt auf Position 0) */}
+      <Animated.View
         style={[
           StyleSheet.absoluteFillObject,
-          { pointerEvents: screenChange ? "auto" : "none" },
+          {
+            opacity: animStep.interpolate({
+              inputRange: [0, 0.2, 1],
+              outputRange: [0, 1, 1],
+            }),
+            transform: [
+              {
+                translateX: animStep.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [width, 0],
+                }),
+              },
+            ],
+          },
         ]}
+        pointerEvents={screenChange ? "auto" : "none"}
       >
-        <ChangeScreen visible={screenChange} onClose={closeChange} />
-      </View>
+        <ChangeScreen visible={screenChange} onClose={closeChange} ref={changeScreenRef} />
+      </Animated.View>
     </Animated.View>
   </View>
-)}    
+)}
+
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

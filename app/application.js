@@ -667,23 +667,13 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       clearInterval(interval);
       setLoading(false);
 
-      if (response.data.response) {
+     if (response.data.response) {
         console.log('Received response:', response.data.response);
         await EncryptedStorage.setItem('text', response.data.response);
         await EncryptedStorage.setItem('result', 'change');
-      changeScreen()
+        changeScreen(); // Löst navigateToChange() in StartApp.js aus
       }
-      Animated.timing(animCardX, {
-    toValue: -400, // weit genug raus, z. B. Bildschirmbreite
-    duration: 350,
-    useNativeDriver: true,
-  }).start(async ({ finished }) => {
-    if (finished) {
-      await EncryptedStorage.setItem('result', 'change');
-      console.log("suppi")
-      // Falls du hier navigierst oder changeScreen aufrufst:
-    }
-  });
+      // Der nachfolgende Animated.timing(animCardX, { toValue: -400 }) Block entfällt komplett!
     } catch (error) {
       clearInterval(interval);
       setLoading(false);

@@ -3,7 +3,15 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -16,7 +24,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
@@ -36,10 +43,9 @@ import {
 import { getCurrentDateTime } from '../inc/date.js';
 import { runQuery } from '../inc/db.js';
 
-const { width } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
 
-const ChangeScreen = ({ visible, onClose }) => {
+const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
   const { t } = useTranslation();
 
   const [text, setText] = useState('');
@@ -47,11 +53,19 @@ const ChangeScreen = ({ visible, onClose }) => {
   const [dots, setDots] = useState('');
   const [subject, setSubject] = useState('');
 
+  const inputRef = useRef(null);
   const currentTextRef = useRef('');
   currentTextRef.current = text;
 
-  /* ── Lokale Slide-In Animation ── */
-  const animCardX = useRef(new Animated.Value(width)).current;
+  /* ── Ref nach außen bereitstellen ── */
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+    blur: () => {
+      inputRef.current?.blur();
+    },
+  }));
 
   /* ── Dynamische Anpassung an die Tastaturhöhe ── */
   const keyboardPadding = useRef(new Animated.Value(0)).current;
@@ -64,7 +78,7 @@ const ChangeScreen = ({ visible, onClose }) => {
       Animated.timing(keyboardPadding, {
         toValue: event.endCoordinates.height * 0.9,
         duration: Platform.OS === 'ios' ? event.duration || 250 : 180,
-        useNativeDriver: false, // Layout-Padding benötigt false
+        useNativeDriver: false,
       }).start();
     };
 
@@ -84,14 +98,6 @@ const ChangeScreen = ({ visible, onClose }) => {
       subHide.remove();
     };
   }, [keyboardPadding]);
-
-  useEffect(() => {
-    Animated.timing(animCardX, {
-      toValue: visible ? 0 : width,
-      duration: 350,
-      useNativeDriver: true,
-    }).start();
-  }, [visible, animCardX]);
 
   /* ── Text laden & Persistenz ── */
   useEffect(() => {
@@ -350,7 +356,6 @@ const ChangeScreen = ({ visible, onClose }) => {
         year: 'numeric',
       });
 
-      // Absender
       page.drawText(myName || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
       page.drawText(myStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
@@ -358,7 +363,6 @@ const ChangeScreen = ({ visible, onClose }) => {
       page.drawText(myCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= 4 * lineHeight;
 
-      // Empfänger
       page.drawText(yourCompany || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
       page.drawText(yourStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
@@ -366,12 +370,10 @@ const ChangeScreen = ({ visible, onClose }) => {
       page.drawText(yourCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= 2 * lineHeight;
 
-      // Datum
       const dateX = leftMargin + textWidth - 50;
       page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
       currentY -= 2 * lineHeight;
 
-      // Betreff
       const subjectLines = splitTextIntoLinesWithoutFont(objectSubject || '', 70);
       subjectLines.forEach((line) => {
         page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
@@ -379,7 +381,6 @@ const ChangeScreen = ({ visible, onClose }) => {
       });
       currentY -= 1 * lineHeight;
 
-      // Haupttext
       const paragraphs = text.split('\n\n');
       paragraphs.forEach((paragraph) => {
         const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
@@ -418,114 +419,101 @@ const ChangeScreen = ({ visible, onClose }) => {
     }
   };
 
- return (
+  return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        
-        {/* 1. ÄUßERER CONTAINER: Nur Native Driver (Slide-In X) */}
-        <Animated.View
-          style={[
-            styles.nativeWrap,
-            { transform: [{ translateX: animCardX }] },
-          ]}
-        >
-          {/* 2. INNERER CONTAINER: Nur JS Driver (Tastatur PaddingBottom) */}
-          <Animated.View
-            style={[
-              styles.container,
-              {
-                paddingBottom: Animated.add(
-                  keyboardPadding,
-                  Platform.OS === 'ios' ? 16 : 22
-                ),
-              },
-            ]}
-          >
-            <View style={styles.editorCard}>
-              <View style={styles.editorHeader}>
-                <View style={styles.editorHeaderLeft}>
-                  <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
-                  <Text style={styles.editorHeaderText}>Text-Editor</Text>
-                </View>
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            paddingBottom: Animated.add(
+              keyboardPadding,
+              Platform.OS === 'ios' ? 16 : 22
+            ),
+          },
+        ]}
+      >
+        <View style={styles.editorCard}>
+          <View style={styles.editorHeader}>
+            <View style={styles.editorHeaderLeft}>
+              <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
+              <Text style={styles.editorHeaderText}>Text-Editor</Text>
+            </View>
 
-                <View style={styles.editorHeaderRight}>
-                  <View style={styles.wordBadge}>
-                    <Text style={styles.wordBadgeText}>{wordCount} Wörter</Text>
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.closeBtn}
-                    onPress={onClose}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    activeOpacity={0.7}
-                  >
-                    <MaterialIcons name="close" size={17} color="rgba(255, 255, 255, 0.7)" />
-                  </TouchableOpacity>
-                </View>
+            <View style={styles.editorHeaderRight}>
+              <View style={styles.wordBadge}>
+                <Text style={styles.wordBadgeText}>{wordCount} Wörter</Text>
               </View>
 
-              <TextInput
-                style={styles.textArea}
-                value={text}
-                onChangeText={handleTextChange}
-                placeholder={t('placeholderText') || 'Hier Text eingeben...'}
-                placeholderTextColor="rgba(255, 255, 255, 0.35)"
-                multiline={true}
-                textAlignVertical="top"
-                showsVerticalScrollIndicator={true}
-              />
-            </View>
-
-            <View style={styles.actionContainer}>
               <TouchableOpacity
-                style={styles.generateButton}
-                disabled={loading}
-                onPress={generate}
-                activeOpacity={0.85}
+                style={styles.closeBtn}
+                onPress={onClose}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
               >
-                {loading ? (
-                  <View style={styles.loadingRow}>
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                    <Text style={styles.generateBtnText}>
-                      {`Bewerbungsmappe wird erstellt`}
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.loadingRow}>
-                    <MaterialIcons
-                      name="picture-as-pdf"
-                      size={20}
-                      color="#FFFFFF"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.generateBtnText}>
-                      {t('saveCoverLetter') || 'Mappe generieren & fortsetzen'}
-                    </Text>
-                    <MaterialIcons
-                      name="arrow-forward"
-                      size={18}
-                      color="#FFFFFF"
-                      style={{ marginLeft: 6 }}
-                    />
-                  </View>
-                )}
+                <MaterialIcons name="close" size={17} color="rgba(255, 255, 255, 0.7)" />
               </TouchableOpacity>
             </View>
-          </Animated.View>
-        </Animated.View>
+          </View>
 
-      </TouchableWithoutFeedback>
+          <TextInput
+            ref={inputRef}
+            style={styles.textArea}
+            value={text}
+            onChangeText={handleTextChange}
+            placeholder={t('placeholderText') || 'Hier Text eingeben...'}
+            placeholderTextColor="rgba(255, 255, 255, 0.35)"
+            multiline={true}
+            textAlignVertical="top"
+            showsVerticalScrollIndicator={true}
+          />
+        </View>
+
+        <View style={styles.actionContainer}>
+          <TouchableOpacity
+            style={styles.generateButton}
+            disabled={loading}
+            onPress={generate}
+            activeOpacity={0.85}
+          >
+            {loading ? (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.generateBtnText}>
+                  {`Bewerbungsmappe wird erstellt${dots}`}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.loadingRow}>
+                <MaterialIcons
+                  name="picture-as-pdf"
+                  size={20}
+                  color="#FFFFFF"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.generateBtnText}>
+                  {t('saveCoverLetter') || 'Mappe generieren & fortsetzen'}
+                </Text>
+                <MaterialIcons
+                  name="arrow-forward"
+                  size={18}
+                  color="#FFFFFF"
+                  style={{ marginLeft: 6 }}
+                />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
-};
-/* ── Styles ─────────────────────────────────────────────── */
+});
+
+export default ChangeScreen;
+
 const styles = StyleSheet.create({
- safeArea: {
+  safeArea: {
     flex: 1,
     backgroundColor: 'transparent',
-  },
-  nativeWrap: {
-    flex: 1, // Füllt den gesamten Screen aus für das Slide-In
   },
   container: {
     flex: 1,
@@ -629,5 +617,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
-export default ChangeScreen;
