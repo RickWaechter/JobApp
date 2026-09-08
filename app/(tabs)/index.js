@@ -262,11 +262,12 @@ const closeBewerbung = useCallback(() => {
     setScreen(false);
     setScreenApp(false);
     setScreenChange(false);
+    setShowCompanySearch(false);
     animProgress.setValue(0);
     animProgressY.setValue(0);
     animStep.setValue(0);
   });
-}, [animProgress, animProgressY, animStep]);
+}, [animProgress, animProgressY, animStep, animProgressOpacity]);
 
 // Schließen aus Screen 2 (Change) mit identischer weicher Aufhellung
 const closeChange = useCallback(() => {
@@ -304,6 +305,14 @@ const openChange = useCallback(() => {
   animStep.setValue(1);
 
   // 3. animProgress auf 1 animieren (Slide-In von rechts + Fade-In)
+  Animated.timing(animProgressOpacity, {
+    toValue: 1,
+    duration: 320,
+    useNativeDriver: true,
+  }).start(() => {
+  
+    
+  })
   Animated.timing(animProgress, {
     toValue: 1,
     duration: 320,

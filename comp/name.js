@@ -485,13 +485,18 @@ const CompanySearchModal = ({
       onSaved?.(payload.name, payload.street, payload.city);
 
       // 2. Karte nach links schieben (Backdrop NICHT faden, damit nichts blitzt)
-      Animated.timing(animNameX, {
-        toValue: -winW,
-        duration: 350,
-        useNativeDriver: true,
-      }).start(({ finished }) => {
-        if (finished) {
-        }
+     // CompanySearchModal.js -> validateAndContinue
+Animated.timing(animNameX, {
+  toValue: -winW,
+  duration: 350,
+  useNativeDriver: true,
+}).start(({ finished }) => {
+  if (finished) {
+    // Backdrop & Modal sauber entladen
+    fadeAnim.setValue(0);
+    setIsMounted(false);
+    isExitingLeft.current = false;
+  }
       });
     } catch (error) {
       console.error("Failed to access Keychain", error);

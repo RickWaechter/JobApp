@@ -100,34 +100,42 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
   }, [keyboardPadding]);
 
   /* ── Text laden & Persistenz ── */
+/* ── Text laden & Persistenz ── */
   useEffect(() => {
     const loadText = async () => {
       try {
-        const [anrede, name, subj, savedEditedText, myText] = await Promise.all([
-          EncryptedStorage.getItem('anrede'),
-          EncryptedStorage.getItem('name'),
-          EncryptedStorage.getItem('subject'),
-          EncryptedStorage.getItem('editedCoverLetter'),
-          EncryptedStorage.getItem('text'),
-        ]);
+        console.log('--- Lade Daten in ChangeScreen ---');
+        const anrede = (await EncryptedStorage.getItem('anrede')) || '';
+        const name = (await EncryptedStorage.getItem('name')) || '';
+        const subj = await EncryptedStorage.getItem('subject');
+        const myText = await EncryptedStorage.getItem('text');
+        const savedEditedText = await EncryptedStorage.getItem('editedCoverLetter');
+
+        console.log('Geladener API-Text (myText):', myText ? 'VORHANDEN' : 'LEER/NULL');
+        console.log('Vorhandener Cache (savedEditedText):', savedEditedText ? 'VORHANDEN' : 'LEER/NULL');
 
         if (subj) setSubject(subj);
 
-        if (savedEditedText) {
-          setText(savedEditedText);
-          currentTextRef.current = savedEditedText;
-        } else if (myText) {
-          const composed = `${anrede || ''}\n\n${myText}\n\n${name || ''}`.trim();
+        // Wenn ein frischer API-Text da ist, hat dieser Vorrang!
+        if (myText) {
+          const composed = `${anrede}\n\n${myText}\n\n${name}`.trim();
           setText(composed);
           currentTextRef.current = composed;
+          // Aktualisiere den Cache mit dem neuen kombinierten Text:
           await EncryptedStorage.setItem('editedCoverLetter', composed);
+          // Lösche den Roh-Text, damit beim nächsten normalen Öffnen wieder der bearbeitete Text greift:
+          await EncryptedStorage.removeItem('text');
+        } else if (savedEditedText) {
+          setText(savedEditedText);
+          currentTextRef.current = savedEditedText;
         }
       } catch (error) {
-        console.error('Error loading text:', error);
+        console.error('Error loading text in ChangeScreen:', error);
       }
     };
 
-    if (visible) {
+    // Lädt immer, es sei denn visible ist explizit false
+    if (visible !== false) {
       loadText();
     }
 
@@ -137,7 +145,6 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
       }
     };
   }, [visible]);
-
   const handleTextChange = useCallback((newText) => {
     setText(newText);
     currentTextRef.current = newText;
@@ -148,7 +155,22 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
     if (!text.trim()) return 0;
     return text.trim().split(/\s+/).length;
   }, [text]);
-
+const sanitizeForPdf = (str) => {
+  if (!str) return '';
+  return str
+    // Geschützte Bindestriche & verschiedene Gedankenstriche (U+2010 bis U+2015) zu normalem Bindestrich
+    .replace(/[\u2010\u2011\u2012\u2013\u2014\u2015]/g, '-')
+    // Typografische Anführungszeichen („, “, ”, «, ») zu normalen Anführungszeichen
+    .replace(/[\u201C\u201D\u201E\u00AB\u00BB]/g, '"')
+    // Typografische einfache Anführungszeichen & Apostrophe (‘, ’, ‚)
+    .replace(/[\u2018\u2019\u201A]/g, "'")
+    // Geschützte Leerzeichen & schmale Leerzeichen zu regulärem Leerzeichen
+    .replace(/[\u00A0\u202F\u2007\u2009]/g, ' ')
+    // Horizontale Ellipse (…) zu drei Punkten
+    .replace(/\u2026/g, '...')
+    // Weiche Trennzeichen & Zero-Width Spaces komplett entfernen
+    .replace(/[\u00AD\u200B\u200C\u200D\uFEFF]/g, '');
+};
   const saveText = async () => {
     try {
       const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
@@ -321,7 +343,7 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
   };
 
   const generate = async () => {
-    if (loading) return;
+   if (loading) return;
     setLoading(true);
 
     try {
@@ -356,32 +378,38 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
         year: 'numeric',
       });
 
-      page.drawText(myName || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      // Adressdaten bereinigen & zeichnen
+      page.drawText(sanitizeForPdf(myName || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
-      page.drawText(myStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      page.drawText(sanitizeForPdf(myStreet || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
-      page.drawText(myCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      page.drawText(sanitizeForPdf(myCity || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= 4 * lineHeight;
 
-      page.drawText(yourCompany || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      page.drawText(sanitizeForPdf(yourCompany || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
-      page.drawText(yourStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      page.drawText(sanitizeForPdf(yourStreet || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= lineHeight;
-      page.drawText(yourCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+      page.drawText(sanitizeForPdf(yourCity || ''), { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
       currentY -= 2 * lineHeight;
 
       const dateX = leftMargin + textWidth - 50;
       page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
       currentY -= 2 * lineHeight;
 
-      const subjectLines = splitTextIntoLinesWithoutFont(objectSubject || '', 70);
+      // Betreff bereinigen
+      const cleanSubject = sanitizeForPdf(objectSubject || '');
+      const subjectLines = splitTextIntoLinesWithoutFont(cleanSubject, 70);
       subjectLines.forEach((line) => {
         page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
         currentY -= lineHeight;
       });
       currentY -= 1 * lineHeight;
 
-      const paragraphs = text.split('\n\n');
+      // Haupttext vor dem Splitten komplett von Inkompatibilitäten befreien:
+      const cleanText = sanitizeForPdf(text);
+      const paragraphs = cleanText.split('\n\n');
+
       paragraphs.forEach((paragraph) => {
         const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
         lines.forEach((line) => {
@@ -479,7 +507,7 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
               <View style={styles.loadingRow}>
                 <ActivityIndicator size="small" color="#FFFFFF" />
                 <Text style={styles.generateBtnText}>
-                  {`Bewerbungsmappe wird erstellt${dots}`}
+                  {`Bewerbungsmappe wird erstellt`}
                 </Text>
               </View>
             ) : (

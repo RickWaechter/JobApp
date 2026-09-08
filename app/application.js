@@ -319,7 +319,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [selectedOption, setSelectedOption] = useState('');
   const [selectedOption2, setSelectedOption2] = useState('');
   const [selectedOption3, setSelectedOption3] = useState('');
-
+const [selectedQuality, setSelectedQuality] = useState('light');
+const [selectedOption4, setSelectedOption4] = useState('');
   const [jobs, setJobs] = useState([]);
   const [skills, setSkills] = useState([]);
   const [skillsFiltered, setSkillsFiltered] = useState([]);
@@ -343,6 +344,24 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
 
   /* ── Horizontale Ausfahr-Animation (fährt nach links raus) ── */
   const animCardX = useRef(new Animated.Value(0)).current;
+const animOptionsX = useRef(new Animated.Value(width)).current;
+useEffect(() => {
+  Animated.parallel([
+    Animated.timing(animCardX, {
+      toValue: accordionOpen ? -width : 0,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }),
+
+    Animated.timing(animOptionsX, {
+      toValue: accordionOpen ? 0 : width,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }),
+  ]).start();
+}, [accordionOpen, animCardX, animOptionsX]);
 
   useEffect(() => {
     Animated.timing(animCardX, {
@@ -387,7 +406,16 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     ],
     [t],
   );
+  const qualityKeys = ['best', 'medium', 'light'];
+ const qualityLabels = useMemo(
+  () => ({
+    medium: t('Schnell') || 'Sehr gut',
+    best: t('Medium') || 'Am besten',
+    light: t('Sehr schnell') || 'Gut',
 
+  }),
+  [t],
+);
   const anredeOptions = useMemo(
     () => [
       t('anredeOptions.herr') || 'Herr',
@@ -396,7 +424,10 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     ],
     [t],
   );
-
+const closeOptions = useCallback(() => {
+  Keyboard.dismiss();
+  setAccordionOpen(false);
+}, []);
   const onExtractSuccess = useCallback((jobTitle, jobDesc) => {
     setInputValue(jobTitle);
     setScrapedDescription(jobDesc);
@@ -618,25 +649,21 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     setErrors({});
     setLoading(true);
 
-    let count = 0;
-    const interval = setInterval(() => {
-      count = (count + 1) % 4;
-      setDots('.'.repeat(count));
-    }, 450);
 
     try {
       await EncryptedStorage.setItem('font', fontValue);
       await EncryptedStorage.setItem('beruf', inputValue);
       await EncryptedStorage.setItem('erfahrung', erfahrung);
       await EncryptedStorage.setItem('time', selectedOption);
+      console.log('Time:', selectedOption);
       await EncryptedStorage.setItem('type', selectedOption2);
-
-      const choice = selectedOption || t('employmentOptions.vollzeit') || 'Vollzeit';
+      const quality = selectedQuality
+      console.log('Quality:', quality); 
       const timepart = selectedOption2
         ? `${selectedOption2}${t('bewerbung.subjectCoverLetterFor') || 'e Bewerbung als '}`
         : t('bewerbung.subjectCoverLetter') || 'Bewerbung als ';
-      await EncryptedStorage.setItem('subject', `${timepart}${inputValue} (${choice})`);
-
+        const choicePart = selectedOption?.trim() ? ` (${selectedOption.trim()})` : '';
+      await EncryptedStorage.setItem('subject', `${timepart}${inputValue} ${choicePart}`);
       let anrede = t('bewerbung.salutationDearAll') || 'Sehr geehrte Damen und Herren,';
       if (selectedOption3.includes('Herr')) {
         anrede = t('bewerbung.salutationDearMr', { name }) || `Sehr geehrter Herr ${name},`;
@@ -657,25 +684,31 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
 
       const deviceId = await DeviceInfo.getUniqueId();
       const key = sha512(deviceId);
-
+      console.log("quality" + quality)
       const response = await axios.post(
         'https://api.jobapp2.de/getText',
-        { prompt1, key },
+        { prompt1, key, modelIntens: quality },
         { timeout: 25000 },
       );
 
-      clearInterval(interval);
       setLoading(false);
-
-     if (response.data.response) {
+if (response.data.response) {
         console.log('Received response:', response.data.response);
+
+        // 1. Großen Text zuerst komplett schreiben & flushen
         await EncryptedStorage.setItem('text', response.data.response);
+        
+        // 2. Danach das Status-Flag setzen
         await EncryptedStorage.setItem('result', 'change');
+
+        // Schneller Gegen-Check im Log:
+        const check = await EncryptedStorage.getItem('text');
+        console.log('Check nach Speichern:', check ? 'Text erfolgreich im Storage!' : 'FEHLT IMMER NOCH');
+
         changeScreen(); // Löst navigateToChange() in StartApp.js aus
       }
       // Der nachfolgende Animated.timing(animCardX, { toValue: -400 }) Block entfällt komplett!
     } catch (error) {
-      clearInterval(interval);
       setLoading(false);
       console.log('Error during PDF generation:', error);
       Alert.alert(
@@ -928,51 +961,190 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
             </View>
 
             {/* ERWEITERTE OPTIONEN */}
-            {accordionOpen && (
-              <View style={styles.accordionPanel}>
-                <Text style={styles.subFieldLabel}>
-                  {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
-                </Text>
-                <SegmentedPills
-                  options={employmentOptions}
-                  selected={selectedOption}
-                  onSelect={(opt) => setSelectedOption((p) => (p === opt ? '' : opt))}
-                />
-
-                <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
-                  {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
-                </Text>
-                <SegmentedPills
-                  options={applicationOptions}
-                  selected={selectedOption2}
-                  onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
-                />
-
-                <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
-                  {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
-                </Text>
-                <View style={{ zIndex: 1000, marginTop: 4 }}>
-                  <DropDownPicker
-                    open={fontPickerOpen}
-                    value={fontValue}
-                    items={fontOptions}
-                    setOpen={setFontPickerOpen}
-                    setValue={setFontValue}
-                    placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropdownList}
-                    textStyle={{ color: WARM.textMain, fontSize: 13.5, fontWeight: '500' }}
-                    arrowIconStyle={{ tintColor: WARM.iconArrow }}
-                    dropDownDirection="TOP"
-                    listMode="SCROLLVIEW"
-                  />
-                </View>
-              </View>
-            )}
+       
           </View>
         </ScrollView>
       </Animated.View>
+{/* OPTIONEN – eigene Seite, kommt von rechts */}
+<Animated.View
+  style={[
+    styles.optionsScreen,
+    {
+      transform: [{ translateX: animOptionsX }],
+    },
+  ]}
+>
+  <ScrollView
+    style={styles.scrollContainer}
+    contentContainerStyle={styles.scrollContent}
+    showsVerticalScrollIndicator={false}
+    keyboardShouldPersistTaps="handled"
+  >
+    <View style={styles.responsiveContent}>
 
+      <View style={styles.accordionPanel}>
+
+        {/* HEADER */}
+        <View style={styles.optionsHeader}>
+          <View style={styles.headerLeft}>
+            <View style={styles.iconBadge}>
+              <MaterialIcons
+                name="tune"
+                size={18}
+                color={WARM.iconLeading}
+              />
+            </View>
+
+            <Text style={styles.fieldLabel}>
+              {t('Optionen') || 'OPTIONEN'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={closeOptions}
+            activeOpacity={0.7}
+            hitSlop={{
+              top: 10,
+              bottom: 10,
+              left: 10,
+              right: 10,
+            }}
+          >
+            <MaterialIcons
+              name="close"
+              size={18}
+              color={WARM.iconClose}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* ANSTELLUNGSART */}
+        <Text style={styles.subFieldLabel}>
+          {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
+        </Text>
+
+        <SegmentedPills
+          options={employmentOptions}
+          selected={selectedOption}
+          onSelect={(opt) =>
+            setSelectedOption((p) => (p === opt ? '' : opt))
+          }
+        />
+
+        {/* BEWERBUNGSTYP */}
+        <Text
+          style={[
+            styles.subFieldLabel,
+            { marginTop: 14 },
+          ]}
+        >
+          {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
+        </Text>
+
+        <SegmentedPills
+          options={applicationOptions}
+          selected={selectedOption2}
+          onSelect={(opt) =>
+            setSelectedOption2((p) => (p === opt ? '' : opt))
+          }
+        />
+         <Text
+          style={[
+            styles.subFieldLabel,
+            { marginTop: 14 },
+          ]}
+        >
+          {t('QUALITÄT') || 'Qualität'}
+        </Text>
+
+        <SegmentedPills
+          options={qualityKeys}
+          selected={selectedQuality}
+          onSelect={(val) =>{ setSelectedQuality(val); console.log(val)}}
+  labels={qualityLabels}
+
+          
+        />
+
+        {/* SCHRIFTART */}
+        <Text
+          style={[
+            styles.subFieldLabel,
+            { marginTop: 14 },
+          ]}
+        >
+          {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
+        </Text>
+
+        <View
+          style={{
+            zIndex: 1000,
+            marginTop: 4,
+          }}
+        >
+          <DropDownPicker
+            open={fontPickerOpen}
+            value={fontValue}
+            items={fontOptions}
+            setOpen={setFontPickerOpen}
+            setValue={setFontValue}
+            placeholder={
+              t('bewerbung.placeholderFont') ||
+              'Schriftart wählen'
+            }
+            style={styles.dropdown}
+            dropDownContainerStyle={styles.dropdownList}
+            textStyle={{
+              color: WARM.textMain,
+              fontSize: 13.5,
+              fontWeight: '500',
+            }}
+            arrowIconStyle={{
+              tintColor: WARM.iconArrow,
+            }}
+            dropDownDirection="TOP"
+            listMode="SCROLLVIEW"
+          />
+        </View>
+ <View style={styles.bottomActionRow}>
+                <TouchableOpacity
+                  style={[styles.settingsButton, accordionOpen && styles.settingsButtonActive]}
+                  onPress={toggleAccordion}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.settingsButtonText} numberOfLines={1}>
+                    {t('Zurück') || 'Optionen'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.generateButton}
+                  onPress={handleGeneratePDF}
+                  disabled={loading}
+                  activeOpacity={0.85}
+                >
+                  {loading ? (
+                    <View style={styles.loadingRow}>
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                      <Text style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]} numberOfLines={1}>
+                        {` Bitte warten`}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={styles.loadingRow}>
+                      <MaterialIcons name="auto-awesome" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+            </View>
+
+      </View>
+
+    </View>
+  </ScrollView>
+</Animated.View>
       {/* EXTRAKTIONS-OVERLAY */}
       {isExtracting && (
         <View style={styles.extractingOverlay}>
@@ -1073,6 +1245,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  optionsScreen: {
+    flex:1,
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'transparent',
+  zIndex: 100,
+},
+
+optionsHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: 18,
+
+},
   iconBadge: {
     width: 30,
     height: 30,
@@ -1289,7 +1475,7 @@ const styles = StyleSheet.create({
   settingsButtonText: {
     flexShrink: 1,
     color: WARM.textMuted,
-    fontSize: 12.5,
+    fontSize: 15.5,
     fontWeight: '700',
   },
   generateButton: {
