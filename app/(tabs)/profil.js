@@ -6,6 +6,7 @@ import { useIAP } from 'expo-iap';
 import { sha512 } from 'js-sha512';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   ActivityIndicator,
   Alert,
@@ -27,12 +28,13 @@ import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mo
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
-
+import {scanCv} from '../../inc/cvScan.js';
 import colors from '../../inc/colors.js';
 import { decryp, encryp } from '../../inc/cryp.js';
 import { runQuery } from '../../inc/db.js';
 import '../../local/i18n.js';
-
+import { enc } from 'react-native-crypto-js';
+import Info from '../../comp/info.js';
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -74,15 +76,24 @@ const emailServers = [
 ];
 
 /* ── Wiederverwendbare Einstellungs-Kachel ──────────────── */
-const SettingsCard = memo(({ title, description, iconName, onPress, badgeText }) => (
+const SettingsCard = memo(({onIconPress, title, description, iconName, onPress, badgeText }) => (
   <Pressable
     onPress={onPress}
     style={({ pressed }) => [styles.settingsCard, pressed && styles.cardPressed]}
   >
+ <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={(e) => {
+        // Verhindert, dass das äußere Pressable mitauslöst
+        e?.stopPropagation?.();
+        onIconPress?.();
+      }}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+    >
     <View style={styles.settingsIconWrap}>
       <MaterialIcons name={iconName} size={22} color="#60A5FA" />
     </View>
-
+</TouchableOpacity>
     <View style={styles.settingsContent}>
       <View style={styles.settingsTitleRow}>
         <Text style={styles.settingsTitle} numberOfLines={1}>
@@ -136,7 +147,8 @@ const ModalInput = memo(({ icon, placeholder, value, onChangeText, secureTextEnt
 const ProfilScreen = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
-
+const DB_MAIN_NAME = 'firstNew.db';
+const [textInfo, setTextInfo] = useState('fdfdsfds');
   /* ── State: Profil & Daten ───────────────────────────── */
   const [myName, setMyName] = useState('');
   const [myStreet, setMyStreet] = useState('');
@@ -145,19 +157,72 @@ const ProfilScreen = () => {
   const [password, setPassword] = useState('');
   const [emailServerValue, setEmailServerValue] = useState('smtp.mail.de');
   const [openServerDropdown, setOpenServerDropdown] = useState(false);
-
+const [infoModalVisible, setInfoModalVisible] = useState(false);
   /* ── State: Coins & Ads ──────────────────────────────── */
   const [coins, setCoins] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [source, setSource] = useState(false);
   const [adLoadedState, setAdLoadedState] = useState(false);
   const adLoaded = useRef(false);
-
+const dbMainRef = useRef(null);
   /* ── State: Modals ───────────────────────────────────── */
   const [isModalDataVisible, setModalDataVisible] = useState(false);
   const [isModalEmailVisible, setModalEmailVisible] = useState(false);
   const [isModalLangVisible, setModalLangVisible] = useState(false);
   const [isModalPayVisible, setModalPayVisible] = useState(false);
+const [isModalCvVisible, setModalCvVisible] = useState(false);
+const [experiences, setExperiences] = useState([
+  { 
+    id: '1', 
+    role: 'Anwendungsentwickler', 
+    company: 'Musterfirma GmbH', 
+    period: '02/2024 – Heute',
+    tasks: '• Entwicklung mobiler Komponenten\n• Anbindung der REST-Schnittstellen in Go',
+  },
+]);
+
+const saveExperiences = async () => {
+  // 1. Früher Abbruch, falls die Referenz nicht existiert
+  if (!dbMainRef.current) {
+    console.warn('Datenbankverbindung ist nicht bereit oder geschlossen.');
+    return;
+  }
+
+  try {
+    const key = await EncryptedStorage.getItem('key');
+    const deviceId = await DeviceInfo.getUniqueId();
+    const string = JSON.stringify(experiences);
+    const encString = await encryp(string, key);
+
+    // Nochmalige Prüfung vor dem eigentlichen Ausführen
+    if (!dbMainRef.current) return;
+
+    await dbMainRef.current.executeSql(
+      `UPDATE files SET skills = ? WHERE ident = ?`,
+      [encString, deviceId]
+    );
+
+    console.log('Experiences saved successfully');
+  } catch (error) {
+    console.error('Fehler beim Speichern der Erfahrungen:', error);
+  }
+};
+const handleAddExperience = () => {
+  setExperiences((prev) => [
+    ...prev,
+    { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
+  ]);
+};
+
+const handleUpdateExperience = (id, field, value) => {
+  setExperiences((prev) =>
+    prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+  );
+};
+
+const handleDeleteExperience = (id) => {
+  setExperiences((prev) => prev.filter((item) => item.id !== id));
+};
 
   /* ── In-App Purchases (IAP) ──────────────────────────── */
   const { requestPurchase, finishTransaction } = useIAP({
@@ -204,7 +269,21 @@ const ProfilScreen = () => {
       setLoaded(false);
     }
   };
+useEffect(() => {
+  const initDB = async () => {
+    try {
+      dbMainRef.current = await SQLite.openDatabase({ 
+        name: DB_MAIN_NAME, 
+        location: 'default' 
+      });
+      console.log('Datenbank erfolgreich geöffnet');
+    } catch (error) {
+      console.error('Fehler beim Öffnen der DB:', error);
+    }
+  };
 
+  initDB(); // <-- Funktion MUSS aufgerufen werden!
+}, []); // Leeres Array, damit es einmal beim Laden ausgeführt wird
   /* ── Rewarded Ads ────────────────────────────────────── */
   useEffect(() => {
     const putCoins = async (amount) => {
@@ -215,6 +294,7 @@ const ProfilScreen = () => {
           username: key,
           coins: amount,
         });
+        
         setCoins((prev) => (Number(prev) || 0) + amount);
       } catch (error) {
         console.error('Fehler beim Gutschreiben der Coins:', error);
@@ -275,7 +355,44 @@ const ProfilScreen = () => {
       fetchCoins();
     }, [])
   );
+useEffect(() => {
+  let isMounted = true;
 
+  const loadFileData = async () => {
+    // Sicherstellen, dass DB-Referenz und deviceId existieren
+    const key = await EncryptedStorage.getItem('key');
+    const deviceId = await DeviceInfo.getUniqueId();
+    if (!dbMainRef.current || !deviceId) return;
+
+    try {
+      // executeSql liefert ein Array mit [results] zurück
+      const [results] = await dbMainRef.current.executeSql(
+        'SELECT skills FROM files WHERE ident = ?',
+        [deviceId]
+      );
+
+      // In react-native-sqlite-storage: results.rows.raw() liefert das echte JS-Array
+      const data = results?.rows?.raw() || [];
+
+      if (isMounted) {
+        console.log('Geladene Daten:', data);
+        const decSkills = await decryp(data[0]?.skills, key);
+        console.log('Entschlüsselte Daten:', decSkills);
+        const jsonSkills = JSON.parse(decSkills);
+        setExperiences(jsonSkills);
+        // setMyDataState(data);
+      }
+    } catch (err) {
+      console.error('SQL Fehler:', err);
+    }
+  };
+
+  loadFileData();
+
+  return () => {
+    isMounted = false; // Verhindert State-Updates nach Unmount
+  };
+}, [dbMainRef.current]); // Feuert nur, wenn deviceId oder DB bereit sind
   /* ── Daten initial aus DB / Storage synchronisieren ──── */
   const loadLocalData = async () => {
     try {
@@ -344,7 +461,10 @@ const ProfilScreen = () => {
   useEffect(() => {
     loadLocalData();
   }, []);
+useEffect(() => {
+  console.log("experience",experiences);
 
+}, [experiences])
   /* ── Speichern: Persönliche Daten ────────────────────── */
   const handleSavePersonalData = async () => {
     try {
@@ -437,8 +557,58 @@ const ProfilScreen = () => {
     }
   };
 
-  const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
+ const handleScan = async () => {
+  try {
+    const text = await scanCv();
+    console.log('Scanned text:', text);
 
+    const workExperience = text?.work_experience || [];
+
+    // Map all experiences into a single list of objects
+    const newExperiences = workExperience
+      .filter((exp) => exp.company)
+      .map((exp) => ({
+         id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+        company: exp.company,
+        role: exp.position,
+        period: exp.period,
+        // If tasks is an array of strings, join them; otherwise keep as-is or fallback to empty string
+        tasks: Array.isArray(exp.tasks) ? exp.tasks.join('\n') : (exp.tasks || ''),
+      }));
+
+    // Perform a single state update
+    setExperiences((prev) => [...prev, ...newExperiences]);
+  } catch (error) {
+    console.error('Failed to scan CV:', error);
+  }
+};
+  const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
+const handleInfo = (val) => {
+  switch (val) {
+    case 'lang':
+     setInfoModalVisible(true);
+     setTextInfo(t("info.language"));
+      break;
+    case 'email':
+      setInfoModalVisible(true);
+      setTextInfo(t("info.email"));
+      break;
+      case 'personal':
+      setInfoModalVisible(true);
+      setTextInfo(t("info.personal"));
+      break;
+      case'experience':
+      setInfoModalVisible(true);
+      setTextInfo(t("info.experience"));
+      break;
+      case 'coins':
+      setInfoModalVisible(true);
+      setTextInfo(t("info.coins"));
+      break;
+    default:
+      break;
+  }
+}
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -468,6 +638,7 @@ const ProfilScreen = () => {
             <View style={styles.coinIconCircle}>
               <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
             </View>
+           
             <Text style={styles.coinText}>
               {coins !== null ? `${coins} Coins` : '… Coins'}
             </Text>
@@ -483,6 +654,7 @@ const ProfilScreen = () => {
 
           <View style={styles.cardGroup}>
             <SettingsCard
+            onIconPress={() =>{handleInfo("personal")}}
               iconName="badge"
               title={t('personalData') || 'Persönliche Daten'}
               description={myName ? `${myStreet}, ${myCity}` : (t('personalDataDescription') || 'Adresse & Name hinterlegen')}
@@ -495,6 +667,7 @@ const ProfilScreen = () => {
             <View style={styles.divider} />
 
             <SettingsCard
+            onIconPress={() =>{handleInfo("email")}}
               iconName="alternate-email"
               title={t('configureEmail') || 'E-Mail Server'}
               description={email ? email : (t('configureEmailDescription') || 'SMTP-Daten für direkten Versand')}
@@ -507,12 +680,24 @@ const ProfilScreen = () => {
             <View style={styles.divider} />
 
             <SettingsCard
+            onIconPress={() =>{handleInfo("lang")}}
               iconName="translate"
               title={t('settings.languageChange') || 'Sprache'}
               description={currentLangObj?.label || 'Deutsch'}
               badgeText={`${currentLangObj?.flag || '🇩🇪'} ${currentLangObj?.value?.toUpperCase()}`}
               onPress={() => setModalLangVisible(true)}
             />
+             <View style={styles.divider} />
+<SettingsCard
+              onIconPress={() =>{handleInfo("experience")}}
+              iconName="work-outline"
+              title="Werdegang & Fähigkeiten"
+              description={`Aktuell ${experiences.length} Stationen hinterlegt`}
+              onPress={() => {
+                setModalCvVisible(true);
+              }}
+            />
+            
           </View>
         </View>
 
@@ -527,7 +712,12 @@ const ProfilScreen = () => {
             <View style={styles.shopBannerGlow} />
             <View style={styles.shopBannerContent}>
               <View style={styles.shopIconContainer}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => handleInfo('coins')}>
                 <MaterialIcons name="stars" size={24} color="#F59E0B" />
+                </TouchableOpacity>
+
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <Text style={styles.shopBannerTitle}>Coins verwalten</Text>
@@ -825,6 +1015,170 @@ const ProfilScreen = () => {
           </View>
         </View>
       </Modal>
+     <Modal
+  isVisible={isModalCvVisible}
+  animationIn="zoomIn"
+  animationOut="zoomOut"
+  animationInTiming={260}
+  animationOutTiming={300}
+  backdropTransitionInTiming={260}
+  backdropTransitionOutTiming={300}
+  backdropOpacity={0.75}
+  hideModalContentWhileAnimating={true}
+  useNativeDriver={true}
+  useNativeDriverForBackdrop={true}
+  onBackdropPress={() => setModalCvVisible(false)}
+  onBackButtonPress={() => setModalCvVisible(false)}
+  style={styles.modalBackdrop}
+>
+  <View style={styles.modalSheet}>
+    {/* ── 1. FEST: Header ── */}
+    <View style={styles.modalHeader}>
+      <View>
+        <Text style={styles.modalTitle}>Werdegang & CV</Text>
+        <Text style={styles.modalSubtitle}>Stationen verwalten oder einscannen</Text>
+      </View>
+      <TouchableOpacity
+        onPress={() => setModalCvVisible(false)}
+        style={styles.modalCloseBtn}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <MaterialIcons name="close" size={18} color="#FFFFFF" />
+      </TouchableOpacity>
+    </View>
+
+    {/* ── 2. FEST: OCR Scan Button ── */}
+    <TouchableOpacity
+      onPress={handleScan}
+      activeOpacity={0.82}
+      style={styles.scanActionCard}
+    >
+      <View style={styles.scanIconWrap}>
+        <MaterialIcons name="document-scanner" size={22} color="#60A5FA" />
+      </View>
+      <View style={{ flex: 1, paddingHorizontal: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={styles.scanCardTitle}>Lebenslauf scannen</Text>
+          <View style={styles.badgeAi}>
+            <Text style={styles.badgeAiText}>OCR</Text>
+          </View>
+        </View>
+        <Text style={styles.scanCardDesc}>
+          PDF oder Bild wählen – Daten automatisch einfügen
+        </Text>
+      </View>
+      <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
+    </TouchableOpacity>
+
+    {/* ── 3. FEST: Sektions-Leiste ── */}
+    <View style={styles.sectionHeaderRow}>
+      <Text style={styles.sectionTitle}>
+        Werdegang ({experiences.length})
+      </Text>
+      <TouchableOpacity
+        onPress={handleAddExperience}
+        style={styles.addBtn}
+        activeOpacity={0.7}
+      >
+        <MaterialIcons name="add" size={16} color="#60A5FA" />
+        <Text style={styles.addBtnText}>Hinzufügen</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* ── 4. SCROLLBAR: Nur dieser Container scrollt ── */}
+    <ScrollView
+      style={styles.experienceScrollArea}
+      contentContainerStyle={{ paddingBottom: 8 }}
+      showsVerticalScrollIndicator={true}
+      keyboardShouldPersistTaps="handled"
+    >
+      {experiences.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialIcons name="work-outline" size={32} color="rgba(255,255,255,0.2)" />
+          <Text style={styles.emptyText}>
+            Noch keine Stationen hinterlegt.
+          </Text>
+        </View>
+      ) : (
+        experiences.map((exp, index) => (
+          <View key={exp.id || index} style={styles.experienceCard}>
+            <View style={styles.expCardHeader}>
+              <View style={styles.expBadge}>
+                <Text style={styles.expBadgeText}>Station #{index + 1}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleDeleteExperience(exp.id)}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+              >
+                <MaterialIcons name="delete-outline" size={19} color="#EF4444" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Position */}
+            <Text style={styles.inputLabel}>Position / Rolle</Text>
+            <TextInput
+              style={styles.textInput}
+              value={exp.role}
+              onChangeText={(val) => handleUpdateExperience(exp.id, 'role', val)}
+              placeholder="z. B. Fachinformatiker"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+            />
+
+            {/* Firma & Zeitraum */}
+            <View style={styles.inputRow}>
+              <View style={{ flex: 1.2 }}>
+                <Text style={styles.inputLabel}>Unternehmen</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={exp.company}
+                  onChangeText={(val) => handleUpdateExperience(exp.id, 'company', val)}
+                  placeholder="z. B. Daimler AG"
+                  placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text style={styles.inputLabel}>Zeitraum</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={exp.period}
+                  onChangeText={(val) => handleUpdateExperience(exp.id, 'period', val)}
+                  placeholder="08/2020 – Heute"
+                  placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                />
+              </View>
+            </View>
+
+            {/* Aufgaben & Stichpunkte (Große Textarea) */}
+            <Text style={styles.inputLabel}>Tätigkeiten & Erfolge (Stichpunkte)</Text>
+            <TextInput
+              style={[styles.textInput, styles.textAreaInput]}
+              value={exp.tasks}
+              onChangeText={(val) => handleUpdateExperience(exp.id, 'tasks', val)}
+              placeholder={"• Entwicklung von React Native Apps\n• Migration auf Go Microservices"}
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              multiline={true}
+              textAlignVertical="top"
+              scrollEnabled={false}
+            />
+          </View>
+        ))
+      )}
+    </ScrollView>
+
+    {/* ── 5. FEST: Footer Button ── */}
+    <TouchableOpacity
+      style={styles.saveModalBtn}
+      onPress={() => saveExperiences()}
+      activeOpacity={0.85}
+    >
+      <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+      <Text style={styles.saveModalBtnText}>Übernehmen & Schließen</Text>
+    </TouchableOpacity>
+  </View>
+</Modal>
+      <Info  message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
+      
     </SafeAreaView>
   );
 };
@@ -840,7 +1194,149 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 40,
   },
-
+modalScrollArea: {
+  marginBottom: 12,
+},
+scanActionCard: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: 'rgba(59, 130, 246, 0.08)',
+  borderWidth: 1,
+  borderColor: 'rgba(59, 130, 246, 0.3)',
+  borderRadius: 16,
+  padding: 14,
+  marginBottom: 18,
+},
+scanIconWrap: {
+  width: 44,
+  height: 44,
+  borderRadius: 12,
+  backgroundColor: 'rgba(59, 130, 246, 0.15)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+scanCardTitle: {
+  color: '#FFFFFF',
+  fontSize: 15,
+  fontWeight: '700',
+},
+experienceScrollArea: {
+  maxHeight: height * 0.4,
+},
+badgeAi: {
+  backgroundColor: '#3B82F6',
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  borderRadius: 6,
+},
+badgeAiText: {
+  color: '#FFFFFF',
+  fontSize: 10,
+  fontWeight: '800',
+},
+scanCardDesc: {
+  color: 'rgba(255, 255, 255, 0.55)',
+  fontSize: 12,
+  marginTop: 2,
+},
+sectionHeaderRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 10,
+  marginTop: 4,
+},
+sectionTitle: {
+  color: '#FFFFFF',
+  fontSize: 14,
+  fontWeight: '700',
+},
+addBtn: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 4,
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  backgroundColor: 'rgba(59, 130, 246, 0.12)',
+  borderRadius: 8,
+},
+addBtnText: {
+  color: '#60A5FA',
+  fontSize: 12,
+  fontWeight: '600',
+},
+experienceCard: {
+  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  borderWidth: 1,
+  borderColor: 'rgba(255, 255, 255, 0.07)',
+  borderRadius: 14,
+  padding: 12,
+  marginBottom: 10,
+},
+expCardHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+expBadge: {
+  backgroundColor: 'rgba(255, 255, 255, 0.07)',
+  paddingHorizontal: 8,
+  paddingVertical: 2,
+  borderRadius: 6,
+},
+expBadgeText: {
+  color: 'rgba(255, 255, 255, 0.7)',
+  fontSize: 11,
+  fontWeight: '600',
+},
+inputLabel: {
+  color: 'rgba(255, 255, 255, 0.5)',
+  fontSize: 11,
+  marginBottom: 4,
+  marginTop: 4,
+},
+textInput: {
+  backgroundColor: '#12151D',
+  borderWidth: 1,
+  borderColor: 'rgba(255, 255, 255, 0.09)',
+  borderRadius: 10,
+  paddingHorizontal: 10,
+  paddingVertical: 8,
+  color: '#FFFFFF',
+  fontSize: 13,
+},
+inputRow: {
+  flexDirection: 'row',
+  gap: 8,
+},
+emptyContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 28,
+  paddingHorizontal: 20,
+},
+emptyText: {
+  color: 'rgba(255, 255, 255, 0.4)',
+  fontSize: 13,
+  textAlign: 'center',
+  marginTop: 10,
+  lineHeight: 18,
+},
+saveModalBtn: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#3B82F6',
+  borderRadius: 14,
+  height: 46,
+  marginTop: 8,
+},
+saveModalBtnText: {
+  color: '#FFFFFF',
+  fontSize: 14,
+  fontWeight: '700',
+},
   /* ── Profile Header Card ── */
   profileHeaderCard: {
     backgroundColor: '#171B26',

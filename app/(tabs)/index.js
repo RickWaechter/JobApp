@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   BackHandler,
@@ -12,7 +13,6 @@ import {
   Keyboard,
   Platform,
   Pressable,
-  ActivityIndicator, // <-- Hinzufügen
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -27,6 +27,7 @@ import SQLite from "react-native-sqlite-storage";
 import Bewerbung from "../application.js";
 import ChangeScreen from "../change.js";
 import CompanySearchModal from "../../comp/name.js";
+import Info from "../../comp/info.js"; // <-- Info Komponente eingebunden
 import colors from "../../inc/colors.js";
 import { decryp } from "../../inc/cryp.js";
 import { runQuery } from "../../inc/db.js";
@@ -45,90 +46,146 @@ const ROUTE_MAP = {
 };
 
 /* ── Hero Card (Hauptaktion) ────────────────────────────── */
-const PrimaryActionCard = memo(({ title, description, badgeText, footerText, onPress }) => (
-  <Pressable
-    onPress={onPress}
-    style={({ pressed }) => [styles.primaryCard, pressed && styles.cardPressed]}
-  >
-    <View style={styles.primaryGlowEffect} />
+const PrimaryActionCard = memo(
+  ({ title, description, badgeText, footerText, onPress, onIconPress }) => (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.primaryCard, pressed && styles.cardPressed]}
+    >
+      <View style={styles.primaryGlowEffect} />
 
-    <View style={styles.primaryTopRow}>
-      <View style={styles.primaryIconContainer}>
-        <MaterialIcons name="auto-awesome" size={24} color="#FFFFFF" />
+      <View style={styles.primaryTopRow}>
+        <View style={styles.primaryIconContainer}>
+          <Pressable
+            onPress={(e) => {
+              e?.stopPropagation?.();
+              onIconPress?.();
+            }}
+            hitSlop={10}
+            style={({ pressed }) => pressed && { opacity: 0.7 }}
+          >
+            <MaterialIcons name="auto-awesome" size={24} color="#FFFFFF" />
+          </Pressable>
+        </View>
+        <View style={styles.badgePrimary}>
+          <Text style={styles.badgePrimaryText}>{badgeText}</Text>
+        </View>
       </View>
-      <View style={styles.badgePrimary}>
-        <Text style={styles.badgePrimaryText}>{badgeText}</Text>
-      </View>
-    </View>
 
-    <View style={styles.cardContent}>
-      <Text style={styles.primaryCardTitle}>{title}</Text>
-      <Text style={styles.primaryCardDescription} numberOfLines={2}>
-        {description}
-      </Text>
-    </View>
-
-    <View style={styles.primaryFooter}>
-      <Text style={styles.primaryFooterText}>{footerText}</Text>
-      <View style={styles.arrowCircle}>
-        <MaterialIcons name="arrow-forward" size={16} color="#FFFFFF" />
+      <View style={styles.cardContent}>
+        <Text style={styles.primaryCardTitle}>{title}</Text>
+        <Text style={styles.primaryCardDescription} numberOfLines={2}>
+          {description}
+        </Text>
       </View>
-    </View>
-  </Pressable>
-));
+
+      <View style={styles.primaryFooter}>
+        <Text style={styles.primaryFooterText}>{footerText}</Text>
+        <View style={styles.arrowCircle}>
+          <MaterialIcons name="arrow-forward" size={16} color="#FFFFFF" />
+        </View>
+      </View>
+    </Pressable>
+  )
+);
 
 /* ── Secondary Card (Bewerbung recyclen) ────────────────── */
-/* ── Secondary Card (Bewerbung recyclen) ────────────────── */
-const SecondaryActionCard = memo(({ title, description, onPress, isLoading }) => (
-  <Pressable
-    onPress={onPress}
-    disabled={isLoading}
-    style={({ pressed }) => [
-      styles.secondaryCard, 
-      pressed && styles.cardPressed,
-      isLoading && { opacity: 0.7 }
-    ]}
-  >
-    <View style={styles.secondaryIconContainer}>
-      {isLoading ? (
-        <ActivityIndicator size="small" color="#FFFFFF" />
-      ) : (
-        <MaterialIcons name="history" size={24} color="rgba(255, 255, 255, 0.8)" />
-      )}
-    </View>
+const SecondaryActionCard = memo(
+  ({ title, description, onPress, onIconPress, isLoading }) => (
+    <Pressable
+      onPress={onPress}
+      disabled={isLoading}
+      style={({ pressed }) => [
+        styles.secondaryCard,
+        pressed && styles.cardPressed,
+        isLoading && { opacity: 0.7 },
+      ]}
+    >
+      <View style={styles.secondaryIconContainer}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <Pressable
+            onPress={(e) => {
+              e?.stopPropagation?.();
+              onIconPress?.();
+            }}
+            hitSlop={10}
+            style={({ pressed }) => pressed && { opacity: 0.7 }}
+          >
+            <MaterialIcons
+              name="history"
+              size={24}
+              color="rgba(255, 255, 255, 0.8)"
+            />
+          </Pressable>
+        )}
+      </View>
 
-    <View style={styles.secondaryTextWrap}>
-      <Text style={styles.secondaryCardTitle}>{title}</Text>
-      <Text style={styles.secondaryCardDescription} numberOfLines={2}>
-        {description}
-      </Text>
-    </View>
+      <View style={styles.secondaryTextWrap}>
+        <Text style={styles.secondaryCardTitle}>{title}</Text>
+        <Text style={styles.secondaryCardDescription} numberOfLines={2}>
+          {description}
+        </Text>
+      </View>
 
-    <MaterialIcons name="chevron-right" size={22} color="rgba(255, 255, 255, 0.25)" />
-  </Pressable>
-));
+      <MaterialIcons
+        name="chevron-right"
+        size={22}
+        color="rgba(255, 255, 255, 0.25)"
+      />
+    </Pressable>
+  )
+);
 
 export default function StartApp() {
   const { t } = useTranslation();
   const [isButtonVisible, setIsButtonVisible] = useState(false);
-  const [isLoadingOld, setIsLoadingOld] = useState(false); // <-- Neuer State
+  const [isLoadingOld, setIsLoadingOld] = useState(false);
   const [showCompanySearch, setShowCompanySearch] = useState(false);
+
+  /* ── Info Modal State ── */
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [textInfo, setTextInfo] = useState("");
+
   const [screenApp, setScreenApp] = useState(false);
   const [screenChange, setScreenChange] = useState(false);
   const [screen, setScreen] = useState(false);
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
-const changeScreenRef = useRef(null);
+
+  const changeScreenRef = useRef(null);
   const lastClickTime = useRef(0);
   const bewerbungRef = useRef(null);
   const focusTimeoutRef = useRef(null);
 
   /* ── Animationen ── */
   const animResume = useRef(new Animated.Value(0)).current;
-const animProgress = useRef(new Animated.Value(0)).current;   // Overlay Slide-In X (0 = draußen, 1 = sichtbar)
-const animProgressY = useRef(new Animated.Value(0)).current;  // Slide-Down Y (0 = normal, 1 = nach unten weg)
-const animStep = useRef(new Animated.Value(0)).current;
+  const animProgress = useRef(new Animated.Value(0)).current;
+  const animProgressY = useRef(new Animated.Value(0)).current;
+  const animStep = useRef(new Animated.Value(0)).current;
   const animProgressOpacity = useRef(new Animated.Value(0)).current;
-  
+
+  /* ── Info Handler ── */
+  const handleInfo = useCallback(
+    (val) => {
+      switch (val) {
+       case 'new':
+        setInfoModalVisible(true);
+        setTextInfo(t("info.new"));
+        break;
+        case 'old':
+        setInfoModalVisible(true);
+        setTextInfo(t("info.old"));
+        break;
+        case 'resume':
+        setInfoModalVisible(true);
+        setTextInfo(t("info.resume"));
+        default:
+          break;
+      }
+    },
+    []
+  );
 
   /* ── Cross-Platform DB Check ── */
   useEffect(() => {
@@ -140,7 +197,6 @@ const animStep = useRef(new Animated.Value(0)).current;
             : `${RNFS.DocumentDirectoryPath}/databases`;
 
         const exists = await RNFS.exists(`${dbDir}/${DB_NAME}`);
-        // Fallback: Direkte Abfrage testen, falls Pfad abweicht
         if (!exists && Platform.OS === "ios") {
           router.dismissTo("/first");
         }
@@ -188,205 +244,211 @@ const animStep = useRef(new Animated.Value(0)).current;
   }, [isButtonVisible, animResume]);
 
   /* ── Modal & Overlay Steuerung ── */
-  /* ── Modal & Overlay Steuerung ── */
-
-// 1. Overlay von rechts öffnen
-const openBewerbung = useCallback(() => {
-  setScreenApp(true);
-  setScreenChange(false);
-  setScreen(true);
-  
-  // Werte vor Start zurücksetzen
-  animProgress.setValue(0);
-  animProgressY.setValue(0);
-  animStep.setValue(0);
-
-  Animated.timing(animProgress, {
-    toValue: 1,
-    duration: 320,
-    useNativeDriver: true,
-  }).start(() => {
-    bewerbungRef.current?.focusJob?.();
-  });
-}, [animProgress, animProgressY, animStep]);
-
-// 2. Komplettes Overlay nach rechts schließen
-
-// 3. Übergang zu Screen 2 (ChangeScreen)
-// 3. Übergang zu Screen 2 (ChangeScreen) mit nahtloser Tastatur-Übergabe
-// In StartApp.js: navigateToChange anpassen
-const navigateToChange = useCallback(() => {
-  // 1. Fokus SOFORT und synchron an ChangeScreen übergeben (ohne requestAnimationFrame!)
-  changeScreenRef.current?.focus();
-
-  // 2. Screen-Zustand umschalten
-  setScreenChange(true);
-
-  // 3. Animation starten
-  Animated.timing(animStep, {
-    toValue: 1,
-    duration: 300,
-    useNativeDriver: true,
-  }).start();
-}, [animStep]);
-// 4. Zurück von Screen 2 zu Screen 1 (optional, falls ChangeScreen einen Zurück-Pfeil hat)
-const backToBewerbung = useCallback(() => {
-  Keyboard.dismiss();
-
-  Animated.timing(animStep, {
-    toValue: 0,
-    duration: 280,
-    useNativeDriver: true,
-  }).start(() => {
+  const openBewerbung = useCallback(() => {
+    setScreenApp(true);
     setScreenChange(false);
-  });
-}, [animStep]);
+    setScreen(true);
 
-// 5. ChangeScreen nach unten wegschieben & schließen
-// Schließen aus Screen 1 (Bewerbung) mit weicher Aufhellung
-const closeBewerbung = useCallback(() => {
-  Keyboard.dismiss();
-
-  Animated.parallel([
-    Animated.timing(animProgressY, {
-      toValue: 1,
-      duration: 260,
-      useNativeDriver: true,
-    }),
-    Animated.timing(animProgressOpacity, {
-      toValue: 0, // <-- Hellt den Backdrop sanft auf
-      duration: 260,
-      useNativeDriver: true,
-    }),
-  ]).start(() => {
-    setScreen(false);
-    setScreenApp(false);
-    setScreenChange(false);
-    setShowCompanySearch(false);
     animProgress.setValue(0);
     animProgressY.setValue(0);
     animStep.setValue(0);
-  });
-}, [animProgress, animProgressY, animStep, animProgressOpacity]);
 
-// Schließen aus Screen 2 (Change) mit identischer weicher Aufhellung
-const closeChange = useCallback(() => {
-  Keyboard.dismiss();
+    Animated.parallel([
+      Animated.timing(animProgress, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      bewerbungRef.current?.focusName?.();
+    });
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
 
-  Animated.parallel([
-    Animated.timing(animProgressY, {
+  const navigateToChange = useCallback(() => {
+    changeScreenRef.current?.focus();
+    setScreenChange(true);
+
+    Animated.timing(animStep, {
       toValue: 1,
-      duration: 260,
+      duration: 300,
       useNativeDriver: true,
-    }),
-    Animated.timing(animProgressOpacity, {
-      toValue: 0, // <-- Hellt den Backdrop sanft auf
-      duration: 260,
+    }).start();
+  }, [animStep]);
+
+  const backToBewerbung = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.timing(animStep, {
+      toValue: 0,
+      duration: 280,
       useNativeDriver: true,
-    }),
-  ]).start(() => {
-    setScreen(false);
+    }).start(() => {
+      setScreenChange(false);
+    });
+  }, [animStep]);
+
+  const closeBewerbung = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.parallel([
+      Animated.timing(animProgressY, {
+        toValue: 1,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 0,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setScreen(false);
+      setScreenApp(false);
+      setScreenChange(false);
+      setShowCompanySearch(false);
+      animProgress.setValue(0);
+      animProgressY.setValue(0);
+      animStep.setValue(0);
+    });
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+
+  const closeChange = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.parallel([
+      Animated.timing(animProgressY, {
+        toValue: 1,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 0,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setScreen(false);
+      setScreenApp(false);
+      setScreenChange(false);
+      setShowCompanySearch(false);
+      animProgress.setValue(0);
+      animProgressY.setValue(0);
+      animStep.setValue(0);
+    });
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+
+  const openChange = useCallback(() => {
     setScreenApp(false);
-    setScreenChange(false);
+    setScreen(true);
+    setScreenChange(true);
+
     animProgress.setValue(0);
     animProgressY.setValue(0);
-    animStep.setValue(0);
-  });
-}, [animProgress, animProgressY, animStep]);
-// Screen 2 (ChangeScreen) direkt öffnen & von rechts einfliegen lassen
-const openChange = useCallback(() => {
-  setScreenApp(false);
-  setScreen(true);
-  setScreenChange(true); // 1. Muss zwingend true sein
+    animStep.setValue(1);
 
-  // 2. Y-Werte auf neutral (0) setzen, damit nichts nach oben weggeschoben ist
-  animProgress.setValue(0);
-  animProgressY.setValue(0);
-  animStep.setValue(1);
+    Animated.timing(animProgressOpacity, {
+      toValue: 1,
+      duration: 320,
+      useNativeDriver: true,
+    }).start();
 
-  // 3. animProgress auf 1 animieren (Slide-In von rechts + Fade-In)
-  Animated.timing(animProgressOpacity, {
-    toValue: 1,
-    duration: 320,
-    useNativeDriver: true,
-  }).start(() => {
-  
-    
-  })
-  Animated.timing(animProgress, {
-    toValue: 1,
-    duration: 320,
-    useNativeDriver: true,
-  }).start();
-}, [animProgress, animProgressY, animStep]);
+    Animated.timing(animProgress, {
+      toValue: 1,
+      duration: 320,
+      useNativeDriver: true,
+    }).start(() => {
+      changeScreenRef.current?.focus();
+    });
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
 
-/* ── Android Back-Handler Fix ── */
-useEffect(() => {
-  const onBackPress = () => {
-    if (screenChange) {
-      backToBewerbung(); // oder closeChange(), je nachdem ob Back abbrechen oder zurückspringen soll
-      return true;
-    }
-    if (screenApp) {
-      closeBewerbung();
-      return true;
-    }
-    return false;
-  };
-
-  const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-  return () => sub.remove();
-}, [screenApp, screenChange, closeBewerbung, backToBewerbung]);
-  /* ── Saubere Historien-Abfrage ohne Nested Promises ── */
-  const getOld = async () => {
-    try {
-      const deviceId = await DeviceInfo.getUniqueId();
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
-
-      const result = await runQuery(
-        db,
-        "SELECT old, mergePdf FROM files WHERE ident = ?;",
-        [deviceId]
-      );
-
-      const rows = result?.rows?.raw() ?? [];
-      if (rows.length === 0 || !rows[0].old) return [];
-
-      const key = await EncryptedStorage.getItem("key");
-      const encData = await decryp(rows[0].old, key);
-      const decMerge = rows[0].mergePdf ? await decryp(rows[0].mergePdf, key) : "";
-
-      const oldFull = encData ? encData.split("&").filter(Boolean) : [];
-      const oldArray = decMerge ? decMerge.split(",") : [];
-
-      const newEntries = [];
-      for (let i = oldFull.length - 1; i >= 0; i--) {
-        const parts = oldFull[i].split("#");
-        if (parts.length >= 3) {
-          newEntries.push({
-            job: parts[0],
-            date: parts[1] || "",
-            myType: `${parts[2] || ""} / ${parts[3] || ""}`,
-            subject: parts[4] || "Kein Betreff",
-            text: parts[5] || "",
-            link: oldArray[i] || "",
-          });
-        }
+  useEffect(() => {
+    const onBackPress = () => {
+      if (screenChange) {
+        backToBewerbung();
+        return true;
       }
-      return newEntries;
-    } catch (error) {
-      console.error("getOld Error:", error);
+      if (screenApp) {
+        closeBewerbung();
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => sub.remove();
+  }, [screenApp, screenChange, closeBewerbung, backToBewerbung]);
+
+const getOld = async () => {
+  try {
+    const key = await EncryptedStorage.getItem("key");
+    // Wenn kein Key vorhanden ist, darf keine Entschlüsselung aufgerufen werden!
+    if (!key || typeof key !== "string" || key.trim() === "") {
+      console.warn("getOld: Kein gültiger Encryption-Key gefunden.");
       return [];
     }
-  };
 
-  /* ── Validierung & Firmenauswahl ── */
+    const deviceId = await DeviceInfo.getUniqueId();
+    const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
+
+    const result = await runQuery(
+      db,
+      "SELECT old, mergePdf FROM files WHERE ident = ?;",
+      [deviceId]
+    );
+
+    const rows = result?.rows?.raw() ?? [];
+    if (rows.length === 0 || !rows[0].old) return [];
+
+    // Vor dem Entschlüsseln prüfen:
+    const rawOld = rows[0].old;
+    if (!rawOld || typeof rawOld !== "string") return [];
+
+    const encData = await decryp(rawOld, key);
+    
+    let decMerge = "";
+    if (rows[0].mergePdf && typeof rows[0].mergePdf === "string") {
+      decMerge = await decryp(rows[0].mergePdf, key);
+    }
+
+    if (!encData) return [];
+
+    const oldFull = encData.split("&").filter(Boolean);
+    const oldArray = decMerge ? decMerge.split(",") : [];
+
+    const newEntries = [];
+    for (let i = oldFull.length - 1; i >= 0; i--) {
+      const parts = oldFull[i].split("#");
+      if (parts.length >= 3) {
+        newEntries.push({
+          job: parts[0],
+          date: parts[1] || "",
+          myType: `${parts[2] || ""} / ${parts[3] || ""}`,
+          subject: parts[4] || "Kein Betreff",
+          text: parts[5] || "",
+          link: oldArray[i] || "",
+        });
+      }
+    }
+    return newEntries;
+  } catch (error) {
+    console.error("getOld Error:", error);
+    return [];
+  }
+};
+
   const handleNewApplication = async () => {
     try {
       const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
       const deviceId = await DeviceInfo.getUniqueId();
 
-      const result = await runQuery(db, "SELECT * FROM files WHERE ident = ?;", [deviceId]);
+      const result = await runQuery(db, "SELECT * FROM files WHERE ident = ?;", [
+        deviceId,
+      ]);
       const rows = result?.rows?.raw() ?? [];
 
       if (rows.length === 0) {
@@ -401,12 +463,14 @@ useEffect(() => {
       if (!item.name) {
         Alert.alert(
           t("startApp.alertIncompleteProfileTitle") || "Profil unvollständig",
-          t("startApp.alertIncompleteProfileMsg") || "Bitte trage deine Adresse im Profil ein."
+          t("startApp.alertIncompleteProfileMsg") ||
+            "Bitte trage deine Adresse im Profil ein."
         );
       } else if (!item.lebenslauf) {
         Alert.alert(
           t("startApp.alertMissingCvTitle") || "Lebenslauf fehlt",
-          t("startApp.alertMissingCvMsg") || "Bitte lade zuerst deinen Lebenslauf hoch."
+          t("startApp.alertMissingCvMsg") ||
+            "Bitte lade zuerst deinen Lebenslauf hoch."
         );
         router.push("/uploadFirst");
       } else {
@@ -421,7 +485,7 @@ useEffect(() => {
     }
   };
 
-const handleOldApplication = async () => {
+  const handleOldApplication = async () => {
     const now = Date.now();
     if (now - lastClickTime.current < 800 || isLoadingOld) return;
     lastClickTime.current = now;
@@ -442,7 +506,9 @@ const handleOldApplication = async () => {
 
   const handleCompanySaved = async (name, street, city) => {
     setSavedCompany({ name, street, city });
-    await EncryptedStorage.setItem("result", "application");
+    EncryptedStorage.setItem("result", "application").catch((err) =>
+      console.error("Storage Error:", err)
+    );
     setIsButtonVisible(true);
     setShowCompanySearch(false);
     openBewerbung();
@@ -456,7 +522,6 @@ const handleOldApplication = async () => {
     try {
       const lastStep = await EncryptedStorage.getItem("result");
       const targetRoute = ROUTE_MAP[lastStep];
-      console.log("Target route:", targetRoute);
       if (!targetRoute) return;
 
       if (targetRoute === "/application") {
@@ -464,6 +529,11 @@ const handleOldApplication = async () => {
       } else if (targetRoute === "/change") {
         openChange();
       }
+      else if (targetRoute === "/collect") {
+        router.push("/collect");
+        
+      }
+      console.log("Routing to:", targetRoute);
     } catch (e) {
       console.error("Routing error:", e);
     }
@@ -485,7 +555,7 @@ const handleOldApplication = async () => {
           </Text>
         </View>
 
-        {/* Aktionskarten */}
+        {/* Aktionskarten mit Icon-Pressable für Info-Modal */}
         <View style={styles.actionContainer}>
           <PrimaryActionCard
             title={t("BewerbungGenerieren") || "Neue Bewerbung"}
@@ -496,17 +566,19 @@ const handleOldApplication = async () => {
             badgeText={t("startApp.badgeRecommended") || "EMPFOHLEN"}
             footerText={t("startApp.primaryFooter") || "Jetzt starten"}
             onPress={handleNewApplication}
+            onIconPress={() => handleInfo("new")}
           />
 
-       <SecondaryActionCard
-  title={t("BewerbungRecycel") || "Bewerbung recyclen"}
-  description={
-    t("BewerbungRecycelText") ||
-    "Verwende gespeicherte Daten oder ändere ein früheres Dokument ab."
-  }
-  isLoading={isLoadingOld}
-  onPress={handleOldApplication}
-/>
+          <SecondaryActionCard
+            title={t("BewerbungRecycel") || "Bewerbung recyclen"}
+            description={
+              t("BewerbungRecycelText") ||
+              "Verwende gespeicherte Daten oder ändere ein früheres Dokument ab."
+            }
+            isLoading={isLoadingOld}
+            onPress={handleOldApplication}
+            onIconPress={() => handleInfo("old")}
+          />
         </View>
 
         {/* Quick-Resume Bar */}
@@ -540,7 +612,15 @@ const handleOldApplication = async () => {
             >
               <View style={styles.resumeLeft}>
                 <View style={styles.resumePlayIcon}>
+                  <Pressable
+                    onPress={(e) => {
+                      e?.stopPropagation?.();
+                      handleInfo("resume");
+                    }}
+                  >
+                  
                   <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
+                  </Pressable>
                 </View>
                 <View>
                   <Text style={styles.resumeTitle}>
@@ -551,12 +631,24 @@ const handleOldApplication = async () => {
                   </Text>
                 </View>
               </View>
-              <MaterialIcons name="arrow-forward-ios" size={14} color="rgba(255,255,255,0.4)" />
+              <MaterialIcons
+                name="arrow-forward-ios"
+                size={14}
+                color="rgba(255,255,255,0.4)"
+              />
             </TouchableOpacity>
           </Animated.View>
         )}
       </View>
 
+      {/* Info Modal */}
+      <Info
+        visible={infoModalVisible}
+        onClose={() => setInfoModalVisible(false)}
+        message={textInfo}
+      />
+
+      {/* Company Search Modal */}
       <CompanySearchModal
         visible={showCompanySearch}
         onClose={() => setShowCompanySearch(false)}
@@ -564,117 +656,106 @@ const handleOldApplication = async () => {
         initialName={savedCompany.name}
         initialStreet={savedCompany.street}
         initialCity={savedCompany.city}
-        nextScreen={screenChange}
       />
 
-     {/* ══ Overlay & Slide-In Container ══ */}
-{screen && (
-  <View style={styles.bewerbungOverlay}>
-    {/* Backdrop */}
-    <Animated.View
-      style={[
-        styles.backdrop,
-        {
-          opacity: animProgressOpacity.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-            extrapolate: "clamp",
-          }),
-        },
-      ]}
-    >
-      <Pressable style={StyleSheet.absoluteFill} onPress={closeBewerbung} />
-    </Animated.View>
-
-    {/* Haupt-Slide-In Container */}
-    <Animated.View
-      style={[
-        styles.cardAnimatedWrap,
-        {
-          opacity: animProgress.interpolate({
-            inputRange: [0, 0.1, 1],
-            outputRange: [0, 1, 1],
-            extrapolate: "clamp",
-          }),
-          transform: [
-            {
-              translateX: animProgress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [width, 0],
-                extrapolate: "clamp",
-              }),
-            },
-            {
-              translateY: animProgressY.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -height],
-                extrapolate: "clamp",
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      {/* Screen 1: Bewerbung (fährt bei animStep: 1 nach links weg und wird unsichtbar) */}
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFillObject,
-          {
-            opacity: animStep.interpolate({
-              inputRange: [0, 0.8, 1],
-              outputRange: [1, 0, 0],
-            }),
-            transform: [
+      {/* ══ Overlay & Slide-In Container ══ */}
+      {screen && (
+        <View style={styles.bewerbungOverlay}>
+          <Animated.View
+            style={[
+              styles.backdrop,
               {
-                translateX: animStep.interpolate({
+                opacity: animProgressOpacity.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, -width],
+                  outputRange: [0, 1],
+                  extrapolate: "clamp",
                 }),
               },
-            ],
-          },
-        ]}
-        pointerEvents={screenChange ? "none" : "auto"}
-      >
-        <Bewerbung
-          changeScreen={navigateToChange}
-          visibleApp={screenApp}
-          isNextStep={screenChange}
-          ref={bewerbungRef}
-          onClose={closeBewerbung}
-        />
-      </Animated.View>
+            ]}
+          >
+            <Pressable style={StyleSheet.absoluteFill} onPress={closeBewerbung} />
+          </Animated.View>
 
-      {/* Screen 2: ChangeScreen (steht bei animStep: 1 direkt auf Position 0) */}
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFillObject,
-          {
-            opacity: animStep.interpolate({
-              inputRange: [0, 0.2, 1],
-              outputRange: [0, 1, 1],
-            }),
-            transform: [
+          <Animated.View
+            renderToHardwareTextureAndroid={true}
+            style={[
+              styles.cardAnimatedWrap,
               {
-                translateX: animStep.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [width, 0],
-                }),
+                transform: [
+                  {
+                    translateX: animProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [width, 0],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                  {
+                    translateY: animProgressY.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -height],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
               },
-            ],
-          },
-        ]}
-        pointerEvents={screenChange ? "auto" : "none"}
-      >
-        <ChangeScreen visible={screenChange} onClose={closeChange} ref={changeScreenRef} />
-      </Animated.View>
-    </Animated.View>
-  </View>
-)}
+            ]}
+          >
+            {/* Screen 1: Bewerbung */}
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  opacity: animStep.interpolate({
+                    inputRange: [0, 0.8, 1],
+                    outputRange: [1, 0, 0],
+                  }),
+                },
+              ]}
+              pointerEvents={screenChange ? "none" : "auto"}
+            >
+              <Bewerbung
+                changeScreen={navigateToChange}
+                visibleApp={screenApp}
+                isNextStep={screenChange}
+                ref={bewerbungRef}
+                onClose={closeBewerbung}
+              />
+            </Animated.View>
 
+            {/* Screen 2: ChangeScreen */}
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  opacity: animStep.interpolate({
+                    inputRange: [0, 0.2, 1],
+                    outputRange: [0, 1, 1],
+                  }),
+                  transform: [
+                    {
+                      translateX: animStep.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [width, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+              pointerEvents={screenChange ? "auto" : "none"}
+            >
+              <ChangeScreen
+                visible={screenChange}
+                onClose={closeChange}
+                ref={changeScreenRef}
+              />
+            </Animated.View>
+          </Animated.View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -897,9 +978,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(10, 12, 18, 0.82)",
   },
   cardAnimatedWrap: {
-    flex: 1,
-  },
-  innerScreenWrapper: {
     flex: 1,
   },
 });

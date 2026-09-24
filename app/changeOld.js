@@ -3,7 +3,14 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { Buffer } from 'buffer';
 import { router } from 'expo-router';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -30,11 +37,11 @@ import colors from '../inc/colors.js';
 import { decryp, decryptBase, encryp, encryptBase64, genIv } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
 import { runQuery } from '../inc/db.js';
-
+import { sanitizeForPdf } from '../inc/string.js';
 const { width } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
 
-const ChangeScreenOld = ({ visible = false, onClose }) => {
+const ChangeScreenOld = forwardRef(({ visible = false, onClose }, ref) => {
   const { t } = useTranslation();
 
   const [text, setText] = useState('');
@@ -43,6 +50,14 @@ const ChangeScreenOld = ({ visible = false, onClose }) => {
   const [dots, setDots] = useState('');
 
   const animCardX = useRef(new Animated.Value(width)).current;
+  const textAreaRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => textAreaRef.current?.focus(),
+    blur: () => textAreaRef.current?.blur(),
+    clear: () => textAreaRef.current?.clear(),
+    inputRef: textAreaRef.current,
+  }));
 
   useEffect(() => {
     if (visible) {
@@ -257,111 +272,127 @@ const ChangeScreenOld = ({ visible = false, onClose }) => {
     return lines;
   };
 
-  const generate = async () => {
-    if (loading) return;
-    setLoading(true);
+ const generate = async () => {
+  if (loading) return;
+  setLoading(true);
 
-    try {
-      const pdfDoc1 = await PDFDocument.create();
-      const helvetica = await pdfDoc1.embedFont(StandardFonts.Helvetica);
-      const helveticaBold = await pdfDoc1.embedFont(StandardFonts.HelveticaBold);
-      const page = pdfDoc1.addPage([600, 800]);
-      const { height: pageH } = page.getSize();
+  try {
+    const pdfDoc1 = await PDFDocument.create();
+    const helvetica = await pdfDoc1.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc1.embedFont(StandardFonts.HelveticaBold);
+    const page = pdfDoc1.addPage([600, 800]);
+    const { height: pageH } = page.getSize();
 
-      const fontSize = 11;
-      const leftMargin = 60;
-      const maxChars = 90;
-      const lineHeight = fontSize + 4;
-      let currentY = pageH - 60;
-      const textWidth = 450;
+    const fontSize = 11;
+    const leftMargin = 60;
+    const maxChars = 90;
+    const lineHeight = fontSize + 4;
+    let currentY = pageH - 60;
+    const textWidth = 450;
 
-      const [myName, myStreet, myCity, yourCompany, yourStreet, yourCity, myKey] =
-        await Promise.all([
-          EncryptedStorage.getItem('name'),
-          EncryptedStorage.getItem('street'),
-          EncryptedStorage.getItem('city'),
-          EncryptedStorage.getItem('yourName'),
-          EncryptedStorage.getItem('yourStreet'),
-          EncryptedStorage.getItem('yourCity'),
-          EncryptedStorage.getItem('key'),
-        ]);
+    const [
+      rawMyName,
+      rawMyStreet,
+      rawMyCity,
+      rawYourCompany,
+      rawYourStreet,
+      rawYourCity,
+      myKey,
+    ] = await Promise.all([
+      EncryptedStorage.getItem('name'),
+      EncryptedStorage.getItem('street'),
+      EncryptedStorage.getItem('city'),
+      EncryptedStorage.getItem('yourName'),
+      EncryptedStorage.getItem('yourStreet'),
+      EncryptedStorage.getItem('yourCity'),
+      EncryptedStorage.getItem('key'),
+    ]);
 
-      const today = new Date().toLocaleDateString('de-DE', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      });
+    // Alle Eingabefelder sanitizen
+    const myName = sanitizeForPdf(rawMyName);
+    const myStreet = sanitizeForPdf(rawMyStreet);
+    const myCity = sanitizeForPdf(rawMyCity);
+    const yourCompany = sanitizeForPdf(rawYourCompany);
+    const yourStreet = sanitizeForPdf(rawYourStreet);
+    const yourCity = sanitizeForPdf(rawYourCity);
+    const sanitizedSubject = sanitizeForPdf(subject);
+    const sanitizedText = sanitizeForPdf(text);
 
-      // Absender
-      page.drawText(myName || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    const today = new Date().toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    // Absender
+    page.drawText(myName, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= lineHeight;
+    page.drawText(myStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= lineHeight;
+    page.drawText(myCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= 4 * lineHeight;
+
+    // Empfänger
+    page.drawText(yourCompany, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= lineHeight;
+    page.drawText(yourStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= lineHeight;
+    page.drawText(yourCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
+    currentY -= 2 * lineHeight;
+
+    // Datum
+    const dateX = leftMargin + textWidth - 50;
+    page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
+    currentY -= 2 * lineHeight;
+
+    // Betreff
+    const subjectLines = splitTextIntoLinesWithoutFont(sanitizedSubject, 70);
+    subjectLines.forEach((line) => {
+      page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
       currentY -= lineHeight;
-      page.drawText(myStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-      currentY -= lineHeight;
-      page.drawText(myCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-      currentY -= 4 * lineHeight;
+    });
+    currentY -= 1 * lineHeight;
 
-      // Empfänger
-      page.drawText(yourCompany || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-      currentY -= lineHeight;
-      page.drawText(yourStreet || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-      currentY -= lineHeight;
-      page.drawText(yourCity || '', { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-      currentY -= 2 * lineHeight;
-
-      // Datum
-      const dateX = leftMargin + textWidth - 50;
-      page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
-      currentY -= 2 * lineHeight;
-
-      // Betreff
-      const subjectLines = splitTextIntoLinesWithoutFont(subject || '', 70);
-      subjectLines.forEach((line) => {
-        page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
+    // Haupttext
+    const paragraphs = sanitizedText.split('\n\n');
+    paragraphs.forEach((paragraph) => {
+      const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
+      lines.forEach((line) => {
+        page.drawText(line, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
         currentY -= lineHeight;
       });
-      currentY -= 1 * lineHeight;
+      currentY -= lineHeight;
+    });
 
-      // Haupttext
-      const paragraphs = text.split('\n\n');
-      paragraphs.forEach((paragraph) => {
-        const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
-        lines.forEach((line) => {
-          page.drawText(line, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-          currentY -= lineHeight;
-        });
-        currentY -= lineHeight;
-      });
+    const pdfBase641 = await pdfDoc1.saveAsBase64();
+    const iv = await genIv();
+    const Base64Part1 = pdfBase641.slice(0, 16);
+    const Base64Part2 = pdfBase641.slice(16);
+    const encrypted = await encryptBase64(Base64Part1, iv, myKey);
 
-      const pdfBase641 = await pdfDoc1.saveAsBase64();
-      const iv = await genIv();
-      const Base64Part1 = pdfBase641.slice(0, 16);
-      const Base64Part2 = pdfBase641.slice(16);
-      const encrypted = await encryptBase64(Base64Part1, iv, myKey);
+    const outputPath = `${RNFS.LibraryDirectoryPath}/anschreiben.pdf`;
+    const outputPathNew = await encryp(outputPath, myKey);
 
-      const outputPath = `${RNFS.LibraryDirectoryPath}/anschreiben.pdf`;
-      const outputPathNew = await encryp(outputPath, myKey);
+    await Promise.all([
+      EncryptedStorage.setItem('subject', sanitizedSubject),
+      RNFS.writeFile(outputPath, encrypted, 'base64'),
+      RNFS.writeFile(`${outputPath}_1`, Base64Part2, 'base64'),
+    ]);
 
-      await Promise.all([
-        EncryptedStorage.setItem('subject', subject),
-        RNFS.writeFile(outputPath, encrypted, 'base64'),
-        RNFS.writeFile(`${outputPath}_1`, Base64Part2, 'base64'),
-      ]);
+    const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+    const deviceId = await DeviceInfo.getUniqueId();
+    await db.executeSql('UPDATE files SET anschreiben = ? WHERE ident = ?', [
+      outputPathNew,
+      deviceId,
+    ]);
 
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      const deviceId = await DeviceInfo.getUniqueId();
-      await db.executeSql('UPDATE files SET anschreiben = ? WHERE ident = ?', [
-        outputPathNew,
-        deviceId,
-      ]);
-
-      await mergeFilesFromDB();
-    } catch (error) {
-      console.error('Error during PDF generation:', error);
-      setLoading(false);
-      Alert.alert('Fehler', 'PDF konnte nicht generiert werden.');
-    }
-  };
-
+    await mergeFilesFromDB();
+  } catch (error) {
+    console.error('Error during PDF generation:', error);
+    setLoading(false);
+    Alert.alert('Fehler', 'PDF konnte nicht generiert werden.');
+  }
+};
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}
@@ -389,12 +420,15 @@ const ChangeScreenOld = ({ visible = false, onClose }) => {
                   </View>
 
                   {onClose && (
-                    <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <TouchableOpacity
+                      onPress={onClose}
+                      style={styles.closeBtn}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
                       <MaterialIcons name="close" size={22} color="rgba(255, 255, 255, 0.7)" />
                     </TouchableOpacity>
                   )}
                 </View>
-
               </View>
 
               {/* Editor Card */}
@@ -422,6 +456,7 @@ const ChangeScreenOld = ({ visible = false, onClose }) => {
                 <View style={styles.divider} />
 
                 <TextInput
+                  ref={textAreaRef}
                   style={styles.textArea}
                   value={text}
                   onChangeText={setText}
@@ -475,8 +510,9 @@ const ChangeScreenOld = ({ visible = false, onClose }) => {
       </SafeAreaView>
     </Animated.View>
   );
-};
+});
 
+// Styles unverändert übernommen
 const styles = StyleSheet.create({
   overlayContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -497,13 +533,13 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 12 : 18,
     justifyContent: 'space-between',
   },
-  header: {
-  },
+  header: {},
   headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-marginTop: 6, },
+    marginTop: 6,
+  },
   closeBtn: {
     padding: 4,
   },

@@ -167,14 +167,7 @@ const Field = memo(function Field({
         )}
       </View>
 
-      {showError && (
-        <Text
-          style={[styles.errorText, !error && styles.errorHidden]}
-          numberOfLines={1}
-        >
-          {error || " "}
-        </Text>
-      )}
+      <View style={{padding:7}}></View>
     </View>
   );
 });
@@ -182,7 +175,6 @@ const Field = memo(function Field({
 /* ── 4. Hauptkomponente ────────────────────────────────────────────────── */
 const CompanySearchModal = ({
   visible,
-  nextScreen,
   onClose,
   onSaved,
   initialName = "",
@@ -277,18 +269,7 @@ const CompanySearchModal = ({
     }
   }, [winH, stageTop, kbHeight, insets.bottom]);
 
-  useEffect(() => {
-    if (!nextScreen) {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: durationOut,
-        useNativeDriver: true,
-      }).start(({ finished }) => {
-        setIsMounted(false);
-        if (finished) onClose(); 
-      });
-    }
-    }, [nextScreen]);
+ 
   /* ── Ein- und Ausflug von oben nach unten ── */
   useEffect(() => {
     if (visible) {
@@ -441,73 +422,58 @@ const CompanySearchModal = ({
     setTimeout(() => searchRef.current?.focus(), 50);
   }, []);
 
-  const validateAndContinue = useCallback(async () => {
-    const next = { nameErr: "", streetErr: "", cityErr: "" };
+  // CompanySearchModal.js
+const validateAndContinue = useCallback(() => {
+  const next = { nameErr: "", streetErr: "", cityErr: "" };
 
-    if (!yourName?.trim())
-      next.nameErr =
-        t("validation.nameCompany.required") || "Bitte Firmenname eingeben";
-    if (!yourStreet?.trim())
-      next.streetErr = t("validation.street.required") || "Bitte Straße eingeben";
-    if (!yourCity?.trim())
-      next.cityErr = t("validation.city.required") || "Bitte Ort eingeben";
+  if (!yourName?.trim()) next.nameErr = t("validation.nameCompany.required") || "Bitte Firmenname eingeben";
+  if (!yourStreet?.trim()) next.streetErr = t("validation.street.required") || "Bitte Straße eingeben";
+  if (!yourCity?.trim()) next.cityErr = t("validation.city.required") || "Bitte Ort eingeben";
 
-    if (next.nameErr || next.streetErr || next.cityErr) {
-      setErrors(next);
-      if (next.nameErr) nameRef.current?.focus();
-      else if (next.streetErr) streetRef.current?.focus();
-      else cityRef.current?.focus();
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastClick.current < DOUBLE_TAP_GUARD_MS) return;
-    lastClick.current = now;
-
-    const payload = {
-      name: yourName.trim(),
-      street: yourStreet.trim(),
-      city: yourCity.trim(),
-    };
-
-  try {
-      await Promise.all([
-        EncryptedStorage.setItem("yourName", payload.name),
-        EncryptedStorage.setItem("yourStreet", payload.street),
-        EncryptedStorage.setItem("yourCity", payload.city),
-      ]);
-
-      setErrors({ nameErr: "", streetErr: "", cityErr: "" });
-
-      isExitingLeft.current = true;
-
-      // 1. SOFORT an StartApp melden, damit beide Animationen im selben Frame starten!
-      onSaved?.(payload.name, payload.street, payload.city);
-
-      // 2. Karte nach links schieben (Backdrop NICHT faden, damit nichts blitzt)
-     // CompanySearchModal.js -> validateAndContinue
-Animated.timing(animNameX, {
-  toValue: -winW,
-  duration: 350,
-  useNativeDriver: true,
-}).start(({ finished }) => {
-  if (finished) {
-    // Backdrop & Modal sauber entladen
-    fadeAnim.setValue(0);
-    setIsMounted(false);
-    isExitingLeft.current = false;
+  if (next.nameErr || next.streetErr || next.cityErr) {
+    setErrors(next);
+    if (next.nameErr) nameRef.current?.focus();
+    else if (next.streetErr) streetRef.current?.focus();
+    else cityRef.current?.focus();
+    return;
   }
-      });
-    } catch (error) {
-      console.error("Failed to access Keychain", error);
-      Alert.alert(
-        t("companySearchModal.errorTitle") || "Fehler",
-        t("companySearchModal.saveErrorMsg") ||
-          "Deine Daten konnten nicht gespeichert werden.",
-        [{ text: t("companySearchModal.btnOk") || "OK" }]
-      );
+
+  const now = Date.now();
+  if (now - lastClick.current < DOUBLE_TAP_GUARD_MS) return;
+  lastClick.current = now;
+
+  const payload = {
+    name: yourName.trim(),
+    street: yourStreet.trim(),
+    city: yourCity.trim(),
+  };
+
+  // 1. Storage OHNE await im Hintergrund feuern (frisst keine Frames!)
+  Promise.all([
+    EncryptedStorage.setItem("yourName", payload.name),
+    EncryptedStorage.setItem("yourStreet", payload.street),
+    EncryptedStorage.setItem("yourCity", payload.city),
+  ]).catch((err) => console.error("Storage background save error:", err));
+
+  setErrors({ nameErr: "", streetErr: "", cityErr: "" });
+  isExitingLeft.current = true;
+
+  // 2. SOFORT StartApp triggern
+  onSaved?.(payload.name, payload.street, payload.city);
+
+  // 3. Gleichmäßige native Animation nach links
+  Animated.timing(animNameX, {
+    toValue: -winW,
+    duration: 500,
+    useNativeDriver: true,
+  }).start(({ finished }) => {
+    if (finished) {
+      fadeAnim.setValue(0);
+      setIsMounted(false);
+      isExitingLeft.current = false;
     }
-  }, [yourName, yourStreet, yourCity, t, onSaved, animNameX, fadeAnim, winW, durationOut]);
+  });
+}, [yourName, yourStreet, yourCity, t, onSaved, animNameX, fadeAnim, winW]);
 
   const renderSeparator = useCallback(() => <View style={styles.separator} />, []);
 
@@ -746,8 +712,8 @@ Animated.timing(animNameX, {
                   }
                   error={errors.cityErr}
                   returnKeyType="done"
-                  blurOnSubmit
                   onSubmitEditing={validateAndContinue}
+                  blurOnSubmit={false} // <-- WICHTIG: Auf false setzen!
                 />
               </ScrollView>
             </View>

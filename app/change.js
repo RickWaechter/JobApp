@@ -42,7 +42,7 @@ import {
 } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
 import { runQuery } from '../inc/db.js';
-
+import { sanitizeForPdf } from '../inc/string.js';
 const DB_NAME = 'firstNew.db';
 
 const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
@@ -50,9 +50,8 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
 
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dots, setDots] = useState('');
   const [subject, setSubject] = useState('');
-
+const [section, setSection] = useState({start: 0, end: 0});
   const inputRef = useRef(null);
   const currentTextRef = useRef('');
   currentTextRef.current = text;
@@ -155,22 +154,7 @@ const ChangeScreen = forwardRef(({ visible, onClose }, ref) => {
     if (!text.trim()) return 0;
     return text.trim().split(/\s+/).length;
   }, [text]);
-const sanitizeForPdf = (str) => {
-  if (!str) return '';
-  return str
-    // Geschützte Bindestriche & verschiedene Gedankenstriche (U+2010 bis U+2015) zu normalem Bindestrich
-    .replace(/[\u2010\u2011\u2012\u2013\u2014\u2015]/g, '-')
-    // Typografische Anführungszeichen („, “, ”, «, ») zu normalen Anführungszeichen
-    .replace(/[\u201C\u201D\u201E\u00AB\u00BB]/g, '"')
-    // Typografische einfache Anführungszeichen & Apostrophe (‘, ’, ‚)
-    .replace(/[\u2018\u2019\u201A]/g, "'")
-    // Geschützte Leerzeichen & schmale Leerzeichen zu regulärem Leerzeichen
-    .replace(/[\u00A0\u202F\u2007\u2009]/g, ' ')
-    // Horizontale Ellipse (…) zu drei Punkten
-    .replace(/\u2026/g, '...')
-    // Weiche Trennzeichen & Zero-Width Spaces komplett entfernen
-    .replace(/[\u00AD\u200B\u200C\u200D\uFEFF]/g, '');
-};
+
   const saveText = async () => {
     try {
       const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
@@ -216,11 +200,7 @@ const sanitizeForPdf = (str) => {
   };
 
   const mergeFilesFromDB = async () => {
-    let count = 0;
-    const interval = setInterval(() => {
-      count = (count + 1) % 4;
-      setDots('.'.repeat(count));
-    }, 200);
+    
 
     try {
       const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
@@ -300,8 +280,6 @@ const sanitizeForPdf = (str) => {
       }
 
       await saveText();
-      clearInterval(interval);
-      setDots('');
       await EncryptedStorage.setItem('result', 'collect');
       router.replace('collect');
     } catch (err) {
@@ -316,8 +294,6 @@ const sanitizeForPdf = (str) => {
         Alert.alert('Fehler', 'Bewerbungsmappe konnte nicht zusammengefügt werden.');
       }
     } finally {
-      clearInterval(interval);
-      setDots('');
       setLoading(false);
     }
   };
@@ -486,12 +462,17 @@ const sanitizeForPdf = (str) => {
           <TextInput
             ref={inputRef}
             style={styles.textArea}
+            selection={section}
             value={text}
             onChangeText={handleTextChange}
+   onSelectionChange={(e) => {
+  setSection(e.nativeEvent.selection);
+}}
             placeholder={t('placeholderText') || 'Hier Text eingeben...'}
             placeholderTextColor="rgba(255, 255, 255, 0.35)"
             multiline={true}
             textAlignVertical="top"
+            scrollEnabled={true}               // Scrollt selbständig bei Wischgeste
             showsVerticalScrollIndicator={true}
           />
         </View>

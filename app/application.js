@@ -26,6 +26,7 @@ import {
 } from 'react-native';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import axios from 'axios';
+import { InteractionManager } from 'react-native';
 
 import { router } from 'expo-router';
 import { sha512 } from 'js-sha512';
@@ -37,7 +38,7 @@ import RNFS from 'react-native-fs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 import { WebView } from 'react-native-webview';
-
+import { decryp } from '../inc/cryp.js';
 import Info from '../comp/info.js';
 import colors from '../inc/colors.js';
 import { runQuery } from '../inc/db.js';
@@ -118,55 +119,85 @@ const SegmentedPills = memo(({ options, selected, onSelect, labels }) => (
   </View>
 ));
 
-const SuggestionDropdown = memo(({ data, onSelect, onDelete, isSkill = false, theMaxHeight = height * 0.16 }) => (
+const SuggestionDropdown = memo(({ 
+  data, 
+  onSelect, 
+  onToggleSelect,
+  selectedItems = [],
+  isSkill = false, 
+  theMaxHeight = height * 0.16 
+}) => (
   <View style={[styles.suggestionsCard, { maxHeight: theMaxHeight }]}>
     <FlatList
       data={data}
-      keyExtractor={(item, index) => (item.rowid ? String(item.rowid) : String(index))}
+      keyExtractor={(item, index) => (item?.rowid ? String(item.rowid) : item?.id ? String(item.id) : String(index))}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
       renderItem={({ item }) => {
-        const text = isSkill ? item : item.text;
+        // Robuste Text-Auflösung für ALLE Datenstrukturen:
+        // 1. Reiner String
+        // 2. Job-Objekt aus DB (item.text)
+        // 3. Skill-Objekt (item.role)
+        // 4. Fallbacks (name, label, id)
+        const text = typeof item === 'string' 
+          ? item 
+          : isSkill 
+            ? (item?.role ?? item?.text ?? item?.name ?? '') 
+            : (item?.text ?? item?.role ?? item?.name ?? item?.id ?? '');
+        const rawText = text.length > 25 ? text.substring(0, 27) + '...' : text; 
+        const itemKey = item?.rowid ?? item?.id ?? text;
+        const isSelected = selectedItems.some((s) => {
+          const sKey = s?.rowid ?? s?.id ?? (typeof s === 'string' ? s : s?.role ?? s?.text);
+          return sKey === itemKey;
+        });
+
         return (
-          <View style={styles.suggestionRow}>
+          <View style={[styles.suggestionRow, isSkill && isSelected && styles.suggestionRowSelected]}>
             <TouchableOpacity
               style={styles.suggestionTextArea}
-              onPress={() => onSelect(item)}
+              onPress={() => (isSkill && onToggleSelect ? onToggleSelect(item) : onSelect(item))}
               activeOpacity={0.7}
             >
               <View style={styles.resultIconWrapper}>
                 <MaterialIcons
-                  name={isSkill ? 'psychology' : 'location-on'}
+                  name={isSkill ? 'psychology' : 'work-outline'}
                   size={16}
                   color={WARM.iconPin}
                 />
               </View>
-              <Text style={styles.suggestionText} numberOfLines={1}>
-                {text}
+              <Text style={[styles.suggestionText, isSkill && isSelected && styles.suggestionTextSelected]} numberOfLines={1}>
+                {String(rawText)}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.deleteSuggestionBtn}
-              onPress={() => onDelete(item)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <MaterialIcons name="close" size={16} color={WARM.iconClear} />
-            </TouchableOpacity>
+            {isSkill && onToggleSelect ? (
+              <TouchableOpacity
+                style={styles.selectSuggestionBtn}
+                onPress={() => onToggleSelect(item)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialIcons 
+                  name={isSelected ? 'check-box' : 'check-box-outline-blank'} 
+                  size={20} 
+                  color={isSelected ? WARM.primary : WARM.textDim} 
+                />
+              </TouchableOpacity>
+            ) : null}
           </View>
         );
       }}
     />
   </View>
 ));
-
 const useDatabase = () => {
   const dbMainRef = useRef(null);
   const dbJobsRef = useRef(null);
+  const [isDbReady, setIsDbReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    const init = async () => {
+    
+    const interactionHandle = InteractionManager.runAfterInteractions(async () => {
       try {
         const folderPath = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
         const dest = `${folderPath}/${DB_JOBS_NAME}`;
@@ -189,21 +220,20 @@ const useDatabase = () => {
         if (isMounted) {
           dbJobsRef.current = await SQLite.openDatabase({ name: DB_JOBS_NAME, location: 'default' });
           dbMainRef.current = await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' });
+          setIsDbReady(true);
         }
       } catch (err) {
         console.error('Database Init Error:', err);
       }
-    };
+    });
 
-    init();
     return () => {
       isMounted = false;
-      dbJobsRef.current?.close();
-      dbMainRef.current?.close();
+      interactionHandle.cancel();
     };
   }, []);
 
-  return { dbMainRef, dbJobsRef };
+  return { dbMainRef, dbJobsRef, isDbReady };
 };
 
 const useWebExtractor = ({ onExtractSuccess }) => {
@@ -310,7 +340,7 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 /* ── Hauptkomponente ────────────────────────────────────── */
 const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, onClose }, ref) => {
   const { t } = useTranslation();
-  const { dbMainRef, dbJobsRef } = useDatabase();
+  const { dbMainRef, dbJobsRef, isDbReady } = useDatabase();
 
   const [inputValue, setInputValue] = useState('');
   const [scrapedDescription, setScrapedDescription] = useState('');
@@ -319,11 +349,13 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [selectedOption, setSelectedOption] = useState('');
   const [selectedOption2, setSelectedOption2] = useState('');
   const [selectedOption3, setSelectedOption3] = useState('');
-const [selectedQuality, setSelectedQuality] = useState('light');
-const [selectedOption4, setSelectedOption4] = useState('');
+  const [selectedQuality, setSelectedQuality] = useState('light');
+  
   const [jobs, setJobs] = useState([]);
-  const [skills, setSkills] = useState([]);
+  const [skills, setSkills] = useState([]); // Initial sauber als leeres Array
   const [skillsFiltered, setSkillsFiltered] = useState([]);
+  const [selectedSkills, setSelectedSkills] = useState([]); // Ausgewählte Skills für GPT
+  
   const [showJobDropdown, setShowJobDropdown] = useState(false);
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [saveJobVisible, setSaveJobVisible] = useState(false);
@@ -334,34 +366,31 @@ const [selectedOption4, setSelectedOption4] = useState('');
   const [fontValue, setFontValue] = useState('Helvetica');
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [dots, setDots] = useState('');
   const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
-
+  
   const inputRef = useRef(null);
   const jobRef = useRef(null);
   const jobRef2 = useRef(null);
   const searchTimeout = useRef(null);
 
-  /* ── Horizontale Ausfahr-Animation (fährt nach links raus) ── */
+  /* ── Horizontale Ausfahr-Animation ── */
   const animCardX = useRef(new Animated.Value(0)).current;
-const animOptionsX = useRef(new Animated.Value(width)).current;
-useEffect(() => {
-  Animated.parallel([
-    Animated.timing(animCardX, {
-      toValue: accordionOpen ? -width : 0,
-      duration: 320,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }),
+  const animOptionsX = useRef(new Animated.Value(width)).current;
 
-    Animated.timing(animOptionsX, {
-      toValue: accordionOpen ? 0 : width,
-      duration: 320,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }),
-  ]).start();
-}, [accordionOpen, animCardX, animOptionsX]);
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(animCardX, {
+        toValue: accordionOpen ? -width : 0,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animOptionsX, {
+        toValue: accordionOpen ? 0 : width,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [accordionOpen, animCardX, animOptionsX]);
 
   useEffect(() => {
     Animated.timing(animCardX, {
@@ -406,16 +435,17 @@ useEffect(() => {
     ],
     [t],
   );
-  const qualityKeys = ['best', 'medium', 'light'];
- const qualityLabels = useMemo(
-  () => ({
-    medium: t('Schnell') || 'Sehr gut',
-    best: t('Medium') || 'Am besten',
-    light: t('Sehr schnell') || 'Gut',
 
-  }),
-  [t],
-);
+  const qualityKeys = ['best', 'medium', 'light'];
+  const qualityLabels = useMemo(
+    () => ({
+      medium: t('Schnell') || 'Sehr gut',
+      best: t('Medium') || 'Am besten',
+      light: t('Sehr schnell') || 'Gut',
+    }),
+    [t],
+  );
+
   const anredeOptions = useMemo(
     () => [
       t('anredeOptions.herr') || 'Herr',
@@ -424,10 +454,12 @@ useEffect(() => {
     ],
     [t],
   );
-const closeOptions = useCallback(() => {
-  Keyboard.dismiss();
-  setAccordionOpen(false);
-}, []);
+
+  const closeOptions = useCallback(() => {
+    Keyboard.dismiss();
+    setAccordionOpen(false);
+  }, []);
+
   const onExtractSuccess = useCallback((jobTitle, jobDesc) => {
     setInputValue(jobTitle);
     setScrapedDescription(jobDesc);
@@ -444,43 +476,101 @@ const closeOptions = useCallback(() => {
     injectScript,
   } = useWebExtractor({ onExtractSuccess });
 
+  /* ── Skills Laden wenn DB bereit ── */
   useEffect(() => {
+    if (!isDbReady || !dbMainRef.current) return;
     let active = true;
-    const fetchSkills = async () => {
-      if (!dbMainRef.current) return;
+
+    const task = InteractionManager.runAfterInteractions(async () => {
       try {
+        const key = await EncryptedStorage.getItem('key');
         const deviceId = await DeviceInfo.getUniqueId();
-        const res = await runQuery(dbMainRef.current, 'SELECT skills FROM files WHERE ident = ?', [
-          deviceId,
-        ]);
+        if (!active || !dbMainRef.current) return;
+
+        const res = await runQuery(
+          dbMainRef.current,
+          'SELECT skills FROM files WHERE ident = ? LIMIT 1',
+          [deviceId]
+        );
+        if (!active) return;
+
         const raw = res?.rows?.raw()?.[0]?.skills;
-        if (active && typeof raw === 'string') {
-          setSkills(raw.split('#').filter(Boolean));
+        if (typeof raw === 'string' && raw.trim().length > 0) {
+          try {
+            const decSkills = await decryp(raw, key);
+            if (!active || !decSkills) return;
+            const parsed = JSON.parse(decSkills);
+            if (Array.isArray(parsed)) {
+              setSkills(parsed);
+              setSkillsFiltered(parsed);
+            }
+          } catch (err) {
+            console.error('Decryption/Parsing failed:', err);
+          }
         }
       } catch (err) {
         console.error('Failed to load user skills:', err);
       }
-    };
+    });
 
-    const timer = setTimeout(fetchSkills, 120);
     return () => {
       active = false;
-      clearTimeout(timer);
+      task?.cancel?.();
     };
-  }, [dbMainRef, erfahrung]);
+  }, [isDbReady]);
 
   const handleNextStep = useCallback((currentStep) => {
     if (currentStep === 'ansprechpartner') {
       jobRef.current?.focus();
     } else if (currentStep === 'job') {
       inputRef.current?.focus();
-    } else if (currentStep === 'skill') {
     }
   }, []);
 
-  const toggleAccordion = useCallback(() => {
+  // Erstellt aus allen ausgewählten Skills einen fertigen GPT-Prompt-String
+  const buildSelectedSkillsString = useCallback(() => {
+    if (selectedSkills.length === 0) return erfahrung;
+    return selectedSkills
+      .map((item, idx) => {
+        if (typeof item === 'string') return `• ${item}`;
+        const parts = [];
+        if (item.role) parts.push(`Rolle: ${item.role}`);
+        if (item.company) parts.push(`Unternehmen: ${item.company}`);
+        if (item.period) parts.push(`Zeitraum: ${item.period}`);
+        if (item.tasks) parts.push(`Aufgaben: ${item.tasks}`);
+        return `[Qualifikation/Station ${idx + 1}]\n${parts.join('\n')}`;
+      })
+      .join('\n\n');
+  }, [selectedSkills, erfahrung]);
+
+  // Mehrfachauswahl toggeln
+  const handleToggleSelectSkill = useCallback((skillItem) => {
+    const itemKey = skillItem?.id ?? (typeof skillItem === 'string' ? skillItem : skillItem?.role);
+
+    setSelectedSkills((prev) => {
+      const exists = prev.some((s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) === itemKey);
+      let updated;
+      if (exists) {
+        updated = prev.filter((s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) !== itemKey);
+      } else {
+        updated = [...prev, skillItem];
+      }
+
+      // Aktualisiert das Input-Feld als Zusammenfassung
+      const labels = updated.map((s) => (typeof s === 'string' ? s : s.role || '')).filter(Boolean);
+      setErfahrung(labels.join(', '));
+      return updated;
+    });
+  }, []);
+
+  const toggleAccordion = useCallback((val) => {
+    if (val) {
     Keyboard.dismiss();
     setAccordionOpen((prev) => !prev);
+    }
+    else {
+      setAccordionOpen(false);
+    } 
   }, []);
 
   const handleJobChange = useCallback(
@@ -516,28 +606,42 @@ const closeOptions = useCallback(() => {
 
   const handleErfahrungChange = useCallback(
     (val) => {
-      setErfahrung(val);
-      if (errors.skill) setErrors((p) => ({ ...p, skill: '' }));
-      setSaveSkillVisible(val.length > 0);
+      const textValue = typeof val === 'string' ? val : val?.role || '';
+      setErfahrung(textValue);
 
-      const matches = skills.filter((s) => s.toLowerCase().includes(val.toLowerCase()));
-      setSkillsFiltered(matches);
-      setShowSkillDropdown(matches.length > 0 && val.length > 0);
+      if (!Array.isArray(skills) || skills.length === 0) {
+        setSkillsFiltered([]);
+        setShowSkillDropdown(false);
+        return;
+      }
+
+      const query = textValue.trim().toLowerCase();
+      if (!query) {
+        setSkillsFiltered(skills);
+        setShowSkillDropdown(true);
+        return;
+      }
+
+      const skillsFilter = skills.filter((skill) => {
+        const roleText = typeof skill === 'string' ? skill : skill?.role;
+        return roleText ? roleText.toLowerCase().includes(query) : false;
+      });
+
+      setShowSkillDropdown(true);
+      setSkillsFiltered(skillsFilter);
     },
-    [errors.skill, skills],
+    [skills],
   );
 
   const handleAnredeChange = useCallback(
     (val) => {
       setSelectedOption3((prev) => (prev === val ? '' : val));
       if (errors.anrede) setErrors((p) => ({ ...p, anrede: '' }));
-      setTimeout(() => {
-        if (val === 'Herr' || val === 'Frau') {
-          jobRef2.current?.focus();
-        } else {
-          jobRef.current?.focus();
-        }
-      }, 100);
+      if (val === 'Herr' || val === 'Frau') {
+        jobRef2.current?.focus();
+      } else {
+        jobRef.current?.focus();
+      }
     },
     [errors.anrede],
   );
@@ -591,28 +695,8 @@ const closeOptions = useCallback(() => {
     [dbJobsRef],
   );
 
-  const handleDeleteSkill = useCallback(
-    async (skill) => {
-      if (!dbMainRef.current) return;
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
-        const filtered = skills.filter((item) => item !== skill);
-        const updated = filtered.length > 0 ? filtered.join('#') : null;
-        await dbMainRef.current.executeSql('UPDATE files SET skills = ? WHERE ident = ?', [
-          updated,
-          deviceId,
-        ]);
-        setSkills(filtered);
-        setSkillsFiltered(filtered);
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [dbMainRef, skills],
-  );
-
   /* ── Starten / Generieren ── */
- const handleGeneratePDF = async () => {
+  const handleGeneratePDF = async () => {
     setShowJobDropdown(false);
     setShowSkillDropdown(false);
 
@@ -635,6 +719,7 @@ const closeOptions = useCallback(() => {
     }
 
     if (Object.keys(nextErrors).length > 0) {
+      toggleAccordion(false);
       setErrors(nextErrors);
       if (!isDamenUndHerrenCheck && !name.trim()) {
         jobRef2.current?.focus();
@@ -649,30 +734,36 @@ const closeOptions = useCallback(() => {
     setErrors({});
     setLoading(true);
 
-
     try {
-      await EncryptedStorage.setItem('font', fontValue);
-      await EncryptedStorage.setItem('beruf', inputValue);
-      await EncryptedStorage.setItem('erfahrung', erfahrung);
-      await EncryptedStorage.setItem('time', selectedOption);
-      console.log('Time:', selectedOption);
-      await EncryptedStorage.setItem('type', selectedOption2);
-      const quality = selectedQuality
-      console.log('Quality:', quality); 
       const timepart = selectedOption2
         ? `${selectedOption2}${t('bewerbung.subjectCoverLetterFor') || 'e Bewerbung als '}`
         : t('bewerbung.subjectCoverLetter') || 'Bewerbung als ';
-        const choicePart = selectedOption?.trim() ? ` (${selectedOption.trim()})` : '';
-      await EncryptedStorage.setItem('subject', `${timepart}${inputValue} ${choicePart}`);
+      const choicePart = selectedOption?.trim() ? ` (${selectedOption.trim()})` : '';
+
       let anrede = t('bewerbung.salutationDearAll') || 'Sehr geehrte Damen und Herren,';
       if (selectedOption3.includes('Herr')) {
         anrede = t('bewerbung.salutationDearMr', { name }) || `Sehr geehrter Herr ${name},`;
       } else if (selectedOption3.includes('Frau')) {
         anrede = t('bewerbung.salutationDearMrs', { name }) || `Sehr geehrte Frau ${name},`;
       }
-      await EncryptedStorage.setItem('anrede', anrede);
 
-      let prompt1 = `Schreibe eine ${selectedOption2 || 'professionelle'} Bewerbung für die Position als ${inputValue}. Ich habe ${erfahrung} Erfahrung.
+      await Promise.all([
+        EncryptedStorage.setItem('font', fontValue),
+        EncryptedStorage.setItem('beruf', inputValue),
+        EncryptedStorage.setItem('erfahrung', erfahrung),
+        EncryptedStorage.setItem('time', selectedOption),
+        EncryptedStorage.setItem('type', selectedOption2),
+        EncryptedStorage.setItem('subject', `${timepart}${inputValue} ${choicePart}`),
+        EncryptedStorage.setItem('anrede', anrede),
+      ]);
+
+      // Generierter Prompt-String aus den markierten Fähigkeiten:
+      const detailedSkillsString = buildSelectedSkillsString();
+
+      let prompt1 = `Schreibe eine ${selectedOption2 || 'professionelle'} Bewerbung für die Position als ${inputValue}.
+Meine relevanten Erfahrungen, Stationen und Fähigkeiten:
+${detailedSkillsString}
+
 - Keine Firmennamen oder spezifische Unternehmen nennen.
 - Die Anrede komplett weglassen und direkt mit dem Text beginnen.
 - Maximal 300 Wörter.
@@ -684,36 +775,59 @@ const closeOptions = useCallback(() => {
 
       const deviceId = await DeviceInfo.getUniqueId();
       const key = sha512(deviceId);
-      console.log("quality" + quality)
-      const response = await axios.post(
-        'https://api.jobapp2.de/getText',
-        { prompt1, key, modelIntens: quality },
-        { timeout: 25000 },
-      );
+      const quality = selectedQuality;
 
-      setLoading(false);
-if (response.data.response) {
-        console.log('Received response:', response.data.response);
+      const maxAttempts = 3;
+      let success = false;
+      let lastError = null;
 
-        // 1. Großen Text zuerst komplett schreiben & flushen
-        await EncryptedStorage.setItem('text', response.data.response);
-        
-        // 2. Danach das Status-Flag setzen
-        await EncryptedStorage.setItem('result', 'change');
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          console.log(`Generierungs-Versuch ${attempt} von ${maxAttempts}...`);
 
-        // Schneller Gegen-Check im Log:
-        const check = await EncryptedStorage.getItem('text');
-        console.log('Check nach Speichern:', check ? 'Text erfolgreich im Storage!' : 'FEHLT IMMER NOCH');
+          const response = await axios.post(
+            'https://api.jobapp2.de/getText',
+            { prompt1, key, modelIntens: quality },
+            { timeout: 20000 },
+          );
 
-        changeScreen(); // Löst navigateToChange() in StartApp.js aus
+          const generatedText = response.data?.response;
+          if (!generatedText || typeof generatedText !== 'string' || !generatedText.trim()) {
+            throw new Error('Ungültige oder leere Server-Antwort');
+          }
+
+          await EncryptedStorage.setItem('text', generatedText);
+          await EncryptedStorage.setItem('result', 'change');
+
+          const check = await EncryptedStorage.getItem('text');
+          if (!check) {
+            throw new Error('Text konnte nicht im Storage verifiziert werden');
+          }
+
+          success = true;
+          setLoading(false);
+          changeScreen();
+          break;
+        } catch (attemptErr) {
+          lastError = attemptErr;
+          console.warn(`Fehlversuch ${attempt}:`, attemptErr?.message || attemptErr);
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        }
       }
-      // Der nachfolgende Animated.timing(animCardX, { toValue: -400 }) Block entfällt komplett!
+
+      if (!success) {
+        throw lastError || new Error('Generierung nach mehreren Versuchen fehlgeschlagen');
+      }
     } catch (error) {
       setLoading(false);
-      console.log('Error during PDF generation:', error);
+      console.error('Error during PDF generation:', error);
       Alert.alert(
         t('bewerbung.errorTitle') || 'Fehler',
-        error.response?.data?.error || t('bewerbung.networkError') || 'Netzwerkfehler beim Erstellen des Textes.',
+        error.response?.data?.error ||
+          t('bewerbung.networkError') ||
+          'Netzwerk- oder Übertragungsfehler. Bitte versuche es erneut.',
       );
     }
   };
@@ -735,7 +849,6 @@ if (response.data.response) {
         }
       />
 
-      {/* Die gesamte Ansicht fährt synchron nach links raus */}
       <Animated.View
         style={[
           styles.animatedScreenWrap,
@@ -749,28 +862,27 @@ if (response.data.response) {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.responsiveContent}>
-            
-   <View style={styles.sectionCard}>
-  <CardHeader
-    icon="person"
-    title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
-    rightElement={
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={onClose}
-        activeOpacity={0.7}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <MaterialIcons name="close" size={18} color={WARM.iconClose} />
-      </TouchableOpacity>
-    }
-  />
+            <View style={styles.sectionCard}>
+              <CardHeader
+                icon="person"
+                title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
+                rightElement={
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={onClose}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <MaterialIcons name="close" size={18} color={WARM.iconClose} />
+                  </TouchableOpacity>
+                }
+              />
 
-  <SegmentedPills
-    options={anredeOptions}
-    selected={selectedOption3}
-    onSelect={handleAnredeChange}
-  />
+              <SegmentedPills
+                options={anredeOptions}
+                selected={selectedOption3}
+                onSelect={handleAnredeChange}
+              />
 
               <View style={styles.suggestionsField}>
                 <View
@@ -868,7 +980,7 @@ if (response.data.response) {
                 )}
               </View>
 
-              {/* KENNTNISSE */}
+              {/* KENNTNISSE & SKILLS MIT MULTI-SELECT */}
               <View style={styles.suggestionFieldSkill}>
                 <View
                   style={[
@@ -886,10 +998,20 @@ if (response.data.response) {
                   <TextInput
                     ref={inputRef}
                     style={styles.textInput}
-                    placeholder={t('bewerbung.placeholderSkills') || 'z.B. 3 Jahre React Native...'}
+                    placeholder={
+                      selectedSkills.length > 0
+                        ? `${selectedSkills.length} Fähigkeiten gewählt`
+                        : t('bewerbung.placeholderSkills') || 'z.B. 3 Jahre React Native...'
+                    }
                     placeholderTextColor={WARM.textDim}
                     value={erfahrung}
-                    onBlur={() => setTimeout(() => setShowSkillDropdown(false), 220)}
+                    onFocus={() => {
+                      if (skills.length > 0) {
+                        setSkillsFiltered(skills);
+                        setShowSkillDropdown(true);
+                      }
+                    }}
+                    onBlur={() => setTimeout(() => setShowSkillDropdown(false), 250)}
                     onChangeText={handleErfahrungChange}
                     blurOnSubmit={false}
                     autoCorrect={false}
@@ -904,17 +1026,14 @@ if (response.data.response) {
                   )}
                 </View>
 
-                {erfahrung.length > 0 && showSkillDropdown && skillsFiltered.length > 0 && (
+                {showSkillDropdown && skillsFiltered.length > 0 && (
                   <SuggestionDropdown
                     data={skillsFiltered}
-                    onSelect={(suggestion) => {
-                      setErfahrung(suggestion);
-                      setShowSkillDropdown(false);
-                      setSaveSkillVisible(false);
-                    }}
-                    theMaxHeight={height * 0.08}
-                    onDelete={handleDeleteSkill}
-                    isSkill
+                    onSelect={handleToggleSelectSkill}
+                    onToggleSelect={handleToggleSelectSkill}
+                    selectedItems={selectedSkills}
+                    theMaxHeight={height * 0.22}
+                    isSkill={true}
                   />
                 )}
               </View>
@@ -923,7 +1042,7 @@ if (response.data.response) {
               <View style={styles.bottomActionRow}>
                 <TouchableOpacity
                   style={[styles.settingsButton, accordionOpen && styles.settingsButtonActive]}
-                  onPress={toggleAccordion}
+                  onPress={() => toggleAccordion(true)}
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
@@ -959,155 +1078,99 @@ if (response.data.response) {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* ERWEITERTE OPTIONEN */}
-       
           </View>
         </ScrollView>
       </Animated.View>
-{/* OPTIONEN – eigene Seite, kommt von rechts */}
-<Animated.View
-  style={[
-    styles.optionsScreen,
-    {
-      transform: [{ translateX: animOptionsX }],
-    },
-  ]}
->
-  <ScrollView
-    style={styles.scrollContainer}
-    contentContainerStyle={styles.scrollContent}
-    showsVerticalScrollIndicator={false}
-    keyboardShouldPersistTaps="handled"
-  >
-    <View style={styles.responsiveContent}>
 
-      <View style={styles.accordionPanel}>
+      {/* OPTIONEN SCREEN */}
+      <Animated.View
+        pointerEvents={accordionOpen ? 'auto' : 'none'}
+        style={[
+          styles.optionsScreen,
+          {
+            transform: [{ translateX: animOptionsX }],
+          },
+        ]}
+      >
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.responsiveContent}>
+            <View style={styles.accordionPanel}>
+              <View style={styles.optionsHeader}>
+                <View style={styles.headerLeft}>
+                  <View style={styles.iconBadge}>
+                    <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
+                  </View>
+                  <Text style={styles.fieldLabel}>{t('Optionen') || 'OPTIONEN'}</Text>
+                </View>
 
-        {/* HEADER */}
-        <View style={styles.optionsHeader}>
-          <View style={styles.headerLeft}>
-            <View style={styles.iconBadge}>
-              <MaterialIcons
-                name="tune"
-                size={18}
-                color={WARM.iconLeading}
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={closeOptions}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <MaterialIcons name="close" size={18} color={WARM.iconClose} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.subFieldLabel}>
+                {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
+              </Text>
+              <SegmentedPills
+                options={employmentOptions}
+                selected={selectedOption}
+                onSelect={(opt) => setSelectedOption((p) => (p === opt ? '' : opt))}
               />
-            </View>
 
-            <Text style={styles.fieldLabel}>
-              {t('Optionen') || 'OPTIONEN'}
-            </Text>
-          </View>
+              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
+              </Text>
+              <SegmentedPills
+                options={applicationOptions}
+                selected={selectedOption2}
+                onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
+              />
 
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={closeOptions}
-            activeOpacity={0.7}
-            hitSlop={{
-              top: 10,
-              bottom: 10,
-              left: 10,
-              right: 10,
-            }}
-          >
-            <MaterialIcons
-              name="close"
-              size={18}
-              color={WARM.iconClose}
-            />
-          </TouchableOpacity>
-        </View>
+              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                {t('QUALITÄT') || 'Qualität'}
+              </Text>
+              <SegmentedPills
+                options={qualityKeys}
+                selected={selectedQuality}
+                onSelect={(val) => setSelectedQuality(val)}
+                labels={qualityLabels}
+              />
 
-        {/* ANSTELLUNGSART */}
-        <Text style={styles.subFieldLabel}>
-          {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
-        </Text>
+              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
+              </Text>
+              <View style={{ zIndex: 1000, marginTop: 4 }}>
+                <DropDownPicker
+                  open={fontPickerOpen}
+                  value={fontValue}
+                  items={fontOptions}
+                  setOpen={setFontPickerOpen}
+                  setValue={setFontValue}
+                  placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
+                  style={styles.dropdown}
+                  dropDownContainerStyle={styles.dropdownList}
+                  textStyle={{
+                    color: WARM.textMain,
+                    fontSize: 13.5,
+                    fontWeight: '500',
+                  }}
+                  arrowIconStyle={{ tintColor: WARM.iconArrow }}
+                  dropDownDirection="TOP"
+                  listMode="SCROLLVIEW"
+                />
+              </View>
 
-        <SegmentedPills
-          options={employmentOptions}
-          selected={selectedOption}
-          onSelect={(opt) =>
-            setSelectedOption((p) => (p === opt ? '' : opt))
-          }
-        />
-
-        {/* BEWERBUNGSTYP */}
-        <Text
-          style={[
-            styles.subFieldLabel,
-            { marginTop: 14 },
-          ]}
-        >
-          {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
-        </Text>
-
-        <SegmentedPills
-          options={applicationOptions}
-          selected={selectedOption2}
-          onSelect={(opt) =>
-            setSelectedOption2((p) => (p === opt ? '' : opt))
-          }
-        />
-         <Text
-          style={[
-            styles.subFieldLabel,
-            { marginTop: 14 },
-          ]}
-        >
-          {t('QUALITÄT') || 'Qualität'}
-        </Text>
-
-        <SegmentedPills
-          options={qualityKeys}
-          selected={selectedQuality}
-          onSelect={(val) =>{ setSelectedQuality(val); console.log(val)}}
-  labels={qualityLabels}
-
-          
-        />
-
-        {/* SCHRIFTART */}
-        <Text
-          style={[
-            styles.subFieldLabel,
-            { marginTop: 14 },
-          ]}
-        >
-          {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
-        </Text>
-
-        <View
-          style={{
-            zIndex: 1000,
-            marginTop: 4,
-          }}
-        >
-          <DropDownPicker
-            open={fontPickerOpen}
-            value={fontValue}
-            items={fontOptions}
-            setOpen={setFontPickerOpen}
-            setValue={setFontValue}
-            placeholder={
-              t('bewerbung.placeholderFont') ||
-              'Schriftart wählen'
-            }
-            style={styles.dropdown}
-            dropDownContainerStyle={styles.dropdownList}
-            textStyle={{
-              color: WARM.textMain,
-              fontSize: 13.5,
-              fontWeight: '500',
-            }}
-            arrowIconStyle={{
-              tintColor: WARM.iconArrow,
-            }}
-            dropDownDirection="TOP"
-            listMode="SCROLLVIEW"
-          />
-        </View>
- <View style={styles.bottomActionRow}>
+              <View style={styles.bottomActionRow}>
                 <TouchableOpacity
                   style={[styles.settingsButton, accordionOpen && styles.settingsButtonActive]}
                   onPress={toggleAccordion}
@@ -1138,13 +1201,12 @@ if (response.data.response) {
                     </View>
                   )}
                 </TouchableOpacity>
+              </View>
             </View>
+          </View>
+        </ScrollView>
+      </Animated.View>
 
-      </View>
-
-    </View>
-  </ScrollView>
-</Animated.View>
       {/* EXTRAKTIONS-OVERLAY */}
       {isExtracting && (
         <View style={styles.extractingOverlay}>
@@ -1225,13 +1287,13 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-    closeButton: {
+  closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255, 240, 225, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(255, 240, 225, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginLeft: 12,
   },
   cardHeaderRow: {
@@ -1246,19 +1308,17 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   optionsScreen: {
-    flex:1,
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: 'transparent',
-  zIndex: 100,
-},
-
-optionsHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  marginBottom: 18,
-
-},
+    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    zIndex: 100,
+  },
+  optionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
   iconBadge: {
     width: 30,
     height: 30,
@@ -1384,7 +1444,7 @@ optionsHeader: {
   },
   suggestionsCard: {
     position: 'absolute',
-    top: 52,
+    top: 46,
     left: 0,
     right: 0,
     backgroundColor: WARM.bg,
@@ -1404,6 +1464,8 @@ optionsHeader: {
     minHeight: 44,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: WARM.surfaceBorderSubtle,
+  },
+  suggestionRowSelected: {
   },
   resultIconWrapper: {
     width: 26,
@@ -1427,9 +1489,15 @@ optionsHeader: {
     fontSize: 13.5,
     fontWeight: '500',
   },
-  deleteSuggestionBtn: {
+  suggestionTextSelected: {
+    color: WARM.iconArrow,
+    fontWeight: '700',
+  },
+  selectSuggestionBtn: {
     paddingHorizontal: 12,
-    marginLeft: 6,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   accordionPanel: {
     backgroundColor: WARM.bg,

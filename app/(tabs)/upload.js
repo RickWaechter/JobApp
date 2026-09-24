@@ -2,7 +2,7 @@
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import  { memo, useCallback,  useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -19,7 +19,6 @@ import {
 import Modal from 'react-native-modal';
 import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from 'react-native-draggable-flatlist';
-import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
@@ -35,7 +34,7 @@ import {
   encryptBase64,
   genIv,
 } from '../../inc/cryp.js';
-
+import Info from "../../comp/info.js";
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
@@ -49,7 +48,7 @@ const orderedKeys = [
 ];
 
 /* ── Wiederverwendbare Dashboard Card ───────────────────── */
-const DocumentActionCard = memo(({ title, description, iconName, onPress, isPrimary = false, badgeText }) => (
+const DocumentActionCard = memo(({ title, onIconPress, description, iconName, onPress, isPrimary = false, badgeText }) => (
   <Pressable
     onPress={onPress}
     style={({ pressed }) => [
@@ -59,11 +58,20 @@ const DocumentActionCard = memo(({ title, description, iconName, onPress, isPrim
     ]}
   >
     <View style={[styles.iconContainer, isPrimary && styles.primaryIconContainer]}>
+      <Pressable
+        onPress={(e) => {
+          e?.stopPropagation?.();
+          onIconPress?.();
+          
+        }
+      }
+      >
       <MaterialIcons
         name={iconName}
         size={22}
         color={isPrimary ? '#FFFFFF' : '#60A5FA'}
       />
+      </Pressable>
     </View>
 
     <View style={styles.cardTextContainer}>
@@ -96,6 +104,8 @@ const UploadScreen = () => {
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [data, setData] = useState([]);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [textInfo, setTextInfo] = useState('');
   const [db, setDb] = useState(null);
   const [source, setSource] = useState({});
   const [pdfView, setPdfView] = useState(false);
@@ -426,7 +436,22 @@ const UploadScreen = () => {
       setPdfView(false);
     }
   };
+const handleInfo = (val) => {
+  switch (val) {
+    case 'choose':
+     setInfoModalVisible(true);
+     setTextInfo(t("info.choose"));
+      break;
+    case 'sort':
+      setInfoModalVisible(true);
+      setTextInfo(t("info.sort"));
+      break;
+      case 'personal':
 
+    default:
+      break;
+  }
+}
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -447,6 +472,7 @@ const UploadScreen = () => {
           <View style={styles.cardsWrapper}>
             <DocumentActionCard
               isPrimary={true}
+              onIconPress={() => handleInfo('choose')}
               iconName="upload-file"
               title={t('uploadFiles') || 'Dateien auswählen'}
               description={t('selectFilesToUpload') || 'PDFs oder Bilder von deinem Gerät auswählen.'}
@@ -455,6 +481,7 @@ const UploadScreen = () => {
 
             <DocumentActionCard
               iconName="reorder"
+              onIconPress={() => handleInfo('sort')}
               title={t('sortAttachments') || 'Anlagen sortieren'}
               description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
               badgeText={`${data.length} Datei${data.length === 1 ? '' : 'en'}`}
@@ -695,6 +722,8 @@ const UploadScreen = () => {
           </View>
         </View>
       </Modal>
+            <Info  message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
+      
     </SafeAreaView>
   );
 };

@@ -121,7 +121,7 @@ const OldScreen = () => {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [changeOldScreen, setChangeOldScreen] = useState(false);
-
+const inputRef = useRef(null);
   const lastTimeClick = useRef(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -182,6 +182,7 @@ const OldScreen = () => {
   };
 
   const triggerSwipeRightAndOpenModal = (entry) => {
+console.log("triger");
     setSelectedEntry(entry);
     setTimeout(() => setModalVisible(true), 80);
 
@@ -360,13 +361,15 @@ const OldScreen = () => {
         visible={modalVisible}
         nextScreen={changeOldScreen}
         initialName={selectedEntry?.job || ''}
+        durationIn={200}
         onClose={() => {
           setModalVisible(false);
           resetCardAnimation();
         }}
         onSaved={async () => {
           setChangeOldScreen(true);
-
+          inputRef.current.focus();
+            
           setModalVisible(false);
           await EncryptedStorage.setItem('result', 'changeOld');
         }}
@@ -375,6 +378,7 @@ const OldScreen = () => {
       {/* Editor Overlay für Altdaten */}
       <ChangeScreenOld
         visible={changeOldScreen}
+        ref={inputRef}
         onClose={() => {setChangeOldScreen(false);
           setModalVisible(false);
         }

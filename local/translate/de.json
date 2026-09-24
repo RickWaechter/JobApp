@@ -424,5 +424,20 @@
     "errorTitle": "Fehler",
     "saveErrorMsg": "Deine Daten konnten nicht gespeichert werden.",
     "btnOk": "OK"
+  },
+"info": {
+    "title": "Info",
+    "subtitle": "Fehler beim Laden der Daten.",
+    "btnOk": "Verstanden",
+    "language": "Legt die Sprache der Benutzeroberfläche fest.\n\nWeder bestehende Bewerbungen noch neue Anschreiben sind davon betroffen. Diese Einstellung lässt sich jederzeit anpassen.",
+    "email": "Verknüpfen Sie Ihr E-Mail-Konto, um Bewerbungen direkt aus der App über Ihr eigenes Postfach zu versenden.\n\nWir empfehlen, dafür eine separate E-Mail-Adresse ausschließlich für Bewerbungen zu nutzen.",
+    "personal": "Verwalten Sie hier Ihre persönlichen Daten.\n\nIhre Angaben verbleiben lokal auf Ihrem Gerät und werden ausschließlich als Inhalt in Ihre fertigen Bewerbungsunterlagen eingefügt.",
+    "experience": "Erfassen Sie hier Ihren beruflichen Werdegang manuell oder lassen Sie ihn automatisch aus Ihrem Lebenslauf extrahieren.\n\nBei der späteren Erstellung einer Bewerbung entscheiden Sie flexibel, welche Stationen einfließen sollen.",
+    "coins": "Laden Sie Ihr Guthaben flexibel auf, indem Sie kurze Werbeclips ansehen oder zusätzliche Coins im Shop erwerben.\n\nIhre Coins können Sie anschließend jederzeit für die Erstellung neuer Bewerbungen einlösen.",
+    "choose": "Wählen Sie hier die Dokumente und Nachweise aus, die Ihrer Bewerbung beigefügt werden sollen.\n\nSie können neue Anlagen hinzufügen, bestehende Dateien flexibel austauschen oder nicht mehr benötigte Dokumente entfernen.",
+    "sort": "Bringen Sie Ihre Anlagen in die gewünschte Reihenfolge. Die Dokumente werden genau in dieser Abfolge an Ihre Bewerbung angehängt.\n\nHalten Sie einen Eintrag gedrückt, um ihn nach oben oder unten zu verschieben.",
+  "new": "Erstellen Sie ein maßgeschneidertes Anschreiben, das exakt auf das Anforderungsprofil Ihrer Wunschstelle abgestimmt ist.\n\nGeben Sie einfach die Eckdaten des Unternehmens und der Stelle ein – der Assistent formuliert den Text passgenau anhand Ihres Profils.",
+    "old": "Greifen Sie auf bereits erstellte Bewerbungen zurück, um Zeit und Aufwand zu sparen.\n\nSie können frühere Dokumente als Vorlage verwenden, Inhalte für eine ähnliche Stelle adaptieren oder einzelne Abschnitte flexibel aktualisieren.",
+  "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können."
   }
 }
