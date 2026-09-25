@@ -1,0 +1,499 @@
+{
+  "BewerbungGenerieren": "Kreiraj novu prijavu",
+  "BewerbungGenerierenText": "Brzo i jednostavno kreirajte profesionalnu prijavu za posao.",
+  "BewerbungRecycel": "Iskoristi ponovo",
+  "BewerbungRecycelText": "Iskoristite svoju prethodnu prijavu kako biste je brzo prilagodili za drugi posao.",
+  "personalData": "Lični podaci",
+  "personalDataDescription": "Ovdje uredite svoju adresu stanovanja za prijavu za posao.",
+  "configureEmail": "Podešavanje e-maila",
+  "configureEmailDescription": "Podesite svoj e-mail za direktno slanje prijava.",
+  "sortAttachments": "Sortiranje priloga",
+  "sortAttachmentsDescription": "Uredite redoslijed priloga za svoju mapu prijave.",
+  "placeholderName": "Moje ime i prezime",
+  "placeholderStreet": "Ulica i kućni broj",
+  "placeholderZip": "Poštanski broj i grad",
+  "placeholderEmail": "E-mail adresa",
+  "placeholderPassword": "Lozinka",
+  "placeholderEmailServer": "Odaberite e-mail server",
+  "saveAndClose": "Sačuvaj i zatvori",
+  "activateAndClose": "Aktiviraj",
+  "deactivateAndClose": "Deaktiviraj",
+  "save": "Sačuvaj",
+  "downloadProgress": "",
+  "bwnzg": "Vaša mapa prijave se priprema.",
+  "uploadFiles": "Izaberi fajlove",
+  "selectFilesToUpload": "Odaberite priloge koje želite priložiti uz prijavu.",
+  "addAttachment": "Dodaj prilog",
+  "addAttachmentsToApplication": "Dodajte odabrane priloge svojoj postojećoj mapi prijave.",
+  "replaceOldFiles": "Zamijeni stare priloge",
+  "replaceExistingAttachments": "Zamijenite postojeće priloge novim odabranim fajlovima.",
+  "selectedFiles": "Odabrani fajl(ovi)",
+  "searchCompany": "Traži adresu ovdje",
+  "searchResult": "Rezultati pretrage će se prikazati ovdje.",
+  "searchCompanyOld": "Traži adresu firme...",
+  "companyName": "Naziv firme",
+  "companyStreet": "Ulica i kućni broj firme",
+  "companyStreet2": "Ulica i kućni broj firme",
+  "companyCity": "Poštanski broj i grad sjedišta firme",
+  "continue": "Nastavi",
+  "enterManually": "Unesi ručno",
+  "nameAnsprechpartner": "Ime kontakt osobe",
+  "beruf": "Zanimanje / Pozicija",
+  "skillsErfahrung": "Vještine / Iskustvo",
+  "fontPlaceholder": "Helvetica (Standardni font)",
+  "generateCoverLetter": "Generiši propratno pismo",
+  "next": "Dalje",
+  "toHome": "Zatvori",
+  "ok": "Da, naravno!",
+  "cancel": "Ne",
+  "pleaseWait": "Molimo sačekajte",
+  "finish": "Završi",
+  "close": "Zatvori",
+  "nextStep": "Dalje",
+  "previousStep": "Nazad",
+  "Bewerbung": "Prijava",
+  "Profile": "Profil",
+  "Anlagen": "Prilozi",
+  "Info": "Informacije",
+  "Fortsetzen": "Nastavi",
+
+  "employmentOptions": {
+    "vollzeit": "Puno radno vrijeme",
+    "teilzeit": "Skraćeno radno vrijeme",
+    "minijob": "Mini-posao (Minijob)"
+  },
+  "applicationOptions": {
+    "initiativ": "Otvorena prijava (samoinicijativna)",
+    "regulär": "Standardna prijava",
+    "praktikum": "Praksa"
+  },
+  "anredeOptions": {
+    "herr": "Gospodin",
+    "damenUndHerren": "Poštovane dame i gospodo",
+    "frau": "Gospođa"
+  },
+  "salutation": {
+    "herr": "Poštovani gospodine ",
+    "frau": "Poštovana gospođo ",
+    "default": "Poštovane dame i gospodo,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Samoinicijativna prijava za posao: ",
+    "regulär": "Prijava za posao: ",
+    "praktikum": "Prijava za praksu: ",
+    "default": "Prijava za posao: "
+  },
+  "employmentChoice": {
+    "fulltime": "za rad u punom radnom vremenu",
+    "parttime": "za rad u skraćenom radnom vremenu",
+    "minijob": "na bazi mini-posla",
+    "default": ""
+  },
+  "enterText": "Unesite tekst ovdje...",
+  "saveCoverLetter": "Sačuvaj propratno pismo",
+  "merge": "Spoji",
+  "viewApplication": "Pregledaj prijavu",
+  "viewApplicationDescription": "Provjerite svoju mapu prijave kako biste izbjegli greške prije preuzimanja ili slanja.",
+  "downloadDescription": "Sačuvajte mapu prijave u PDF formatu na uređaju i pošaljite je na željenu poziciju.",
+  "sendEmail": "Pošalji e-mailom",
+  "sendEmailDescription": "Pošaljite svoju mapu prijave direktno putem e-maila. Tekst poruke se kreira automatski, ali ga možete urediti prije slanja. ✉️",
+
+  "terms": {
+    "title": "Opšti uslovi poslovanja",
+    "section1": {
+      "heading": "1. Područje primjene",
+      "content": "Ovi Opšti uslovi primjenjuju se na korištenje alata za prijave. Alat sastavlja dokumente uz pomoć vještačke inteligencije (AI) koju pružaju eksterni provajderi."
+    },
+    "section2": {
+      "heading": "2. Zaštita podataka i sigurnost",
+      "content": "Svi lični podaci se čuvaju isključivo lokalno na vašem uređaju i zaštićeni su AES-256 enkripcijom."
+    },
+    "section3": {
+      "heading": "3. Isključenje odgovornosti",
+      "content": "Pružalac usluge ne preuzima nikakvu odgovornost za tačnost ili potpunost kreiranih prijava za posao."
+    },
+    "section4": {
+      "heading": "4. Prava korištenja",
+      "content": "Korištenje alata je neekskluzivno i neprenosivo. Zabranjeno je mijenjanje ili preprodaja alata."
+    },
+    "section5": {
+      "heading": "5. Završne odredbe",
+      "content": "Primjenjuje se pravo Savezne Republike Njemačke."
+    },
+    "email": {
+      "placeholder": "E-mail",
+      "sendButton": "Pošalji e-mail"
+    },
+    "subject": {
+      "placeholder": "Predmet"
+    },
+    "message": {
+      "placeholder": "Poruka"
+    },
+    "messageText": "Poštovane dame i gospodo,\n\novim putem Vam dostavljam svoju prijavu za radno mjesto {{jobTitle}} u firmi {{companyName}}.\n\nS poštovanjem,\n{{applicantName}}"
+  },
+
+  "emailSent": {
+    "success": "E-mail je uspješno poslan!",
+    "error": "Greška pri slanju e-maila. Molimo pokušajte ponovo."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "E-mail server"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Korisničko ime"
+    },
+    "password": {
+      "placeholder": "Lozinka"
+    }
+  },
+
+  "faq": {
+    "heading": "Često postavljana pitanja",
+    "entry1": {
+      "subheading": "Kako se čuvaju moji podaci?",
+      "paragraph": "Vaši podaci su potpuno sigurni. Sve informacije se čuvaju isključivo lokalno na vašem telefonu u SQLite bazi podataka i zaštićene su snažnom 256-bitnom AES enkripcijom. To garantuje da niko osim vas nema pristup podacima. Izuzetno cijenimo privatnost i namjerno odbijamo pohranjivanje ili dijeljenje podataka na eksternim serverima.\n\nKada koristite uslugu e-maila, vaša e-mail adresa, lozinka i server su zaštićeni istom jakom enkripcijom prije obrade. Vaša privatnost je naš prioritet — zadržavate potpunu kontrolu nad svojim podacima."
+    },
+    "entry2": {
+      "subheading": "Kako funkcioniše e-mail servis?",
+      "paragraph": "Putem našeg e-mail servisa možete jednostavno poslati svoju mapu prijave direktno na adresu željene firme — potrebna vam je samo kontakt adresa. Predmet poruke i pripremljeni tekst se kreiraju automatski, čineći slanje brzim i jednostavnim.\n\nPodaci se prenose sigurnom 2048-bitnom enkripcijom do našeg servera, koji dešifruje mapu i prosljeđuje je primaocu. Ne vode se nikakvi zapisi (logovi) niti se podaci trajno čuvaju — informacije ostaju privremeno u keš memoriji i brišu se odmah nakon prosljeđivanja.\n\nVeć radimo na potpuno lokalnoj verziji ove funkcije. Usluga je besplatna i opciona."
+    },
+    "entry3": {
+      "subheading": "Kreiranje i ponovno korištenje prijave",
+      "paragraph": "Možete kreirati potpuno novo propratno pismo ili iskoristiti prethodno. Po minimalnoj cijeni dobijate pismo skrojeno prema zahtjevima pozicije. Takođe možete uzeti ranije pismo, odabrati drugu firmu, promijeniti kontakt osobu i urediti tekst, čime štedite vrijeme."
+    }
+  },
+
+  "privacy": {
+    "heading": "Politika privatnosti",
+    "entry1": {
+      "title": "1. Opšte informacije",
+      "text": "Ova politika privatnosti objašnjava kako alat za prijavu obrađuje lične podatke."
+    },
+    "entry2": {
+      "title": "2. Prikupljanje i obrada podataka",
+      "text": "Alat prikuplja samo podatke neophodne za izradu prijave za posao:\n• Željena radna pozicija\n• Relevantne vještine i radno iskustvo\n• Vrsta prijave"
+    },
+    "entry3": {
+      "title": "3. Pohrana i sigurnost",
+      "text": "Svi lični podaci se čuvaju isključivo na vašem uređaju i zaštićeni su AES-256 enkripcijom."
+    },
+    "entry4": {
+      "title": "4. Prosljeđivanje trećim licima",
+      "text": "Lični podaci se ne prosljeđuju trećim licima. AI provajderima se šalju samo anonimizovani tekstualni podaci neophodni za generisanje sadržaja."
+    },
+    "entry5": {
+      "title": "5. Prava korisnika",
+      "text": "Korisnici imaju pravo na uvid, ispravku i trajno brisanje svojih lokalno sačuvanih podataka u svakom trenutku."
+    },
+    "entry6": {
+      "title": "6. Izmjene politike privatnosti",
+      "text": "Ova izjava o privatnosti može se povremeno ažurirati. Važeća verzija je uvijek dostupna unutar aplikacije."
+    }
+  },
+
+  "imprint": {
+    "heading": "Impresum / Pravne napomene",
+    "entry1": {
+      "title": "Podaci u skladu sa § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nNjemačka"
+    },
+    "entry2": {
+      "title": "Kontakt",
+      "text": "E-mail: kontakt@jobape.de\nWeb stranica: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Odricanje odgovornosti",
+      "text": "Sadržaj ove aplikacije pripremljen je sa najvećom pažnjom. Ipak, ne možemo garantovati za tačnost, potpunost i ažurnost sadržaja. Korištenje aplikacije je na sopstvenu odgovornost."
+    },
+    "entry4": {
+      "title": "Autorska prava",
+      "text": "Sav sadržaj ove aplikacije zaštićen je autorskim pravom. Dozvoljena je isključivo privatna i nekomercijalna upotreba. Svaka komercijalna upotreba zahtijeva izričitu pismenu saglasnost vlasnika prava."
+    }
+  },
+
+  "navigation": {
+    "faq": "ČPP",
+    "contact": "Kontakt",
+    "agb": "Uslovi",
+    "privacy": "Privatnost",
+    "impressum": "Impresum"
+  },
+
+  "validation": {
+    "salutation": {
+      "required": "Molimo odaberite oslovljavanje",
+      "contactRequired": "Molimo unesite kontakt osobu"
+    },
+    "job": {
+      "required": "Polje za zanimanje je obavezno!"
+    },
+    "skill": {
+      "required": "Molimo navedite svoje iskustvo"
+    },
+    "name": {
+      "required": "Molimo unesite svoje ime",
+      "minWords": "Ime mora sadržavati najmanje 2 riječi!"
+    },
+    "nameCompany": {
+      "required": "Molimo unesite naziv firme"
+    },
+    "city": {
+      "required": "Molimo navedite poštanski broj i grad."
+    },
+    "street": {
+      "required": "Molimo navedite ulicu i kućni broj.",
+      "minWords": "Adresa mora sadržavati najmanje 2 riječi!"
+    },
+    "email": {
+      "required": "Molimo unesite e-mail adresu",
+      "invalid": "Molimo unesite ispravnu e-mail adresu"
+    },
+    "generating": "Molimo sačekajte.\nTekst vaše prijave se generiše."
+  },
+
+  "alerts": {
+    "error": {
+      "title": "Greška",
+      "attachments": "Došlo je do problema sa vašim prilozima, učitajte ih ponovo.",
+      "emailSettings": "Provjerite postavke vašeg e-maila.",
+      "unknown": "Nepoznata greška"
+    }
+  },
+
+  "common": {
+    "ok": "OK",
+    "infoBadge": "Informacije",
+    "understood": "Razumijem"
+  },
+
+  "email": {
+    "sendButton": "Pošalji",
+    "placeholder": "E-mail adresa"
+  },
+
+  "offlineHeader": "Kreiraj prijavu lokalno",
+  "offlineMain": "Kreirajte svoju prijavu za posao jednostavno, profesionalno i potpuno lokalno na svom uređaju",
+
+  "settings": {
+    "title": "Postavke",
+    "language": "Jezik aplikacije",
+    "theme": "Tema",
+    "darkMode": "Tamni način",
+    "lightMode": "Svijetli način",
+    "languageSaved": "Jezik je sačuvan",
+    "languageChange": "Promijeni jezik",
+    "apiKey": "Koristi sopstveni API ključ",
+    "apiKeyKey": "Unesite API ključ",
+    "changeMode": "Uključi tamni način",
+    "pleaseApi": "Molimo odaberite API provajdera.",
+    "changeApiText": "Koristi API ključ",
+    "apiText": "Koristite svoj OpenAI ključ za kreiranje prilagođenih pisama.",
+    "apiGoogleText": "Koristite svoj Google API ključ za pretragu firmi i adresa.",
+    "languageText": "Promijenite jezik aplikacije (ne utiče na kreirane tekstove prijava)."
+  },
+
+  "saveFile": "Sačuvaj fajl",
+  "saveFileText": "Sačuvajte priloge kako biste ih koristili za buduće prijave.",
+  "Continue": "Preskoči",
+
+  "first": {
+    "heading": "Dobrodošli u JobApp 2",
+    "theDrop": "Svi podaci ostaju šifrovani i sačuvani lokalno na vašem uređaju — sigurno i privatno. Možete ih promijeniti u bilo kom trenutku.",
+    "error": "Molimo popunite sva polja"
+  },
+
+  "ownName": "Vaše ime i prezime",
+  "ownStreet": "Vaša ulica i kućni broj",
+  "ownCity": "Vaš poštanski broj i grad",
+  "buy1": "0,29 € (40 novčića)",
+  "ad": "Oglas (4 novčića)",
+
+  "download": {
+    "titleFirma": "Preuzmi listu firmi",
+    "messageFirma": "Želite li preuzeti imenik od oko 5,3 miliona naziva firmi registrovanih u Njemačkoj? (Bez adresa)",
+    "titleStreet": "Preuzmi nazive ulica",
+    "messageStreet": "Želite li preuzeti sve nazive ulica u Njemačkoj?",
+    "titleCity": "Preuzmi listu gradova",
+    "messageCity": "Želite li preuzeti sve gradove u Njemačkoj sa poštanskim brojevima?",
+    "titleJob": "Preuzmi katalog zanimanja",
+    "messageJob": "Želite li preuzeti listu sa preko 3500 zanimanja?",
+    "button": "Preuzmi"
+  },
+
+  "success": {
+    "title": "Uspješno",
+    "applicationSent": "Vaša mapa prijave je uspješno poslana"
+  },
+
+  "upload": {
+    "title": "Uspješno",
+    "info": "Fajlovi su uspješno sačuvani.",
+    "error": "Odabrano je previše fajlova. Odaberite najviše 11 fajlova.",
+    "headerBlue": "DOKUMENTI I PRILOZI",
+    "headerWhite": "Upravljanje dokumentima",
+    "headerInfo": "Učitajte svoj CV i diplome ili podesite redoslijed fajlova u mapi.",
+    "press": "Pritisnite i prevucite za raspoređivanje",
+    "mainDocument": "Glavni dokument (CV / Biografija)",
+    "attachment": "Prilog {{index}}",
+    "deleteAlertTitle": "Obriši prilog",
+    "deleteAlertMessage": "Da li zaista želite ukloniti „{{name}}“?",
+    "deleteAlertCancel": "Otkaži",
+    "deleteAlertConfirm": "Obriši"
+  },
+
+  "profil": {
+    "title": "Uspješno",
+    "infoData": "Vaši podaci su uspješno sačuvani.",
+    "infoEmail": "Postavke e-maila su uspješno sačuvane.",
+    "error": "Greška",
+    "errorDataEmail": "Molimo popunite sva polja.",
+    "errorEmail": "Postavke e-maila se nisu mogle sačuvati.",
+    "languageError": "Molimo odaberite jezik.",
+    "languageSaved": "Odabrani jezik je sada aktivan.",
+    "buyCancel": "Kupovina je otkazana.",
+    "coinsVerwalten": "Upravljanje novčićima",
+    "coinsText": "Osvojite nove novčiće gledanjem kratkih videa ili dopunite račun.",
+    "welcomeBack": "Dobrodošli nazad",
+    "experienceTitle": "Karijera i Vještine",
+    "experienceDesc": "Trenutno je sačuvano unosa: {{count}}",
+    "experienceDesc_one": "Trenutno je sačuvan 1 unos"
+  },
+
+  "emailDelete": "E-mail je uspješno obrisan",
+  "deleteTitle": "Obriši stavku",
+  "deleteConfirm": "Da li zaista želite obrisati ovu stavku? Ova radnja se ne može poništiti.",
+  "delete": "Obriši",
+  "emailSearch": "Pretraga e-mailova...",
+
+  "bewerbung": {
+    "stepBadge": "KORAK 1 OD 2",
+    "mainTitle": "Konfiguracija prijave",
+    "sectionSalutation": "OSLOVLJAVANJE I KONTAKT OSOBA",
+    "sectionJob": "ZANIMANJE ILI LINK OGLASA",
+    "sectionSkills": "ZNANJE I ISKUSTVO",
+    "sectionAccordion": "Napredne postavke",
+    "labelEmployment": "VRSTA ZAPOSLENJA",
+    "labelAppType": "VRSTA PRIJAVE",
+    "labelFont": "FONT U PDF DOKUMENTU",
+    "placeholderSalutation": "Prezime kontakt osobe (npr. Petrović)",
+    "placeholderJob": "Naziv zanimanja ili zalijepite link oglasa...",
+    "placeholderSkills": "npr. 3 godine React Native, vođenje tima...",
+    "placeholderFont": "Odaberite font",
+    "btnAnalyze": "Analiziraj",
+    "btnGenerate": "Generiši pismo",
+    "creatingApplication": "Prijava se kreira...",
+    "btnCancel": "Otkaži",
+    "infoModalMessage": "Jednostavno zalijepite link oglasa za posao u polje zanimanja — automatski ćemo izvući zahtjeve pozicije!\n\nIli jednostavno unesite samo naziv svog zanimanja.",
+    "extractingTitle": "Analiza oglasa za posao...",
+    "extractingSubtitle": "Izdvajamo ključne riječi i zadatke pozicije",
+    "extractSuccessTitle": "Uspješno!",
+    "extractSuccessMsg": "Oglas za posao je uspješno analiziran.",
+    "extractHintTitle": "Napomena",
+    "extractDefaultError": "Nije bilo moguće izvući podatke iz oglasa.",
+    "invalidLinkTitle": "Nevažeći link",
+    "invalidLinkMsg": "Molimo zalijepite potpun i ispravan link do oglasa za posao.",
+    "timeoutTitle": "Isteklo vrijeme",
+    "timeoutMsg": "Stranica oglasa se predugo učitavala. Provjerite URL.",
+    "savedTitle": "Sačuvano",
+    "jobSavedMsg": "Naziv zanimanja je zapamćen za buduće prijedloge.",
+    "skillSavedMsg": "Vještina je zapamćena za buduće prijedloge.",
+    "networkError": "Mrežna greška prilikom kreiranja teksta.",
+    "salutationDearAll": "Poštovane dame i gospodo,",
+    "salutationDearMr": "Poštovani gospodine {{name}},",
+    "salutationDearMrs": "Poštovana gospođo {{name}},",
+    "subjectCoverLetterFor": "Prijava za radno mjesto: ",
+    "subjectCoverLetter": "Prijava za radno mjesto: ",
+    "errorTitle": "Greška",
+    "errorLoadJob": "Oglas za posao se nije mogao učitati.",
+    "fonts": {
+      "helvetica": "Helvetica (Moderno i jasno)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Klasični serif)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Monospace)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+
+  "startApp": {
+    "badgeHub": "ASISTENT ZA PRIJAVE",
+    "titleMain": "Kako želite započeti?",
+    "badgeRecommended": "PREPORUČENO",
+    "primaryFooter": "Započni sada",
+    "resumeSubtitle": "Kliknite ovdje za nastavak",
+    "alertMissingProfileTitle": "Nedostaje profil",
+    "alertMissingProfileMsg": "Molimo prvo podesite svoj profil.",
+    "alertIncompleteProfileTitle": "Nepotpun profil",
+    "alertIncompleteProfileMsg": "Unesite svoju adresu na stranici profila.",
+    "alertMissingCvTitle": "Nedostaje CV",
+    "alertMissingCvMsg": "Molimo prvo učitajte svoj CV.",
+    "alertErrorTitle": "Greška",
+    "alertDbLoadError": "Greška pri učitavanju lokalnih podataka.",
+    "alertDbConnectionError": "Povezivanje sa bazom podataka nije uspjelo."
+  },
+
+  "companySearchModal": {
+    "badgeManual": "PROVJERI ADRESU",
+    "badgeAuto": "AUTO-PRETRAGA",
+    "titleManual": "Podaci o firmi",
+    "titleAuto": "Pronađi firmu",
+    "searchPlaceholder": "Unesite naziv firme ili grad...",
+    "promptTypeSuggestions": "Pišite da biste vidjeli prijedloge",
+    "searching": "Pretraga lokacija...",
+    "noResults": "Nema rezultata",
+    "btnManual": "Unesi ručno",
+    "namePlaceholder": "Naziv firme",
+    "streetPlaceholder": "Ulica i kućni broj",
+    "cityPlaceholder": "Poštanski broj i grad",
+    "btnContinue": "Primijeni",
+    "btnBackToSearch": "Nazad na pretragu",
+    "errorTitle": "Greška",
+    "saveErrorMsg": "Vaši podaci se nisu mogli sačuvati.",
+    "btnOk": "OK"
+  },
+
+  "info": {
+    "title": "Informacije",
+    "subtitle": "Greška pri učitavanju podataka.",
+    "btnOk": "Razumijem",
+    "language": "Određuje jezik interfejsa aplikacije.\n\nPostojeće prijave i novokreirani tekstovi neće biti promijenjeni. Ovu postavku možete promijeniti u bilo kom trenutku.",
+    "email": "Povežite svoj e-mail račun kako biste prijave slali direktno iz aplikacije putem sopstvenog sandučeta.\n\nPreporučujemo korištenje posebne e-mail adrese namijenjene isključivo prijavama za posao.",
+    "personal": "Ovdje upravljajte svojim ličnim podacima.\n\nVaši podaci ostaju sačuvani lokalno na vašem uređaju i koriste se samo u kreiranim dokumentima.",
+    "experience": "Unesite radno iskustvo ručno ili dopustite da se automatski izvuče iz vašeg CV-a.\n\nPrilikom izrade prijave možete fleksibilno odabrati koje stanice želite uključiti.",
+    "coins": "Dopunite stanje novčića gledanjem kratkih videa ili kupovinom paketa u prodavnici.\n\nNovčiće možete iskoristiti kad god želite za kreiranje novih prijava.",
+    "choose": "Izaberite dokumente i certifikate koje želite priložiti uz prijavu.\n\nMožete dodavati nove fajlove, zamijeniti postojeće ili obrisati nepotrebne.",
+    "sort": "Posložite priloge željenim redoslijedom. Dokumenti će biti spojeni u mapu tačno tim redom.\n\nPritisnite i držite stavku da je pomjerite gore ili dolje.",
+    "new": "Kreirajte propratno pismo prilagođeno tačnim zahtjevima željenog radnog mjesta.\n\nUnesite osnovne podatke o firmi i poziciji — asistent sastavlja tekst prema vašem profilu.",
+    "old": "Iskoristite ranije prijave da biste uštedjeli vrijeme i trud.\n\nStara dokumenta možete koristiti kao šablone, prilagoditi sadržaj sličnom poslu ili prepraviti određene dijelove.",
+    "resume": "Nastavite započetu prijavu tačno tamo gdje ste stali.\n\nSav napredak se čuva automatski, što sprečava gubitak unesenih podataka."
+  },
+
+  "history": {
+    "headerBadge": "ISTORIJA I ŠABLONI",
+    "title": "Prethodne prijave",
+    "subtitle": "Otvorite gotove mape ili prilagodite postojeće tekstove za novu firmu.",
+    "totalCount": "Ukupno prijava: {{count}}",
+    "totalCount_one": "Ukupno prijava: 1",
+    "emptyTitle": "Nema sačuvanih šablona",
+    "emptySubtitle": "Čim kreirate svoju prvu prijavu, ona će se automatski prikazati ovdje.",
+    "newApplicationBtn": "Započni novu prijavu",
+    "defaultJobTitle": "Prijava bez naziva",
+    "pdfAttached": "PDF priložen",
+    "openFolder": "Otvori mapu",
+    "reuseTemplate": "Iskoristi kao šablon"
+  },
+
+  "editor": {
+    "headerTitle": "Tekstualni editor",
+    "wordCount": "{{count}} riječi",
+    "wordCount_one": "1 riječ",
+    "placeholder": "Unesite tekst ovdje...",
+    "creatingFolder": "Mapa prijave se priprema...",
+    "generateButton": "Generiši mapu i nastavi"
+  }
+}

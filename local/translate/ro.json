@@ -1,0 +1,499 @@
+{
+  "BewerbungGenerieren": "Creează o candidatură nouă",
+  "BewerbungGenerierenText": "Creează rapid și simplu o candidatură profesională.",
+  "BewerbungRecycel": "Reutilizează",
+  "BewerbungRecycelText": "Folosește candidatura anterioară pentru a o adapta rapid la un alt post.",
+  "personalData": "Date personale",
+  "personalDataDescription": "Editează aici adresa ta personală pentru dosarul de candidatură.",
+  "configureEmail": "Configurare e-mail",
+  "configureEmailDescription": "Configurează contul de e-mail pentru trimiterea candidaturilor.",
+  "sortAttachments": "Sortare anexe",
+  "sortAttachmentsDescription": "Ordonează anexele pentru dosarul tău de candidatură.",
+  "placeholderName": "Numele și prenumele meu",
+  "placeholderStreet": "Strada și numărul",
+  "placeholderZip": "Cod poștal și localitate",
+  "placeholderEmail": "E-mail",
+  "placeholderPassword": "Parolă",
+  "placeholderEmailServer": "Alege un server de e-mail",
+  "saveAndClose": "Salvează și închide",
+  "activateAndClose": "Activează",
+  "deactivateAndClose": "Dezactivează",
+  "save": "Salvează",
+  "downloadProgress": "",
+  "bwnzg": "Dosarul tău de candidatură este în curs de pregătire.",
+  "uploadFiles": "Selectează fișiere",
+  "selectFilesToUpload": "Alege anexele pe care dorești să le folosești pentru dosarul de candidatură.",
+  "addAttachment": "Adaugă anexă",
+  "addAttachmentsToApplication": "Adaugă anexele selectate la dosarul tău existent.",
+  "replaceOldFiles": "Înlocuiește anexele vechi",
+  "replaceExistingAttachments": "Înlocuiește anexele existente cu noile fișiere selectate.",
+  "selectedFiles": "Fișier(e) selectat(e)",
+  "searchCompany": "Caută adresa aici",
+  "searchResult": "Rezultatele căutării vor fi afișate aici.",
+  "searchCompanyOld": "Caută adresa companiei...",
+  "companyName": "Numele companiei",
+  "companyStreet": "Strada și numărul companiei",
+  "companyStreet2": "Strada și numărul companiei",
+  "companyCity": "Cod poștal și orașul sediului companiei",
+  "continue": "Continuă",
+  "enterManually": "Introducere manuală",
+  "nameAnsprechpartner": "Nume persoană de contact",
+  "beruf": "Profesie / Post",
+  "skillsErfahrung": "Abilități / Experiență",
+  "fontPlaceholder": "Helvetica (Font implicit)",
+  "generateCoverLetter": "Generează scrisoarea de intenție",
+  "next": "Următorul",
+  "toHome": "Închide",
+  "ok": "Da, desigur!",
+  "cancel": "Nu",
+  "pleaseWait": "Vă rugăm să așteptați",
+  "finish": "Finalizare",
+  "close": "Închide",
+  "nextStep": "Următorul",
+  "previousStep": "Înapoi",
+  "Bewerbung": "Candidatură",
+  "Profile": "Profil",
+  "Anlagen": "Anexe",
+  "Info": "Informații",
+  "Fortsetzen": "Continuă",
+
+  "employmentOptions": {
+    "vollzeit": "Normă întreagă (Full-time)",
+    "teilzeit": "Normă parțială (Part-time)",
+    "minijob": "Minijob / Job ocazional"
+  },
+  "applicationOptions": {
+    "initiativ": "Candidatură spontană",
+    "regulär": "Candidatură standard",
+    "praktikum": "Stagiu de practică / Internat"
+  },
+  "anredeOptions": {
+    "herr": "Domnul",
+    "damenUndHerren": "Doamnelor și Domnilor",
+    "frau": "Doamna"
+  },
+  "salutation": {
+    "herr": "Stimate Domnule ",
+    "frau": "Stimată Doamnă ",
+    "default": "Stimate Doamne, Stimați Domni,"
+  },
+  "applicationOptions2": {
+    "initiativ": "Candidatură spontană pentru postul de ",
+    "regulär": "Candidatură pentru postul de ",
+    "praktikum": "Candidatură pentru stagiu de practică ca ",
+    "default": "Candidatură pentru postul de "
+  },
+  "employmentChoice": {
+    "fulltime": "pentru o normă întreagă",
+    "parttime": "pentru o normă parțială",
+    "minijob": "pe bază de minijob",
+    "default": ""
+  },
+  "enterText": "Introdu textul aici...",
+  "saveCoverLetter": "Salvează scrisoarea",
+  "merge": "Îmbină",
+  "viewApplication": "Vizualizează dosarul",
+  "viewApplicationDescription": "Verifică dosarul de candidatură pentru a evita erorile înainte de descărcare sau trimitere.",
+  "downloadDescription": "Salvează dosarul de candidatură ca fișier PDF pe dispozitiv și trimite-l angajatorului dorit.",
+  "sendEmail": "Trimite prin e-mail",
+  "sendEmailDescription": "Trimite dosarul de candidatură direct prin e-mail. Textul mesajului este generat automat, dar poate fi editat înainte de trimitere. ✉️",
+
+  "terms": {
+    "title": "Termeni și Condiții Generale",
+    "section1": {
+      "heading": "1. Domeniul de aplicare",
+      "content": "Acești Termeni și Condiții se aplică utilizării instrumentului de candidaturi. Aplicația creează documente cu ajutorul inteligenței artificiale (AI) furnizate de terți."
+    },
+    "section2": {
+      "heading": "2. Protecția datelor și securitate",
+      "content": "Toate datele personale sunt salvate exclusiv local pe dispozitivul tău și sunt securizate prin criptare AES-256."
+    },
+    "section3": {
+      "heading": "3. Declinarea responsabilității",
+      "content": "Furnizorul nu își asumă nicio răspundere pentru acuratețea sau exhaustivitatea candidaturilor generate."
+    },
+    "section4": {
+      "heading": "4. Drepturi de utilizare",
+      "content": "Utilizarea aplicației este neexclusivă și netransmisibilă. Modificarea sau revânzarea sunt strict interzise."
+    },
+    "section5": {
+      "heading": "5. Dispoziții finale",
+      "content": "Se aplică legislația Republicii Federale Germania."
+    },
+    "email": {
+      "placeholder": "E-mail",
+      "sendButton": "Trimite e-mail"
+    },
+    "subject": {
+      "placeholder": "Subiect"
+    },
+    "message": {
+      "placeholder": "Mesaj"
+    },
+    "messageText": "Stimate Doamne, Stimați Domni,\n\nPrin prezenta, vă transmit candidatura mea pentru postul de {{jobTitle}} în cadrul companiei {{companyName}}.\n\nCu stimă,\n{{applicantName}}"
+  },
+
+  "emailSent": {
+    "success": "E-mailul a fost trimis cu succes!",
+    "error": "Eroare la trimiterea e-mailului. Vă rugăm să încercați din nou."
+  },
+  "emailConfig": {
+    "server": {
+      "placeholder": "Server de e-mail"
+    },
+    "port": {
+      "placeholder": "Port"
+    },
+    "username": {
+      "placeholder": "Nume utilizator"
+    },
+    "password": {
+      "placeholder": "Parolă"
+    }
+  },
+
+  "faq": {
+    "heading": "Întrebări Frecvente",
+    "entry1": {
+      "subheading": "Cum sunt stocate datele mele?",
+      "paragraph": "Datele tale sunt complet în siguranță. Toate informațiile sunt salvate exclusiv local pe telefonul tău într-o bază de date SQLite și protejate prin criptare puternică AES pe 256 de biți. Acest lucru garantează că nimeni în afară de tine nu are acces la ele. Punem mare preț pe confidențialitate și refuzăm deliberat să stocăm sau să transmitem datele tale pe servere externe.\n\nCând utilizezi serviciul de e-mail, adresa, parola și serverul sunt protejate prin aceeași criptare puternică înainte de procesare. Confidențialitatea ta este prioritatea noastră absolută — deții controlul total asupra datelor tale în orice moment."
+    },
+    "entry2": {
+      "subheading": "Cum funcționează serverul de e-mail?",
+      "paragraph": "Cu ajutorul serviciului nostru de e-mail poți trimite dosarul de candidatură simplu și direct către compania dorită — ai nevoie doar de adresa de contact. Linia de subiect și un model de mesaj sunt redactate automat, asigurând o expediere rapidă și fără bătăi de cap.\n\nDatele tale sunt transmise securizat prin criptare pe 2048 de biți către serverul nostru, care decriptează dosarul și îl trimite direct destinatarului. Nu se creează jurnale (loguri) și nu se stochează date permanent — informațiile rămân doar temporar în memoria cache și sunt șterse imediat după expediere.\n\nLucrăm deja la o versiune complet locală a acestui serviciu. Utilizarea este gratuită și opțională."
+    },
+    "entry3": {
+      "subheading": "Crearea și reutilizarea candidaturilor",
+      "paragraph": "Ai opțiunea fie de a genera o scrisoare de intenție complet nouă, fie de a reutiliza una existentă. Cu un cost simbolic per generare, primești o scrisoare adaptată perfect profilului postului dorit. De asemenea, poți prelua o scrisoare anterioară, actualiza compania și persoana de contact și retușa textul dorit, economisind timp prețios."
+    }
+  },
+
+  "privacy": {
+    "heading": "Politica de Confidențialitate",
+    "entry1": {
+      "title": "1. Informații generale",
+      "text": "Această politică de confidențialitate explică modul în care instrumentul de candidatură prelucrează datele cu caracter personal."
+    },
+    "entry2": {
+      "title": "2. Colectarea și prelucrarea datelor",
+      "text": "Aplicația colectează exclusiv datele necesare pentru întocmirea unei candidaturi:\n• Postul vizat\n• Competențe și experiențe relevante\n• Tipul candidaturii"
+    },
+    "entry3": {
+      "title": "3. Stocare și securitate",
+      "text": "Toate datele cu caracter personal sunt stocate exclusiv pe dispozitivul tău și sunt securizate prin criptare AES pe 256 de biți."
+    },
+    "entry4": {
+      "title": "4. Transmiterea către terți",
+      "text": "Nu se transmit date cu caracter personal către terți. Către furnizorii de servicii AI se transmit doar texte anonimizate necesare redactării scrisorii."
+    },
+    "entry5": {
+      "title": "5. Drepturile utilizatorilor",
+      "text": "Utilizatorii au dreptul de a consulta, corecta și șterge datele salvate local în orice moment."
+    },
+    "entry6": {
+      "title": "6. Modificări ale politicii de confidențialitate",
+      "text": "Această declarație poate fi actualizată periodic. Versiunea actualizată este întotdeauna accesibilă în cadrul aplicației."
+    }
+  },
+
+  "imprint": {
+    "heading": "Date de Contact / Informații Legale",
+    "entry1": {
+      "title": "Informații conform § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermania"
+    },
+    "entry2": {
+      "title": "Contact",
+      "text": "E-mail: kontakt@jobape.de\nSite web: www.jobape.de"
+    },
+    "entry3": {
+      "title": "Declinarea responsabilității",
+      "text": "Conținutul acestei aplicații a fost creat cu cea mai mare atenție. Totuși, nu putem garanta corectitudinea, exhaustivitatea și actualitatea materialelor. Utilizarea aplicației se face pe propria răspundere."
+    },
+    "entry4": {
+      "title": "Drepturi de autor",
+      "text": "Toate materialele din această aplicație sunt protejate de drepturile de autor. Este permisă doar utilizarea privată și necomercială. Orice exploatare comercială necesită acordul scris prealabil al titularului drepturilor."
+    }
+  },
+
+  "navigation": {
+    "faq": "Întrebări",
+    "contact": "Contact",
+    "agb": "Termeni",
+    "privacy": "Confidențialitate",
+    "impressum": "Informații legale"
+  },
+
+  "validation": {
+    "salutation": {
+      "required": "Vă rugăm să alegeți o formulă de adresare",
+      "contactRequired": "Vă rugăm să introduceți persoana de contact"
+    },
+    "job": {
+      "required": "Câmpul profesiei este obligatoriu!"
+    },
+    "skill": {
+      "required": "Vă rugăm să indicați experiența dumneavoastră"
+    },
+    "name": {
+      "required": "Vă rugăm să introduceți numele",
+      "minWords": "Numele trebuie să fie compus din cel puțin 2 cuvinte!"
+    },
+    "nameCompany": {
+      "required": "Vă rugăm să introduceți numele companiei"
+    },
+    "city": {
+      "required": "Vă rugăm să introduceți codul poștal și orașul."
+    },
+    "street": {
+      "required": "Vă rugăm să introduceți strada și numărul.",
+      "minWords": "Adresa trebuie să fie compusă din cel puțin 2 cuvinte!"
+    },
+    "email": {
+      "required": "Vă rugăm să introduceți o adresă de e-mail",
+      "invalid": "Vă rugăm să introduceți o adresă de e-mail validă"
+    },
+    "generating": "Vă rugăm să așteptați.\nTextul candidaturii se generează."
+  },
+
+  "alerts": {
+    "error": {
+      "title": "Eroare",
+      "attachments": "A apărut o problemă cu anexele tale, te rugăm să le încarci din nou.",
+      "emailSettings": "Te rugăm să verifici setările contului de e-mail.",
+      "unknown": "Eroare necunoscută"
+    }
+  },
+
+  "common": {
+    "ok": "OK",
+    "infoBadge": "Informații",
+    "understood": "Am înțeles"
+  },
+
+  "email": {
+    "sendButton": "Trimite",
+    "placeholder": "Adresă de e-mail"
+  },
+
+  "offlineHeader": "Creează candidatura local",
+  "offlineMain": "Creează-ți candidatura simplu, profesional și complet sigur pe dispozitivul tău",
+
+  "settings": {
+    "title": "Setări",
+    "language": "Limba aplicației",
+    "theme": "Temă",
+    "darkMode": "Mod întunecat",
+    "lightMode": "Mod luminos",
+    "languageSaved": "Limba a fost salvată",
+    "languageChange": "Schimbă limba",
+    "apiKey": "Folosește cheie API proprie",
+    "apiKeyKey": "Introdu cheia API",
+    "changeMode": "Activează modul întunecat",
+    "pleaseApi": "Vă rugăm să selectați un furnizor API.",
+    "changeApiText": "Utilizează cheie API",
+    "apiText": "Folosește propria cheie OpenAI pentru scrisori de intenție personalizate.",
+    "apiGoogleText": "Folosește cheia Google API pentru căutarea automată a firmelor și adreselor.",
+    "languageText": "Schimbă limba meniului (nu afectează textele candidaturilor generate)."
+  },
+
+  "saveFile": "Salvează fișierul",
+  "saveFileText": "Salvează anexele pentru a le folosi în candidaturile viitoare.",
+  "Continue": "Omite",
+
+  "first": {
+    "heading": "Bine ai venit la JobApp 2",
+    "theDrop": "Toate datele rămân criptate și stocate local pe dispozitivul tău — sigure și confidențiale. Le poți modifica în orice moment.",
+    "error": "Vă rugăm să completați toate câmpurile"
+  },
+
+  "ownName": "Numele și prenumele tău",
+  "ownStreet": "Strada și numărul tău",
+  "ownCity": "Codul tău poștal și orașul",
+  "buy1": "0,29 € (40 monede)",
+  "ad": "Reclamă (4 monede)",
+
+  "download": {
+    "titleFirma": "Descarcă lista companiilor",
+    "messageFirma": "Dorești să descarci catalogul a aproximativ 5,3 milioane de denumiri de companii înregistrate în Germania? (Fără adrese)",
+    "titleStreet": "Descarcă lista străzilor",
+    "messageStreet": "Dorești să descarci toate denumirile străzilor din Germania?",
+    "titleCity": "Descarcă lista orașelor",
+    "messageCity": "Dorești să descarci toate orașele din Germania cu codurile lor poștale?",
+    "titleJob": "Descarcă catalogul profesiilor",
+    "messageJob": "Dorești să descarci peste 3500 de denumiri de meserii?",
+    "button": "Descarcă"
+  },
+
+  "success": {
+    "title": "Succes",
+    "applicationSent": "Dosarul tău de candidatură a fost trimis cu succes"
+  },
+
+  "upload": {
+    "title": "Succes",
+    "info": "Fișierele au fost salvate cu succes.",
+    "error": "Prea multe fișiere selectate. Te rugăm să selectezi maximum 11 fișiere.",
+    "headerBlue": "DOCUMENTE ȘI ANEXE",
+    "headerWhite": "Gestionare documente",
+    "headerInfo": "Încarcă CV-ul și certificatele sau rearanjează ordinea documentelor din dosar.",
+    "press": "Apasă lung și trage pentru a ordona",
+    "mainDocument": "Document principal (CV)",
+    "attachment": "Anexă {{index}}",
+    "deleteAlertTitle": "Șterge anexa",
+    "deleteAlertMessage": "Sigur dorești să elimini „{{name}}”?",
+    "deleteAlertCancel": "Anulează",
+    "deleteAlertConfirm": "Șterge"
+  },
+
+  "profil": {
+    "title": "Succes",
+    "infoData": "Datele tale au fost salvate cu succes.",
+    "infoEmail": "Setările de e-mail au fost salvate cu succes.",
+    "error": "Eroare",
+    "errorDataEmail": "Vă rugăm să completați toate câmpurile.",
+    "errorEmail": "Setările de e-mail nu au putut fi salvate.",
+    "languageError": "Vă rugăm să selectați o limbă.",
+    "languageSaved": "Limba selectată este acum activă.",
+    "buyCancel": "Achiziția a fost anulată.",
+    "coinsVerwalten": "Gestionare monede",
+    "coinsText": "Obține monede noi vizionând clipuri video sau reîncarcă direct.",
+    "welcomeBack": "Bine ai revenit",
+    "experienceTitle": "Traseu profesional & Abilități",
+    "experienceDesc": "În prezent sunt înregistrate {{count}} etape",
+    "experienceDesc_one": "În prezent este înregistrată 1 etapă"
+  },
+
+  "emailDelete": "E-mailul a fost șters cu succes",
+  "deleteTitle": "Șterge înregistrarea",
+  "deleteConfirm": "Sigur dorești să ștergi această înregistrare? Această acțiune nu poate fi anulată.",
+  "delete": "Șterge",
+  "emailSearch": "Se caută e-mailurile...",
+
+  "bewerbung": {
+    "stepBadge": "PASUL 1 DIN 2",
+    "mainTitle": "Configurare candidatură",
+    "sectionSalutation": "FORMULĂ ȘI PERSOANĂ DE CONTACT",
+    "sectionJob": "PROFESIE SAU LINK CĂTRE ANUNȚ",
+    "sectionSkills": "CUNOȘTINȚE ȘI EXPERIENȚĂ",
+    "sectionAccordion": "Setări avansate",
+    "labelEmployment": "TIP DE ANGAJARE",
+    "labelAppType": "TIPUL CANDIDATURII",
+    "labelFont": "FONTUL DOCUMENTULUI PDF",
+    "placeholderSalutation": "Numele de familie al persoanei de contact (ex. Popescu)",
+    "placeholderJob": "Titlul profesiei sau lipește linkul anunțului...",
+    "placeholderSkills": "ex. 3 ani React Native, coordonare echipă...",
+    "placeholderFont": "Alege fontul",
+    "btnAnalyze": "Analizează",
+    "btnGenerate": "Generează scrisoarea",
+    "creatingApplication": "Se pregătește candidatura...",
+    "btnCancel": "Anulează",
+    "infoModalMessage": "Lipește linkul unui anunț de angajare în câmpul profesiei — vom extrage automat cerințele!\n\nAlternativ, este suficient să introduci doar denumirea profesiei tale.",
+    "extractingTitle": "Se analizează anunțul de muncă...",
+    "extractingSubtitle": "Extragem cuvintele-cheie și responsabilitățile postului",
+    "extractSuccessTitle": "Succes!",
+    "extractSuccessMsg": "Anunțul de muncă a fost analizat cu succes.",
+    "extractHintTitle": "Notă",
+    "extractDefaultError": "Nu s-au putut extrage date din anunț.",
+    "invalidLinkTitle": "Link nevalid",
+    "invalidLinkMsg": "Vă rugăm să introduceți un link complet și valid către anunțul de muncă.",
+    "timeoutTitle": "Timp expirat",
+    "timeoutMsg": "Pagina anunțului a răspuns prea greu. Verificați adresa URL.",
+    "savedTitle": "Salvat",
+    "jobSavedMsg": "Denumirea profesiei a fost reținută pentru sugestii viitoare.",
+    "skillSavedMsg": "Abilitatea a fost reținută pentru sugestii viitoare.",
+    "networkError": "Eroare de rețea la generarea textului.",
+    "salutationDearAll": "Stimate Doamne, Stimați Domni,",
+    "salutationDearMr": "Stimate Domnule {{name}},",
+    "salutationDearMrs": "Stimată Doamnă {{name}},",
+    "subjectCoverLetterFor": "Candidatură pentru postul de ",
+    "subjectCoverLetter": "Candidatură pentru postul de ",
+    "errorTitle": "Eroare",
+    "errorLoadJob": "Anunțul de angajare nu a putut fi încărcat.",
+    "fonts": {
+      "helvetica": "Helvetica (Modern & Clar)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Clasic Serif)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Monospațiat)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+
+  "startApp": {
+    "badgeHub": "ASISTENT PENTRU CANDIDATURI",
+    "titleMain": "Cum dorești să începi?",
+    "badgeRecommended": "RECOMANDAT",
+    "primaryFooter": "Începe acum",
+    "resumeSubtitle": "Apasă aici pentru a continua",
+    "alertMissingProfileTitle": "Profil lipsă",
+    "alertMissingProfileMsg": "Te rugăm să îți configurezi mai întâi profilul.",
+    "alertIncompleteProfileTitle": "Profil incomplet",
+    "alertIncompleteProfileMsg": "Te rugăm să introduci adresa pe pagina de profil.",
+    "alertMissingCvTitle": "CV lipsă",
+    "alertMissingCvMsg": "Te rugăm să încarci mai întâi CV-ul tău.",
+    "alertErrorTitle": "Eroare",
+    "alertDbLoadError": "Eroare la încărcarea datelor locale.",
+    "alertDbConnectionError": "Conexiunea la baza de date a eșuat."
+  },
+
+  "companySearchModal": {
+    "badgeManual": "VERIFICĂ ADRESA",
+    "badgeAuto": "CĂUTARE AUTO",
+    "titleManual": "Datele companiei",
+    "titleAuto": "Găsește compania",
+    "searchPlaceholder": "Introdu numele companiei sau orașul...",
+    "promptTypeSuggestions": "Scrie pentru a afișa sugestii",
+    "searching": "Se caută locații...",
+    "noResults": "Nu s-au găsit rezultate",
+    "btnManual": "Introducere manuală",
+    "namePlaceholder": "Numele companiei",
+    "streetPlaceholder": "Strada și numărul",
+    "cityPlaceholder": "Cod poștal și oraș",
+    "btnContinue": "Aplică",
+    "btnBackToSearch": "Înapoi la căutare",
+    "errorTitle": "Eroare",
+    "saveErrorMsg": "Datele tale nu au putut fi salvate.",
+    "btnOk": "OK"
+  },
+
+  "info": {
+    "title": "Informații",
+    "subtitle": "Eroare la încărcarea datelor.",
+    "btnOk": "Am înțeles",
+    "language": "Setează limba interfeței aplicației.\n\nCandidaturile existente și textele noi nu sunt afectate. Poți schimba oricând această setare.",
+    "email": "Conectează-ți contul de e-mail pentru a trimite candidaturi direct din aplicație prin propria căsuță poștală.\n\nÎți recomandăm să folosești o adresă de e-mail dedicată exclusiv căutării unui loc de muncă.",
+    "personal": "Gestionează aici datele tale personale de contact.\n\nInformațiile rămân salvate local pe dispozitiv și sunt inserate exclusiv în documentele tale finale.",
+    "experience": "Introdu istoricul profesional manual sau extrage-l automat din CV-ul tău.\n\nCând creezi o candidatură, alegi în mod flexibil ce etape dorești să incluzi.",
+    "coins": "Reîncarcă soldul de monede vizionând scurte reclame video sau cumpărând pachete din magazin.\n\nPoți folosi monedele oricând pentru a genera candidaturi noi.",
+    "choose": "Alege documentele și certificatele care vor fi anexate dosarului tău de candidatură.\n\nPoți adăuga fișiere noi, înlocui documente existente sau șterge anexele de care nu mai ai nevoie.",
+    "sort": "Așază anexele în ordinea dorită. Documentele vor fi concatenate în dosar exact în această ordine.\n\nȚine apăsat un element pentru a-l muta mai sus sau mai jos.",
+    "new": "Creează o scrisoare de intenție croită perfect pe cerințele postului vizat.\n\nIntrodu datele de bază ale firmei și postului — asistentul redactează textul potrivit profilului tău.",
+    "old": "Folosește candidaturi anterioare pentru a economisi timp și efort.\n\nPoți folosi documente vechi ca modele, adapta conținutul pentru posturi similare sau edita secțiuni individuale.",
+    "resume": "Continuă dosarul început exact de unde ai rămas.\n\nProgresul și datele introduse au fost salvate automat, astfel încât să poți continua fără pierderi de informații."
+  },
+
+  "history": {
+    "headerBadge": "ISTORIC ȘI MODELE",
+    "title": "Candidaturi anterioare",
+    "subtitle": "Deschide dosare finalizate sau adaptează scrisori existente pentru un nou angajator.",
+    "totalCount": "Total {{count}} candidaturi",
+    "totalCount_one": "Total 1 candidatură",
+    "emptyTitle": "Nu există modele salvate",
+    "emptySubtitle": "De îndată ce vei crea prima candidatură, aceasta va apărea automat aici.",
+    "newApplicationBtn": "Începe o candidatură nouă",
+    "defaultJobTitle": "Candidatură fără titlu",
+    "pdfAttached": "PDF atașat",
+    "openFolder": "Deschide dosarul",
+    "reuseTemplate": "Reutilizează ca model"
+  },
+
+  "editor": {
+    "headerTitle": "Editor de text",
+    "wordCount": "{{count}} cuvinte",
+    "wordCount_one": "1 cuvânt",
+    "placeholder": "Introdu textul aici...",
+    "creatingFolder": "Se asamblează dosarul de candidatură...",
+    "generateButton": "Generează dosarul și continuă"
+  }
+}

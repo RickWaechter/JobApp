@@ -423,100 +423,102 @@ const [section, setSection] = useState({start: 0, end: 0});
     }
   };
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <Animated.View
-        style={[
-          styles.container,
-          {
-            paddingBottom: Animated.add(
-              keyboardPadding,
-              Platform.OS === 'ios' ? 16 : 22
-            ),
-          },
-        ]}
-      >
-        <View style={styles.editorCard}>
-          <View style={styles.editorHeader}>
-            <View style={styles.editorHeaderLeft}>
-              <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
-              <Text style={styles.editorHeaderText}>Text-Editor</Text>
-            </View>
-
-            <View style={styles.editorHeaderRight}>
-              <View style={styles.wordBadge}>
-                <Text style={styles.wordBadgeText}>{wordCount} Wörter</Text>
-              </View>
-
-              <TouchableOpacity
-                style={styles.closeBtn}
-                onPress={onClose}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons name="close" size={17} color="rgba(255, 255, 255, 0.7)" />
-              </TouchableOpacity>
-            </View>
+ return (
+  <SafeAreaView style={styles.safeArea}>
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          paddingBottom: Animated.add(
+            keyboardPadding,
+            Platform.OS === 'ios' ? 16 : 22
+          ),
+        },
+      ]}
+    >
+      <View style={styles.editorCard}>
+        <View style={styles.editorHeader}>
+          <View style={styles.editorHeaderLeft}>
+            <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
+            <Text style={styles.editorHeaderText}>
+              {t('editor.headerTitle')}
+            </Text>
           </View>
 
-          <TextInput
-            ref={inputRef}
-            style={styles.textArea}
-            selection={section}
-            value={text}
-            onChangeText={handleTextChange}
-   onSelectionChange={(e) => {
-  setSection(e.nativeEvent.selection);
-}}
-            placeholder={t('placeholderText') || 'Hier Text eingeben...'}
-            placeholderTextColor="rgba(255, 255, 255, 0.35)"
-            multiline={true}
-            textAlignVertical="top"
-            scrollEnabled={true}               // Scrollt selbständig bei Wischgeste
-            showsVerticalScrollIndicator={true}
-          />
+          <View style={styles.editorHeaderRight}>
+            <View style={styles.wordBadge}>
+              <Text style={styles.wordBadgeText}>
+                {t('editor.wordCount', { count: wordCount })}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={onClose}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="close" size={17} color="rgba(255, 255, 255, 0.7)" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={styles.generateButton}
-            disabled={loading}
-            onPress={generate}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <View style={styles.loadingRow}>
-                <ActivityIndicator size="small" color="#FFFFFF" />
-                <Text style={styles.generateBtnText}>
-                  {`Bewerbungsmappe wird erstellt`}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.loadingRow}>
-                <MaterialIcons
-                  name="picture-as-pdf"
-                  size={20}
-                  color="#FFFFFF"
-                  style={{ marginRight: 8 }}
-                />
-                <Text style={styles.generateBtnText}>
-                  {t('saveCoverLetter') || 'Mappe generieren & fortsetzen'}
-                </Text>
-                <MaterialIcons
-                  name="arrow-forward"
-                  size={18}
-                  color="#FFFFFF"
-                  style={{ marginLeft: 6 }}
-                />
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    </SafeAreaView>
-  );
-});
+        <TextInput
+          ref={inputRef}
+          style={styles.textArea}
+          selection={section}
+          value={text}
+          onChangeText={handleTextChange}
+          onSelectionChange={(e) => {
+            setSection(e.nativeEvent.selection);
+          }}
+          placeholder={t('editor.placeholder')}
+          placeholderTextColor="rgba(255, 255, 255, 0.35)"
+          multiline={true}
+          textAlignVertical="top"
+          scrollEnabled={true}
+          showsVerticalScrollIndicator={true}
+        />
+      </View>
 
+      <View style={styles.actionContainer}>
+        <TouchableOpacity
+          style={styles.generateButton}
+          disabled={loading}
+          onPress={generate}
+          activeOpacity={0.85}
+        >
+          {loading ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <Text style={styles.generateBtnText}>
+                {t('editor.creatingFolder')}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.loadingRow}>
+              <MaterialIcons
+                name="picture-as-pdf"
+                size={20}
+                color="#FFFFFF"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.generateBtnText}>
+                {t('editor.generateButton')}
+              </Text>
+              <MaterialIcons
+                name="arrow-forward"
+                size={18}
+                color="#FFFFFF"
+                style={{ marginLeft: 6 }}
+              />
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  </SafeAreaView>
+);})
 export default ChangeScreen;
 
 const styles = StyleSheet.create({

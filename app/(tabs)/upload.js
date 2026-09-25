@@ -2,7 +2,7 @@
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import  { memo, useCallback,  useState } from 'react';
+import  { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -104,6 +104,7 @@ const UploadScreen = () => {
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [data, setData] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [textInfo, setTextInfo] = useState('');
   const [db, setDb] = useState(null);
@@ -112,11 +113,18 @@ const UploadScreen = () => {
   const [isModalSortVisible, setModalSortVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const dbRef = useRef(null);
+
   /* ── Fetch Data from DB ──────────────────────────────── */
   const fetchData = async () => {
+    setDataLoading(true);
     try {
-      const database = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      setDb(database);
+      let database = dbRef.current;
+      if (!database) {
+        database = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+        dbRef.current = database;
+        setDb(database);
+      }
 
       const credentials = await Keychain.getGenericPassword();
       const myKey = credentials.password;
@@ -168,6 +176,8 @@ const UploadScreen = () => {
       setData(uiData);
     } catch (err) {
       console.error('Error in fetchData:', err);
+    } finally {
+      setDataLoading(false);
     }
   };
 
@@ -459,12 +469,10 @@ const handleInfo = (val) => {
         <View style={styles.header}>
           <View style={styles.badgeHub}>
             <View style={styles.statusDot} />
-            <Text style={styles.badgeHubText}>DOKUMENTE & ANLAGEN</Text>
-          </View>
-          <Text style={styles.titleMain}>Unterlagen verwalten</Text>
-          <Text style={styles.subtitleMain}>
-            Lade deinen Lebenslauf und Zeugnisse hoch oder passe die Reihenfolge deiner Mappe an.
-          </Text>
+   <Text style={styles.badgeHubText}>{t('upload.headerBlue')}</Text>
+  </View>
+  <Text style={styles.titleMain}>{t('upload.headerWhite')}</Text>
+  <Text style={styles.subtitleMain}>{t('upload.headerInfo')}</Text>
         </View>
 
         {/* ── Normaler Modus ── */}
@@ -484,7 +492,7 @@ const handleInfo = (val) => {
               onIconPress={() => handleInfo('sort')}
               title={t('sortAttachments') || 'Anlagen sortieren'}
               description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
-              badgeText={`${data.length} Datei${data.length === 1 ? '' : 'en'}`}
+              badgeText={dataLoading ? undefined : `${data.length} Datei${data.length === 1 ? '' : 'en'}`}
               onPress={() => {
                 if (data.length > 0) setModalSortVisible(true);
                 else Alert.alert('Keine Anlagen', 'Bitte lade zuerst Unterlagen hoch.');
@@ -583,7 +591,7 @@ const handleInfo = (val) => {
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>{t('sortAttachments') || 'Anlagen sortieren'}</Text>
-                <Text style={styles.modalSubtitle}>Gedrückt halten & ziehen, um zu ordnen</Text>
+                <Text style={styles.modalSubtitle}>{t("upload.press")}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setModalSortVisible(false)}
@@ -631,7 +639,9 @@ const handleInfo = (val) => {
                             {item.name}
                           </Text>
                           <Text style={styles.sortFileRole}>
-                            {isFirst ? 'Hauptdokument (Lebenslauf)' : `Anhang ${currentIndex}`}
+                         {isFirst 
+  ? t('upload.mainDocument') 
+  : t('upload.attachment', { index: currentIndex })}
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -640,11 +650,15 @@ const handleInfo = (val) => {
                         <TouchableOpacity
                           style={styles.trashBtn}
                           onPress={() =>
-                            Alert.alert('Anhang löschen', `Möchtest du "${item.name}" wirklich entfernen?`, [
-                              { text: 'Abbrechen', style: 'cancel' },
-                              { text: 'Löschen', style: 'destructive', onPress: () => deleteItem(item) },
-                            ])
-                          }
+  Alert.alert(
+    t('upload.deleteAlertTitle'),
+    t('upload.deleteAlertMessage', { name: item.name }),
+    [
+      { text: t('upload.deleteAlertCancel'), style: 'cancel' },
+      { text: t('upload.deleteAlertConfirm'), style: 'destructive', onPress: () => deleteItem(item) },
+    ]
+  )
+}
                           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
                           <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
@@ -674,7 +688,7 @@ const handleInfo = (val) => {
               onPress={() => setModalSortVisible(false)}
               activeOpacity={0.8}
             >
-              <Text style={styles.modalDoneBtnText}>Fertig</Text>
+              <Text style={styles.modalDoneBtnText}>{t("finish")}</Text>
             </TouchableOpacity>
           </View>
         </View>

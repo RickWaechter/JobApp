@@ -47,7 +47,10 @@
   "ok": "Ja, klar !",
   "cancel": "Nein",
   "pleaseWait": "Bitte warten",
-
+  "finish": "Fertig",
+  "close": "Schließen",
+  "nextStep": "Weiter",
+  "previousStep": "Zurück",
   "Bewerbung": "Bewerbung",
   "Profile": "Profil",
   "Anlagen": "Anlagen",
@@ -259,7 +262,9 @@
     }
   },
   "common": {
-    "ok": "OK"
+    "ok": "OK",
+     "infoBadge": "Informationen",
+  "understood": "Verstanden"
   },
 
   "email": {
@@ -315,11 +320,19 @@
     "applicationSent": "Deine Bewerbungsmappe wurde erfolgreich versendet"
   },
   "upload": {
-    
-
     "title": "Erfolgreich",
     "info": "Dateien wurden erfolgreich gespeichert.",
-    "error":"Zuviele Dateien ausgewählt. Bitte nur maximal 11 Dateien auswählen."
+    "error":"Zuviele Dateien ausgewählt. Bitte nur maximal 11 Dateien auswählen.",
+    "headerBlue": "DOKUMENTE & ANLAGEN",
+    "headerWhite":"Unterlagen verwalten",
+    "headerInfo": "Lade deinen Lebenslauf und Zeugnisse hoch oder passe die Reihenfolge deiner Mappe an.",
+    "press": "Gedrückt halten & ziehen, um zu ordnen",
+    "mainDocument": "Hauptdokument (Lebenslauf)",
+  "attachment": "Anhang {{index}}",
+  "deleteAlertTitle": "Anhang löschen",
+  "deleteAlertMessage": "Möchtest du \"{{name}}\" wirklich entfernen?",
+  "deleteAlertCancel": "Abbrechen",
+  "deleteAlertConfirm": "Löschen"
   },
   "profil": {
     "title": "Erfolgreich",
@@ -330,14 +343,66 @@
     "errorEmail": "Deine E-Mail-Einstellungen konnten nicht gespeichert werden.",
     "languageError": "Bitte wähle Sie eine Sprache aus.",
     "languageSaved": "Ihre ausgewählte Sprache ist nun verfügbar",
-    "buyCancel": "Kauf wurde abgebrochen."
+    "buyCancel": "Kauf wurde abgebrochen.",
+    "coinsVerwalten": "Coins verwalten",
+    "coinsText":" Erhalte neue Coins per Video oder Sofort-Aufladung",
+    "welcomeBack": "Willkommen zurück",
+    "experienceTitle": "Werdegang & Fähigkeiten",
+  "experienceDesc": "Aktuell {{count}} Stationen hinterlegt",
+  "experienceDesc_one": "Aktuell 1 Station hinterlegt"
+
+    
   },
         "emailDelete": "Email erfolgreich gelöscht",
 "deleteTitle": "Eintrag löschen",
 "deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
 "delete": "Löschen",
 
-
+"profil": {
+  "welcomeBack": "Willkommen zurück",
+  "defaultProfileName": "Mein Profil",
+  "coinsCount": "{{count}} Coins",
+  "coinsCountLoading": "… Coins",
+  "sectionSettings": "EINSTELLUNGEN & DATEN",
+  "sectionTopUp": "GUTHABEN AUFLADEN",
+  "defaultAddressDesc": "Adresse & Name hinterlegen",
+  "defaultEmailDesc": "SMTP-Daten für direkten Versand",
+  "coinsVerwalten": "Coins verwalten",
+  "coinsText": "Erhalte neue Coins per Video oder Sofort-Aufladung",
+  "experienceTitle": "Werdegang & Fähigkeiten",
+  "experienceDesc": "Aktuell {{count}} Stationen hinterlegt",
+  "experienceDesc_one": "Aktuell 1 Station hinterlegt",
+  "modalDataSubtitle": "Diese Daten werden im Anschreiben genutzt",
+  "modalEmailTitle": "E-Mail Versand",
+  "modalEmailSubtitle": "Absenderdaten für automatische Bewerbungen",
+  "modalLangTitle": "Sprache wählen",
+  "modalLangSubtitle": "Wähle deine bevorzugte Sprache",
+  "modalCoinsTitle": "Coins aufladen",
+  "modalCoinsSubtitle": "Nutze Coins für das Erstellen von Bewerbungen",
+  "packTitle": "+40 Coins Paket",
+  "packBadge": "BELIEBT",
+  "packDesc": "Sofortige Freischaltung ohne Werbung",
+  "adTitle": "+4 Coins gratis",
+  "adDesc": "Kurzes Werbevideo ansehen",
+  "cvModalTitle": "Werdegang & CV",
+  "cvModalSubtitle": "Stationen verwalten oder einscannen",
+  "scanTitle": "Lebenslauf scannen",
+  "scanBadge": "OCR",
+  "scanDesc": "PDF oder Bild wählen – Daten automatisch einfügen",
+  "sectionExperience": "Werdegang ({{count}})",
+  "btnAdd": "Hinzufügen",
+  "emptyExperience": "Noch keine Stationen hinterlegt.",
+  "stationBadge": "Station #{{index}}",
+  "labelRole": "Position / Rolle",
+  "placeholderRole": "z. B. Fachinformatiker",
+  "labelCompany": "Unternehmen",
+  "placeholderCompany": "z. B. Daimler AG",
+  "labelPeriod": "Zeitraum",
+  "placeholderPeriod": "08/2020 – Heute",
+  "labelTasks": "Tätigkeiten & Erfolge (Stichpunkte)",
+  "placeholderTasks": "• Entwicklung von React Native Apps\n• Migration auf Go Microservices",
+  "btnSaveCv": "Übernehmen & Schließen"
+},
 
 "emailSearch": "Emails werden gesucht.",
 "bewerbung": {
@@ -439,5 +504,33 @@
   "new": "Erstellen Sie ein maßgeschneidertes Anschreiben, das exakt auf das Anforderungsprofil Ihrer Wunschstelle abgestimmt ist.\n\nGeben Sie einfach die Eckdaten des Unternehmens und der Stelle ein – der Assistent formuliert den Text passgenau anhand Ihres Profils.",
     "old": "Greifen Sie auf bereits erstellte Bewerbungen zurück, um Zeit und Aufwand zu sparen.\n\nSie können frühere Dokumente als Vorlage verwenden, Inhalte für eine ähnliche Stelle adaptieren oder einzelne Abschnitte flexibel aktualisieren.",
   "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können."
-  }
+  
+},
+"history": {
+  "headerBadge": "HISTORIE & VORLAGEN",
+  "title": "Frühere Bewerbungen",
+  "subtitle": "Öffne fertige Mappen oder passe bestehende Texte für eine neue Firma an.",
+  "totalCount": "{{count}} Bewerbungen insgesamt",
+  "totalCount_one": "1 Bewerbung insgesamt",
+  "emptyTitle": "Keine Vorlagen vorhanden",
+  "emptySubtitle": "Sobald du deine erste Bewerbung erstellst, wird sie hier automatisch gespeichert.",
+  "newApplicationBtn": "Neue Bewerbung starten",
+  "defaultJobTitle": "Unbenannte Bewerbung",
+  "pdfAttached": "PDF vorhanden",
+  "openFolder": "Mappe öffnen",
+  "reuseTemplate": "Neu verwenden"
+},
+"editor": {
+  "headerTitle": "Text-Editor",
+  "wordCount": "{{count}} Wörter",
+  "wordCount_one": "1 Wort",
+  "placeholder": "Hier Text eingeben...",
+  "creatingFolder": "Bewerbungsmappe wird erstellt",
+  "generateButton": "Mappe generieren & fortsetzen"
+},
+"completed": {
+  "badge": "FERTIGGESTELLT",
+  "title": "Bewerbungsmappe bereit!",
+  "subtitle": "Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt."
+}
 }

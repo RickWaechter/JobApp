@@ -1,325 +1,499 @@
 {
-  "BewerbungGenerieren": "Utwórz nowe podanie",
-  "BewerbungGenerierenText": "Szybko i łatwo stwórz profesjonalne podanie o pracę.",
-  "BewerbungRecycel": "Wykorzystaj ponownie",
-  "BewerbungRecycelText": "Użyj poprzedniego podania, aby szybko dopasować je do innej oferty.",
-  "personalData": "Dane osobowe",
-  "personalDataDescription": "Edytuj tutaj swój adres do podania.",
-  "configureEmail": "Konfiguracja e-maila",
-  "configureEmailDescription": "Skonfiguruj e-mail do wysyłania podań.",
-  "sortAttachments": "Sortowanie załączników",
-  "sortAttachmentsDescription": "Posortuj załączniki do swojej teczki aplikacyjnej.",
-  "placeholderName": "Moje imię i nazwisko",
-  "placeholderStreet": "Ulica i numer domu",
-  "placeholderZip": "Kod pocztowy i miejscowość",
-  "placeholderEmail": "E-mail",
-  "placeholderPassword": "Hasło",
-  "placeholderEmailServer": "Wybierz serwer e-mail",
-  "saveAndClose": "Zapisz i zamknij",
-  "activateAndClose": "Aktywuj",
-  "deactivateAndClose": "Dezaktywuj",
-  "save": "Zapisz",
+  "BewerbungGenerieren": "Створити нову заяву",
+  "BewerbungGenerierenText": "Створіть професійне резюме швидко та просто.",
+  "BewerbungRecycel": "Використати повторно",
+  "BewerbungRecycelText": "Використовуйте попередню заяву, щоб швидко адаптувати її для іншої вакансії.",
+  "personalData": "Особисті дані",
+  "personalDataDescription": "Відредагуйте тут вашу особисту адресу для подання заяви.",
+  "configureEmail": "Налаштувати пошту",
+  "configureEmailDescription": "Налаштуйте електронну пошту для надсилання резюме.",
+  "sortAttachments": "Сортувати додатки",
+  "sortAttachmentsDescription": "Впорядкуйте додатки для вашого пакета документів.",
+  "placeholderName": "Моє ім'я та прізвище",
+  "placeholderStreet": "Вулиця та номер будинку",
+  "placeholderZip": "Індекс та місто",
+  "placeholderEmail": "Ел. пошта",
+  "placeholderPassword": "Пароль",
+  "placeholderEmailServer": "Оберіть поштовий сервер",
+  "saveAndClose": "Зберегти та закрити",
+  "activateAndClose": "Увімкнути",
+  "deactivateAndClose": "Вимкнути",
+  "save": "Зберегти",
   "downloadProgress": "",
-  "bwnzg": "Twoja teczka aplikacyjna jest teraz przygotowywana.",
-  "uploadFiles": "Wybierz pliki",
-  "selectFilesToUpload": "Wybierz załączniki, których chcesz użyć w swojej teczce aplikacyjnej.",
-  "addAttachment": "Dodaj załącznik",
-  "addAttachmentsToApplication": "Dodaj wybrane załączniki do istniejącej teczki aplikacyjnej.",
-  "replaceOldFiles": "Zastąp stare załączniki",
-  "replaceExistingAttachments": "Zastąp dotychczasowe załączniki nowo wybranymi.",
-  "selectedFiles": "Wybrany(e) plik(i)",
-  "searchCompany": "Wyszukaj tutaj adres",
-  "searchCompanyOld": "Wyszukaj adres firmy...",
-  "companyName": "Nazwa firmy",
-  "companyStreet": "Ulica i numer budynku firmy",
-  "companyStreet2": "Ulica i numer budynku firmy",
-  "companyCity": "Kod pocztowy i miejscowość siedziby",
-  "continue": "Dalej",
-  "enterManually": "Wpisz ręcznie",
-  "nameAnsprechpartner": "Imię i nazwisko osoby kontaktowej",
-  "beruf": "Stanowisko",
-  "skillsErfahrung": "Umiejętności / doświadczenie",
-  "fontPlaceholder": "Helvetica (czcionka domyślna)",
-  "generateCoverLetter": "Wygeneruj list motywacyjny",
-  "next": "Dalej",
-  "toHome": "Zamknij",
-  "ok": "Tak, jasne!",
-  "cancel": "Nie",
-  "pleaseWait": "Proszę czekać",
-
-  "Bewerbung": "Podanie",
-  "Profile": "Profil",
-  "Anlagen": "Załączniki",
-  "Info": "Informacje",
-
-  "Fortsetzen": "Kontynuuj",
+  "bwnzg": "Формується ваш пакет документів для відгуку.",
+  "uploadFiles": "Обрати файли",
+  "selectFilesToUpload": "Оберіть додатки, які ви хочете долучити до свого резюме.",
+  "addAttachment": "Додати файл",
+  "addAttachmentsToApplication": "Додайте вибрані файли до поточного пакета документів.",
+  "replaceOldFiles": "Замінити старі файли",
+  "replaceExistingAttachments": "Замініть наявні додатки новими вибраними файлами.",
+  "selectedFiles": "Вибраний(і) файл(и)",
+  "searchCompany": "Пошук адреси",
+  "searchResult": "Результати пошуку відобразяться тут.",
+  "searchCompanyOld": "Пошук адреси компанії...",
+  "companyName": "Назва компанії",
+  "companyStreet": "Вулиця та номер будинку компанії",
+  "companyStreet2": "Вулиця та номер будинку компанії",
+  "companyCity": "Індекс та місто розташування компанії",
+  "continue": "Далі",
+  "enterManually": "Ввести вручну",
+  "nameAnsprechpartner": "Ім'я контактної особи",
+  "beruf": "Професія / Посада",
+  "skillsErfahrung": "Навички / Досвід",
+  "fontPlaceholder": "Helvetica (Шрифт за замовчуванням)",
+  "generateCoverLetter": "Створити супровідний лист",
+  "next": "Далі",
+  "toHome": "Закрити",
+  "ok": "Так, звісно!",
+  "cancel": "Ні",
+  "pleaseWait": "Будь ласка, зачекайте",
+  "finish": "Готово",
+  "close": "Закрити",
+  "nextStep": "Далі",
+  "previousStep": "Назад",
+  "Bewerbung": "Заява",
+  "Profile": "Профіль",
+  "Anlagen": "Додатки",
+  "Info": "Інформація",
+  "Fortsetzen": "Продовжити",
 
   "employmentOptions": {
-    "vollzeit": "Pełny etat",
-    "teilzeit": "Część etatu",
-    "minijob": "Minijob"
+    "vollzeit": "Повна зайнятість",
+    "teilzeit": "Неповна зайнятість",
+    "minijob": "Міні-робота (Minijob)"
   },
   "applicationOptions": {
-    "initiativ": "Aplikacja spontaniczna",
-    "regulär": "Standardowa",
-    "praktikum": "Praktyka"
+    "initiativ": "Ініціативне резюме",
+    "regulär": "Звичайне",
+    "praktikum": "Практика / Стажування"
   },
   "anredeOptions": {
-    "herr": "Pan",
-    "damenUndHerren": "Szanowni Państwo",
-    "frau": "Pani"
+    "herr": "Пан",
+    "damenUndHerren": "Пані та панове",
+    "frau": "Пані"
   },
   "salutation": {
-    "herr": "Szanowny Panie ",
-    "frau": "Szanowna Pani ",
-    "default": "Szanowni Państwo,"
+    "herr": "Шановний пане ",
+    "frau": "Шановна пані ",
+    "default": "Шановні пані та панове,"
   },
   "applicationOptions2": {
-    "initiativ": "Aplikacja spontaniczna na stanowisko ",
-    "regulär": "Podanie o pracę na stanowisko ",
-    "praktikum": "Podanie o praktykę na stanowisko ",
-    "default": "Podanie o pracę na stanowisko "
+    "initiativ": "Ініціативне резюме на посаду: ",
+    "regulär": "Заява на посаду: ",
+    "praktikum": "Заява на стажування на посаду: ",
+    "default": "Заява на посаду: "
   },
   "employmentChoice": {
-    "fulltime": "na pełny etat",
-    "parttime": "na część etatu",
-    "minijob": "w formie minijobu",
+    "fulltime": "на умовах повної зайнятості",
+    "parttime": "на умовах неповної зайнятості",
+    "minijob": "на умовах міні-зайнятості",
     "default": ""
   },
-  "enterText": "Wpisz tutaj swój tekst...",
-  "saveCoverLetter": "Zapisz list motywacyjny",
-  "merge": "Połącz",
-  "viewApplication": "Podgląd podania",
-  "viewApplicationDescription": "Sprawdź teczkę aplikacyjną, aby uniknąć błędów przed pobraniem lub wysłaniem.",
+  "enterText": "Введіть текст тут...",
+  "saveCoverLetter": "Зберегти лист",
+  "merge": "Об'єднати",
+  "viewApplication": "Переглянути пакет документів",
+  "viewApplicationDescription": "Перевірте ваш пакет документів, щоб уникнути помилок перед завантаженням або надсиланням.",
+  "downloadDescription": "Збережіть готовий пакет як PDF-файл на пристрій і надішліть роботодавцю.",
+  "sendEmail": "Надіслати електронною поштою",
+  "sendEmailDescription": "Надішліть ваш пакет документів безпосередньо ел. поштою. Текст листа генерується автоматично, але його можна змінити перед відправкою. ✉️",
 
-  "downloadDescription": "Zapisz teczkę aplikacyjną jako PDF na swoim urządzeniu i wyślij ją na wybrane stanowisko.",
-  "sendEmail": "Wyślij e-mailem",
-  "sendEmailDescription": "Wyślij teczkę aplikacyjną bezpośrednio e-mailem. Treść wiadomości generuje się automatycznie, ale możesz ją edytować przed wysyłką. ✉️",
   "terms": {
-    "title": "Ogólne warunki korzystania",
+    "title": "Загальні умови використання",
     "section1": {
-      "heading": "1. Zakres obowiązywania",
-      "content": "Niniejsze ogólne warunki obowiązują podczas korzystania z narzędzia do tworzenia podań. Narzędzie tworzy podania z wykorzystaniem sztucznej inteligencji (AI), dostarczanej przez zewnętrznych dostawców."
+      "heading": "1. Сфера застосування",
+      "content": "Ці загальні умови регулюють використання інструменту підготовки заяв. Застосунок створює документи за допомогою штучного інтелекту (ШІ), наданого сторонніми провайдерами."
     },
     "section2": {
-      "heading": "2. Ochrona danych i bezpieczeństwo",
-      "content": "Wszystkie dane osobowe są przechowywane lokalnie i zabezpieczone szyfrowaniem AES-256."
+      "heading": "2. Захист даних та безпека",
+      "content": "Усі персональні дані зберігаються виключно локально на вашому пристрої та захищені шифруванням AES-256."
     },
     "section3": {
-      "heading": "3. Wyłączenie odpowiedzialności",
-      "content": "Dostawca nie ponosi odpowiedzialności za poprawność ani kompletność wygenerowanych podań."
+      "heading": "3. Відмова від відповідальності",
+      "content": "Постачальник не несе відповідальності за правильність чи повноту згенерованих документів."
     },
     "section4": {
-      "heading": "4. Prawa do korzystania",
-      "content": "Korzystanie z narzędzia nie ma charakteru wyłącznego ani przenoszalnego. Zabrania się modyfikacji lub odsprzedaży."
+      "heading": "4. Права використання",
+      "content": "Використання інструменту є невиключним і не підлягає передачі. Зміна чи перепродаж заборонені."
     },
     "section5": {
-      "heading": "5. Postanowienia końcowe",
-      "content": "Obowiązuje prawo Republiki Federalnej Niemiec."
+      "heading": "5. Прикінцеві положення",
+      "content": "Застосовується законодавство Федеративної Республіки Німеччина."
     },
     "email": {
-      "placeholder": "E-mail",
-      "sendButton": "Wyślij e-mail"
+      "placeholder": "Ел. пошта",
+      "sendButton": "Надіслати листа"
     },
     "subject": {
-      "placeholder": "Temat"
+      "placeholder": "Тема"
     },
     "message": {
-      "placeholder": "Wiadomość"
+      "placeholder": "Повідомлення"
     },
-    "messageText": "Szanowni Państwo,\n\nniniejszym aplikuję na stanowisko {{jobTitle}} w firmie {{companyName}}.\n\nZ poważaniem,\n{{applicantName}}"
+    "messageText": "Шановні пані та панове,\n\nцим листом надсилаю своє резюме на посаду {{jobTitle}} у компанії {{companyName}}.\n\nЗ повагою,\n{{applicantName}}"
   },
+
   "emailSent": {
-    "success": "E-mail został wysłany!",
-    "error": "Błąd podczas wysyłania e-maila. Spróbuj ponownie."
+    "success": "Лист успішно надіслано!",
+    "error": "Помилка під час надсилання листа. Спробуйте ще раз."
   },
   "emailConfig": {
     "server": {
-      "placeholder": "Serwer e-mail"
+      "placeholder": "Поштовий сервер"
     },
     "port": {
-      "placeholder": "Port"
+      "placeholder": "Порт"
     },
     "username": {
-      "placeholder": "Nazwa użytkownika"
+      "placeholder": "Ім'я користувача"
     },
     "password": {
-      "placeholder": "Hasło"
+      "placeholder": "Пароль"
     }
   },
+
   "faq": {
-    "heading": "Najczęściej zadawane pytania",
+    "heading": "Часті запитання",
     "entry1": {
-      "subheading": "Jak przechowywane są moje dane?",
-      "paragraph": "Twoje dane są u nas bezpieczne. Wszystkie informacje są przechowywane wyłącznie lokalnie na Twoim telefonie w bazie SQLite i chronione silnym szyfrowaniem AES 256-bit. Dzięki temu nikt poza Tobą nie ma do nich dostępu. Przywiązujemy ogromną wagę do prywatności i świadomie rezygnujemy z zapisywania Twoich danych na zewnętrznych serwerach lub udostępniania ich dalej.\n\nJeśli korzystasz z usługi e-mail, Twój adres e-mail, hasło oraz serwer poczty są również chronione tym samym silnym szyfrowaniem, zanim dane zostaną przetworzone. Dzięki temu Twoje wrażliwe informacje pozostają jak najlepiej zabezpieczone. Twoja prywatność jest dla nas priorytetem – zawsze masz pełną kontrolę nad swoimi danymi."
+      "subheading": "Як зберігаються мої дані?",
+      "paragraph": "Ваші дані у повній безпеці. Уся ваша інформація зберігається виключно локально на телефоні в базі даних SQLite і захищена надійним 256-бітним AES-шифруванням. Це гарантує, що ніхто, крім вас, не має до неї доступу. Ми дуже цінуємо конфіденційність і свідомо відмовляємося від збереження чи передачі ваших даних на сторонні сервери.\n\nЯкщо ви користуєтеся поштовою службою, адреса, пароль і сервер захищаються таким самим надійним шифруванням перед обробкою. Ваша приватність — наш головний пріоритет: ви завжди маєте повний контроль над даними."
     },
     "entry2": {
-      "subheading": "Jak działa serwer e-mail?",
-      "paragraph": "Dzięki naszej usłudze e-mail możesz łatwo wysłać swoją teczkę aplikacyjną bezpośrednio na adres e-mail wybranej firmy – potrzebujesz jedynie właściwego adresu kontaktowego. Temat oraz szablon treści wiadomości generują się automatycznie, dzięki czemu wysyłka jest szybka i wygodna.\n\nTwoje dane są przesyłane na nasz serwer z bezpiecznym szyfrowaniem 2048-bit, a serwer odszyfrowuje teczkę aplikacyjną i przekazuje ją bezpośrednio do odbiorcy. Nie tworzymy logów ani nie przechowujemy danych na stałe – informacje pozostają tylko tymczasowo w pamięci podręcznej i są usuwane natychmiast po przekazaniu.\n\nPracujemy już nad w pełni lokalną wersją tej usługi, aby w przyszłości zapewnić Ci jeszcze większą kontrolę nad danymi. Usługa jest całkowicie darmowa i opcjonalna – to Ty decydujesz, czy chcesz z niej korzystać."
+      "subheading": "Як працює поштовий сервер?",
+      "paragraph": "За допомогою нашої поштової служби ви можете легко надіслати пакет документів безпосередньо на адресу компанії — потрібна лише контактна адреса. Тема та шаблон супровідного тексту генеруються автоматично, що робить надсилання швидким і зручним.\n\nДані передаються захищеним 2048-бітним шифруванням на наш сервер, який розшифровує пакет і відправляє його безпосередньо адресату. Жодних журналів не ведеться, дані не зберігаються постійно: інформація залишається лише тимчасово в оперативній пам'яті й видаляється відразу після надсилання.\n\nМи працюємо над повністю локальною версією цієї функції. Сервіс цілком безкоштовний та необов'язковий."
     },
     "entry3": {
-      "subheading": "Tworzenie podania i ponowne użycie",
-      "paragraph": "Możesz stworzyć zupełnie nowy list motywacyjny albo ponownie wykorzystać istniejący. Za około 1 cent za wygenerowanie możesz otrzymać list motywacyjny dopasowany do wybranej oferty. Alternatywnie możesz użyć wcześniejszego listu i go zmodyfikować: wybierz firmę, ustaw na nowo osobę kontaktową i edytuj tekst według własnych potrzeb. Dzięki temu oszczędzasz czas i nadal możesz elastycznie dopasować każde podanie."
+      "subheading": "Створення та повторне використання резюме",
+      "paragraph": "Ви можете створити цілком новий супровідний лист або використати попередній. За символічну вартість ви отримаєте лист, адаптований під обрану посаду. Також можна використати минулий варіант, вказати іншу компанію, оновити контактну особу й підкоригувати текст, заощаджуючи час."
     }
   },
+
   "privacy": {
-    "heading": "Polityka prywatności",
+    "heading": "Політика конфіденційності",
     "entry1": {
-      "title": "1. Informacje ogólne",
-      "text": "Niniejsza polityka prywatności wyjaśnia, w jaki sposób narzędzie do tworzenia podań przetwarza dane osobowe."
+      "title": "1. Загальна інформація",
+      "text": "Ця політика конфіденційності пояснює, як застосунок обробляє персональні дані."
     },
     "entry2": {
-      "title": "2. Zbieranie i przetwarzanie danych",
-      "text": "Narzędzie zbiera tylko dane niezbędne do stworzenia podania:\n• Pożądane stanowisko\n• Istotne umiejętności (skills)\n• Rodzaj aplikacji"
+      "title": "2. Збір та обробка даних",
+      "text": "Застосунок збирає лише дані, необхідні для підготовки документів:\n• Бажана посада\n• Відповідні навички та досвід\n• Тип заяви"
     },
     "entry3": {
-      "title": "3. Przechowywanie i bezpieczeństwo",
-      "text": "Wszystkie dane osobowe są przechowywane wyłącznie na urządzeniu i zabezpieczone szyfrowaniem AES-256-bit."
+      "title": "3. Збереження та безпека",
+      "text": "Усі персональні дані зберігаються виключно на вашому пристрої під захистом шифрування AES-256."
     },
     "entry4": {
-      "title": "4. Przekazywanie danych stronom trzecim",
-      "text": "Dane osobowe nie są przekazywane stronom trzecim. Do dostawców AI przekazywane są jedynie zanonimizowane dane potrzebne do wygenerowania podania."
+      "title": "4. Передача третім особам",
+      "text": "Жодні персональні дані не передаються третім особам. Провайдерам ШІ передаються лише знеособлені тексти для створення листа."
     },
     "entry5": {
-      "title": "5. Prawa użytkowników",
-      "text": "Użytkownicy mają prawo do wglądu, poprawienia oraz usunięcia danych zapisanych lokalnie."
+      "title": "5. Права користувачів",
+      "text": "Користувачі мають право у будь-який час переглядати, виправляти та видаляти свої збережені локально дані."
     },
     "entry6": {
-      "title": "6. Zmiany polityki prywatności",
-      "text": "Niniejsza polityka prywatności może być aktualizowana. Aktualna wersja jest zawsze dostępna w aplikacji."
+      "title": "6. Зміни до політики конфіденційності",
+      "text": "Ця політика може оновлюватися. Актуальна версія завжди доступна всередині застосунку."
     }
   },
+
   "imprint": {
-    "heading": "Impressum",
+    "heading": "Вихідні дані",
     "entry1": {
-      "title": "Dane zgodnie z § 5 TMG",
-      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nNiemcy"
+      "title": "Відомості відповідно до § 5 TMG",
+      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nНімеччина"
     },
     "entry2": {
-      "title": "Kontakt",
-      "text": "E-mail: kontakt@jobape.de\nStrona: www.jobape.de"
+      "title": "Контакти",
+      "text": "Ел. пошта: kontakt@jobape.de\nВебсайт: www.jobape.de"
     },
     "entry3": {
-      "title": "Wyłączenie odpowiedzialności",
-      "text": "Treści w tej aplikacji przygotowano z najwyższą starannością. Nie możemy jednak zagwarantować ich poprawności, kompletności ani aktualności. Korzystanie z aplikacji odbywa się na własne ryzyko."
+      "title": "Відмова від відповідальності",
+      "text": "Вміст цього застосунку створено з максимальною ретельністю. Проте ми не можемо гарантувати абсолютну точність, повноту чи актуальність матеріалів. Використання застосунку здійснюється на власний ризик."
     },
     "entry4": {
-      "title": "Prawa autorskie",
-      "text": "Wszystkie treści tej aplikacji są chronione prawem autorskim. Dozwolone jest korzystanie wyłącznie do celów prywatnych i niekomercyjnych. Każde dalsze użycie, w szczególności komercyjne wykorzystanie, wymaga wyraźnej zgody właściciela praw autorskich."
+      "title": "Авторське право",
+      "text": "Увесь вміст цього застосунку захищено авторським правом. Дозволено лише особисте некомерційне використання. Будь-яке комерційне використання потребує письмової згоди правовласника."
     }
   },
+
   "navigation": {
-    "faq": "FAQ",
-    "contact": "Kontakt",
-    "agb": "Regulamin",
-    "privacy": "Prywatność",
-    "impressum": "Impressum"
+    "faq": "ЧаПи",
+    "contact": "Контакти",
+    "agb": "Умови",
+    "privacy": "Конфіденційність",
+    "impressum": "Вихідні дані"
   },
+
   "validation": {
+    "salutation": {
+      "required": "Будь ласка, оберіть звертання",
+      "contactRequired": "Будь ласка, вкажіть контактну особу"
+    },
     "job": {
-      "required": "Stanowisko jest wymagane!"
+      "required": "Посада є обов'язковою!"
     },
     "skill": {
-      "required": "Podaj proszę swoje doświadczenie"
+      "required": "Будь ласка, вкажіть ваш досвід"
     },
     "name": {
-      "required": "Wpisz proszę imię i nazwisko",
-      "minWords": "Imię i nazwisko musi składać się z co najmniej 2 słów!"
+      "required": "Будь ласка, введіть ім'я",
+      "minWords": "Ім'я має містити щонайменше 2 слова!"
     },
     "nameCompany": {
-      "required": "Wpisz proszę nazwę firmy"
+      "required": "Будь ласка, введіть назву компанії"
     },
     "city": {
-      "required": "Podaj proszę kod pocztowy i miasto."
+      "required": "Будь ласка, вкажіть індекс та місто."
     },
     "street": {
-      "required": "Podaj proszę ulicę i numer domu.",
-      "minWords": "Wpis musi składać się z co najmniej 2 słów!"
+      "required": "Будь ласка, вкажіть вулицю та номер будинку.",
+      "minWords": "Адреса має містити щонайменше 2 слова!"
     },
     "email": {
-      "required": "Wpisz proszę adres e-mail",
-      "invalid": "Wpisz proszę poprawny adres e-mail"
+      "required": "Будь ласка, введіть адресу ел. пошти",
+      "invalid": "Введіть дійсну адресу ел. пошти"
     },
-    "generating": "Proszę czekać.\nTwój tekst podania jest generowany."
+    "generating": "Будь ласка, зачекайте.\nТекст вашого резюме створюється."
   },
+
   "alerts": {
     "error": {
-      "title": "Błąd",
-      "attachments": "Wystąpiły problemy z załącznikami. Prześlij je ponownie.",
-      "emailSettings": "Sprawdź ustawienia e-mail.",
-      "unknown": "Nieznany błąd"
+      "title": "Помилка",
+      "attachments": "Виникла проблема з файлами додатків, завантажте їх знову.",
+      "emailSettings": "Перевірте налаштування електронної пошти.",
+      "unknown": "Невідома помилка"
     }
   },
+
   "common": {
-    "ok": "OK"
+    "ok": "ОК",
+    "infoBadge": "Інформація",
+    "understood": "Зрозуміло"
   },
 
   "email": {
-    "sendButton": "Wyślij",
-    "placeholder": "Adres e-mail"
+    "sendButton": "Надіслати",
+    "placeholder": "Адреса ел. пошти"
   },
-  "offlineHeader": "Utwórz podanie lokalnie",
-  "offlineMain": "Twórz swoje podanie łatwo i profesjonalnie — całkowicie lokalnie na urządzeniu",
+
+  "offlineHeader": "Створити резюме локально",
+  "offlineMain": "Створюйте ваше резюме легко, професійно та безпечно прямо на вашому пристрої",
 
   "settings": {
-    "title": "Ustawienia",
-    "language": "Język menu",
-    "theme": "Motyw",
-    "darkMode": "Tryb ciemny",
-    "lightMode": "Tryb jasny",
-    "languageSaved": "Język zapisany",
-    "languageChange": "Zmień język",
-    "apiKey": "Użyj własnego API",
-    "apiKeyKey": "Wpisz klucz API",
-    "changeMode": "Włącz tryb ciemny",
-    "pleaseApi": "Wybierz proszę API.",
-    "changeApiText": "Użyj klucza API",
-    "apiText": "Użyj swojego klucza OpenAI do spersonalizowanych listów motywacyjnych.",
-    "apiGoogleText": "Użyj swojego klucza API do wyszukiwania firm i adresów w Google.",
-    "languageText": "Zmień język aplikacji (nie dotyczy podań)."
+    "title": "Налаштування",
+    "language": "Мова меню",
+    "theme": "Тема",
+    "darkMode": "Темний режим",
+    "lightMode": "Світлий режим",
+    "languageSaved": "Мову збережено",
+    "languageChange": "Змінити мову",
+    "apiKey": "Власний ключ API",
+    "apiKeyKey": "Введіть ключ API",
+    "changeMode": "Увімкнути темний режим",
+    "pleaseApi": "Будь ласка, оберіть провайдера API.",
+    "changeApiText": "Використовувати ключ API",
+    "apiText": "Використовуйте ключ OpenAI для створення індивідуальних листів.",
+    "apiGoogleText": "Використовуйте ключ Google API для пошуку компаній та адрес.",
+    "languageText": "Зміна мови застосунку (не впливає на створені тексти резюме)."
   },
-  "saveFile": "Zapisz plik",
-  "saveFileText": "Zapisz załączniki, aby móc użyć ich później w swoich teczkach aplikacyjnych.",
-  "Continue": "Pomiń",
+
+  "saveFile": "Зберегти файл",
+  "saveFileText": "Збережіть додатки, щоб використовувати їх для майбутніх заяв.",
+  "Continue": "Пропустити",
+
   "first": {
-    "heading": "Witamy w JobApp 2.0",
-    "theDrop": "Wszystkie dane pozostają zaszyfrowane i są przechowywane lokalnie na Twoim urządzeniu – bezpiecznie i prywatnie. Możesz je w każdej chwili zmienić.",
-    "error": "Uzupełnij proszę wszystkie pola"
+    "heading": "Ласкаво просимо до JobApp 2",
+    "theDrop": "Усі дані залишаються зашифрованими та збереженими локально на вашому пристрої — надійно та конфіденційно. Ви можете змінити їх у будь-який момент.",
+    "error": "Будь ласка, заповніть усі поля"
   },
-  "ownName": "Twoje imię i nazwisko",
-  "ownStreet": "Twoja ulica i numer domu",
-  "ownCity": "Twój kod pocztowy i miejscowość",
-  "buy1": "0,29 € (40 monet)",
-  "ad": "Reklama (4 monety)",
+
+  "ownName": "Ваше ім'я та прізвище",
+  "ownStreet": "Ваша вулиця та номер будинку",
+  "ownCity": "Ваш індекс та місто",
+  "buy1": "0,29 € (40 монет)",
+  "ad": "Реклама (4 монети)",
+
   "download": {
-    "titleFirma": "Pobierz listę firm",
-    "messageFirma": "Czy chcesz pobrać katalog ok. 5,3 miliona nazw firm i przedsiębiorstw w Niemczech? (bez adresów)",
-    "titleStreet": "Pobierz listę",
-    "messageStreet": "Czy chcesz pobrać wszystkie nazwy ulic w Niemczech?",
-    "titleCity": "Pobierz listę",
-    "messageCity": "Czy chcesz pobrać wszystkie miasta wraz z kodami pocztowymi?",
-    "titleJob": "Pobierz listę zawodów",
-    "messageJob": "Czy chcesz pobrać ponad 3500 nazw zawodów?",
-    "button": "Pobierz"
+    "titleFirma": "Завантажити список компаній",
+    "messageFirma": "Бажаєте завантажити каталог із близько 5,3 млн назв компаній у Німеччині? (Без адрес)",
+    "titleStreet": "Завантажити назви вулиць",
+    "messageStreet": "Бажаєте завантажити всі назви вулиць Німеччини?",
+    "titleCity": "Завантажити список міст",
+    "messageCity": "Бажаєте завантажити всі міста Німеччини з поштовими індексами?",
+    "titleJob": "Завантажити каталог професій",
+    "messageJob": "Бажаєте завантажити список із понад 3500 професій?",
+    "button": "Завантажити"
   },
+
   "success": {
-    "title": "Sukces",
-    "applicationSent": "Twoja teczka aplikacyjna została pomyślnie wysłana"
+    "title": "Успішно",
+    "applicationSent": "Ваш пакет документів успішно надіслано"
   },
+
   "upload": {
-    "title": "Sukces",
-    "info": "Pliki zostały pomyślnie zapisane.",
-    "error": "Wybrano zbyt wiele plików. Wybierz maksymalnie 11 plików."
+    "title": "Успішно",
+    "info": "Файли успішно збережено.",
+    "error": "Вибрано забагато файлів. Оберіть не більше 11 файлів.",
+    "headerBlue": "ДОКУМЕНТИ ТА ДОДАТКИ",
+    "headerWhite": "Керування документами",
+    "headerInfo": "Завантажте автобіографію та дипломи або налаштуйте порядок файлів.",
+    "press": "Утримуйте та перетягуйте для впорядкування",
+    "mainDocument": "Головний документ (Резюме / CV)",
+    "attachment": "Додаток {{index}}",
+    "deleteAlertTitle": "Видалити додаток",
+    "deleteAlertMessage": "Ви дійсно бажаєте видалити «{{name}}»?",
+    "deleteAlertCancel": "Скасувати",
+    "deleteAlertConfirm": "Видалити"
   },
+
   "profil": {
-    "title": "Sukces",
-    "infoData": "Twoje dane zostały pomyślnie zapisane.",
-    "infoEmail": "Ustawienia e-mail zostały pomyślnie zapisane.",
-    "error": "Błąd",
-    "errorDataEmail": "Wypełnij proszę wszystkie pola.",
-    "errorEmail": "Nie udało się zapisać ustawień e-mail.",
-    "languageError": "Wybierz proszę język.",
-    "languageSaved": "Wybrany język jest teraz dostępny",
-    "buyCancel": "Zakup został anulowany."
+    "title": "Успішно",
+    "infoData": "Ваші дані успішно збережено.",
+    "infoEmail": "Налаштування пошти успішно збережено.",
+    "error": "Помилка",
+    "errorDataEmail": "Будь ласка, заповніть усі поля.",
+    "errorEmail": "Не вдалося зберегти налаштування пошти.",
+    "languageError": "Будь ласка, оберіть мову.",
+    "languageSaved": "Обрана мова активована.",
+    "buyCancel": "Купівлю скасовано.",
+    "coinsVerwalten": "Керування монетами",
+    "coinsText": "Отримуйте нові монети за перегляд відео або поповнюйте рахунок.",
+    "welcomeBack": "З поверненням",
+    "experienceTitle": "Досвід та навички",
+    "experienceDesc": "Збережено місць роботи: {{count}}",
+    "experienceDesc_one": "Збережено місць роботи: 1"
+  },
+
+  "emailDelete": "Пошту успішно видалено",
+  "deleteTitle": "Видалити запис",
+  "deleteConfirm": "Ви дійсно бажаєте видалити цей запис? Дію не можна скасувати.",
+  "delete": "Видалити",
+  "emailSearch": "Пошук листів...",
+
+  "bewerbung": {
+    "stepBadge": "КРОК 1 З 2",
+    "mainTitle": "Налаштування заяви",
+    "sectionSalutation": "ЗВЕРТАННЯ ТА КОНТАКТ",
+    "sectionJob": "ПРОФЕСІЯ АБО ПОСИЛАННЯ НА ВАКАНСІЮ",
+    "sectionSkills": "ЗНАННЯ ТА ДОСВІД",
+    "sectionAccordion": "Розширені налаштування",
+    "labelEmployment": "ТИП ЗАЙНЯТОСТІ",
+    "labelAppType": "ТИП ЗАЯВИ",
+    "labelFont": "ШРИФТ У PDF",
+    "placeholderSalutation": "Прізвище контактної особи (напр. Шевченко)",
+    "placeholderJob": "Назва посади або посилання на вакансію...",
+    "placeholderSkills": "напр., 3 роки React Native, керівництво командою...",
+    "placeholderFont": "Оберіть шрифт",
+    "btnAnalyze": "Аналізувати",
+    "btnGenerate": "Створити лист",
+    "creatingApplication": "Створення пакета документів...",
+    "btnCancel": "Скасувати",
+    "infoModalMessage": "Просто вставте посилання на вакансію у поле посади — ми автоматично виділимо вимоги!\n\nАбо введіть лише назву вашої професії.",
+    "extractingTitle": "Аналіз вакансії...",
+    "extractingSubtitle": "Виділяємо ключові навички та обов'язки",
+    "extractSuccessTitle": "Успішно!",
+    "extractSuccessMsg": "Вакансію успішно проаналізовано.",
+    "extractHintTitle": "Примітка",
+    "extractDefaultError": "Не вдалося отримати дані з вакансії.",
+    "invalidLinkTitle": "Недійсне посилання",
+    "invalidLinkMsg": "Будь ласка, вставте повне та дійсне посилання на вакансію.",
+    "timeoutTitle": "Тайм-аут",
+    "timeoutMsg": "Сторінка вакансії завантажувалася занадто довго. Перевірте URL.",
+    "savedTitle": "Збережено",
+    "jobSavedMsg": "Посаду збережено для підказок.",
+    "skillSavedMsg": "Навичку збережено для підказок.",
+    "networkError": "Мережева помилка під час створення тексту.",
+    "salutationDearAll": "Шановні пані та панове,",
+    "salutationDearMr": "Шановний пане {{name}},",
+    "salutationDearMrs": "Шановна пані {{name}},",
+    "subjectCoverLetterFor": "Заява на посаду: ",
+    "subjectCoverLetter": "Заява на посаду: ",
+    "errorTitle": "Помилка",
+    "errorLoadJob": "Не вдалося завантажити вакансію.",
+    "fonts": {
+      "helvetica": "Helvetica (Сучасний та чіткий)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Класичний із зарубками)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Моноширинний)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+
+  "startApp": {
+    "badgeHub": "ПОМІЧНИК ІЗ РЕЗЮМЕ",
+    "titleMain": "Як ви бажаєте розпочати?",
+    "badgeRecommended": "РЕКОМЕНДОВАНО",
+    "primaryFooter": "Розпочати зараз",
+    "resumeSubtitle": "Натисніть, щоб продовжити",
+    "alertMissingProfileTitle": "Профіль відсутній",
+    "alertMissingProfileMsg": "Будь ласка, спочатку заповніть ваш профіль.",
+    "alertIncompleteProfileTitle": "Профіль не заповнено",
+    "alertIncompleteProfileMsg": "Вкажіть вашу адресу на сторінці профілю.",
+    "alertMissingCvTitle": "Резюме відсутнє",
+    "alertMissingCvMsg": "Будь ласка, спочатку завантажте ваше резюме.",
+    "alertErrorTitle": "Помилка",
+    "alertDbLoadError": "Помилка завантаження даних.",
+    "alertDbConnectionError": "Помилка підключення до бази даних."
+  },
+
+  "companySearchModal": {
+    "badgeManual": "ПЕРЕВІРКА АДРЕСИ",
+    "badgeAuto": "АВТОПОШУК",
+    "titleManual": "Дані компанії",
+    "titleAuto": "Знайти компанію",
+    "searchPlaceholder": "Назва компанії або місто...",
+    "promptTypeSuggestions": "Введіть текст для підказок",
+    "searching": "Пошук місць...",
+    "noResults": "Нічого не знайдено",
+    "btnManual": "Ввести вручну",
+    "namePlaceholder": "Назва компанії",
+    "streetPlaceholder": "Вулиця та номер будинку",
+    "cityPlaceholder": "Індекс та місто",
+    "btnContinue": "Застосувати",
+    "btnBackToSearch": "Назад до пошуку",
+    "errorTitle": "Помилка",
+    "saveErrorMsg": "Не вдалося зберегти дані.",
+    "btnOk": "ОК"
+  },
+
+  "info": {
+    "title": "Інформація",
+    "subtitle": "Помилка під час завантаження даних.",
+    "btnOk": "Зрозуміло",
+    "language": "Встановлює мову інтерфейсу застосунку.\n\nЦе не впливає на готові документи чи створювані тексти. Ви можете змінити мову в будь-який момент.",
+    "email": "Підключіть поштовий обліковий запис, щоб надсилати заяви безпосередньо з додатка через власну скриньку.\n\nМи рекомендуємо використовувати окрему адресу виключно для пошуку роботи.",
+    "personal": "Керуйте своїми персональними даними тут.\n\nІнформація зберігається локально на вашому пристрої й використовується лише у фінальних документах.",
+    "experience": "Вкажіть кар'єрний шлях вручну або дозвольте витягти його автоматично з вашого резюме.\n\nПід час створення заяви ви зможете гнучко вибирати, які етапи включити в документ.",
+    "coins": "Поповнюйте баланс монет переглядом коротких відео або купівлею пакетів у магазині.\n\nМонети можна використати в будь-який момент для створення нових заяв.",
+    "choose": "Оберіть документи та сертифікати, які слід додати до резюме.\n\nВи можете додавати нові файли, замінювати наявні або видаляти зайві.",
+    "sort": "Розташуйте додатки в бажаному порядку. Документи будуть об'єднані в пакет саме в цій послідовності.\n\nЗатисніть елемент і потягніть угору чи вниз.",
+    "new": "Створіть супровідний лист, який ідеально відповідає вимогам обраної посади.\n\nВведіть основні дані про компанію та посаду — асистент сформулює текст під ваш профіль.",
+    "old": "Використовуйте попередні заяви для економії часу та зусиль.\n\nВи можете брати старі документи як шаблони, адаптувати вміст під схожі вакансії або оновлювати окремі абзаци.",
+    "resume": "Продовжуйте роботу над розпочатою заявою з того місця, де зупинилися.\n\nВаш прогрес зберігається автоматично, що виключає втрату внесених даних."
+  },
+
+  "history": {
+    "headerBadge": "ІСТОРІЯ ТА ШАБЛОНИ",
+    "title": "Попередні заяви",
+    "subtitle": "Відкривайте готові пакети або адаптуйте тексти для нової компанії.",
+    "totalCount": "Усього заяв: {{count}}",
+    "totalCount_one": "Усього заяв: 1",
+    "emptyTitle": "Немає збережених шаблонів",
+    "emptySubtitle": "Щойно ви створите свою першу заяву, вона з'явиться тут.",
+    "newApplicationBtn": "Створити нову заяву",
+    "defaultJobTitle": "Заява без назви",
+    "pdfAttached": "PDF додано",
+    "openFolder": "Відкрити папку",
+    "reuseTemplate": "Використати як шаблон"
+  },
+
+  "editor": {
+    "headerTitle": "Текстовий редактор",
+    "wordCount": "{{count}} слів",
+    "wordCount_one": "1 слово",
+    "placeholder": "Введіть текст тут...",
+    "creatingFolder": "Формується пакет документів...",
+    "generateButton": "Сформувати пакет і продовжити"
   }
 }

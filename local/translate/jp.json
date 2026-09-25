@@ -1,121 +1,124 @@
 {
-  "BewerbungGenerieren": "新規応募の作成",
-  "BewerbungGenerierenText": "素早く簡単にプロフェッショナルな応募書類を作成します。",
-  "BewerbungRecycel": "再利用",
-  "BewerbungRecycelText": "以前の応募データを活用して、別の求人用に素早く新しい応募書類を作成します。",
+  "BewerbungGenerieren": "新しい応募書類を作成",
+  "BewerbungGenerierenText": "プロフェッショナルな応募書類をすばやく簡単に作成できます。",
+  "BewerbungRecycel": "応募書類を再利用",
+  "BewerbungRecycelText": "以前の応募書類を活用して、別の求人向けに素早く調整します。",
   "personalData": "個人情報",
-  "personalDataDescription": "応募書類に使用するあなたの住所や連絡先を編集します。",
+  "personalDataDescription": "応募書類に記載するあなたの住所や連絡先を編集します。",
   "configureEmail": "メール設定",
-  "configureEmailDescription": "応募書類を送信するためのメールアドレスを設定します。",
+  "configureEmailDescription": "応募書類を直接送信するためのメール設定を行います。",
   "sortAttachments": "添付ファイルの並べ替え",
-  "sortAttachmentsDescription": "応募ポートフォリオ内の添付ファイルの順序を整理します。",
+  "sortAttachmentsDescription": "応募書類ポートフォリオの添付順序を整理します。",
   "placeholderName": "氏名",
-  "placeholderStreet": "住所（通り・番地）",
+  "placeholderStreet": "住所（番地・部屋番号）",
   "placeholderZip": "郵便番号・市区町村",
   "placeholderEmail": "メールアドレス",
   "placeholderPassword": "パスワード",
   "placeholderEmailServer": "メールサーバーを選択",
   "saveAndClose": "保存して閉じる",
-  "activateAndClose": "有効化して閉じる",
-  "deactivateAndClose": "無効化して閉じる",
+  "activateAndClose": "有効にする",
+  "deactivateAndClose": "無効にする",
   "save": "保存",
   "downloadProgress": "",
-  "bwnzg": "応募書類を作成中です。少々お待ちください。",
+  "bwnzg": "応募ポートフォリオを作成中です。",
   "uploadFiles": "ファイルを選択",
-  "selectFilesToUpload": "応募ポートフォリオに追加したい添付ファイルを選択してください。",
+  "selectFilesToUpload": "応募書類に添付するファイルを選択してください。",
   "addAttachment": "添付ファイルを追加",
-  "addAttachmentsToApplication": "選択したファイルを既存の応募ポートフォリオに追加します。",
-  "replaceOldFiles": "古いファイルを置き換える",
-  "replaceExistingAttachments": "既存の添付ファイルを新しく選択したファイルに置き換えます。",
+  "addAttachmentsToApplication": "選択した添付ファイルを現在のポートフォリオに追加します。",
+  "replaceOldFiles": "古い添付ファイルを置換",
+  "replaceExistingAttachments": "現在の添付ファイルを新しく選択したファイルに置き換えます。",
   "selectedFiles": "選択されたファイル",
   "searchCompany": "住所を検索",
-  "searchCompanyOld": "会社の住所を検索...",
-  "companyName": "会社名",
-  "companyStreet": "会社の住所（通り・番地）",
-  "companyStreet2": "会社の住所（建物名など）",
-  "companyCity": "会社の郵便番号・所在地",
+  "searchResult": "検索結果がここに表示されます。",
+  "searchCompanyOld": "企業住所を検索...",
+  "companyName": "企業名",
+  "companyStreet": "企業所在地（番地など）",
+  "companyStreet2": "企業所在地（番地など）",
+  "companyCity": "郵便番号・市区町村",
   "continue": "次へ",
   "enterManually": "手動で入力",
   "nameAnsprechpartner": "採用担当者名",
-  "beruf": "職種",
-  "skillsErfahrung": "スキル / 経験",
-  "fontPlaceholder": "Helvetica (標準フォント)",
-  "generateCoverLetter": "カバーレターを作成",
+  "beruf": "希望職種",
+  "skillsErfahrung": "スキル・経歴",
+  "fontPlaceholder": "Helvetica（デフォルトフォント）",
+  "generateCoverLetter": "カバーレター（添え状）を生成",
   "next": "次へ",
   "toHome": "閉じる",
-  "ok": "はい",
+  "ok": "了解",
   "cancel": "いいえ",
-  "pleaseWait": "お待ちください",
-
-  "Bewerbung": "応募",
+  "pleaseWait": "しばらくお待ちください",
+  "finish": "完了",
+  "close": "閉じる",
+  "nextStep": "次へ",
+  "previousStep": "戻る",
+  "Bewerbung": "応募書類",
   "Profile": "プロフィール",
   "Anlagen": "添付書類",
-  "Info": "情報",
-
-  "Fortsetzen": "再開する",
+  "Info": "インフォメーション",
+  "Fortsetzen": "再開",
 
   "employmentOptions": {
-    "vollzeit": "フルタイム",
+    "vollzeit": "正社員・フルタイム",
     "teilzeit": "パートタイム",
-    "minijob": "ミニジョブ (短時間労働)"
+    "minijob": "ミニジョブ・アルバイト"
   },
   "applicationOptions": {
-    "initiativ": "自主応募",
+    "initiativ": "オープン応募（自己推薦）",
     "regulär": "通常応募",
     "praktikum": "インターンシップ"
   },
   "anredeOptions": {
-    "herr": "男性 (Mr.)",
-    "damenUndHerren": "担当部署御中",
-    "frau": "女性 (Ms.)"
+    "herr": "様（男性）",
+    "damenUndHerren": "採用ご担当者様",
+    "frau": "様（女性）"
   },
   "salutation": {
-    "herr": "拝啓 ",
-    "frau": "拝啓 ",
-    "default": "ご担当者様"
+    "herr": "{{name}} 様",
+    "frau": "{{name}} 様",
+    "default": "採用ご担当者様"
   },
   "applicationOptions2": {
-    "initiativ": "自主応募職種: ",
-    "regulär": "応募職種: ",
-    "praktikum": "インターンシップ職種: ",
-    "default": "応募職種: "
+    "initiativ": "オープン応募：",
+    "regulär": "応募書類：",
+    "praktikum": "インターンシップ応募：",
+    "default": "応募書類："
   },
   "employmentChoice": {
-    "fulltime": "（フルタイム勤務希望）",
-    "parttime": "（パートタイム勤務希望）",
-    "minijob": "（ミニジョブ勤務希望）",
+    "fulltime": "（フルタイム希望）",
+    "parttime": "（パートタイム希望）",
+    "minijob": "（アルバイト希望）",
     "default": ""
   },
-  "enterText": "ここにテキストを入力してください...",
-  "saveCoverLetter": "カバーレターを保存",
-  "merge": "統合する",
+  "enterText": "ここにテキストを入力...",
+  "saveCoverLetter": "添え状を保存",
+  "merge": "結合する",
   "viewApplication": "応募書類を確認",
-  "viewApplicationDescription": "ダウンロードや送信の前に、間違いがないか応募書類を確認してください。",
-
-  "downloadDescription": "応募書類をPDFとしてデバイスに保存し、希望の応募先へ送信します。",
+  "viewApplicationDescription": "ダウンロードや送信の前に、ポートフォリオに誤りがないか確認します。",
+  "downloadDescription": "応募書類一式をPDFとして端末に保存し、応募先へ提出できます。",
   "sendEmail": "メールで送信",
-  "sendEmailDescription": "応募書類をメールで直接送信します。メールの本文は自動生成されますが、送信前に編集可能です。✉️",
+  "sendEmailDescription": "応募書類一式をメールで直接送信します。本文は自動生成されますが、送信前に編集可能です。✉️",
+
   "terms": {
     "title": "利用規約",
     "section1": {
       "heading": "1. 適用範囲",
-      "content": "本利用規約は、当応募ツールの利用に適用されます。本ツールは、外部のサードパーティが提供する人工知能（AI）を使用して応募書類を作成します。"
+      "content": "本利用規約は、本応募ツールの利用に適用されます。本ツールは外部プロバイダーの人工知能（AI）を活用して応募書類を作成します。"
     },
     "section2": {
       "heading": "2. データ保護とセキュリティ",
-      "content": "すべての個人データはローカルに保存され、AES-256暗号化によって保護されます。"
+      "content": "すべての個人データはお使いの端末内にローカル保存され、AES-256暗号化によって保護されます。"
     },
     "section3": {
       "heading": "3. 免責事項",
       "content": "提供者は、生成された応募書類の正確性または完全性について一切の責任を負いません。"
     },
     "section4": {
-      "heading": "4. 使用権",
-      "content": "ツールの使用権は非独占的であり、譲渡できません。変更または再販は禁止されています。"
+      "heading": "4. 利用権",
+      "content": "本ツールの利用権は非独占的かつ譲渡不能です。改変や転売は固く禁止されています。"
     },
     "section5": {
-      "heading": "5. 最終規定",
-      "content": "ドイツ連邦共和国の法律が適用されます。"
+      "heading": "5. 準拠法",
+      "content": "ドイツ連邦共和国の法律に準拠します。"
     },
     "email": {
       "placeholder": "メールアドレス",
@@ -125,20 +128,21 @@
       "placeholder": "件名"
     },
     "message": {
-      "placeholder": "メッセージ"
+      "placeholder": "本文"
     },
-    "messageText": "ご担当者様\n\nこの度、{{companyName}}の{{jobTitle}}の求人に応募したく、書類を送付いたします。\n\n何卒よろしくお願い申し上げます。\n{{applicantName}}"
+    "messageText": "拝啓\n\n貴社の {{jobTitle}} の求人に応募いたしたく、応募書類一式をお送りいたします。\n何卒よろしくお願い申し上げます。\n\n敬具\n{{applicantName}}"
   },
+
   "emailSent": {
-    "success": "メールの送信に成功しました！",
-    "error": "メールの送信中にエラーが発生しました。もう一度お試しください。"
+    "success": "メールが正常に送信されました！",
+    "error": "メール送信中にエラーが発生しました。もう一度お試しください。"
   },
   "emailConfig": {
     "server": {
       "placeholder": "メールサーバー"
     },
     "port": {
-      "placeholder": "ポート"
+      "placeholder": "ポート番号"
     },
     "username": {
       "placeholder": "ユーザー名"
@@ -147,119 +151,133 @@
       "placeholder": "パスワード"
     }
   },
+
   "faq": {
-    "heading": "よくある質問 (FAQ)",
+    "heading": "よくある質問",
     "entry1": {
-      "subheading": "私のデータはどのように保存されますか？",
-      "paragraph": "あなたのデータは安全に管理されています。すべての情報は携帯電話のローカルSQLiteデータベースにのみ保存され、強力な256ビットAES暗号化で保護されています。これにより、あなた以外がデータにアクセスすることはできません。私たちはデータ保護を非常に重視しており、意図的に外部サーバーへの保存や共有を行っていません。\n\nメールサービスを利用する場合、メールアドレス、パスワード、メールサーバー情報も処理前に同様の強力な暗号化で保護されます。あなたの機密情報は常に最高レベルで保護されます。プライバシーは最優先事項であり、データは常にあなたが完全に管理できます。"
+      "subheading": "データはどのように保存されますか？",
+      "paragraph": "お客様のデータは安全に保護されています。すべての情報は端末内のSQLiteデータベースにのみローカル保存され、強固な256ビットAES暗号化により保護されています。これにより、お客様以外の第三者がアクセスすることはできません。当社はプライバシーを最優先とし、外部サーバーへのデータ保存や共有は一切行っておりません。\n\nメール送信機能をご利用いただく際も、メールアドレス、パスワード、サーバー設定は同様に強力な暗号化で保護されて処理されます。データはお客様自身の完全な管理下に置かれます。"
     },
     "entry2": {
-      "subheading": "メールサーバーはどのように機能しますか？",
-      "paragraph": "当社のメールサービスを使用すると、応募先企業の連絡先アドレスさえあれば、応募書類を直接送信できます。件名やメール本文のテンプレートは自動的に生成されるため、素早く簡単に送信可能です。\n\nデータは安全な2048ビット暗号化を使用して当社のサーバーに転送され、サーバーが応募書類を復号化して受信者に直接転送します。この際、ログは作成されず、データが永続的に保存されることもありません。情報は一時的にキャッシュに残るのみで、転送後すぐに削除されます。\n\n将来的には、このサービスの完全なローカル版を提供できるよう開発を進めており、データの管理権限をさらに強化する予定です。このサービスは完全に無料で、利用は任意です。"
+      "subheading": "メールサーバー機能はどのように動作しますか？",
+      "paragraph": "メール機能を使用すると、作成した応募ポートフォリオを希望企業のメールアドレスへ直接送信できます。件名や本文のテンプレートは自動生成されるため、迅速かつ簡単に送信手続きが完了します。\n\nデータは2048ビットの安全な暗号化通信で送信サーバーに送られ、復号された後、宛先へ直接転送されます。サーバー上にログやデータが恒久的に保存されることは一切なく、メモリ上に一時保持された後、転送完了と同時に破棄されます。\n\n本機能は完全無料で任意にご利用いただけます。"
     },
     "entry3": {
-      "subheading": "応募書類の作成とリサイクルについて",
-      "paragraph": "完全に新しいカバーレター（送付状）を作成するか、既存のものを再利用するかを選択できます。1回の生成につき約1セントで、希望の職種に合わせたカバーレターを作成できます。または、以前のカバーレターを再利用し、会社名や担当者を変更してテキストを編集することも可能です。これにより、時間を節約しつつ、必要に応じて各応募を柔軟にカスタマイズできます。"
+      "subheading": "応募書類の新規作成と再利用",
+      "paragraph": "まったく新しい添え状を作成することも、過去の添え状を再利用することも可能です。わずかなコストで希望のポジションに最適化された添え状をAIが作成します。また、以前作成した添え状をベースに、企業名や担当者を差し替えて微調整するだけで、作成時間を大幅に短縮できます。"
     }
   },
+
   "privacy": {
     "heading": "プライバシーポリシー",
     "entry1": {
-      "title": "1. 一般情報",
-      "text": "このプライバシーポリシーは、応募ツールが個人データを処理する方法について説明しています。"
+      "title": "1. 一般事項",
+      "text": "本プライバシーポリシーは、本応募ツールにおける個人情報の取り扱いについて説明するものです。"
     },
     "entry2": {
-      "title": "2. データの収集と処理",
-      "text": "ツールは、応募書類の作成に必要なデータのみを収集します：\n• 希望する職種\n• 関連スキル\n• 応募の種類"
+      "title": "2. データの収集および処理",
+      "text": "本ツールは、応募書類の作成に必要な最小限のデータのみを収集します：\n• 希望職種\n• 関連するスキルおよび経験\n• 応募区分"
     },
     "entry3": {
       "title": "3. 保存とセキュリティ",
-      "text": "すべての個人データはデバイスにのみ保存され、AES-256ビット暗号化で保護されます。"
+      "text": "すべての個人データは端末内にのみ保存され、AES-256ビット暗号化によって強固に保護されます。"
     },
     "entry4": {
-      "title": "4. 第三者への提供",
-      "text": "個人データが第三者に提供されることはありません。応募作成のために匿名化されたデータのみがAIサービスプロバイダーに送信されます。"
+      "title": "4. 第三者への開示",
+      "text": "個人を特定できる情報が第三者に提供されることはありません。文章作成に必要なプロンプト情報のみが匿名化されてAIサービスプロバイダーへ送信されます。"
     },
     "entry5": {
       "title": "5. ユーザーの権利",
-      "text": "ユーザーは、ローカルに保存されたデータの開示、訂正、および削除を求める権利を有します。"
+      "text": "ユーザーは、ローカルに保存されている自身のデータをいつでも確認、修正、削除する権利を有します。"
     },
     "entry6": {
-      "title": "6. プライバシーポリシーの変更",
-      "text": "このプライバシーポリシーは更新される場合があります。最新版は常にアプリ内で確認できます。"
+      "title": "6. ポリシーの変更",
+      "text": "本プライバシーポリシーは改定されることがあります。最新バージョンはアプリ内からいつでも確認可能です。"
     }
   },
+
   "imprint": {
-    "heading": "運営者情報 (インプリント)",
+    "heading": "運営者情報 / 法的表示",
     "entry1": {
-      "title": "ドイツテレメディア法第5条に基づく表記",
+      "title": "ドイツ遠隔メディア法（TMG）第5条に基づく表示",
       "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermany"
     },
     "entry2": {
-      "title": "連絡先",
+      "title": "お問い合わせ",
       "text": "メール: kontakt@jobape.de\nウェブサイト: www.jobape.de"
     },
     "entry3": {
       "title": "免責事項",
-      "text": "本アプリのコンテンツは細心の注意を払って作成されていますが、内容の正確性、完全性、最新性について保証するものではありません。アプリの利用はユーザー自身の責任で行ってください。"
+      "text": "本アプリのコンテンツは細心の注意を払って作成されていますが、その正確性、完全性、最新性を保証するものではありません。本アプリの利用はお客様自身の責任において行われるものとします。"
     },
     "entry4": {
-      "title": "著作権",
-      "text": "本アプリのすべてのコンテンツは著作権で保護されています。私的かつ非営利目的での利用のみ許可されます。それ以外の利用、特に商用利用には、著作権者の明示的な同意が必要です。"
+      "title": "著作権について",
+      "text": "本アプリ内のすべてのコンテンツは著作権によって保護されています。私的かつ非商用目的でのみご利用いただけます。それ以外の利用には著作権者の事前の書面による許諾が必要です。"
     }
   },
+
   "navigation": {
     "faq": "よくある質問",
     "contact": "お問い合わせ",
     "agb": "利用規約",
     "privacy": "プライバシー",
-    "impressum": "運営者情報"
+    "impressum": "法的表示"
   },
+
   "validation": {
+    "salutation": {
+      "required": "敬称を選択してください",
+      "contactRequired": "担当者名を入力してください"
+    },
     "job": {
-      "required": "職種の入力は必須です！"
+      "required": "職種名は必須です！"
     },
     "skill": {
-      "required": "経験・スキルを入力してください"
+      "required": "スキルや経験を入力してください"
     },
     "name": {
       "required": "氏名を入力してください",
-      "minWords": "名前は姓と名の2語以上で入力してください！"
+      "minWords": "氏名は2単語以上で入力してください！"
     },
-     "nameCompany": {
-      "required": "会社名を入力してください"
+    "nameCompany": {
+      "required": "企業名を入力してください"
     },
     "city": {
       "required": "郵便番号と市区町村を入力してください。"
     },
     "street": {
-      "required": "通りと番地を入力してください。",
-      "minWords": "通りと番地を正しく入力してください！"
+      "required": "番地を入力してください。",
+      "minWords": "住所は2単語以上で入力してください！"
     },
     "email": {
       "required": "メールアドレスを入力してください",
       "invalid": "正しいメールアドレスを入力してください"
     },
-    "generating": "お待ちください。\n応募テキストを生成しています。"
+    "generating": "しばらくお待ちください。\n応募書類を作成しています。"
   },
+
   "alerts": {
     "error": {
       "title": "エラー",
       "attachments": "添付ファイルに問題が発生しました。再度アップロードしてください。",
       "emailSettings": "メール設定を確認してください。",
-      "unknown": "不明なエラーが発生しました"
+      "unknown": "不明なエラー"
     }
   },
+
   "common": {
-    "ok": "OK"
+    "ok": "OK",
+    "infoBadge": "インフォメーション",
+    "understood": "了解"
   },
 
   "email": {
     "sendButton": "送信",
     "placeholder": "メールアドレス"
   },
-  "offlineHeader": "ローカルで応募書類を作成",
-  "offlineMain": "デバイス上でローカルに、簡単かつプロフェッショナルに応募書類を作成しましょう。",
+
+  "offlineHeader": "端末内で応募書類を作成",
+  "offlineMain": "お使いの端末上で、簡単・安全・プロフェッショナルに応募書類を作成できます",
 
   "settings": {
     "title": "設定",
@@ -267,61 +285,215 @@
     "theme": "テーマ",
     "darkMode": "ダークモード",
     "lightMode": "ライトモード",
-    "languageSaved": "言語設定を保存しました",
+    "languageSaved": "言語を保存しました",
     "languageChange": "言語を変更",
-    "apiKey": "独自のAPIを使用",
+    "apiKey": "カスタムAPIキーを使用",
     "apiKeyKey": "APIキーを入力",
     "changeMode": "ダークモードを有効化",
-    "pleaseApi": "APIを選択してください。",
+    "pleaseApi": "APIプロバイダーを選択してください。",
     "changeApiText": "APIキーを使用",
-    "apiText": "独自のOpenAIキーを使用して、個別の応募書類を作成します。",
-    "apiGoogleText": "Google APIキーを使用して、企業および住所検索を行います。",
-    "languageText": "アプリの言語を変更します（作成される応募書類の言語には影響しません）。"
+    "apiText": "独自のOpenAIキーを使用して応募書類を生成します。",
+    "apiGoogleText": "企業や住所の自動検索にGoogle APIキーを使用します。",
+    "languageText": "アプリの表示言語を変更します（生成される応募文書には影響しません）。"
   },
+
   "saveFile": "ファイルを保存",
-  "saveFileText": "後で応募ポートフォリオに使用するために、添付ファイルを保存します。",
+  "saveFileText": "次回以降の応募書類でも再利用できるように添付ファイルを保存します。",
   "Continue": "スキップ",
+
   "first": {
-    "heading": "JobApp 2.0へようこそ",
-    "theDrop": "すべてのデータは暗号化され、デバイスにローカル保存されます。安全でプライベートな環境で、いつでも変更可能です。",
-    "error": "すべてのフィールドに入力してください"
+    "heading": "JobApp 2 へようこそ",
+    "theDrop": "すべてのデータは暗号化され、お使いの端末内に安全に保存されます。プライベートかつセキュアで、いつでも編集可能です。",
+    "error": "すべての項目を入力してください"
   },
-  "ownName": "氏名（名・姓）",
-  "ownStreet": "住所（通り・番地）",
-  "ownCity": "郵便番号と市区町村",
-  "buy1": "0.29 € (40コイン)",
-  "ad": "広告 (4コイン)",
+
+  "ownName": "氏名（フルネーム）",
+  "ownStreet": "番地・部屋番号",
+  "ownCity": "郵便番号・市区町村",
+  "buy1": "0.29 €（40コイン）",
+  "ad": "広告（4コイン）",
+
   "download": {
     "titleFirma": "企業リストをダウンロード",
-    "messageFirma": "ドイツ国内の約530万件の企業名リストをダウンロードしますか？（住所は含まれません）",
-    "titleStreet": "通りリストをダウンロード",
-    "messageStreet": "ドイツ国内のすべての通り名のリストをダウンロードしますか？",
+    "messageFirma": "ドイツ国内の約530万社の企業名ディレクトリをダウンロードしますか？（住所情報は含みません）",
+    "titleStreet": "通り名リストをダウンロード",
+    "messageStreet": "ドイツ国内のすべての通り名をダウンロードしますか？",
     "titleCity": "都市リストをダウンロード",
-    "messageCity": "すべての都市と郵便番号のリストをダウンロードしますか？",
-    "titleJob": "職種リストをダウンロード",
-    "messageJob": "3500以上の職種名リストをダウンロードしますか？",
+    "messageCity": "ドイツ国内のすべての都市と郵便番号をダウンロードしますか？",
+    "titleJob": "職種名リストをダウンロード",
+    "messageJob": "3500種類以上の職種名リストをダウンロードしますか？",
     "button": "ダウンロード"
   },
+
   "success": {
     "title": "成功",
-    "applicationSent": "応募書類が正常に送信されました"
+    "applicationSent": "応募ポートフォリオが正常に送信されました"
   },
-  "upload": {
-    
 
+  "upload": {
     "title": "成功",
     "info": "ファイルが正常に保存されました。",
-    "error":"選択されたファイルが多すぎます。最大11個まで選択してください。"
+    "error": "選択されたファイルが多すぎます。最大11個まで選択してください。",
+    "headerBlue": "書類 & 添付ファイル",
+    "headerWhite": "書類の管理",
+    "headerInfo": "履歴書や証明書をアップロードするか、ポートフォリオの並び順を調整します。",
+    "press": "長押し＆ドラッグで並べ替え",
+    "mainDocument": "メイン書類（履歴書）",
+    "attachment": "添付書類 {{index}}",
+    "deleteAlertTitle": "添付ファイルの削除",
+    "deleteAlertMessage": "本当に「{{name}}」を削除しますか？",
+    "deleteAlertCancel": "キャンセル",
+    "deleteAlertConfirm": "削除"
   },
+
   "profil": {
     "title": "成功",
-    "infoData": "データが正常に保存されました。",
-    "infoEmail": "メール設定が正常に保存されました。",
+    "infoData": "プロフィール情報が保存されました。",
+    "infoEmail": "メール設定が保存されました。",
     "error": "エラー",
-    "errorDataEmail": "すべてのフィールドに入力してください。",
+    "errorDataEmail": "すべての項目に入力してください。",
     "errorEmail": "メール設定を保存できませんでした。",
     "languageError": "言語を選択してください。",
-    "languageSaved": "選択した言語が適用されました",
-    "buyCancel": "購入がキャンセルされました。"
+    "languageSaved": "選択した言語が適用されました。",
+    "buyCancel": "購入がキャンセルされました。",
+    "coinsVerwalten": "コイン管理",
+    "coinsText": "動画広告を視聴するか、チャージして新しいコインを獲得できます。",
+    "welcomeBack": "おかえりなさい",
+    "experienceTitle": "経歴 & スキル",
+    "experienceDesc": "現在 {{count}} 件の経歴が登録されています",
+    "experienceDesc_one": "現在 1 件の経歴が登録されています"
+  },
+
+  "emailDelete": "メールが正常に削除されました",
+  "deleteTitle": "エントリーを削除",
+  "deleteConfirm": "このエントリーを本当に削除しますか？この操作は取り消せません。",
+  "delete": "削除",
+  "emailSearch": "メールを検索中...",
+
+  "bewerbung": {
+    "stepBadge": "ステップ 1 / 2",
+    "mainTitle": "応募書類の設定",
+    "sectionSalutation": "敬称 & 担当者",
+    "sectionJob": "職種名または求人リンク",
+    "sectionSkills": "スキル & 経験",
+    "sectionAccordion": "高度な設定",
+    "labelEmployment": "雇用形態",
+    "labelAppType": "応募種別",
+    "labelFont": "PDFフォント",
+    "placeholderSalutation": "担当者の姓（例：山田）",
+    "placeholderJob": "職種名または求人URLを貼り付け...",
+    "placeholderSkills": "例：React Native実務3年、チームリード経験など...",
+    "placeholderFont": "フォントを選択",
+    "btnAnalyze": "分析する",
+    "btnGenerate": "添え状を生成",
+    "creatingApplication": "応募書類を作成中...",
+    "btnCancel": "キャンセル",
+    "infoModalMessage": "職種欄に求人情報のURLを貼り付けるだけで、必須条件を自動抽出します！\n\nもちろん職種名のみを手入力して作成することも可能です。",
+    "extractingTitle": "求人情報を分析中...",
+    "extractingSubtitle": "キーワードと業務内容を抽出しています",
+    "extractSuccessTitle": "成功！",
+    "extractSuccessMsg": "求人情報の分析が完了しました。",
+    "extractHintTitle": "ヒント",
+    "extractDefaultError": "求人情報を抽出できませんでした。",
+    "invalidLinkTitle": "無効なリンク",
+    "invalidLinkMsg": "有効な求人ページの完全なURLを入力してください。",
+    "timeoutTitle": "タイムアウト",
+    "timeoutMsg": "求人ページの読み込みに時間がかかりすぎました。URLを確認してください。",
+    "savedTitle": "保存完了",
+    "jobSavedMsg": "職種名を入力候補として保存しました。",
+    "skillSavedMsg": "スキルを入力候補として保存しました。",
+    "networkError": "テキスト生成中にネットワークエラーが発生しました。",
+    "salutationDearAll": "採用ご担当者様",
+    "salutationDearMr": "{{name}} 様",
+    "salutationDearMrs": "{{name}} 様",
+    "subjectCoverLetterFor": "応募書類：",
+    "subjectCoverLetter": "応募書類：",
+    "errorTitle": "エラー",
+    "errorLoadJob": "求人情報を読み込めませんでした。",
+    "fonts": {
+      "helvetica": "Helvetica（モダン・クッキリ）",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman（クラシック・明朝系）",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier（等幅フォント）",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+
+  "startApp": {
+    "badgeHub": "応募アシスタント",
+    "titleMain": "どの方法で開始しますか？",
+    "badgeRecommended": "おすすめ",
+    "primaryFooter": "今すぐ開始",
+    "resumeSubtitle": "タップして再開",
+    "alertMissingProfileTitle": "プロフィール未設定",
+    "alertMissingProfileMsg": "まずプロフィールを作成してください。",
+    "alertIncompleteProfileTitle": "プロフィールが不完全です",
+    "alertIncompleteProfileMsg": "プロフィール画面で住所を登録してください。",
+    "alertMissingCvTitle": "履歴書がありません",
+    "alertMissingCvMsg": "まず履歴書をアップロードしてください。",
+    "alertErrorTitle": "エラー",
+    "alertDbLoadError": "データ読み込み中にエラーが発生しました。",
+    "alertDbConnectionError": "データベース接続に失敗しました。"
+  },
+
+  "companySearchModal": {
+    "badgeManual": "住所を確認",
+    "badgeAuto": "自動検索",
+    "titleManual": "企業情報",
+    "titleAuto": "企業を検索",
+    "searchPlaceholder": "企業名または地名を入力...",
+    "promptTypeSuggestions": "文字を入力して候補を表示",
+    "searching": "位置情報を検索中...",
+    "noResults": "一致する結果が見つかりません",
+    "btnManual": "手動入力",
+    "namePlaceholder": "企業名",
+    "streetPlaceholder": "番地・号",
+    "cityPlaceholder": "郵便番号・市区町村",
+    "btnContinue": "適用する",
+    "btnBackToSearch": "検索に戻る",
+    "errorTitle": "エラー",
+    "saveErrorMsg": "データを保存できませんでした。",
+    "btnOk": "OK"
+  },
+
+  "info": {
+    "title": "インフォメーション",
+    "subtitle": "データの読み込み中にエラーが発生しました。",
+    "btnOk": "了解",
+    "language": "アプリの画面表示言語を設定します。\n\n既存の応募書類や新しく作成する文書には影響しません。この設定はいつでも変更可能です。",
+    "email": "メールアカウントを連携することで、アプリから直接ご自身のメールボックス経由で応募書類を送信できます。\n\n就職活動専用のメールアドレスを使用することをお勧めします。",
+    "personal": "個人情報をここで管理します。\n\nデータはお使いの端末内にのみ保存され、完成した応募書類の作成にのみ使用されます。",
+    "experience": "職歴を手動で入力するか、履歴書から自動抽出します。\n\n応募書類を作成する際、どの職歴を含めるかを自由に選択できます。",
+    "coins": "短い動画広告を視聴するか、ショップでコインを購入して残高をチャージできます。\n\nコインを使用して新しい応募書類をいつでも生成できます。",
+    "choose": "応募書類に添付する証明書などの書類を選択します。\n\n新しいファイルの追加、既存ファイルの差し替え、不要な書類の削除が可能です。",
+    "sort": "添付書類を希望の順序に並べ替えます。書類は指定した通りの順番でポートフォリオに結合されます。\n\n項目を長押しして上下にドラッグできます。",
+    "new": "希望する求人の要件に合わせた、最適な添え状を作成します。\n\n企業と求人の基本情報を入力するだけで、アシスタントがあなたの経歴に合わせた文章を作成します。",
+    "old": "過去に作成した応募書類を再利用して、作業時間と手間を削減できます。\n\n以前の書類をテンプレートとして活用し、類似の職種向けに内容を素早く調整できます。",
+    "resume": "中断した応募書類の作成を前回の場所からスムーズに再開します。\n\n入力データは自動保存されているため、データを失うことなく作業を続けられます。"
+  },
+
+  "history": {
+    "headerBadge": "履歴 & テンプレート",
+    "title": "以前の応募書類",
+    "subtitle": "完成したポートフォリオを開くか、既存の文章を別の企業向けに調整します。",
+    "totalCount": "合計 {{count}} 件の応募",
+    "totalCount_one": "合計 1 件の応募",
+    "emptyTitle": "テンプレートがありません",
+    "emptySubtitle": "最初の応募書類を作成すると、ここに自動で保存されます。",
+    "newApplicationBtn": "新しい応募を作成",
+    "defaultJobTitle": "無題の応募書類",
+    "pdfAttached": "PDFあり",
+    "openFolder": "フォルダを開く",
+    "reuseTemplate": "テンプレートとして再利用"
+  },
+
+  "editor": {
+    "headerTitle": "テキストエディタ",
+    "wordCount": "{{count}} 語",
+    "wordCount_one": "1 語",
+    "placeholder": "ここにテキストを入力...",
+    "creatingFolder": "応募ポートフォリオを作成中...",
+    "generateButton": "ポートフォリオを生成して次へ"
   }
 }

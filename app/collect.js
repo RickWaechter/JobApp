@@ -216,16 +216,15 @@ const CollectScreen = () => {
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
-          <View style={styles.successBadge}>
-            <MaterialIcons name="check-circle" size={15} color="#10B981" />
-            <Text style={styles.successBadgeText}>FERTIGGESTELLT</Text>
-          </View>
-          <Text style={styles.titleMain}>Bewerbungsmappe bereit!</Text>
-          <Text style={styles.subtitleMain}>
-            Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt.
-          </Text>
-        </View>
-
+  <View style={styles.successBadge}>
+    <MaterialIcons name="check-circle" size={15} color="#10B981" />
+    <Text style={styles.successBadgeText}>{t('completed.badge')}</Text>
+  </View>
+  <Text style={styles.titleMain}>{t('completed.title')}</Text>
+  <Text style={styles.subtitleMain}>
+    {t('completed.subtitle')}
+  </Text>
+</View>
         {/* ── Action Cards ── */}
         <View style={styles.cardsWrapper}>
           <CollectActionCard

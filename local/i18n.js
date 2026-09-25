@@ -3,22 +3,27 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import * as RNLocalize from 'react-native-localize';
+
 import ar from './translate/ar.json';
+import bks from './translate/bks.json'; // Bosnisch / Kroatisch / Serbisch
 import de from './translate/de.json';
 import en from './translate/en.json';
+import es from './translate/es.json';   // Spanisch
+import fa from './translate/fa.json';   // Persisch / Farsi / Dari
 import fr from './translate/fr.json';
 import gr from './translate/gr.json';
 import it from './translate/it.json';
 import jp from './translate/jp.json';
 import nl from './translate/nl.json';
 import pl from './translate/pl.json';
+import ro from './translate/ro.json';   // Rumänisch
 import ru from './translate/ru.json';
 import tr from './translate/tr.json';
 import ua from './translate/ua.json';
 
-
-const resources = { en: { translation: en },
- de: { translation: de },
+const resources = {
+  en: { translation: en },
+  de: { translation: de },
   tr: { translation: tr },
   ar: { translation: ar },
   gr: { translation: gr },
@@ -29,13 +34,18 @@ const resources = { en: { translation: en },
   ua: { translation: ua },
   pl: { translation: pl },
   ru: { translation: ru },
+  ro: { translation: ro },
+  bks: { translation: bks },
+  es: { translation: es },
+  fa: { translation: fa },
 };
-const fallback  = 'en';
+
+const fallback = 'en';
 const deviceLng = RNLocalize.getLocales()[0]?.languageCode ?? fallback;
 
 /** Promise, das aufgelöst wird, sobald i18n fertig ist */
 export const i18nReady = (async () => {
-  const storedLng = await EncryptedStorage.getItem('lang');     // z. B. "de" | null
+  const storedLng = await EncryptedStorage.getItem('lang'); // z. B. "de" | null
   await i18next
     .use(initReactI18next)
     .init({

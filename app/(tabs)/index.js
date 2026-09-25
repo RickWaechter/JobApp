@@ -23,7 +23,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import RNFS from "react-native-fs";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SQLite from "react-native-sqlite-storage";
-
+import KeyboardDummy from "../../comp/keyboardDummy.jsx";
 import Bewerbung from "../application.js";
 import ChangeScreen from "../change.js";
 import CompanySearchModal from "../../comp/name.js";
@@ -752,6 +752,7 @@ const getOld = async () => {
           </Animated.View>
         </View>
       )}
+      <KeyboardDummy />
     </SafeAreaView>
   );
 }

@@ -60,10 +60,14 @@ const itemsLang = [
   { label: 'العربية', value: 'ar', flag: '🇸🇦' },
   { label: 'Français', value: 'fr', flag: '🇫🇷' },
   { label: 'Italiano', value: 'it', flag: '🇮🇹' },
+  { label: 'Español', value: 'es', flag: '🇪🇸' },
   { label: 'Nederlands', value: 'nl', flag: '🇳🇱' },
   { label: 'Polski', value: 'pl', flag: '🇵🇱' },
   { label: 'Română', value: 'ro', flag: '🇷🇴' },
+  { label: 'Русский', value: 'ru', flag: '🇷🇺' },
   { label: 'Українська', value: 'uk', flag: '🇺🇦' },
+  { label: 'Bosanski / Hrvatski / Srpski', value: 'bks', flag: '🇭🇷'}, 
+  { label: 'فارسی / دری', value: 'fa', flag: '🇮🇷' },
   { label: 'Ελληνικά', value: 'el', flag: '🇬🇷' },
   { label: '日本語', value: 'ja', flag: '🇯🇵' },
 ];
@@ -203,6 +207,7 @@ const saveExperiences = async () => {
     );
 
     console.log('Experiences saved successfully');
+    setModalCvVisible(false);
   } catch (error) {
     console.error('Fehler beim Speichern der Erfahrungen:', error);
   }
@@ -609,7 +614,7 @@ const handleInfo = (val) => {
       break;
   }
 }
-  return (
+return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -622,9 +627,9 @@ const handleInfo = (val) => {
               <MaterialIcons name="person" size={26} color="#FFFFFF" />
             </View>
             <View style={styles.nameWrap}>
-              <Text style={styles.greetingLabel}>Willkommen zurück</Text>
+              <Text style={styles.greetingLabel}>{t('profil.welcomeBack')}</Text>
               <Text style={styles.userName} numberOfLines={1}>
-                {myName ? myName : 'Mein Profil'}
+                {myName ? myName : t('profil.defaultProfileName')}
               </Text>
             </View>
           </View>
@@ -640,7 +645,9 @@ const handleInfo = (val) => {
             </View>
            
             <Text style={styles.coinText}>
-              {coins !== null ? `${coins} Coins` : '… Coins'}
+              {coins !== null 
+                ? t('profil.coinsCount', { count: coins }) 
+                : t('profil.coinsCountLoading')}
             </Text>
             <View style={styles.coinAddBtn}>
               <MaterialIcons name="add" size={14} color="#FFFFFF" />
@@ -650,14 +657,14 @@ const handleInfo = (val) => {
 
         {/* ── Settings Liste ── */}
         <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>EINSTELLUNGEN & DATEN</Text>
+          <Text style={styles.sectionTitle}>{t('profil.sectionSettings')}</Text>
 
           <View style={styles.cardGroup}>
             <SettingsCard
-            onIconPress={() =>{handleInfo("personal")}}
+              onIconPress={() => handleInfo('personal')}
               iconName="badge"
-              title={t('personalData') || 'Persönliche Daten'}
-              description={myName ? `${myStreet}, ${myCity}` : (t('personalDataDescription') || 'Adresse & Name hinterlegen')}
+              title={t('personalData')}
+              description={myName ? `${myStreet}, ${myCity}` : t('profil.defaultAddressDesc')}
               onPress={() => {
                 loadLocalData();
                 setModalDataVisible(true);
@@ -667,10 +674,10 @@ const handleInfo = (val) => {
             <View style={styles.divider} />
 
             <SettingsCard
-            onIconPress={() =>{handleInfo("email")}}
+              onIconPress={() => handleInfo('email')}
               iconName="alternate-email"
-              title={t('configureEmail') || 'E-Mail Server'}
-              description={email ? email : (t('configureEmailDescription') || 'SMTP-Daten für direkten Versand')}
+              title={t('configureEmail')}
+              description={email ? email : t('profil.defaultEmailDesc')}
               onPress={() => {
                 loadLocalData();
                 setModalEmailVisible(true);
@@ -680,30 +687,29 @@ const handleInfo = (val) => {
             <View style={styles.divider} />
 
             <SettingsCard
-            onIconPress={() =>{handleInfo("lang")}}
+              onIconPress={() => handleInfo('lang')}
               iconName="translate"
-              title={t('settings.languageChange') || 'Sprache'}
+              title={t('settings.languageChange')}
               description={currentLangObj?.label || 'Deutsch'}
               badgeText={`${currentLangObj?.flag || '🇩🇪'} ${currentLangObj?.value?.toUpperCase()}`}
               onPress={() => setModalLangVisible(true)}
             />
-             <View style={styles.divider} />
-<SettingsCard
-              onIconPress={() =>{handleInfo("experience")}}
+
+            <View style={styles.divider} />
+
+            <SettingsCard
+              onIconPress={() => handleInfo('experience')}
               iconName="work-outline"
-              title="Werdegang & Fähigkeiten"
-              description={`Aktuell ${experiences.length} Stationen hinterlegt`}
-              onPress={() => {
-                setModalCvVisible(true);
-              }}
+              title={t('profil.experienceTitle')}
+              description={t('profil.experienceDesc', { count: experiences.length })}
+              onPress={() => setModalCvVisible(true)}
             />
-            
           </View>
         </View>
 
         {/* ── Coin Shop Banner ── */}
         <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>GUTHABEN AUFLADEN</Text>
+          <Text style={styles.sectionTitle}>{t('profil.sectionTopUp')}</Text>
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => setModalPayVisible(true)}
@@ -714,15 +720,15 @@ const handleInfo = (val) => {
               <View style={styles.shopIconContainer}>
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() => handleInfo('coins')}>
-                <MaterialIcons name="stars" size={24} color="#F59E0B" />
+                  onPress={() => handleInfo('coins')}
+                >
+                  <MaterialIcons name="stars" size={24} color="#F59E0B" />
                 </TouchableOpacity>
-
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
-                <Text style={styles.shopBannerTitle}>Coins verwalten</Text>
+                <Text style={styles.shopBannerTitle}>{t('profil.coinsVerwalten')}</Text>
                 <Text style={styles.shopBannerSubtitle}>
-                  Erhalte neue Coins per Video oder Sofort-Aufladung
+                  {t('profil.coinsText')}
                 </Text>
               </View>
               <MaterialIcons name="arrow-forward-ios" size={14} color="rgba(255,255,255,0.4)" />
@@ -736,7 +742,7 @@ const handleInfo = (val) => {
       ═══════════════════════════════════════════════════════════════ */}
       <Modal
         isVisible={isModalDataVisible}
-   animationIn="zoomIn"
+        animationIn="zoomIn"
         animationOut="zoomOut"
         animationInTiming={260}
         animationOutTiming={400}
@@ -753,8 +759,8 @@ const handleInfo = (val) => {
         <View style={styles.modalSheet}>
           <View style={styles.modalHeader}>
             <View>
-              <Text style={styles.modalTitle}>{t('personalData') || 'Persönliche Daten'}</Text>
-              <Text style={styles.modalSubtitle}>Diese Daten werden im Anschreiben genutzt</Text>
+              <Text style={styles.modalTitle}>{t('personalData')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profil.modalDataSubtitle')}</Text>
             </View>
             <TouchableOpacity
               onPress={() => setModalDataVisible(false)}
@@ -767,19 +773,19 @@ const handleInfo = (val) => {
           <View style={styles.modalBody}>
             <ModalInput
               icon="person"
-              placeholder={t('placeholderName') || 'Vollständiger Name'}
+              placeholder={t('placeholderName')}
               value={myName}
               onChangeText={setMyName}
             />
             <ModalInput
               icon="home"
-              placeholder={t('placeholderStreet') || 'Straße & Hausnummer'}
+              placeholder={t('placeholderStreet')}
               value={myStreet}
               onChangeText={setMyStreet}
             />
             <ModalInput
               icon="location-city"
-              placeholder={t('placeholderZip') || 'PLZ & Stadt'}
+              placeholder={t('placeholderZip')}
               value={myCity}
               onChangeText={setMyCity}
             />
@@ -790,7 +796,7 @@ const handleInfo = (val) => {
             onPress={handleSavePersonalData}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryButtonText}>{t('saveAndClose') || 'Speichern'}</Text>
+            <Text style={styles.primaryButtonText}>{t('saveAndClose')}</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -817,8 +823,8 @@ const handleInfo = (val) => {
         <View style={styles.modalSheet}>
           <View style={styles.modalHeader}>
             <View>
-              <Text style={styles.modalTitle}>{t('configureEmail') || 'E-Mail Versand'}</Text>
-              <Text style={styles.modalSubtitle}>Absenderdaten für automatische Bewerbungen</Text>
+              <Text style={styles.modalTitle}>{t('profil.modalEmailTitle')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profil.modalEmailSubtitle')}</Text>
             </View>
             <TouchableOpacity
               onPress={() => setModalEmailVisible(false)}
@@ -831,14 +837,14 @@ const handleInfo = (val) => {
           <View style={styles.modalBody}>
             <ModalInput
               icon="mail"
-              placeholder={t('placeholderEmail') || 'E-Mail Adresse'}
+              placeholder={t('placeholderEmail')}
               value={email}
               onChangeText={setEmail}
             />
 
             <ModalInput
               icon="lock"
-              placeholder={t('placeholderPassword') || 'App-Passwort / Kennwort'}
+              placeholder={t('placeholderPassword')}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={true}
@@ -851,7 +857,7 @@ const handleInfo = (val) => {
                 items={emailServers}
                 setOpen={setOpenServerDropdown}
                 setValue={setEmailServerValue}
-                placeholder={t('placeholderEmailServer') || 'SMTP Server auswählen'}
+                placeholder={t('placeholderEmailServer')}
                 style={styles.dropdown}
                 dropDownContainerStyle={styles.dropdownContainer}
                 textStyle={{ color: '#FFFFFF', fontSize: 14 }}
@@ -865,7 +871,7 @@ const handleInfo = (val) => {
             onPress={handleSaveEmailConfig}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryButtonText}>{t('saveAndClose') || 'Speichern'}</Text>
+            <Text style={styles.primaryButtonText}>{t('saveAndClose')}</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -892,8 +898,8 @@ const handleInfo = (val) => {
         <View style={[styles.modalSheet, { maxHeight: height * 0.58 }]}>
           <View style={styles.modalHeader}>
             <View>
-              <Text style={styles.modalTitle}>{t('settings.languageChange') || 'Sprache wählen'}</Text>
-              <Text style={styles.modalSubtitle}>Wähle deine bevorzugte Sprache</Text>
+              <Text style={styles.modalTitle}>{t('profil.modalLangTitle')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profil.modalLangSubtitle')}</Text>
             </View>
             <TouchableOpacity
               onPress={() => setModalLangVisible(false)}
@@ -954,8 +960,8 @@ const handleInfo = (val) => {
         <View style={styles.modalSheet}>
           <View style={styles.modalHeader}>
             <View>
-              <Text style={styles.modalTitle}>Coins aufladen</Text>
-              <Text style={styles.modalSubtitle}>Nutze Coins für das Erstellen von Bewerbungen</Text>
+              <Text style={styles.modalTitle}>{t('profil.modalCoinsTitle')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profil.modalCoinsSubtitle')}</Text>
             </View>
             <TouchableOpacity
               onPress={() => setModalPayVisible(false)}
@@ -978,12 +984,12 @@ const handleInfo = (val) => {
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.payOptionTitle}>+40 Coins Paket</Text>
+                  <Text style={styles.payOptionTitle}>{t('profil.packTitle')}</Text>
                   <View style={styles.bestValueBadge}>
-                    <Text style={styles.bestValueBadgeText}>BELIEBT</Text>
+                    <Text style={styles.bestValueBadgeText}>{t('profil.packBadge')}</Text>
                   </View>
                 </View>
-                <Text style={styles.payOptionDesc}>Sofortige Freischaltung ohne Werbung</Text>
+                <Text style={styles.payOptionDesc}>{t('profil.packDesc')}</Text>
               </View>
               {loaded ? (
                 <ActivityIndicator size="small" color="#3B82F6" />
@@ -1003,8 +1009,8 @@ const handleInfo = (val) => {
                 <MaterialIcons name="play-circle-filled" size={24} color="#F59E0B" />
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
-                <Text style={styles.payOptionTitle}>+4 Coins gratis</Text>
-                <Text style={styles.payOptionDesc}>Kurzes Werbevideo ansehen</Text>
+                <Text style={styles.payOptionTitle}>{t('profil.adTitle')}</Text>
+                <Text style={styles.payOptionDesc}>{t('profil.adDesc')}</Text>
               </View>
               {loaded ? (
                 <ActivityIndicator size="small" color="#F59E0B" />
@@ -1015,175 +1021,179 @@ const handleInfo = (val) => {
           </View>
         </View>
       </Modal>
-     <Modal
-  isVisible={isModalCvVisible}
-  animationIn="zoomIn"
-  animationOut="zoomOut"
-  animationInTiming={260}
-  animationOutTiming={300}
-  backdropTransitionInTiming={260}
-  backdropTransitionOutTiming={300}
-  backdropOpacity={0.75}
-  hideModalContentWhileAnimating={true}
-  useNativeDriver={true}
-  useNativeDriverForBackdrop={true}
-  onBackdropPress={() => setModalCvVisible(false)}
-  onBackButtonPress={() => setModalCvVisible(false)}
-  style={styles.modalBackdrop}
->
-  <View style={styles.modalSheet}>
-    {/* ── 1. FEST: Header ── */}
-    <View style={styles.modalHeader}>
-      <View>
-        <Text style={styles.modalTitle}>Werdegang & CV</Text>
-        <Text style={styles.modalSubtitle}>Stationen verwalten oder einscannen</Text>
-      </View>
-      <TouchableOpacity
-        onPress={() => setModalCvVisible(false)}
-        style={styles.modalCloseBtn}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAL 5: Werdegang & CV Modal
+      ═══════════════════════════════════════════════════════════════ */}
+      <Modal
+        isVisible={isModalCvVisible}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        animationInTiming={260}
+        animationOutTiming={300}
+        backdropTransitionInTiming={260}
+        backdropTransitionOutTiming={300}
+        backdropOpacity={0.75}
+        hideModalContentWhileAnimating={true}
+        useNativeDriver={true}
+        useNativeDriverForBackdrop={true}
+        onBackdropPress={() => setModalCvVisible(false)}
+        onBackButtonPress={() => setModalCvVisible(false)}
+        style={styles.modalBackdrop}
       >
-        <MaterialIcons name="close" size={18} color="#FFFFFF" />
-      </TouchableOpacity>
-    </View>
-
-    {/* ── 2. FEST: OCR Scan Button ── */}
-    <TouchableOpacity
-      onPress={handleScan}
-      activeOpacity={0.82}
-      style={styles.scanActionCard}
-    >
-      <View style={styles.scanIconWrap}>
-        <MaterialIcons name="document-scanner" size={22} color="#60A5FA" />
-      </View>
-      <View style={{ flex: 1, paddingHorizontal: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={styles.scanCardTitle}>Lebenslauf scannen</Text>
-          <View style={styles.badgeAi}>
-            <Text style={styles.badgeAiText}>OCR</Text>
-          </View>
-        </View>
-        <Text style={styles.scanCardDesc}>
-          PDF oder Bild wählen – Daten automatisch einfügen
-        </Text>
-      </View>
-      <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
-    </TouchableOpacity>
-
-    {/* ── 3. FEST: Sektions-Leiste ── */}
-    <View style={styles.sectionHeaderRow}>
-      <Text style={styles.sectionTitle}>
-        Werdegang ({experiences.length})
-      </Text>
-      <TouchableOpacity
-        onPress={handleAddExperience}
-        style={styles.addBtn}
-        activeOpacity={0.7}
-      >
-        <MaterialIcons name="add" size={16} color="#60A5FA" />
-        <Text style={styles.addBtnText}>Hinzufügen</Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* ── 4. SCROLLBAR: Nur dieser Container scrollt ── */}
-    <ScrollView
-      style={styles.experienceScrollArea}
-      contentContainerStyle={{ paddingBottom: 8 }}
-      showsVerticalScrollIndicator={true}
-      keyboardShouldPersistTaps="handled"
-    >
-      {experiences.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <MaterialIcons name="work-outline" size={32} color="rgba(255,255,255,0.2)" />
-          <Text style={styles.emptyText}>
-            Noch keine Stationen hinterlegt.
-          </Text>
-        </View>
-      ) : (
-        experiences.map((exp, index) => (
-          <View key={exp.id || index} style={styles.experienceCard}>
-            <View style={styles.expCardHeader}>
-              <View style={styles.expBadge}>
-                <Text style={styles.expBadgeText}>Station #{index + 1}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleDeleteExperience(exp.id)}
-                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-              >
-                <MaterialIcons name="delete-outline" size={19} color="#EF4444" />
-              </TouchableOpacity>
+        <View style={styles.modalSheet}>
+          {/* ── 1. FEST: Header ── */}
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={styles.modalTitle}>{t('profil.cvModalTitle')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profil.cvModalSubtitle')}</Text>
             </View>
-
-            {/* Position */}
-            <Text style={styles.inputLabel}>Position / Rolle</Text>
-            <TextInput
-              style={styles.textInput}
-              value={exp.role}
-              onChangeText={(val) => handleUpdateExperience(exp.id, 'role', val)}
-              placeholder="z. B. Fachinformatiker"
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
-            />
-
-            {/* Firma & Zeitraum */}
-            <View style={styles.inputRow}>
-              <View style={{ flex: 1.2 }}>
-                <Text style={styles.inputLabel}>Unternehmen</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={exp.company}
-                  onChangeText={(val) => handleUpdateExperience(exp.id, 'company', val)}
-                  placeholder="z. B. Daimler AG"
-                  placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <Text style={styles.inputLabel}>Zeitraum</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={exp.period}
-                  onChangeText={(val) => handleUpdateExperience(exp.id, 'period', val)}
-                  placeholder="08/2020 – Heute"
-                  placeholderTextColor="rgba(255, 255, 255, 0.3)"
-                />
-              </View>
-            </View>
-
-            {/* Aufgaben & Stichpunkte (Große Textarea) */}
-            <Text style={styles.inputLabel}>Tätigkeiten & Erfolge (Stichpunkte)</Text>
-            <TextInput
-              style={[styles.textInput, styles.textAreaInput]}
-              value={exp.tasks}
-              onChangeText={(val) => handleUpdateExperience(exp.id, 'tasks', val)}
-              placeholder={"• Entwicklung von React Native Apps\n• Migration auf Go Microservices"}
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
-              multiline={true}
-              textAlignVertical="top"
-              scrollEnabled={false}
-            />
+            <TouchableOpacity
+              onPress={() => setModalCvVisible(false)}
+              style={styles.modalCloseBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <MaterialIcons name="close" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
-        ))
-      )}
-    </ScrollView>
 
-    {/* ── 5. FEST: Footer Button ── */}
-    <TouchableOpacity
-      style={styles.saveModalBtn}
-      onPress={() => saveExperiences()}
-      activeOpacity={0.85}
-    >
-      <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-      <Text style={styles.saveModalBtnText}>Übernehmen & Schließen</Text>
-    </TouchableOpacity>
-  </View>
-</Modal>
-      <Info  message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
-      
+          {/* ── 2. FEST: OCR Scan Button ── */}
+          <TouchableOpacity
+            onPress={handleScan}
+            activeOpacity={0.82}
+            style={styles.scanActionCard}
+          >
+            <View style={styles.scanIconWrap}>
+              <MaterialIcons name="document-scanner" size={22} color="#60A5FA" />
+            </View>
+            <View style={{ flex: 1, paddingHorizontal: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.scanCardTitle}>{t('profil.scanTitle')}</Text>
+                <View style={styles.badgeAi}>
+                  <Text style={styles.badgeAiText}>{t('profil.scanBadge')}</Text>
+                </View>
+              </View>
+              <Text style={styles.scanCardDesc}>
+                {t('profil.scanDesc')}
+              </Text>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
+          </TouchableOpacity>
+
+          {/* ── 3. FEST: Sektions-Leiste ── */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>
+              {t('profil.sectionExperience', { count: experiences.length })}
+            </Text>
+            <TouchableOpacity
+              onPress={handleAddExperience}
+              style={styles.addBtn}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="add" size={16} color="#60A5FA" />
+              <Text style={styles.addBtnText}>{t('profil.btnAdd')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ── 4. SCROLLBAR: Nur dieser Container scrollt ── */}
+          <ScrollView
+            style={styles.experienceScrollArea}
+            contentContainerStyle={{ paddingBottom: 8 }}
+            showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            {experiences.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <MaterialIcons name="work-outline" size={32} color="rgba(255,255,255,0.2)" />
+                <Text style={styles.emptyText}>
+                  {t('profil.emptyExperience')}
+                </Text>
+              </View>
+            ) : (
+              experiences.map((exp, index) => (
+                <View key={exp.id || index} style={styles.experienceCard}>
+                  <View style={styles.expCardHeader}>
+                    <View style={styles.expBadge}>
+                      <Text style={styles.expBadgeText}>
+                        {t('profil.stationBadge', { index: index + 1 })}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteExperience(exp.id)}
+                      hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                    >
+                      <MaterialIcons name="delete-outline" size={19} color="#EF4444" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Position */}
+                  <Text style={styles.inputLabel}>{t('profil.labelRole')}</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={exp.role}
+                    onChangeText={(val) => handleUpdateExperience(exp.id, 'role', val)}
+                    placeholder={t('profil.placeholderRole')}
+                    placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                  />
+
+                  {/* Firma & Zeitraum */}
+                  <View style={styles.inputRow}>
+                    <View style={{ flex: 1.2 }}>
+                      <Text style={styles.inputLabel}>{t('profil.labelCompany')}</Text>
+                      <TextInput
+                        style={styles.textInput}
+                        value={exp.company}
+                        onChangeText={(val) => handleUpdateExperience(exp.id, 'company', val)}
+                        placeholder={t('profil.placeholderCompany')}
+                        placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                      />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.inputLabel}>{t('profil.labelPeriod')}</Text>
+                      <TextInput
+                        style={styles.textInput}
+                        value={exp.period}
+                        onChangeText={(val) => handleUpdateExperience(exp.id, 'period', val)}
+                        placeholder={t('profil.placeholderPeriod')}
+                        placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                      />
+                    </View>
+                  </View>
+
+                  {/* Aufgaben & Stichpunkte */}
+                  <Text style={styles.inputLabel}>{t('profil.labelTasks')}</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.textAreaInput]}
+                    value={exp.tasks}
+                    onChangeText={(val) => handleUpdateExperience(exp.id, 'tasks', val)}
+                    placeholder={t('profil.placeholderTasks')}
+                    placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                    multiline={true}
+                    textAlignVertical="top"
+                    scrollEnabled={false}
+                  />
+                </View>
+              ))
+            )}
+          </ScrollView>
+
+          {/* ── 5. FEST: Footer Button ── */}
+          <TouchableOpacity
+            style={styles.saveModalBtn}
+            onPress={() => saveExperiences()}
+            activeOpacity={0.85}
+          >
+            <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.saveModalBtnText}>{t('saveAndClose')}</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      <Info message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
     </SafeAreaView>
   );
-};
-
-/* ── Styles ─────────────────────────────────────────────── */
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

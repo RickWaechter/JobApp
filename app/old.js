@@ -12,6 +12,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  FlatList,
   Text,
   TouchableOpacity,
   View,
@@ -25,97 +26,95 @@ import CompanySearchModal from '../comp/name.js';
 import colors from '../inc/colors.js';
 import { encryp } from '../inc/cryp.js';
 import ChangeScreenOld from './changeOld.js';
-
-const { width } = Dimensions.get('window');
-const DB_NAME = 'firstNew.db';
-const SWIPE_THRESHOLD = 80;
-
-/* ── History Card Komponente ────────────────────────────── */
+const {width} = Dimensions.get('window');
 const HistoryEntryCard = memo(
-  ({ entry, index, onUseTemplate, onOpenApplication, onDelete, panHandlers }) => (
-    <View style={styles.cardWrapper} {...panHandlers}>
-      <Pressable
-        onPress={() => onUseTemplate(entry)}
-        onLongPress={() => onOpenApplication(entry)}
-        delayLongPress={280}
-        style={({ pressed }) => [styles.entryCard, pressed && styles.cardPressed]}
-      >
-        <View style={styles.cardHeader}>
-          <View style={styles.jobIconWrapper}>
-            <MaterialIcons name="work-outline" size={20} color="#60A5FA" />
-          </View>
+  ({ entry, index, onUseTemplate, onOpenApplication, onDelete, panHandlers }) => {
+    const { t } = useTranslation();
 
-          <View style={styles.headerTextWrap}>
-            <Text style={styles.jobTitle} numberOfLines={1}>
-              {entry.job || 'Unbenannte Bewerbung'}
-            </Text>
-            {Boolean(entry.date) && <Text style={styles.dateText}>{entry.date}</Text>}
-          </View>
-
-          <TouchableOpacity
-            onPress={() => onDelete(index)}
-            style={styles.deleteBtn}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.cardBody}>
-          {Boolean(entry.subject) && (
-            <Text style={styles.subjectText} numberOfLines={1}>
-              {entry.subject}
-            </Text>
-          )}
-
-          {Boolean(entry.myType) && entry.myType !== ' / ' && (
-            <View style={styles.badgeRow}>
-              <View style={styles.typeBadge}>
-                <Text style={styles.typeBadgeText}>{entry.myType}</Text>
-              </View>
-              {Boolean(entry.link) && (
-                <View style={styles.pdfAttachedBadge}>
-                  <MaterialIcons name="attachment" size={12} color="#60A5FA" />
-                  <Text style={styles.pdfAttachedText}>PDF vorhanden</Text>
-                </View>
-              )}
+    return (
+      <View style={styles.cardWrapper} {...panHandlers}>
+        <Pressable
+          onPress={() => onUseTemplate(entry)}
+          onLongPress={() => onOpenApplication(entry)}
+          delayLongPress={280}
+          style={({ pressed }) => [styles.entryCard, pressed && styles.cardPressed]}
+        >
+          <View style={styles.cardHeader}>
+            <View style={styles.jobIconWrapper}>
+              <MaterialIcons name="work-outline" size={20} color="#60A5FA" />
             </View>
-          )}
-        </View>
 
-        <View style={styles.cardFooter}>
-          <TouchableOpacity
-            style={styles.primaryActionBtn}
-            onPress={() => onOpenApplication(entry)}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="folder-open" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.primaryActionBtnText}>Mappe öffnen</Text>
-          </TouchableOpacity>
+            <View style={styles.headerTextWrap}>
+              <Text style={styles.jobTitle} numberOfLines={1}>
+                {entry.job || t('history.defaultJobTitle')}
+              </Text>
+              {Boolean(entry.date) && <Text style={styles.dateText}>{entry.date}</Text>}
+            </View>
 
-          <TouchableOpacity
-            style={styles.secondaryActionBtn}
-            onPress={() => onUseTemplate(entry)}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons
-              name="auto-awesome"
-              size={15}
-              color="rgba(255,255,255,0.8)"
-              style={{ marginRight: 5 }}
-            />
-            <Text style={styles.secondaryActionBtnText}>Neu verwenden</Text>
-          </TouchableOpacity>
-        </View>
-      </Pressable>
-    </View>
-  )
+            <TouchableOpacity
+              onPress={() => onDelete(index)}
+              style={styles.deleteBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.cardBody}>
+            {Boolean(entry.subject) && (
+              <Text style={styles.subjectText} numberOfLines={1}>
+                {entry.subject}
+              </Text>
+            )}
+
+            {Boolean(entry.myType) && entry.myType !== ' / ' && (
+              <View style={styles.badgeRow}>
+                <View style={styles.typeBadge}>
+                  <Text style={styles.typeBadgeText}>{entry.myType}</Text>
+                </View>
+                {Boolean(entry.link) && (
+                  <View style={styles.pdfAttachedBadge}>
+                    <MaterialIcons name="attachment" size={12} color="#60A5FA" />
+                    <Text style={styles.pdfAttachedText}>{t('history.pdfAttached')}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.cardFooter}>
+            <TouchableOpacity
+              style={styles.primaryActionBtn}
+              onPress={() => onOpenApplication(entry)}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="folder-open" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.primaryActionBtnText}>{t('history.openFolder')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryActionBtn}
+              onPress={() => onUseTemplate(entry)}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons
+                name="auto-awesome"
+                size={15}
+                color="rgba(255,255,255,0.8)"
+                style={{ marginRight: 5 }}
+              />
+              <Text style={styles.secondaryActionBtnText}>{t('history.reuseTemplate')}</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </View>
+    );
+  }
 );
-
 const OldScreen = () => {
   const { t } = useTranslation();
   const { items } = useLocalSearchParams();
-
+const [resetSignal, setResetSignal] = useState(0);
   const [entries, setEntries] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -160,36 +159,66 @@ const inputRef = useRef(null);
     }, [resetCardAnimation])
   );
 
-  const handleOpenApplication = async (entry) => {
-    const now = Date.now();
-    if (now - lastTimeClick.current < 600) return;
-    lastTimeClick.current = now;
 
-    if (entry.link && Object.values(entry).length > 2) {
-      try {
-        await EncryptedStorage.setItem('merge', `${entry.link}.pdf`);
-        await EncryptedStorage.setItem('result', 'collect');
-        router.push('/collect');
-      } catch (e) {
-        console.error('Routing error to collect:', e);
-      }
-    } else {
-      Alert.alert(
-        'Datei nicht gefunden',
-        'Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden.'
-      );
+// beim Fokussieren des Screens ebenfalls zurücksetzen:
+useFocusEffect(
+  useCallback(() => {
+    setResetSignal((s) => s + 1);
+  }, [])
+);
+
+const entriesRef = useRef(entries);
+useEffect(() => { entriesRef.current = entries; }, [entries]);
+
+const lastOpenClick = useRef(0);
+const lastTemplateClick = useRef(0);
+
+const openTemplateModal = useCallback((entry) => {
+  setSelectedEntry(entry);
+  setModalVisible(true);
+
+  // parallel & fire-and-forget, blockiert den UI-Thread nicht
+  Promise.all([
+    EncryptedStorage.setItem('job', entry.job || ''),
+    EncryptedStorage.setItem('text', entry.text || ''),
+    EncryptedStorage.setItem('subject', entry.subject || ''),
+  ]).catch((e) => console.error('Storage error', e));
+}, []);
+
+const handleUseTemplate = useCallback((entry) => {
+  const now = Date.now();
+  if (now - lastTemplateClick.current < 350) return;
+  lastTemplateClick.current = now;
+  openTemplateModal(entry);
+}, [openTemplateModal]);
+
+const handleOpenApplication = useCallback(async (entry) => {
+  const now = Date.now();
+  if (now - lastOpenClick.current < 600) return;
+  lastOpenClick.current = now;
+
+  if (entry.link && Object.values(entry).length > 2) {
+    try {
+      await Promise.all([
+        EncryptedStorage.setItem('merge', `${entry.link}.pdf`),
+        EncryptedStorage.setItem('result', 'collect'),
+      ]);
+      router.push('/collect');
+    } catch (e) {
+      console.error('Routing error to collect:', e);
     }
-  };
-
-  const triggerSwipeRightAndOpenModal = (entry) => {
-console.log("triger");
+  } else {
+    Alert.alert('Datei nicht gefunden', 'Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden.');
+  }
+}, []);
+ const triggerSwipeRightAndOpenModal = (entry) => {
     setSelectedEntry(entry);
-    setTimeout(() => setModalVisible(true), 80);
+    setModalVisible(true); // Sofort öffnen, keine 80ms Verzögerung
 
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: -width * 0.9,
-        duration: 320,
+        duration: 320, // Vorher 320ms -> auf 200-220ms reduzieren für knackiges Feedback
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
@@ -197,11 +226,12 @@ console.log("triger");
         duration: 320,
         useNativeDriver: true,
       }),
-    ]).start(async () => {
-      await EncryptedStorage.setItem('job', entry.job || '');
-      await EncryptedStorage.setItem('text', entry.text || '');
-      await EncryptedStorage.setItem('subject', entry.subject || '');
-    });
+    ]).start();
+
+    // Storage direkt im Hintergrund schreiben, ohne auf das Ende der Animation zu warten
+    EncryptedStorage.setItem('job', entry.job || '');
+    EncryptedStorage.setItem('text', entry.text || '');
+    EncryptedStorage.setItem('subject', entry.subject || '');
   };
 
   const handleCardPress = (entry) => {
@@ -279,115 +309,108 @@ console.log("triger");
     );
   };
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.badgeHub}>
-            <View style={styles.statusDot} />
-            <Text style={styles.badgeHubText}>HISTORIE & VORLAGEN</Text>
-          </View>
-          <Text style={styles.titleMain}>Frühere Bewerbungen</Text>
-          <Text style={styles.subtitleMain}>
-            Öffne fertige Mappen oder passe bestehende Texte für eine neue Firma an.
-          </Text>
-
-          {/* ── Gesamtanzahl Badge ── */}
-          {!loading && entries.length > 0 && (
-            <View style={styles.counterRow}>
-              <View style={styles.counterBadge}>
-                <MaterialIcons name="folder-open" size={14} color="#60A5FA" />
-                <Text style={styles.counterText}>
-                  <Text style={styles.counterHighlight}>{entries.length}</Text>{' '}
-                  {entries.length === 1 ? 'Bewerbung insgesamt' : 'Bewerbungen insgesamt'}
-                </Text>
-              </View>
-            </View>
-          )}
+ return (
+  <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.badgeHub}>
+          <View style={styles.statusDot} />
+          <Text style={styles.badgeHubText}>{t('history.headerBadge')}</Text>
         </View>
+        <Text style={styles.titleMain}>{t('history.title')}</Text>
+        <Text style={styles.subtitleMain}>
+          {t('history.subtitle')}
+        </Text>
 
-        {/* Content */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-          </View>
-        ) : entries.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconWrap}>
-              <MaterialIcons name="history" size={36} color="rgba(255,255,255,0.25)" />
+        {/* ── Gesamtanzahl Badge ── */}
+        {!loading && entries.length > 0 && (
+          <View style={styles.counterRow}>
+            <View style={styles.counterBadge}>
+              <MaterialIcons name="folder-open" size={14} color="#60A5FA" />
+              <Text style={styles.counterText}>
+                {t('history.totalCount', { count: entries.length })}
+              </Text>
             </View>
-            <Text style={styles.emptyTitle}>Keine Vorlagen vorhanden</Text>
-            <Text style={styles.emptySubtitle}>
-              Sobald du deine erste Bewerbung erstellst, wird sie hier automatisch gespeichert.
-            </Text>
-            <TouchableOpacity
-              style={styles.newAppBtn}
-              onPress={() => router.push('/first')}
-              activeOpacity={0.8}
-            >
-              <MaterialIcons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.newAppBtnText}>Neue Bewerbung starten</Text>
-            </TouchableOpacity>
           </View>
-        ) : (
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateX: slideAnim }] }}>
-              {entries.map((entry, index) => {
-                const cardPanResponder = createPanResponder(entry);
-                return (
-                  <HistoryEntryCard
-                    key={`${entry.job}-${index}`}
-                    entry={entry}
-                    index={index}
-                    onUseTemplate={handleCardPress}
-                    onOpenApplication={handleOpenApplication}
-                    onDelete={deleteEntry}
-                    panHandlers={cardPanResponder.panHandlers}
-                  />
-                );
-              })}
-            </Animated.View>
-          </ScrollView>
         )}
       </View>
 
-      {/* Firmen-Such Modal */}
-      <CompanySearchModal
-        visible={modalVisible}
-        nextScreen={changeOldScreen}
-        initialName={selectedEntry?.job || ''}
-        durationIn={200}
-        onClose={() => {
-          setModalVisible(false);
-          resetCardAnimation();
-        }}
-        onSaved={async () => {
-          setChangeOldScreen(true);
-          inputRef.current.focus();
-            
-          setModalVisible(false);
-          await EncryptedStorage.setItem('result', 'changeOld');
-        }}
-      />
+      {/* Content */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+        </View>
+      ) : entries.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyIconWrap}>
+            <MaterialIcons name="history" size={36} color="rgba(255,255,255,0.25)" />
+          </View>
+          <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+          <Text style={styles.emptySubtitle}>
+            {t('history.emptySubtitle')}
+          </Text>
+          <TouchableOpacity
+            style={styles.newAppBtn}
+            onPress={() => router.push('/first')}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.newAppBtnText}>{t('history.newApplicationBtn')}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+      <FlatList
+  data={entries}
+  keyExtractor={(item, index) => (item.link ? String(item.link) : `${item.job || 'entry'}-${index}`)}
+  renderItem={({ item }) => (
+    <HistoryEntryCard
+      entry={item}
+      onUseTemplate={handleUseTemplate}
+      onOpenApplication={handleOpenApplication}
+      onDelete={deleteEntry}
+      resetSignal={resetSignal}
+    />
+  )}
+  contentContainerStyle={styles.scrollContent}
+  showsVerticalScrollIndicator={false}
+  initialNumToRender={6}
+  maxToRenderPerBatch={8}
+  windowSize={7}
+/>
+      )}
+    </View>
 
-      {/* Editor Overlay für Altdaten */}
-      <ChangeScreenOld
-        visible={changeOldScreen}
-        ref={inputRef}
-        onClose={() => {setChangeOldScreen(false);
-          setModalVisible(false);
-        }
-        }
-        
-      />
-    </SafeAreaView>
-  );
-};
+    {/* Firmen-Such Modal */}
+    <CompanySearchModal
+      visible={modalVisible}
+      nextScreen={changeOldScreen}
+      initialName={selectedEntry?.job || ''}
+      durationIn={200}
+      onClose={() => {
+        setModalVisible(false);
+        resetCardAnimation();
+      }}
+      onSaved={async () => {
+        setChangeOldScreen(true);
+        inputRef.current.focus();
+          
+        setModalVisible(false);
+        await EncryptedStorage.setItem('result', 'changeOld');
+      }}
+    />
+
+    {/* Editor Overlay für Altdaten */}
+    <ChangeScreenOld
+      visible={changeOldScreen}
+      ref={inputRef}
+      onClose={() => {
+        setChangeOldScreen(false);
+        setModalVisible(false);
+      }}
+    />
+  </SafeAreaView>
+);};
 
 const styles = StyleSheet.create({
   safeArea: {

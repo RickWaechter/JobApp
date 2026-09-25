@@ -7,10 +7,12 @@ import {
   Dimensions, 
   Pressable 
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
-export default function Info({ visible, onClose, message = '', title = 'Information' }) {
+export default function Info({ visible, onClose, message = '' }) {
+  const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -72,7 +74,9 @@ export default function Info({ visible, onClose, message = '', title = 'Informat
           <View style={styles.headerRow}>
             <View style={styles.badgePrimary}>
               <View style={styles.statusDot} />
-              <Text style={styles.badgePrimaryText}>{title.toUpperCase()}</Text>
+              <Text style={styles.badgePrimaryText}>
+                {t('common.infoBadge').toUpperCase()}
+              </Text>
             </View>
 
             <Pressable 
@@ -94,7 +98,9 @@ export default function Info({ visible, onClose, message = '', title = 'Informat
             onPress={onClose}
             style={({ pressed }) => [styles.confirmButton, pressed && styles.btnPressed]}
           >
-            <Text style={styles.confirmButtonText}>Verstanden</Text>
+            <Text style={styles.confirmButtonText}>
+              {t('common.understood')}
+            </Text>
           </Pressable>
         </Animated.View>
       </View>
