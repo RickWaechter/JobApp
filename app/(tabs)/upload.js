@@ -16,6 +16,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Modal from 'react-native-modal';
 import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -112,7 +113,7 @@ const UploadScreen = () => {
   const [pdfView, setPdfView] = useState(false);
   const [isModalSortVisible, setModalSortVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
+const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
   const dbRef = useRef(null);
 
   /* ── Fetch Data from DB ──────────────────────────────── */
@@ -463,7 +464,7 @@ const handleInfo = (val) => {
   }
 }
   return (
-    <SafeAreaView style={styles.safeArea}>
+<View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -738,7 +739,7 @@ const handleInfo = (val) => {
       </Modal>
             <Info  message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
       
-    </SafeAreaView>
+    </View>
   );
 };
 

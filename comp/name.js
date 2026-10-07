@@ -38,7 +38,7 @@
   import { useSafeAreaInsets } from "react-native-safe-area-context";
   import colors from "../inc/colors.js";
   import "../local/i18n.js";
-
+import { getKeyboardHeight } from "../inc/keyboardStorage.js";
   /* ── 2. Tokens ─────────────────────────────────────────────────────────── */
   const DEBOUNCE_MS = 250;
   const DOUBLE_TAP_GUARD_MS = 1000;
@@ -220,7 +220,7 @@
     manualModeRef.current = manualMode;
 
     /* ── Animierte Werte ── */
-    const animY = useRef(new Animated.Value(winH)).current;
+    const animY = useRef(new Animated.Value(-winH)).current;
     const animNameX = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const keyboardHeightAnim = useRef(new Animated.Value(0)).current;
@@ -233,23 +233,20 @@
       const hideEvent =
         Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
-      const onShow = (e) => {
+      const onShow = async (e) => {
         const h = e?.endCoordinates?.height ?? 0;
+        const keyboardHeigh = await getKeyboardHeight();
+        console.log('Keyboard Height:', h, 'Stored Height:', keyboardHeigh);
+        if (h > 0 && h !== keyboardHeigh) {
         setKbHeight(h);
-        Animated.timing(keyboardHeightAnim, {
-          toValue: h,
-          duration: Platform.OS === "ios" ? e?.duration || 550 : 700,
-          useNativeDriver: false,
-        }).start();
+        }
+        else {
+          setKbHeight(keyboardHeigh);
+        }
       };
 
       const onHide = () => {
-        setKbHeight(0);
-        Animated.timing(keyboardHeightAnim, {
-          toValue: 0,
-          duration: Platform.OS === "ios" ? 250 : 200,
-          useNativeDriver: false,
-        }).start();
+  
       };
 
       const sub1 = Keyboard.addListener(showEvent, onShow);
@@ -281,14 +278,13 @@
       if (visible) {
         isExitingLeft.current = false;
         setIsMounted(true);
-        animY.setValue(winH);
         animNameX.setValue(0);
         fadeAnim.setValue(0);
 
         focusTimer.current = setTimeout(() => {
           if (manualModeRef.current) nameRef.current?.focus();
           else searchRef.current?.focus();
-        }, 240);
+        }, 220);
 
         Animated.parallel([
           Animated.timing(animY, {
@@ -298,7 +294,7 @@
           }),
           Animated.timing(fadeAnim, {
             toValue: 1,
-            duration: 550,
+            duration: 450,
             useNativeDriver: true,
           }),
         ]).start();
@@ -308,13 +304,13 @@
         Keyboard.dismiss();
         Animated.parallel([
           Animated.timing(animY, {
-            toValue: winH,
-            duration: durationOut,
+            toValue:-winH,
+            duration: 450,
             useNativeDriver: true,
           }),
           Animated.timing(fadeAnim, {
             toValue: 0,
-            duration: durationOut,
+            duration: 450,
             useNativeDriver: true,
           }),
         ]).start(({ finished }) => {
@@ -464,15 +460,19 @@
 
       Animated.timing(animNameX, {
         toValue: -winW,
-        duration: 500,
+        duration: 400,
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) {
-          fadeAnim.setValue(0);
           setIsMounted(false);
           isExitingLeft.current = false;
         }
       });
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      })
     }, [yourName, yourStreet, yourCity, t, onSaved, animNameX, fadeAnim, winW]);
 
     const renderSeparator = useCallback(() => <View style={styles.separator} />, []);
@@ -531,7 +531,7 @@
                 width: panelWidth,
                 height: panelHeight,
                 opacity: fadeAnim,
-                transform: [{ translateX: animY }, { translateX: animNameX }],
+                transform: [{ translateY: animY }, { translateX: animNameX }],
               },
             ]}
           >

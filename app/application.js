@@ -13,7 +13,9 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  TouchableWithoutFeedback,
   Dimensions,
+  Platform,
   Easing,
   FlatList,
   Keyboard,
@@ -22,6 +24,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -35,13 +38,14 @@ import DeviceInfo from 'react-native-device-info';
 import DropDownPicker from 'react-native-dropdown-picker';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 import { WebView } from 'react-native-webview';
 import { decryp } from '../inc/cryp.js';
 import Info from '../comp/info.js';
 import colors from '../inc/colors.js';
 import { runQuery } from '../inc/db.js';
+import { getKeyboardHeight } from '../inc/keyboardStorage.js';
 import {
   agenturScript,
   extractScript,
@@ -119,76 +123,73 @@ const SegmentedPills = memo(({ options, selected, onSelect, labels }) => (
   </View>
 ));
 
-const SuggestionDropdown = memo(({ 
-  data, 
-  onSelect, 
-  onToggleSelect,
-  selectedItems = [],
-  isSkill = false, 
-  theMaxHeight = height * 0.16 
-}) => (
-  <View style={[styles.suggestionsCard, { maxHeight: theMaxHeight }]}>
-    <FlatList
-      data={data}
-      keyExtractor={(item, index) => (item?.rowid ? String(item.rowid) : item?.id ? String(item.id) : String(index))}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => {
-        // Robuste Text-Auflösung für ALLE Datenstrukturen:
-        // 1. Reiner String
-        // 2. Job-Objekt aus DB (item.text)
-        // 3. Skill-Objekt (item.role)
-        // 4. Fallbacks (name, label, id)
-        const text = typeof item === 'string' 
-          ? item 
-          : isSkill 
-            ? (item?.role ?? item?.text ?? item?.name ?? '') 
-            : (item?.text ?? item?.role ?? item?.name ?? item?.id ?? '');
-        const rawText = text.length > 25 ? text.substring(0, 27) + '...' : text; 
-        const itemKey = item?.rowid ?? item?.id ?? text;
-        const isSelected = selectedItems.some((s) => {
-          const sKey = s?.rowid ?? s?.id ?? (typeof s === 'string' ? s : s?.role ?? s?.text);
-          return sKey === itemKey;
-        });
+const SuggestionDropdown = memo(
+  ({ data, onSelect, onToggleSelect, selectedItems = [], isSkill = false, theMaxHeight = height * 0.16 }) => (
+    <View style={[styles.suggestionsCard, { maxHeight: theMaxHeight }]}>
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) =>
+          item?.rowid ? String(item.rowid) : item?.id ? String(item.id) : String(index)
+        }
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const text =
+            typeof item === 'string'
+              ? item
+              : isSkill
+              ? item?.role ?? item?.text ?? item?.name ?? ''
+              : item?.text ?? item?.role ?? item?.name ?? item?.id ?? '';
+          const rawText = text.length > 25 ? text.substring(0, 27) + '...' : text;
+          const itemKey = item?.rowid ?? item?.id ?? text;
+          const isSelected = selectedItems.some((s) => {
+            const sKey = s?.rowid ?? s?.id ?? (typeof s === 'string' ? s : s?.role ?? s?.text);
+            return sKey === itemKey;
+          });
 
-        return (
-          <View style={[styles.suggestionRow, isSkill && isSelected && styles.suggestionRowSelected]}>
-            <TouchableOpacity
-              style={styles.suggestionTextArea}
-              onPress={() => (isSkill && onToggleSelect ? onToggleSelect(item) : onSelect(item))}
-              activeOpacity={0.7}
-            >
-              <View style={styles.resultIconWrapper}>
-                <MaterialIcons
-                  name={isSkill ? 'psychology' : 'work-outline'}
-                  size={16}
-                  color={WARM.iconPin}
-                />
-              </View>
-              <Text style={[styles.suggestionText, isSkill && isSelected && styles.suggestionTextSelected]} numberOfLines={1}>
-                {String(rawText)}
-              </Text>
-            </TouchableOpacity>
-
-            {isSkill && onToggleSelect ? (
+          return (
+            <View style={[styles.suggestionRow, isSkill && isSelected && styles.suggestionRowSelected]}>
               <TouchableOpacity
-                style={styles.selectSuggestionBtn}
-                onPress={() => onToggleSelect(item)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.suggestionTextArea}
+                onPress={() => (isSkill && onToggleSelect ? onToggleSelect(item) : onSelect(item))}
+                activeOpacity={0.7}
               >
-                <MaterialIcons 
-                  name={isSelected ? 'check-box' : 'check-box-outline-blank'} 
-                  size={20} 
-                  color={isSelected ? WARM.primary : WARM.textDim} 
-                />
+                <View style={styles.resultIconWrapper}>
+                  <MaterialIcons
+                    name={isSkill ? 'psychology' : 'work-outline'}
+                    size={16}
+                    color={WARM.iconPin}
+                  />
+                </View>
+                <Text
+                  style={[styles.suggestionText, isSkill && isSelected && styles.suggestionTextSelected]}
+                  numberOfLines={1}
+                >
+                  {String(rawText)}
+                </Text>
               </TouchableOpacity>
-            ) : null}
-          </View>
-        );
-      }}
-    />
-  </View>
-));
+
+              {isSkill && onToggleSelect ? (
+                <TouchableOpacity
+                  style={styles.selectSuggestionBtn}
+                  onPress={() => onToggleSelect(item)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <MaterialIcons
+                    name={isSelected ? 'check-box' : 'check-box-outline-blank'}
+                    size={20}
+                    color={isSelected ? WARM.primary : WARM.textDim}
+                  />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          );
+        }}
+      />
+    </View>
+  )
+);
+
 const useDatabase = () => {
   const dbMainRef = useRef(null);
   const dbJobsRef = useRef(null);
@@ -196,7 +197,7 @@ const useDatabase = () => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const interactionHandle = InteractionManager.runAfterInteractions(async () => {
       try {
         const folderPath = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
@@ -251,7 +252,7 @@ const useWebExtractor = ({ onExtractSuccess }) => {
         setWebViewUrl('');
         Alert.alert(
           t('bewerbung.timeoutTitle') || 'Timeout',
-          t('bewerbung.timeoutMsg') || 'Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.',
+          t('bewerbung.timeoutMsg') || 'Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.'
         );
       }
     }, 20000);
@@ -260,69 +261,102 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 
   const startExtraction = useCallback(
     (inputValue) => {
-      Keyboard.dismiss();
-      const text = inputValue.trim();
+    Keyboard.dismiss()
+
+      console.log('🚀 [startExtraction] Gestartet mit Input:', inputValue);
+
+      const text = inputValue?.trim() || '';
+      console.log('📝 [startExtraction] Bereinigter Text:', text);
       let url = '';
 
       const match = text.match(/(https?:\/\/[^\s]+)/);
+      console.log('🔍 [startExtraction] RegEx-Match Ergebnis:', match);
+
       if (match) {
         url = match[0];
+        console.log('✅ [startExtraction] URL via Regex gefunden:', url);
       } else {
+        console.log('⚠️ [startExtraction] Kein direkter http(s)-Link gefunden. Suche nach Domain in PLATFORMS...');
         const words = text.split(/\s+/);
+        console.log('🧩 [startExtraction] Erkannte Wörter:', words);
+
         const found = PLATFORMS.find((p) => words.some((w) => w.toLowerCase().includes(p.domain)));
+        console.log('🏢 [startExtraction] Gefundene Plattform:', found);
+
         if (found) {
           const linkWord = words.find((w) => w.toLowerCase().includes(found.domain));
           url = `https://${linkWord}`;
+          console.log('🌐 [startExtraction] URL aus Wort zusammengebaut:', url);
         }
       }
 
+      console.log('🎯 [startExtraction] Finale URL:', url);
+
       if (!url) {
+        console.warn('❌ [startExtraction] Keine gültige URL ermittelt. Zeige Alert.');
         Alert.alert(
           t('bewerbung.invalidLinkTitle') || 'Ungültiger Link',
-          t('bewerbung.invalidLinkMsg') || 'Bitte füge einen vollständigen Link ein.',
+          t('bewerbung.invalidLinkMsg') || 'Bitte füge einen vollständigen Link ein.'
         );
         return;
       }
 
       const matchedPlatform = PLATFORMS.find((p) => url.toLowerCase().includes(p.domain));
+      console.log('⚙️ [startExtraction] Passende Plattform für Script-Auswahl:', matchedPlatform?.domain || 'Standard');
+
       activeScriptRef.current = matchedPlatform ? matchedPlatform.script : extractScript;
+      console.log('📜 [startExtraction] Script hinterlegt. Setze WebView-URL & starte Extraktion...');
+
       setWebViewUrl(url);
       setIsExtracting(true);
     },
-    [t],
+    [t]
   );
 
   const cancelExtraction = useCallback(() => {
+    console.log('⏹️ [cancelExtraction] Extraktion abgebrochen/beendet. State zurückgesetzt.');
     setIsExtracting(false);
     setWebViewUrl('');
   }, []);
 
   const onMessage = useCallback(
     (event) => {
+      console.log('📩 [onMessage] Nachricht von WebView empfangen (raw):', event?.nativeEvent?.data);
       try {
         const data = JSON.parse(event.nativeEvent.data);
+        console.log('📦 [onMessage] Parsed Data:', data);
+
         if (data.status === 'success') {
-          onExtractSuccess?.(data.title.split('(')[0].trim(), data.description);
+          const cleanTitle = data.title?.split('(')[0]?.trim();
+          console.log('🎉 [onMessage] Status: SUCCESS');
+          console.log('🏷️ [onMessage] Bereinigter Titel:', cleanTitle);
+          console.log('📄 [onMessage] Beschreibungslänge:', data.description?.length || 0, 'Zeichen');
+
+          onExtractSuccess?.(cleanTitle, data.description);
           Alert.alert(
             t('bewerbung.extractSuccessTitle') || 'Erfolg!',
-            t('bewerbung.extractSuccessMsg') || 'Stellenanzeige wurde analysiert.',
+            t('bewerbung.extractSuccessMsg') || 'Stellenanzeige wurde analysiert.'
           );
         } else {
+          console.warn('⚠️ [onMessage] Status nicht success:', data.status, 'Meldung:', data.message);
           Alert.alert(
             t('bewerbung.extractHintTitle') || 'Hinweis',
-            data.message || t('bewerbung.extractDefaultError') || 'Konnte keine Daten extrahieren.',
+            data.message || t('bewerbung.extractDefaultError') || 'Konnte keine Daten extrahieren.'
           );
         }
       } catch (e) {
-        console.warn('Extraction parsing error', e);
+        console.error('💥 [onMessage] JSON Parsing Error:', e);
       } finally {
+        console.log('🧹 [onMessage] Finally-Block: Breche Extraktion ab / räume auf.');
         cancelExtraction();
       }
     },
-    [onExtractSuccess, cancelExtraction, t],
+    [onExtractSuccess, cancelExtraction, t]
   );
 
   const injectScript = useCallback(() => {
+    console.log('💉 [injectScript] Injiziere JavaScript in WebView...');
+    console.log('📄 [injectScript] Ref verfügbar?:', !!webViewRef.current);
     webViewRef.current?.injectJavaScript(activeScriptRef.current);
   }, []);
 
@@ -340,6 +374,8 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 /* ── Hauptkomponente ────────────────────────────────────── */
 const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, onClose }, ref) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { width: winW, height: winH } = useWindowDimensions();
   const { dbMainRef, dbJobsRef, isDbReady } = useDatabase();
 
   const [inputValue, setInputValue] = useState('');
@@ -350,12 +386,12 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [selectedOption2, setSelectedOption2] = useState('');
   const [selectedOption3, setSelectedOption3] = useState('');
   const [selectedQuality, setSelectedQuality] = useState('light');
-  
+
   const [jobs, setJobs] = useState([]);
-  const [skills, setSkills] = useState([]); // Initial sauber als leeres Array
+  const [skills, setSkills] = useState([]);
   const [skillsFiltered, setSkillsFiltered] = useState([]);
-  const [selectedSkills, setSelectedSkills] = useState([]); // Ausgewählte Skills für GPT
-  
+  const [selectedSkills, setSelectedSkills] = useState([]);
+
   const [showJobDropdown, setShowJobDropdown] = useState(false);
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [saveJobVisible, setSaveJobVisible] = useState(false);
@@ -367,7 +403,9 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
-  
+  const [kbHeight, setKbHeight] = useState(0);
+
+  const opacityAnim = useRef(new Animated.Value(1)).current;
   const inputRef = useRef(null);
   const jobRef = useRef(null);
   const jobRef2 = useRef(null);
@@ -377,28 +415,72 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const animCardX = useRef(new Animated.Value(0)).current;
   const animOptionsX = useRef(new Animated.Value(width)).current;
 
+  /* ── Tastatur-Höhe synchronisieren (analog CompanySearchModal) ── */
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = async (e) => {
+      const h = e?.endCoordinates?.height ?? 0;
+      try {
+        const stored = await getKeyboardHeight();
+        if (h > 0 && h !== stored) {
+          setKbHeight(h);
+        } else {
+          setKbHeight(stored || h);
+        }
+      } catch {
+        setKbHeight(h);
+      }
+    };
+
+    const onHide = () => setKbHeight(0);
+
+    const sub1 = Keyboard.addListener(showEvent, onShow);
+    const sub2 = Keyboard.addListener(hideEvent, onHide);
+    return () => {
+      sub1.remove();
+      sub2.remove();
+    };
+  }, []);
+
+  /* ── Layout: Bereich zwischen Topbar und Tastatur ── */
+  const stageTop = insets.top * 1.7;
+
+  /* ── Animierte Unterkante (weiche Transition statt Snap) ── */
+  const bottomAnim = useRef(new Animated.Value(insets.bottom + 12)).current;
+
+
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(animCardX, {
-        toValue: accordionOpen ? -width : 0,
+        toValue: accordionOpen ? -winW : 0,
         duration: 320,
         useNativeDriver: true,
       }),
       Animated.timing(animOptionsX, {
-        toValue: accordionOpen ? 0 : width,
+        toValue: accordionOpen ? 0 : winW,
         duration: 320,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [accordionOpen, animCardX, animOptionsX]);
+  }, [accordionOpen, animCardX, animOptionsX, winW]);
 
   useEffect(() => {
     Animated.timing(animCardX, {
-      toValue: isNextStep ? -width : 0,
-      duration: 320,
+      toValue: isNextStep ? -winW * 0.25 : 0,
+      duration: 300,
       useNativeDriver: true,
     }).start();
-  }, [isNextStep, animCardX]);
+    Animated.timing(opacityAnim, {
+      toValue: isNextStep ? 0 : 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isNextStep, animCardX, opacityAnim, winW]);
 
   useImperativeHandle(ref, () => ({
     focusJob: () => jobRef.current?.focus(),
@@ -415,7 +497,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       { label: t('bewerbung.fonts.courier') || 'Courier (Monospace)', value: 'Courier' },
       { label: t('bewerbung.fonts.courierOblique') || 'Courier Oblique', value: 'CourierOblique' },
     ],
-    [t],
+    [t]
   );
 
   const employmentOptions = useMemo(
@@ -424,7 +506,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       t('employmentOptions.teilzeit') || 'Teilzeit',
       t('employmentOptions.minijob') || 'Minijob',
     ],
-    [t],
+    [t]
   );
 
   const applicationOptions = useMemo(
@@ -433,7 +515,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       t('applicationOptions.initiativ') || 'Initiativ',
       t('applicationOptions.praktikum') || 'Praktikum',
     ],
-    [t],
+    [t]
   );
 
   const qualityKeys = ['best', 'medium', 'light'];
@@ -443,7 +525,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       best: t('Medium') || 'Am besten',
       light: t('Sehr schnell') || 'Gut',
     }),
-    [t],
+    [t]
   );
 
   const anredeOptions = useMemo(
@@ -452,7 +534,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       t('anredeOptions.damenUndHerren') || 'Damen und Herren',
       t('anredeOptions.frau') || 'Frau',
     ],
-    [t],
+    [t]
   );
 
   const closeOptions = useCallback(() => {
@@ -527,7 +609,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     }
   }, []);
 
-  // Erstellt aus allen ausgewählten Skills einen fertigen GPT-Prompt-String
   const buildSelectedSkillsString = useCallback(() => {
     if (selectedSkills.length === 0) return erfahrung;
     return selectedSkills
@@ -543,7 +624,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       .join('\n\n');
   }, [selectedSkills, erfahrung]);
 
-  // Mehrfachauswahl toggeln
   const handleToggleSelectSkill = useCallback((skillItem) => {
     const itemKey = skillItem?.id ?? (typeof skillItem === 'string' ? skillItem : skillItem?.role);
 
@@ -556,7 +636,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         updated = [...prev, skillItem];
       }
 
-      // Aktualisiert das Input-Feld als Zusammenfassung
       const labels = updated.map((s) => (typeof s === 'string' ? s : s.role || '')).filter(Boolean);
       setErfahrung(labels.join(', '));
       return updated;
@@ -565,12 +644,10 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
 
   const toggleAccordion = useCallback((val) => {
     if (val) {
-    Keyboard.dismiss();
-    setAccordionOpen((prev) => !prev);
-    }
-    else {
+      setAccordionOpen((prev) => !prev);
+    } else {
       setAccordionOpen(false);
-    } 
+    }
   }, []);
 
   const handleJobChange = useCallback(
@@ -591,7 +668,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
           const res = await runQuery(
             dbJobsRef.current,
             'SELECT rowid, text FROM eintraege WHERE eintraege MATCH ? LIMIT 15',
-            [`${val}*`],
+            [`${val}*`]
           );
           setJobs(res.rows.raw());
           setShowJobDropdown(true);
@@ -601,7 +678,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         }
       }, 280);
     },
-    [errors.job, dbJobsRef],
+    [errors.job, dbJobsRef]
   );
 
   const handleErfahrungChange = useCallback(
@@ -630,7 +707,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       setShowSkillDropdown(true);
       setSkillsFiltered(skillsFilter);
     },
-    [skills],
+    [skills]
   );
 
   const handleAnredeChange = useCallback(
@@ -643,7 +720,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         jobRef.current?.focus();
       }
     },
-    [errors.anrede],
+    [errors.anrede]
   );
 
   const handleSaveJob = useCallback(async () => {
@@ -656,7 +733,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       setShowJobDropdown(false);
       Alert.alert(
         t('bewerbung.savedTitle') || 'Gespeichert',
-        t('bewerbung.jobSavedMsg') || 'Berufsbezeichnung gemerkt.',
+        t('bewerbung.jobSavedMsg') || 'Berufsbezeichnung gemerkt.'
       );
     } catch (err) {
       console.error(err);
@@ -669,13 +746,13 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       const deviceId = await DeviceInfo.getUniqueId();
       await dbMainRef.current.executeSql(
         `UPDATE files SET skills = IFNULL(skills, '') || ? || '#' WHERE ident = ?`,
-        [erfahrung.trim(), deviceId],
+        [erfahrung.trim(), deviceId]
       );
       setSaveSkillVisible(false);
       setShowSkillDropdown(false);
       Alert.alert(
         t('bewerbung.savedTitle') || 'Gespeichert',
-        t('bewerbung.skillSavedMsg') || 'Kenntnis gemerkt.',
+        t('bewerbung.skillSavedMsg') || 'Kenntnis gemerkt.'
       );
     } catch (err) {
       console.error(err);
@@ -692,10 +769,9 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         console.error(err);
       }
     },
-    [dbJobsRef],
+    [dbJobsRef]
   );
 
-  /* ── Starten / Generieren ── */
   const handleGeneratePDF = async () => {
     setShowJobDropdown(false);
     setShowSkillDropdown(false);
@@ -757,7 +833,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         EncryptedStorage.setItem('anrede', anrede),
       ]);
 
-      // Generierter Prompt-String aus den markierten Fähigkeiten:
       const detailedSkillsString = buildSelectedSkillsString();
 
       let prompt1 = `Schreibe eine ${selectedOption2 || 'professionelle'} Bewerbung für die Position als ${inputValue}.
@@ -788,7 +863,7 @@ ${detailedSkillsString}
           const response = await axios.post(
             'https://api.jobapp2.de/getText',
             { prompt1, key, modelIntens: quality },
-            { timeout: 20000 },
+            { timeout: 20000 }
           );
 
           const generatedText = response.data?.response;
@@ -827,278 +902,291 @@ ${detailedSkillsString}
         t('bewerbung.errorTitle') || 'Fehler',
         error.response?.data?.error ||
           t('bewerbung.networkError') ||
-          'Netzwerk- oder Übertragungsfehler. Bitte versuche es erneut.',
+          'Netzwerk- oder Übertragungsfehler. Bitte versuche es erneut.'
       );
     }
   };
 
-  const isDamenUndHerren = selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
+  const isDamenUndHerren =
+    selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
   const isUrlInput = useMemo(
     () => ['http://', 'https://', 'www.'].some((proto) => inputValue.includes(proto)),
-    [inputValue],
+    [inputValue]
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Info
-        visible={infoModalVisible}
-        onClose={() => setInfoModalVisible(false)}
-        message={
-          t('bewerbung.infoModalMessage') ||
-          'Kopiere einfach den Link einer Stellenanzeige in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!'
-        }
-      />
+    <TouchableWithoutFeedback onPress={() => setShowSkillDropdown(false)} accessible={false}>
+      <View style={styles.root}>
+        <Info
+          visible={infoModalVisible}
+          onClose={() => setInfoModalVisible(false)}
+          message={
+            t('bewerbung.infoModalMessage') ||
+            'Kopiere einfach den Link einer Stellenanzeige in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!'
+          }
+        />
 
-      <Animated.View
-        style={[
-          styles.animatedScreenWrap,
-          { transform: [{ translateX: animCardX }] },
-        ]}
-      >
-        <ScrollView
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+        {/* ══ MAIN CARD – zwischen Topbar und Tastatur, oben verankert ══ */}
+        <Animated.View
+          pointerEvents={accordionOpen ? 'none' : 'auto'}
+          style={[
+            styles.stage,
+            {
+              top: stageTop,
+              opacity: opacityAnim,
+              transform: [{ translateX: animCardX }],
+            },
+          ]}
         >
-          <View style={styles.responsiveContent}>
-            <View style={styles.sectionCard}>
-              <CardHeader
-                icon="person"
-                title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
-                rightElement={
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={onClose}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <MaterialIcons name="close" size={18} color={WARM.iconClose} />
-                  </TouchableOpacity>
-                }
-              />
-
-              <SegmentedPills
-                options={anredeOptions}
-                selected={selectedOption3}
-                onSelect={handleAnredeChange}
-              />
-
-              <View style={styles.suggestionsField}>
-                <View
-                  style={[
-                    styles.inputWrapper,
-                    isDamenUndHerren && styles.textInputDisabled,
-                    Boolean(errors.anrede) && styles.inputWrapperError,
-                    { marginTop: 12 },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="badge"
-                    size={20}
-                    color={isDamenUndHerren ? WARM.textDim : WARM.iconLeading}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    ref={jobRef2}
-                    editable={!isDamenUndHerren}
-                    style={[styles.textInput, isDamenUndHerren && { color: WARM.textDim }]}
-                    blurOnSubmit={false}
-                    placeholder={
-                      t('bewerbung.placeholderSalutation') || 'Nachname Ansprechpartner'
-                    }
-                    placeholderTextColor={WARM.textDim}
-                    value={name}
-                    onChangeText={(txt) => setName(txt.charAt(0).toUpperCase() + txt.slice(1))}
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    onSubmitEditing={() => handleNextStep('ansprechpartner')}
-                  />
-                </View>
-              </View>
-
-              {/* BERUF */}
-              <View style={styles.suggestionField}>
-                <View
-                  style={[
-                    styles.inputWrapper,
-                    { marginBottom: 0 },
-                    Boolean(errors.job) && styles.inputWrapperError,
-                  ]}
-                >
-                  <MaterialIcons
-                    name={isUrlInput ? 'link' : 'work-outline'}
-                    size={20}
-                    color={WARM.iconLeading}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    ref={jobRef}
-                    style={styles.textInput}
-                    placeholder={t('bewerbung.placeholderJob') || 'Berufsbezeichnung oder Link...'}
-                    placeholderTextColor={WARM.textDim}
-                    value={inputValue}
-                    blurOnSubmit={false}
-                    onBlur={() => setTimeout(() => setShowJobDropdown(false), 220)}
-                    onChangeText={handleJobChange}
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    onSubmitEditing={() => handleNextStep('job')}
-                  />
-
-                  {isUrlInput ? (
+          <ScrollView
+            style={styles.stageScroll}
+            contentContainerStyle={styles.stageScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <View style={styles.responsiveContent}>
+              <View style={styles.sectionCard}>
+                <CardHeader
+                  icon="person"
+                  title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
+                  rightElement={
                     <TouchableOpacity
-                      onPress={() => startExtraction(inputValue)}
-                      style={styles.extractBtn}
-                      disabled={isExtracting}
-                      activeOpacity={0.8}
+                      style={styles.closeButton}
+                      onPress={onClose}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                      <MaterialIcons name="auto-awesome" size={16} color="#FFFFFF" />
-                      <Text style={styles.extractBtnText}>
-                        {t('bewerbung.btnAnalyze') || 'Analysieren'}
-                      </Text>
+                      <MaterialIcons name="close" size={18} color={WARM.iconClose} />
                     </TouchableOpacity>
-                  ) : saveJobVisible && inputValue.length > 0 ? (
-                    <TouchableOpacity onPress={handleSaveJob} style={styles.iconBtn}>
-                      <MaterialIcons name="bookmark-add" size={20} color={WARM.iconLeading} />
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
+                  }
+                />
 
-                {inputValue.length > 0 && showJobDropdown && jobs.length > 0 && (
-                  <SuggestionDropdown
-                    data={jobs}
-                    onSelect={(suggestion) => {
-                      setInputValue(suggestion.text);
-                      setJobs([]);
-                      setShowJobDropdown(false);
-                      setSaveJobVisible(false);
-                      inputRef.current?.focus();
-                    }}
-                    onDelete={handleDeleteJob}
-                  />
-                )}
-              </View>
+                <SegmentedPills
+                  options={anredeOptions}
+                  selected={selectedOption3}
+                  onSelect={handleAnredeChange}
+                />
 
-              {/* KENNTNISSE & SKILLS MIT MULTI-SELECT */}
-              <View style={styles.suggestionFieldSkill}>
-                <View
-                  style={[
-                    styles.inputWrapper,
-                    { marginBottom: 0 },
-                    Boolean(errors.skill) && styles.inputWrapperError,
-                  ]}
-                >
-                  <MaterialIcons
-                    name="stars"
-                    size={20}
-                    color={WARM.iconLeading}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    ref={inputRef}
-                    style={styles.textInput}
-                    placeholder={
-                      selectedSkills.length > 0
-                        ? `${selectedSkills.length} Fähigkeiten gewählt`
-                        : t('bewerbung.placeholderSkills') || 'z.B. 3 Jahre React Native...'
-                    }
-                    placeholderTextColor={WARM.textDim}
-                    value={erfahrung}
-                    onFocus={() => {
-                      if (skills.length > 0) {
-                        setSkillsFiltered(skills);
-                        setShowSkillDropdown(true);
+                <View style={styles.suggestionsField}>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      isDamenUndHerren && styles.textInputDisabled,
+                      Boolean(errors.anrede) && styles.inputWrapperError,
+                      { marginTop: 12 },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="badge"
+                      size={20}
+                      color={isDamenUndHerren ? WARM.textDim : WARM.iconLeading}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      ref={jobRef2}
+                      editable={!isDamenUndHerren}
+                      style={[styles.textInput, isDamenUndHerren && { color: WARM.textDim }]}
+                      blurOnSubmit={false}
+                      placeholder={
+                        t('bewerbung.placeholderSalutation') || 'Nachname Ansprechpartner'
                       }
-                    }}
-                    onBlur={() => setTimeout(() => setShowSkillDropdown(false), 250)}
-                    onChangeText={handleErfahrungChange}
-                    blurOnSubmit={false}
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={() => handleNextStep('skill')}
-                  />
+                      placeholderTextColor={WARM.textDim}
+                      value={name}
+                      onChangeText={(txt) => setName(txt.charAt(0).toUpperCase() + txt.slice(1))}
+                      autoCorrect={false}
+                      returnKeyType="next"
+                      onSubmitEditing={() => handleNextStep('ansprechpartner')}
+                    />
+                  </View>
+                </View>
 
-                  {saveSkillVisible && (
-                    <TouchableOpacity onPress={handleSaveSkill} style={styles.iconBtn}>
-                      <MaterialIcons name="bookmark-add" size={20} color={WARM.iconLeading} />
-                    </TouchableOpacity>
+                {/* BERUF */}
+                <View style={styles.suggestionField}>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      { marginBottom: 0 },
+                      Boolean(errors.job) && styles.inputWrapperError,
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={isUrlInput ? 'link' : 'work-outline'}
+                      size={20}
+                      color={WARM.iconLeading}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      ref={jobRef}
+                      style={styles.textInput}
+                      placeholder={t('bewerbung.placeholderJob') || 'Berufsbezeichnung oder Link...'}
+                      placeholderTextColor={WARM.textDim}
+                      value={inputValue}
+                      blurOnSubmit={false}
+                      onBlur={() => setTimeout(() => setShowJobDropdown(false), 220)}
+                      onChangeText={handleJobChange}
+                      autoCorrect={false}
+                      returnKeyType="next"
+                      onSubmitEditing={() => handleNextStep('job')}
+                    />
+
+                    {isUrlInput ? (
+                      <TouchableOpacity
+                        onPress={() => startExtraction(inputValue)}
+                        style={styles.extractBtn}
+                        disabled={isExtracting}
+                        activeOpacity={0.8}
+                      >
+                        <MaterialIcons name="auto-awesome" size={16} color="#FFFFFF" />
+                        <Text style={styles.extractBtnText}>
+                          {t('bewerbung.btnAnalyze') || 'Analysieren'}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : saveJobVisible && inputValue.length > 0 ? (
+                      <TouchableOpacity onPress={handleSaveJob} style={styles.iconBtn}>
+                        <MaterialIcons name="bookmark-add" size={20} color={WARM.iconLeading} />
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+
+                  {inputValue.length > 0 && showJobDropdown && jobs.length > 0 && (
+                    <SuggestionDropdown
+                      data={jobs}
+                      onSelect={(suggestion) => {
+                        setInputValue(suggestion.text);
+                        setJobs([]);
+                        setShowJobDropdown(false);
+                        setSaveJobVisible(false);
+                        inputRef.current?.focus();
+                      }}
+                      onDelete={handleDeleteJob}
+                    />
                   )}
                 </View>
 
-                {showSkillDropdown && skillsFiltered.length > 0 && (
-                  <SuggestionDropdown
-                    data={skillsFiltered}
-                    onSelect={handleToggleSelectSkill}
-                    onToggleSelect={handleToggleSelectSkill}
-                    selectedItems={selectedSkills}
-                    theMaxHeight={height * 0.22}
-                    isSkill={true}
-                  />
-                )}
-              </View>
+                {/* KENNTNISSE & SKILLS MIT MULTI-SELECT */}
+                <View style={styles.suggestionFieldSkill}>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      { marginBottom: 0 },
+                      Boolean(errors.skill) && styles.inputWrapperError,
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="stars"
+                      size={20}
+                      color={WARM.iconLeading}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      ref={inputRef}
+                      style={styles.textInput}
+                      placeholder={
+                        selectedSkills.length > 0
+                          ? `${selectedSkills.length} Fähigkeiten gewählt`
+                          : t('bewerbung.placeholderSkills') || 'z.B. 3 Jahre React Native...'
+                      }
+                      placeholderTextColor={WARM.textDim}
+                      value={erfahrung}
+                      onFocus={() => {
+                        if (skills.length > 0) {
+                          setSkillsFiltered(skills);
+                          setShowSkillDropdown(true);
+                        }
+                      }}
+                      onBlur={() => setTimeout(() => setShowSkillDropdown(false), 250)}
+                      onChangeText={handleErfahrungChange}
+                      blurOnSubmit={false}
+                      autoCorrect={false}
+                      returnKeyType="done"
+                      onSubmitEditing={() => handleNextStep('skill')}
+                    />
 
-              {/* BOTTOM ACTIONS */}
-              <View style={styles.bottomActionRow}>
-                <TouchableOpacity
-                  style={[styles.settingsButton, accordionOpen && styles.settingsButtonActive]}
-                  onPress={() => toggleAccordion(true)}
-                  activeOpacity={0.8}
-                >
-                  <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
-                  <Text style={styles.settingsButtonText} numberOfLines={1}>
-                    {t('Optionen') || 'Optionen'}
-                  </Text>
-                  <MaterialIcons
-                    name={accordionOpen ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-                    size={18}
-                    color={WARM.iconArrow}
-                  />
-                </TouchableOpacity>
+                    {saveSkillVisible && (
+                      <TouchableOpacity onPress={handleSaveSkill} style={styles.iconBtn}>
+                        <MaterialIcons name="bookmark-add" size={20} color={WARM.iconLeading} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
 
-                <TouchableOpacity
-                  style={styles.generateButton}
-                  onPress={handleGeneratePDF}
-                  disabled={loading}
-                  activeOpacity={0.85}
-                >
-                  {loading ? (
-                    <View style={styles.loadingRow}>
-                      <ActivityIndicator size="small" color="#FFFFFF" />
-                      <Text style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]} numberOfLines={1}>
-                        {` Bitte warten`}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.loadingRow}>
-                      <MaterialIcons name="auto-awesome" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
-                    </View>
+                  {showSkillDropdown && skillsFiltered.length > 0 && (
+                    <SuggestionDropdown
+                      data={skillsFiltered}
+                      onSelect={handleToggleSelectSkill}
+                      onToggleSelect={handleToggleSelectSkill}
+                      selectedItems={selectedSkills}
+                      theMaxHeight={height * 0.14}
+                      isSkill={true}
+                    />
                   )}
-                </TouchableOpacity>
+                </View>
+
+                {/* BOTTOM ACTIONS */}
+                <View style={styles.bottomActionRow}>
+                  <TouchableOpacity
+                    style={[styles.settingsButton, accordionOpen && styles.settingsButtonActive]}
+                    onPress={() => toggleAccordion(true)}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
+                    <Text style={styles.settingsButtonText} numberOfLines={1}>
+                      {t('Optionen') || 'Optionen'}
+                    </Text>
+                    <MaterialIcons
+                      name={accordionOpen ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                      size={18}
+                      color={WARM.iconArrow}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.generateButton}
+                    onPress={handleGeneratePDF}
+                    disabled={loading}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <View style={styles.loadingRow}>
+                        <ActivityIndicator size="small" color="#FFFFFF" />
+                        <Text
+                          style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]}
+                          numberOfLines={1}
+                        >
+                          {` Bitte warten`}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.loadingRow}>
+                        <MaterialIcons
+                          name="auto-awesome"
+                          size={18}
+                          color="#FFFFFF"
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
-      </Animated.View>
+          </ScrollView>
+        </Animated.View>
 
-      {/* OPTIONEN SCREEN */}
-      <Animated.View
-        pointerEvents={accordionOpen ? 'auto' : 'none'}
-        style={[
-          styles.optionsScreen,
-          {
-            transform: [{ translateX: animOptionsX }],
-          },
-        ]}
-      >
-        <ScrollView
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+        {/* ══ OPTIONEN SCREEN – zwischen Topbar und Tastatur ══ */}
+        <Animated.View
+          pointerEvents={accordionOpen ? 'auto' : 'none'}
+          style={[
+            styles.stage,
+            styles.optionsStage,
+            {
+              top: stageTop,
+              transform: [{ translateX: animOptionsX }],
+            },
+          ]}
         >
-          <View style={styles.responsiveContent}>
+          <View style={[styles.responsiveContent, { flex: 1 }]}>
             <View style={styles.accordionPanel}>
               <View style={styles.optionsHeader}>
                 <View style={styles.headerLeft}>
@@ -1118,57 +1206,65 @@ ${detailedSkillsString}
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.subFieldLabel}>
-                {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
-              </Text>
-              <SegmentedPills
-                options={employmentOptions}
-                selected={selectedOption}
-                onSelect={(opt) => setSelectedOption((p) => (p === opt ? '' : opt))}
-              />
-
-              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
-                {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
-              </Text>
-              <SegmentedPills
-                options={applicationOptions}
-                selected={selectedOption2}
-                onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
-              />
-
-              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
-                {t('QUALITÄT') || 'Qualität'}
-              </Text>
-              <SegmentedPills
-                options={qualityKeys}
-                selected={selectedQuality}
-                onSelect={(val) => setSelectedQuality(val)}
-                labels={qualityLabels}
-              />
-
-              <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
-                {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
-              </Text>
-              <View style={{ zIndex: 1000, marginTop: 4 }}>
-                <DropDownPicker
-                  open={fontPickerOpen}
-                  value={fontValue}
-                  items={fontOptions}
-                  setOpen={setFontPickerOpen}
-                  setValue={setFontValue}
-                  placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
-                  style={styles.dropdown}
-                  dropDownContainerStyle={styles.dropdownList}
-                  textStyle={{
-                    color: WARM.textMain,
-                    fontSize: 13.5,
-                    fontWeight: '500',
-                  }}
-                  arrowIconStyle={{ tintColor: WARM.iconArrow }}
-                  dropDownDirection="TOP"
-                  listMode="SCROLLVIEW"
+              <ScrollView
+                style={styles.optionsScrollArea}
+                contentContainerStyle={styles.optionsScrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled={true}
+              >
+                <Text style={styles.subFieldLabel}>
+                  {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
+                </Text>
+                <SegmentedPills
+                  options={employmentOptions}
+                  selected={selectedOption}
+                  onSelect={(opt) => setSelectedOption((p) => (p === opt ? '' : opt))}
                 />
-              </View>
+
+                <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                  {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
+                </Text>
+                <SegmentedPills
+                  options={applicationOptions}
+                  selected={selectedOption2}
+                  onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
+                />
+
+                <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                  {t('QUALITÄT') || 'Qualität'}
+                </Text>
+                <SegmentedPills
+                  options={qualityKeys}
+                  selected={selectedQuality}
+                  onSelect={(val) => setSelectedQuality(val)}
+                  labels={qualityLabels}
+                />
+
+                <Text style={[styles.subFieldLabel, { marginTop: 14 }]}>
+                  {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
+                </Text>
+                <View style={{ zIndex: 1000, marginTop: 4, marginBottom: 8 }}>
+                  <DropDownPicker
+                    open={fontPickerOpen}
+                    value={fontValue}
+                    items={fontOptions}
+                    setOpen={setFontPickerOpen}
+                    setValue={setFontValue}
+                    placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
+                    style={styles.dropdown}
+                    dropDownContainerStyle={styles.dropdownList}
+                    textStyle={{
+                      color: WARM.textMain,
+                      fontSize: 13.5,
+                      fontWeight: '500',
+                    }}
+                    arrowIconStyle={{ tintColor: WARM.iconArrow }}
+                    dropDownDirection="TOP"
+                    listMode="SCROLLVIEW"
+                  />
+                </View>
+              </ScrollView>
 
               <View style={styles.bottomActionRow}>
                 <TouchableOpacity
@@ -1190,13 +1286,21 @@ ${detailedSkillsString}
                   {loading ? (
                     <View style={styles.loadingRow}>
                       <ActivityIndicator size="small" color="#FFFFFF" />
-                      <Text style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]} numberOfLines={1}>
+                      <Text
+                        style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]}
+                        numberOfLines={1}
+                      >
                         {` Bitte warten`}
                       </Text>
                     </View>
                   ) : (
                     <View style={styles.loadingRow}>
-                      <MaterialIcons name="auto-awesome" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <MaterialIcons
+                        name="auto-awesome"
+                        size={18}
+                        color="#FFFFFF"
+                        style={{ marginRight: 6 }}
+                      />
                       <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
                     </View>
                   )}
@@ -1204,71 +1308,84 @@ ${detailedSkillsString}
               </View>
             </View>
           </View>
-        </ScrollView>
-      </Animated.View>
+        </Animated.View>
 
-      {/* EXTRAKTIONS-OVERLAY */}
-      {isExtracting && (
-        <View style={styles.extractingOverlay}>
-          {Boolean(webViewUrl) && (
-            <WebView
-              ref={webViewRef}
-              source={{ uri: webViewUrl }}
-              style={styles.hiddenWebView}
-              onLoadEnd={injectScript}
-              onMessage={onMessage}
-              javaScriptEnabled
-              onError={() => {
-                cancelExtraction();
-                Alert.alert(
-                  t('bewerbung.errorTitle') || 'Fehler',
-                  t('bewerbung.errorLoadJob') || 'Stellenanzeige konnte nicht geladen werden.',
-                );
-              }}
-              userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
-            />
-          )}
+        {/* EXTRAKTIONS-OVERLAY */}
+        {isExtracting && (
+          <View style={styles.extractingOverlay}>
+            {Boolean(webViewUrl) && (
+              <WebView
+                ref={webViewRef}
+                source={{ uri: webViewUrl }}
+                style={styles.hiddenWebView}
+                onLoadEnd={injectScript}
+                onMessage={onMessage}
+                javaScriptEnabled
+                onError={() => {
+                  cancelExtraction();
+                  Alert.alert(
+                    t('bewerbung.errorTitle') || 'Fehler',
+                    t('bewerbung.errorLoadJob') || 'Stellenanzeige konnte nicht geladen werden.'
+                  );
+                }}
+                userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
+              />
+            )}
 
-          <View style={styles.extractCard}>
-            <View style={styles.radarCircle}>
-              <ActivityIndicator size="large" color={WARM.iconLeading} />
-            </View>
-            <Text style={styles.extractTitle}>
-              {t('bewerbung.extractingTitle') || 'Stellenanzeige wird analysiert...'}
-            </Text>
-            <Text style={styles.extractSubtitle}>
-              {t('bewerbung.extractingSubtitle') || 'Wir extrahieren Keywords & Aufgaben'}
-            </Text>
-
-            <TouchableOpacity style={styles.cancelExtractBtn} onPress={cancelExtraction}>
-              <Text style={styles.cancelExtractText}>
-                {t('bewerbung.btnCancel') || 'Abbrechen'}
+            <View style={styles.extractCard}>
+              <View style={styles.radarCircle}>
+                <ActivityIndicator size="large" color={WARM.iconLeading} />
+              </View>
+              <Text style={styles.extractTitle}>
+                {t('bewerbung.extractingTitle') || 'Stellenanzeige wird analysiert...'}
               </Text>
-            </TouchableOpacity>
+              <Text style={styles.extractSubtitle}>
+                {t('bewerbung.extractingSubtitle') || 'Wir extrahieren Keywords & Aufgaben'}
+              </Text>
+
+              <TouchableOpacity style={styles.cancelExtractBtn} onPress={cancelExtraction}>
+                <Text style={styles.cancelExtractText}>
+                  {t('bewerbung.btnCancel') || 'Abbrechen'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      )}
-    </SafeAreaView>
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 });
 
 /* ── Styles ─────────────────────────────────────────────── */
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
+  /* ── Root & Stage ── */
+  root: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
   },
-  animatedScreenWrap: {
+  stage: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  optionsStage: {
+    zIndex: 100,
+    elevation: 100,
+  },
+  stageScroll: {
     flex: 1,
+    width: '100%',
   },
-  scrollContainer: {
-    flex: 1,
+  stageScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
+    paddingVertical: 6,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 36,
-  },
+
+  /* ── Content-Layout ── */
   responsiveContent: {
     width: '100%',
     maxWidth: 600,
@@ -1287,6 +1404,37 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
+
+  /* ── Options Panel ── */
+  accordionPanel: {
+    flex: 1,
+    backgroundColor: WARM.bg,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: WARM.surfaceBorder,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  optionsScrollArea: {
+    flex: 1,
+    width: '100%',
+  },
+  optionsScrollContent: {
+    paddingBottom: 16,
+    paddingTop: 4,
+  },
+  optionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
+
+  /* ── Header ── */
   closeButton: {
     width: 32,
     height: 32,
@@ -1306,18 +1454,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-  },
-  optionsScreen: {
-    flex: 1,
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
-    zIndex: 100,
-  },
-  optionsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 18,
   },
   iconBadge: {
     width: 30,
@@ -1342,6 +1478,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 8,
   },
+
+  /* ── Inputs ── */
   suggestionsField: {
     width: '100%',
   },
@@ -1399,6 +1537,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+
+  /* ── Pills ── */
   pillContainer: {
     flexDirection: 'row',
     backgroundColor: WARM.surface,
@@ -1433,6 +1573,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
   },
+
+  /* ── Dropdowns ── */
   suggestionField: {
     position: 'relative',
     zIndex: 20,
@@ -1465,8 +1607,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: WARM.surfaceBorderSubtle,
   },
-  suggestionRowSelected: {
-  },
+  suggestionRowSelected: {},
   resultIconWrapper: {
     width: 26,
     height: 26,
@@ -1499,13 +1640,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  accordionPanel: {
-    backgroundColor: WARM.bg,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: WARM.surfaceBorder,
-    padding: 16,
-  },
   dropdown: {
     backgroundColor: WARM.surface,
     borderRadius: 14,
@@ -1517,6 +1651,8 @@ const styles = StyleSheet.create({
     borderColor: WARM.surfaceBorder,
     borderRadius: 14,
   },
+
+  /* ── Bottom Buttons ── */
   bottomActionRow: {
     marginTop: 12,
     flexDirection: 'row',
@@ -1571,6 +1707,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.2,
   },
+
+  /* ── Extraction Overlay ── */
   extractingOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: WARM.backdrop,

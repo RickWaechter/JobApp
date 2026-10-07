@@ -275,7 +275,7 @@ export default function StartApp() {
 
     Animated.timing(animStep, {
       toValue: 1,
-      duration: 300,
+      duration: 400,
       useNativeDriver: true,
     }).start();
   }, [animStep]);
@@ -667,8 +667,7 @@ const getOld = async () => {
               {
                 opacity: animProgressOpacity.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, 1],
-                  extrapolate: "clamp",
+                  outputRange: [1, 1],
                 }),
               },
             ]}
@@ -701,18 +700,18 @@ const getOld = async () => {
             ]}
           >
             {/* Screen 1: Bewerbung */}
-            <Animated.View
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  opacity: animStep.interpolate({
-                    inputRange: [0, 0.8, 1],
-                    outputRange: [1, 0, 0],
-                  }),
-                },
-              ]}
-              pointerEvents={screenChange ? "none" : "auto"}
-            >
+         <Animated.View
+  style={[
+    StyleSheet.absoluteFillObject,
+    {
+      opacity: animStep.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0], // bleibt leicht abgedunkelt im Hintergrund
+      }),
+    },
+  ]}
+  pointerEvents={screenChange ? "none" : "auto"}
+>
               <Bewerbung
                 changeScreen={navigateToChange}
                 visibleApp={screenApp}

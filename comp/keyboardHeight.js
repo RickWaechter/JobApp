@@ -12,6 +12,7 @@ export const useKeyboardHeight = () => {
 
     const showSub = Keyboard.addListener(showEvent, (e) => {
       setKeyboardHeight(e.endCoordinates.height);
+      console.log(e.endCoordinates.height);
     });
 
     const hideSub = Keyboard.addListener(hideEvent, () => {

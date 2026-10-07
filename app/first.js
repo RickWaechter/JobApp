@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  FlatList,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -27,7 +26,7 @@ import * as Keychain from 'react-native-keychain';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { sha256 } from 'react-native-sha256';
 import SQLite from 'react-native-sqlite-storage';
-
+import { saveKeyboardHeight } from '../inc/keyboardStorage.js';
 import colors from '../inc/colors.js';
 import { encryp } from '../inc/cryp.js';
 
@@ -68,6 +67,23 @@ const StartScreen = () => {
     { label: '日本語', value: 'jp' },
   ];
 
+  /* ── Tastatur-Größe (Höhe) beim Ausfahren speichern ───── */
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidShow';
+
+    const sub = Keyboard.addListener(showEvent, (e) => {
+      const h = e?.endCoordinates?.height;
+      if (h && h > 0) {
+        const roundedHeight = String(Math.round(h));
+        console.log('Keyboard Height:', roundedHeight);
+       saveKeyboardHeight(roundedHeight);
+      }
+    });
+
+    return () => sub.remove();
+  }, []);
+
   /* ── Jobs-DB Download im Hintergrund ─────────────────── */
   useEffect(() => {
     const setupDatabase = async () => {
@@ -103,6 +119,7 @@ const StartScreen = () => {
 
   /* ── Musterdaten einfügen ────────────────────────────── */
   const handleFillSampleData = () => {
+    nameRef.current.focus();
     setName('Max Mustermann');
     setYourStreet('Musterstraße 12');
     setYourCity('10115 Berlin');
@@ -138,7 +155,6 @@ const StartScreen = () => {
       const deviceId = await DeviceInfo.getUniqueId();
       const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
 
-      // Tabelle erstellen, falls noch nicht vorhanden
       await db.executeSql(`
         CREATE TABLE IF NOT EXISTS files (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -170,7 +186,6 @@ const StartScreen = () => {
         );
       `);
 
-      // Basis-Eintrag für dieses Gerät sicherstellen
       await db.executeSql(
         `INSERT OR IGNORE INTO files (ident) VALUES (?);`,
         [deviceId]
@@ -199,7 +214,6 @@ const StartScreen = () => {
       await EncryptedStorage.setItem('street', cleanStreet);
       await EncryptedStorage.setItem('city', cleanCity);
 
-      // Keychain Schlüssel generieren
       const password = await sha256(deviceId);
       await Keychain.setGenericPassword(deviceId, password);
 
@@ -207,7 +221,6 @@ const StartScreen = () => {
       const myKey = credentials.password;
       await EncryptedStorage.setItem('key', myKey);
 
-      // Verschlüsselt in SQLite speichern
       const nameCryp = await encryp(cleanName, myKey);
       const streetCryp = await encryp(cleanStreet, myKey);
       const cityCryp = await encryp(cleanCity, myKey);
@@ -370,33 +383,50 @@ const StartScreen = () => {
                 </View>
 
                 {/* 4. Sprache */}
-                <View style={[styles.fieldGroup, { zIndex: 3000, marginTop: 4 }]}>
-                  <Text style={styles.fieldLabel}>SPRACHE</Text>
-                  <DropDownPicker
-                    open={open}
-                    value={value}
-                    items={items}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    placeholder={t('settings.language') || 'Sprache wählen'}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropDownContainer}
-                    textStyle={{ color: '#FFFFFF', fontSize: 14 }}
-                    arrowIconStyle={{ tintColor: '#FFFFFF' }}
-                    dropDownDirection="BOTTOM"
-                    listMode="SCROLLVIEW"
-                  />
-                </View>
-              </View>
+               {/* 4. Sprache (Horizontale Scroll-Leiste statt Dropdown) */}
+  <Text style={styles.fieldLabel}>SPRACHE</Text>
+  <View style={styles.languageScrollWrapper}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.languageScrollContent}
+      keyboardShouldPersistTaps="handled"
+    >
+      {items.map((item) => {
+        const isSelected = value === item.value;
+        return (
+          <TouchableOpacity
+            key={item.value}
+            style={[
+              styles.langPill,
+              isSelected && styles.langPillActive,
+            ]}
+            onPress={() => setValue(item.value)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.langPillText,
+                isSelected && styles.langPillTextActive,
+              ]}
+            >
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  </View>
+</View>
 
               <Text style={styles.infoHintText}>
-                {t('first.theDrop') || 'Deine Daten werden ausschließlich lokal und sicher verschlüsselt auf diesem Gerät gespeichert.'}
+                {t('first.theDrop') ||
+                  'Deine Daten werden ausschließlich lokal und sicher verschlüsselt auf diesem Gerät gespeichert.'}
               </Text>
             </ScrollView>
 
             {/* ── Primary CTA Button ── */}
-            <View style={styles.footer}>
-              <TouchableOpacity
+          <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={init}
                 disabled={isSaving}
@@ -421,7 +451,6 @@ const StartScreen = () => {
                   </View>
                 )}
               </TouchableOpacity>
-            </View>
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
@@ -445,8 +474,6 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 12 : 20,
     justifyContent: 'space-between',
   },
-
-  /* ── Header ── */
   header: {
     marginBottom: 12,
   },
@@ -469,6 +496,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     marginRight: 6,
   },
+  languageScrollWrapper: {
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  languageScrollContent: {
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    gap: 8,
+  },
+  langPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  langPillActive: {
+    backgroundColor: '#3B82F6',
+  },
+  langPillText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  langPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
   badgeHubText: {
     color: '#60A5FA',
     fontSize: 10,
@@ -487,8 +546,6 @@ const styles = StyleSheet.create({
     marginTop: 3,
     lineHeight: 18,
   },
-
-  /* ── Scroll Area & Form Card ── */
   scrollArea: {
     flex: 1,
   },
@@ -559,8 +616,9 @@ const styles = StyleSheet.create({
   },
   dropDownContainer: {
     backgroundColor: '#1E2433',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgb(19, 17, 17)',
     borderRadius: 14,
+    zIndex: 3000, 
   },
   infoHintText: {
     color: 'rgba(255, 255, 255, 0.4)',
@@ -570,8 +628,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 4,
   },
-
-  /* ── Footer Button ── */
   footer: {
     marginTop: 8,
   },

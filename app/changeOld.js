@@ -393,124 +393,128 @@ const ChangeScreenOld = forwardRef(({ visible = false, onClose }, ref) => {
     Alert.alert('Fehler', 'PDF konnte nicht generiert werden.');
   }
 };
-  return (
-    <Animated.View
-      pointerEvents={visible ? 'auto' : 'none'}
-      style={[
-        styles.overlayContainer,
-        {
-          transform: [{ translateX: animCardX }],
-        },
-      ]}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={styles.keyboardView}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
-          >
-            <View style={styles.container}>
-              {/* Header mit Schließen-Button */}
-              <View style={styles.header}>
-                <View style={styles.headerTopRow}>
-                  <View style={styles.stepBadge}>
-                    <View style={styles.stepDot} />
-                    <Text style={styles.stepBadgeText}>VORLAGE ANPASSEN</Text>
-                  </View>
+ return (
+  <Animated.View
+    pointerEvents={visible ? 'auto' : 'none'}
+    style={[
+      styles.overlayContainer,
+      {
+        transform: [{ translateX: animCardX }],
+      },
+    ]}
+  >
+    <SafeAreaView style={styles.safeArea}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+        >
+          <View style={styles.container}>
+            {/* Header mit Schließen-Button */}
+            <View style={styles.header}>
+              <View style={styles.headerTopRow}>
 
-                  {onClose && (
-                    <TouchableOpacity
-                      onPress={onClose}
-                      style={styles.closeBtn}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <MaterialIcons name="close" size={22} color="rgba(255, 255, 255, 0.7)" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-
-              {/* Editor Card */}
-              <View style={styles.editorCard}>
-                <View style={styles.editorHeader}>
-                  <View style={styles.editorHeaderLeft}>
-                    <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
-                    <Text style={styles.editorHeaderText}>Betreff & Text</Text>
-                  </View>
-                  <View style={styles.wordBadge}>
-                    <Text style={styles.wordBadgeText}>{wordCount} Wörter</Text>
-                  </View>
-                </View>
-
-                <TextInput
-                  style={styles.subjectInput}
-                  value={subject}
-                  onChangeText={setSubject}
-                  placeholder="Betreff eingeben..."
-                  placeholderTextColor="rgba(255, 255, 255, 0.35)"
-                  multiline={false}
-                  returnKeyType="next"
-                />
-
-                <View style={styles.divider} />
-
-                <TextInput
-                  ref={textAreaRef}
-                  style={styles.textArea}
-                  value={text}
-                  onChangeText={setText}
-                  placeholder={t('placeholderText') || 'Hier Text eingeben...'}
-                  placeholderTextColor="rgba(255, 255, 255, 0.35)"
-                  multiline={true}
-                  textAlignVertical="top"
-                  showsVerticalScrollIndicator={true}
-                />
-              </View>
-
-              {/* CTA Button */}
-              <View style={styles.actionContainer}>
-                <TouchableOpacity
-                  style={styles.generateButton}
-                  disabled={loading}
-                  onPress={generate}
-                  activeOpacity={0.85}
-                >
-                  {loading ? (
-                    <View style={styles.loadingRow}>
-                      <ActivityIndicator size="small" color="#FFFFFF" />
-                      <Text style={styles.generateBtnText}>
-                        {`Bewerbungsmappe wird erstellt${dots}`}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.loadingRow}>
-                      <MaterialIcons
-                        name="picture-as-pdf"
-                        size={20}
-                        color="#FFFFFF"
-                        style={{ marginRight: 8 }}
-                      />
-                      <Text style={styles.generateBtnText}>
-                        {t('saveCoverLetter') || 'Mappe generieren & fortsetzen'}
-                      </Text>
-                      <MaterialIcons
-                        name="arrow-forward"
-                        size={18}
-                        color="#FFFFFF"
-                        style={{ marginLeft: 6 }}
-                      />
-                    </View>
-                  )}
-                </TouchableOpacity>
+              
               </View>
             </View>
-          </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
-      </SafeAreaView>
-    </Animated.View>
-  );
-});
+
+            {/* Editor Card */}
+            <View style={styles.editorCard}>
+              
+              <View style={styles.editorHeader}>
+                
+                <View style={styles.editorHeaderLeft}>
+                  <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
+                  <Text style={styles.editorHeaderText}>
+                    {t('changeOld.editorHeader')}
+                  </Text>
+                </View>
+                <View style={styles.wordBadge}>
+                  
+                  <Text style={styles.wordBadgeText}>
+                    {t('changeOld.wordCount', { count: wordCount })}
+                  </Text>
+                </View>
+                  {onClose && (
+                  <TouchableOpacity
+                    onPress={onClose}
+                    style={styles.closeBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <MaterialIcons name="close" size={22} color="rgba(255, 255, 255, 0.7)" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <TextInput
+                style={styles.subjectInput}
+                value={subject}
+                onChangeText={setSubject}
+                placeholder={t('changeOld.subjectPlaceholder')}
+                placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                multiline={false}
+                returnKeyType="next"
+              />
+
+              <View style={styles.divider} />
+
+              <TextInput
+                ref={textAreaRef}
+                style={styles.textArea}
+                value={text}
+                onChangeText={setText}
+                placeholder={t('changeOld.textPlaceholder')}
+                placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                multiline={true}
+                textAlignVertical="top"
+                showsVerticalScrollIndicator={true}
+              />
+            </View>
+
+            {/* CTA Button */}
+            <View style={styles.actionContainer}>
+              <TouchableOpacity
+                style={styles.generateButton}
+                disabled={loading}
+                onPress={generate}
+                activeOpacity={0.85}
+              >
+                {loading ? (
+                  <View style={styles.loadingRow}>
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <Text style={styles.generateBtnText}>
+                      {t('changeOld.creatingFolder', { dots })}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.loadingRow}>
+                    <MaterialIcons
+                      name="picture-as-pdf"
+                      size={20}
+                      color="#FFFFFF"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.generateBtnText}>
+                      {t('changeOld.submitButton')}
+                    </Text>
+                    <MaterialIcons
+                      name="arrow-forward"
+                      size={18}
+                      color="#FFFFFF"
+                      style={{ marginLeft: 6 }}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
+  </Animated.View>
+);
+})
 
 // Styles unverändert übernommen
 const styles = StyleSheet.create({

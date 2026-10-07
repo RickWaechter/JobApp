@@ -6,7 +6,7 @@ import { useIAP } from 'expo-iap';
 import { sha512 } from 'js-sha512';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActivityIndicator,
   Alert,
@@ -168,6 +168,7 @@ const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [source, setSource] = useState(false);
   const [adLoadedState, setAdLoadedState] = useState(false);
   const adLoaded = useRef(false);
+  const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
 const dbMainRef = useRef(null);
   /* ── State: Modals ───────────────────────────────────── */
   const [isModalDataVisible, setModalDataVisible] = useState(false);
@@ -615,8 +616,8 @@ const handleInfo = (val) => {
   }
 }
 return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
+<View style={[styles.container, { paddingTop: insets.top }]}>
+        <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -640,18 +641,16 @@ return (
             onPress={() => setModalPayVisible(true)}
             style={styles.coinBadge}
           >
-            <View style={styles.coinIconCircle}>
+              <View style={styles.coinIconCircle}>
               <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
             </View>
            
             <Text style={styles.coinText}>
               {coins !== null 
-                ? t('profil.coinsCount', { count: coins }) 
+                ? `${coins} `
                 : t('profil.coinsCountLoading')}
             </Text>
-            <View style={styles.coinAddBtn}>
-              <MaterialIcons name="add" size={14} color="#FFFFFF" />
-            </View>
+          
           </TouchableOpacity>
         </View>
 
@@ -1191,7 +1190,7 @@ return (
       </Modal>
 
       <Info message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({

@@ -27,6 +27,7 @@ export const saveKeyboardHeight = async (height) => {
 
     // Nichts tun, wenn sich die Höhe nicht geändert hat
     if (previousHeight === currentHeight) {
+      console.log('previos high', previousHeight, 'current', currentHeight)
       return currentHeight;
     }
 

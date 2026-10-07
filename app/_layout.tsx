@@ -7,7 +7,7 @@ import { BackHandler, Keyboard, Platform } from 'react-native';
 import 'react-native-reanimated';
 import { saveKeyboardHeight } from '../inc/keyboardStorage';
 import "../local/i18n"; // ← nur hier
-
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 // Polyfill für alte Bibliotheken (verhindert den Crash bei BackHandler.removeEventListener)
 if (BackHandler && !(BackHandler as any).removeEventListener) {
   (BackHandler as any).removeEventListener = () => {};
@@ -20,25 +20,10 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  useEffect(() => {
-    const eventName =
-      Platform.OS === "ios"
-        ? "keyboardWillShow"
-        : "keyboardDidShow";
-
-    const subscription = Keyboard.addListener(
-      eventName,
-      (event) => {
-        saveKeyboardHeight(event.endCoordinates.height);
-      }
-    );
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+  
 
   return (
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -57,5 +42,6 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

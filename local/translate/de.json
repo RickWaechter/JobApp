@@ -319,6 +319,16 @@
     "title": "Erfolgreich",
     "applicationSent": "Deine Bewerbungsmappe wurde erfolgreich versendet"
   },
+  "changeOld": {
+  "stepBadge": "VORLAGE ANPASSEN",
+  "editorHeader": "Betreff & Text",
+  "wordCount": "{{count}} Wörter",
+  "wordCount_one": "1 Wort",
+  "subjectPlaceholder": "Betreff eingeben...",
+  "textPlaceholder": "Hier Text eingeben...",
+  "creatingFolder": "Bewerbungsmappe wird erstellt{{dots}}",
+  "submitButton": "Mappe generieren & fortsetzen"
+},
   "upload": {
     "title": "Erfolgreich",
     "info": "Dateien wurden erfolgreich gespeichert.",

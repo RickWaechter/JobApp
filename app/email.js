@@ -423,6 +423,7 @@ Vorgaben:
 
       const response = await axios.post('https://api.jobapp2.de/getEmail', {
         prompt1,
+        modelIntens: 'light',
       });
 
       const myName = await EncryptedStorage.getItem('name');
@@ -497,7 +498,7 @@ Vorgaben:
 
 return (
   <SafeAreaView style={styles.safeArea}>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <TouchableWithoutFeedback onPress={() => setIsFlatListVisible(false)} accessible={false}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -511,9 +512,7 @@ return (
               <Text style={styles.badgeHubText}>DIREKTER VERSAND</Text>
             </View>
             <Text style={styles.titleMain}>Bewerbung versenden</Text>
-            <Text style={styles.subtitleMain}>
-              Überprüfe Empfänger, Betreff und Begleitschreiben vor dem Absenden.
-            </Text>
+            
           </View>
 
           <ScrollView
@@ -587,12 +586,13 @@ return (
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
-                      <View style={styles.suggestionRow}>
-                        <TouchableOpacity
+                       <TouchableOpacity
                           onPress={() => handleSuggestionClick(item)}
                           style={styles.suggestionTextArea}
                           activeOpacity={0.7}
                         >
+                      <View style={styles.suggestionRow}>
+                       
                           <MaterialIcons
                             name="history"
                             size={15}
@@ -602,7 +602,6 @@ return (
                           <Text style={styles.suggestionText} numberOfLines={1}>
                             {item}
                           </Text>
-                        </TouchableOpacity>
 
                         <TouchableOpacity
                           onPress={() => deleteItem(item)}
@@ -612,6 +611,8 @@ return (
                           <MaterialIcons name="close" size={15} color="rgba(255,255,255,0.4)" />
                         </TouchableOpacity>
                       </View>
+                        </TouchableOpacity>
+
                     )}
                   />
                 </View>

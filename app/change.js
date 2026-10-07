@@ -110,8 +110,6 @@ const [section, setSection] = useState({start: 0, end: 0});
         const myText = await EncryptedStorage.getItem('text');
         const savedEditedText = await EncryptedStorage.getItem('editedCoverLetter');
 
-        console.log('Geladener API-Text (myText):', myText ? 'VORHANDEN' : 'LEER/NULL');
-        console.log('Vorhandener Cache (savedEditedText):', savedEditedText ? 'VORHANDEN' : 'LEER/NULL');
 
         if (subj) setSubject(subj);
 
@@ -347,7 +345,14 @@ const [section, setSection] = useState({start: 0, end: 0});
           EncryptedStorage.getItem('subject'),
           EncryptedStorage.getItem('key'),
         ]);
-
+        console.log('myName:', myName); 
+        console.log('myStreet:', myStreet);
+        console.log('myCity:', myCity);
+        console.log('yourCompany:', yourCompany);
+        console.log('yourStreet:', yourStreet);
+        console.log('yourCity:', yourCity);
+        console.log('objectSubject:', objectSubject);
+        console.log('myKey:', myKey);
       const today = new Date().toLocaleDateString('de-DE', {
         day: '2-digit',
         month: 'long',
@@ -431,7 +436,7 @@ const [section, setSection] = useState({start: 0, end: 0});
         {
           paddingBottom: Animated.add(
             keyboardPadding,
-            Platform.OS === 'ios' ? 16 : 22
+            Platform.OS === 'ios' ? 0 : 0
           ),
         },
       ]}
