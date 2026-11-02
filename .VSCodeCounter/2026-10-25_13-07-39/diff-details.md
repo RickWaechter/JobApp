@@ -1,0 +1,279 @@
+# Diff Details
+
+Date : 2026-10-25 13:07:39
+
+Directory /home/rick/JobApp
+
+Total : 264 files,  7612 codes, 91 comments, 445 blanks, all 8148 lines
+
+[Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [/home/rick/Dokumente/git/JobApp/App.js](//home/rick/Dokumente/git/JobApp/App.js) | JavaScript | -4 | -3 | -3 | -10 |
+| [/home/rick/Dokumente/git/JobApp/Gemfile](//home/rick/Dokumente/git/JobApp/Gemfile) | Ruby | -10 | -3 | -4 | -17 |
+| [/home/rick/Dokumente/git/JobApp/README.md](//home/rick/Dokumente/git/JobApp/README.md) | Markdown | -31 | 0 | -20 | -51 |
+| [/home/rick/Dokumente/git/JobApp/\_\_tests\_\_/App.test.tsx](//home/rick/Dokumente/git/JobApp/__tests__/App.test.tsx) | TypeScript JSX | -8 | -3 | -3 | -14 |
+| [/home/rick/Dokumente/git/JobApp/android/app/build.gradle](//home/rick/Dokumente/git/JobApp/android/app/build.gradle) | Groovy | -100 | -70 | -25 | -195 |
+| [/home/rick/Dokumente/git/JobApp/android/app/src/main/AndroidManifest.xml](//home/rick/Dokumente/git/JobApp/android/app/src/main/AndroidManifest.xml) | XML | -39 | 0 | 0 | -39 |
+| [/home/rick/Dokumente/git/JobApp/android/app/src/main/res/drawable/rn\_edit\_text\_material.xml](//home/rick/Dokumente/git/JobApp/android/app/src/main/res/drawable/rn_edit_text_material.xml) | XML | -12 | -23 | -3 | -38 |
+| [/home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/strings.xml](//home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/strings.xml) | XML | -8 | 0 | 0 | -8 |
+| [/home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/styles.xml](//home/rick/Dokumente/git/JobApp/android/app/src/main/res/values/styles.xml) | XML | -14 | 0 | 0 | -14 |
+| [/home/rick/Dokumente/git/JobApp/android/build.gradle](//home/rick/Dokumente/git/JobApp/android/build.gradle) | Groovy | -20 | -1 | -4 | -25 |
+| [/home/rick/Dokumente/git/JobApp/android/gradle.properties](//home/rick/Dokumente/git/JobApp/android/gradle.properties) | Properties | -14 | -37 | -15 | -66 |
+| [/home/rick/Dokumente/git/JobApp/android/gradle/wrapper/gradle-wrapper.properties](//home/rick/Dokumente/git/JobApp/android/gradle/wrapper/gradle-wrapper.properties) | Properties | -7 | 0 | -1 | -8 |
+| [/home/rick/Dokumente/git/JobApp/android/gradlew.bat](//home/rick/Dokumente/git/JobApp/android/gradlew.bat) | Batch | -41 | -32 | -22 | -95 |
+| [/home/rick/Dokumente/git/JobApp/android/settings.gradle](//home/rick/Dokumente/git/JobApp/android/settings.gradle) | Groovy | -33 | 0 | -7 | -40 |
+| [/home/rick/Dokumente/git/JobApp/api/cryp.js](//home/rick/Dokumente/git/JobApp/api/cryp.js) | JavaScript | -40 | -5 | -18 | -63 |
+| [/home/rick/Dokumente/git/JobApp/api/dbJob.js](//home/rick/Dokumente/git/JobApp/api/dbJob.js) | JavaScript | -18 | 0 | -2 | -20 |
+| [/home/rick/Dokumente/git/JobApp/api/first.js](//home/rick/Dokumente/git/JobApp/api/first.js) | JavaScript | -377 | -22 | -58 | -457 |
+| [/home/rick/Dokumente/git/JobApp/api/jobapp.go](//home/rick/Dokumente/git/JobApp/api/jobapp.go) | Go | -691 | -16 | -136 | -843 |
+| [/home/rick/Dokumente/git/JobApp/api/jobapp.js](//home/rick/Dokumente/git/JobApp/api/jobapp.js) | JavaScript | -374 | -22 | -58 | -454 |
+| [/home/rick/Dokumente/git/JobApp/api/package.json](//home/rick/Dokumente/git/JobApp/api/package.json) | JSON | -35 | 0 | -1 | -36 |
+| [/home/rick/Dokumente/git/JobApp/app.config.js](//home/rick/Dokumente/git/JobApp/app.config.js) | JavaScript | -20 | 0 | -3 | -23 |
+| [/home/rick/Dokumente/git/JobApp/app.json](//home/rick/Dokumente/git/JobApp/app.json) | JSON with Comments | -113 | 0 | -1 | -114 |
+| [/home/rick/Dokumente/git/JobApp/app/(tabs)/\_layout.tsx](//home/rick/Dokumente/git/JobApp/app/(tabs)/_layout.tsx) | TypeScript JSX | -63 | 0 | -10 | -73 |
+| [/home/rick/Dokumente/git/JobApp/app/(tabs)/index.js](//home/rick/Dokumente/git/JobApp/app/(tabs)/index.js) | JavaScript | -697 | -16 | -51 | -764 |
+| [/home/rick/Dokumente/git/JobApp/app/(tabs)/profil.js](//home/rick/Dokumente/git/JobApp/app/(tabs)/profil.js) | JavaScript | -1,127 | -26 | -83 | -1,236 |
+| [/home/rick/Dokumente/git/JobApp/app/(tabs)/upload.js](//home/rick/Dokumente/git/JobApp/app/(tabs)/upload.js) | JavaScript | -978 | -19 | -86 | -1,083 |
+| [/home/rick/Dokumente/git/JobApp/app/\_layout.tsx](//home/rick/Dokumente/git/JobApp/app/_layout.tsx) | TypeScript JSX | -51 | 0 | -9 | -60 |
+| [/home/rick/Dokumente/git/JobApp/app/application.js](//home/rick/Dokumente/git/JobApp/app/application.js) | JavaScript | -1,296 | -37 | -111 | -1,444 |
+| [/home/rick/Dokumente/git/JobApp/app/change.js](//home/rick/Dokumente/git/JobApp/app/change.js) | JavaScript | -531 | -17 | -55 | -603 |
+| [/home/rick/Dokumente/git/JobApp/app/changeOld.js](//home/rick/Dokumente/git/JobApp/app/changeOld.js) | JavaScript | -535 | -17 | -64 | -616 |
+| [/home/rick/Dokumente/git/JobApp/app/collect.js](//home/rick/Dokumente/git/JobApp/app/collect.js) | JavaScript | -456 | -13 | -40 | -509 |
+| [/home/rick/Dokumente/git/JobApp/app/email.js](//home/rick/Dokumente/git/JobApp/app/email.js) | JavaScript | -896 | -19 | -68 | -983 |
+| [/home/rick/Dokumente/git/JobApp/app/first.js](//home/rick/Dokumente/git/JobApp/app/first.js) | JavaScript | -548 | -15 | -40 | -603 |
+| [/home/rick/Dokumente/git/JobApp/app/modal.tsx](//home/rick/Dokumente/git/JobApp/app/modal.tsx) | TypeScript JSX | -26 | 0 | -4 | -30 |
+| [/home/rick/Dokumente/git/JobApp/app/nameOld.js](//home/rick/Dokumente/git/JobApp/app/nameOld.js) | JavaScript | -401 | -5 | -20 | -426 |
+| [/home/rick/Dokumente/git/JobApp/app/old.js](//home/rick/Dokumente/git/JobApp/app/old.js) | JavaScript | -621 | -14 | -37 | -672 |
+| [/home/rick/Dokumente/git/JobApp/app/uploadFirst.js](//home/rick/Dokumente/git/JobApp/app/uploadFirst.js) | JavaScript | -505 | -11 | -37 | -553 |
+| [/home/rick/Dokumente/git/JobApp/app/webview.js](//home/rick/Dokumente/git/JobApp/app/webview.js) | JavaScript | -180 | -6 | -9 | -195 |
+| [/home/rick/Dokumente/git/JobApp/assets/images/background.svg](//home/rick/Dokumente/git/JobApp/assets/images/background.svg) | XML | -9 | -1 | -1 | -11 |
+| [/home/rick/Dokumente/git/JobApp/babel.config.js](//home/rick/Dokumente/git/JobApp/babel.config.js) | JavaScript | -10 | 0 | 0 | -10 |
+| [/home/rick/Dokumente/git/JobApp/backup/ocrui.js](//home/rick/Dokumente/git/JobApp/backup/ocrui.js) | JavaScript | -109 | -1 | -15 | -125 |
+| [/home/rick/Dokumente/git/JobApp/comp/clearButton.jsx](//home/rick/Dokumente/git/JobApp/comp/clearButton.jsx) | JavaScript JSX | -25 | 0 | -4 | -29 |
+| [/home/rick/Dokumente/git/JobApp/comp/info.js](//home/rick/Dokumente/git/JobApp/comp/info.js) | JavaScript | -99 | -8 | -11 | -118 |
+| [/home/rick/Dokumente/git/JobApp/comp/keyboardHeight.js](//home/rick/Dokumente/git/JobApp/comp/keyboardHeight.js) | JavaScript | -20 | -2 | -6 | -28 |
+| [/home/rick/Dokumente/git/JobApp/comp/name.js](//home/rick/Dokumente/git/JobApp/comp/name.js) | JavaScript | -939 | -33 | -93 | -1,065 |
+| [/home/rick/Dokumente/git/JobApp/comp/sorter.jsx](//home/rick/Dokumente/git/JobApp/comp/sorter.jsx) | JavaScript JSX | -71 | 0 | -8 | -79 |
+| [/home/rick/Dokumente/git/JobApp/components/external-link.tsx](//home/rick/Dokumente/git/JobApp/components/external-link.tsx) | TypeScript JSX | -21 | -2 | -3 | -26 |
+| [/home/rick/Dokumente/git/JobApp/components/haptic-tab.tsx](//home/rick/Dokumente/git/JobApp/components/haptic-tab.tsx) | TypeScript JSX | -16 | -1 | -2 | -19 |
+| [/home/rick/Dokumente/git/JobApp/components/hello-wave.tsx](//home/rick/Dokumente/git/JobApp/components/hello-wave.tsx) | TypeScript JSX | -18 | 0 | -2 | -20 |
+| [/home/rick/Dokumente/git/JobApp/components/parallax-scroll-view.tsx](//home/rick/Dokumente/git/JobApp/components/parallax-scroll-view.tsx) | TypeScript JSX | -73 | 0 | -7 | -80 |
+| [/home/rick/Dokumente/git/JobApp/components/themed-text.tsx](//home/rick/Dokumente/git/JobApp/components/themed-text.tsx) | TypeScript JSX | -55 | 0 | -6 | -61 |
+| [/home/rick/Dokumente/git/JobApp/components/themed-view.tsx](//home/rick/Dokumente/git/JobApp/components/themed-view.tsx) | TypeScript JSX | -10 | 0 | -5 | -15 |
+| [/home/rick/Dokumente/git/JobApp/components/ui/collapsible.tsx](//home/rick/Dokumente/git/JobApp/components/ui/collapsible.tsx) | TypeScript JSX | -40 | 0 | -6 | -46 |
+| [/home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.ios.tsx](//home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.ios.tsx) | TypeScript JSX | -31 | 0 | -2 | -33 |
+| [/home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.tsx](//home/rick/Dokumente/git/JobApp/components/ui/icon-symbol.tsx) | TypeScript JSX | -26 | -11 | -5 | -42 |
+| [/home/rick/Dokumente/git/JobApp/constants/theme.ts](//home/rick/Dokumente/git/JobApp/constants/theme.ts) | TypeScript | -41 | -8 | -5 | -54 |
+| [/home/rick/Dokumente/git/JobApp/eas.json](//home/rick/Dokumente/git/JobApp/eas.json) | JSON with Comments | -27 | 0 | -1 | -28 |
+| [/home/rick/Dokumente/git/JobApp/eslint.config.js](//home/rick/Dokumente/git/JobApp/eslint.config.js) | JavaScript | -8 | -1 | -2 | -11 |
+| [/home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.ts](//home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.ts) | TypeScript | -1 | 0 | -1 | -2 |
+| [/home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.web.ts](//home/rick/Dokumente/git/JobApp/hooks/use-color-scheme.web.ts) | TypeScript | -13 | -3 | -6 | -22 |
+| [/home/rick/Dokumente/git/JobApp/hooks/use-theme-color.ts](//home/rick/Dokumente/git/JobApp/hooks/use-theme-color.ts) | TypeScript | -14 | -4 | -4 | -22 |
+| [/home/rick/Dokumente/git/JobApp/inc/CutLine.js](//home/rick/Dokumente/git/JobApp/inc/CutLine.js) | JavaScript | -13 | -3 | -4 | -20 |
+| [/home/rick/Dokumente/git/JobApp/inc/CutTheLine.js](//home/rick/Dokumente/git/JobApp/inc/CutTheLine.js) | JavaScript | -5 | 0 | -2 | -7 |
+| [/home/rick/Dokumente/git/JobApp/inc/Keyboard.js](//home/rick/Dokumente/git/JobApp/inc/Keyboard.js) | JavaScript | -31 | -1 | -11 | -43 |
+| [/home/rick/Dokumente/git/JobApp/inc/ba.css](//home/rick/Dokumente/git/JobApp/inc/ba.css) | PostCSS | 0 | 0 | -1 | -1 |
+| [/home/rick/Dokumente/git/JobApp/inc/colors.js](//home/rick/Dokumente/git/JobApp/inc/colors.js) | JavaScript | -15 | 0 | -1 | -16 |
+| [/home/rick/Dokumente/git/JobApp/inc/craw.js](//home/rick/Dokumente/git/JobApp/inc/craw.js) | JavaScript | -82 | -4 | -21 | -107 |
+| [/home/rick/Dokumente/git/JobApp/inc/cryp.js](//home/rick/Dokumente/git/JobApp/inc/cryp.js) | JavaScript | -83 | -17 | -20 | -120 |
+| [/home/rick/Dokumente/git/JobApp/inc/crypNew.js](//home/rick/Dokumente/git/JobApp/inc/crypNew.js) | JavaScript | -50 | -34 | -12 | -96 |
+| [/home/rick/Dokumente/git/JobApp/inc/date.js](//home/rick/Dokumente/git/JobApp/inc/date.js) | JavaScript | -9 | -2 | -4 | -15 |
+| [/home/rick/Dokumente/git/JobApp/inc/db.js](//home/rick/Dokumente/git/JobApp/inc/db.js) | JavaScript | -144 | -1 | -32 | -177 |
+| [/home/rick/Dokumente/git/JobApp/inc/documentPicker.js](//home/rick/Dokumente/git/JobApp/inc/documentPicker.js) | JavaScript | -111 | -8 | -17 | -136 |
+| [/home/rick/Dokumente/git/JobApp/inc/downloadDb.js](//home/rick/Dokumente/git/JobApp/inc/downloadDb.js) | JavaScript | -50 | -3 | -8 | -61 |
+| [/home/rick/Dokumente/git/JobApp/inc/downloader.js](//home/rick/Dokumente/git/JobApp/inc/downloader.js) | JavaScript | -173 | -31 | -24 | -228 |
+| [/home/rick/Dokumente/git/JobApp/inc/header.js](//home/rick/Dokumente/git/JobApp/inc/header.js) | JavaScript | -122 | 0 | -13 | -135 |
+| [/home/rick/Dokumente/git/JobApp/inc/keyboardStorage.js](//home/rick/Dokumente/git/JobApp/inc/keyboardStorage.js) | JavaScript | -53 | -12 | -15 | -80 |
+| [/home/rick/Dokumente/git/JobApp/inc/ocr.js](//home/rick/Dokumente/git/JobApp/inc/ocr.js) | JavaScript | -135 | -6 | -25 | -166 |
+| [/home/rick/Dokumente/git/JobApp/inc/palette.js](//home/rick/Dokumente/git/JobApp/inc/palette.js) | JavaScript | -21 | -4 | -4 | -29 |
+| [/home/rick/Dokumente/git/JobApp/inc/pan.js](//home/rick/Dokumente/git/JobApp/inc/pan.js) | JavaScript | -28 | -8 | -3 | -39 |
+| [/home/rick/Dokumente/git/JobApp/inc/popup.js](//home/rick/Dokumente/git/JobApp/inc/popup.js) | JavaScript | -82 | -4 | -11 | -97 |
+| [/home/rick/Dokumente/git/JobApp/inc/popupDownload.js](//home/rick/Dokumente/git/JobApp/inc/popupDownload.js) | JavaScript | -84 | -1 | -7 | -92 |
+| [/home/rick/Dokumente/git/JobApp/inc/raminfo.js](//home/rick/Dokumente/git/JobApp/inc/raminfo.js) | JavaScript | -47 | -2 | -6 | -55 |
+| [/home/rick/Dokumente/git/JobApp/inc/scrapper.js](//home/rick/Dokumente/git/JobApp/inc/scrapper.js) | JavaScript | -435 | 0 | -1 | -436 |
+| [/home/rick/Dokumente/git/JobApp/index.js](//home/rick/Dokumente/git/JobApp/index.js) | JavaScript | -4 | -3 | -3 | -10 |
+| [/home/rick/Dokumente/git/JobApp/ios/.xcode.env](//home/rick/Dokumente/git/JobApp/ios/.xcode.env) | Dotenv | -1 | -9 | -2 | -12 |
+| [/home/rick/Dokumente/git/JobApp/ios/Podfile](//home/rick/Dokumente/git/JobApp/ios/Podfile) | Ruby | -46 | -3 | -12 | -61 |
+| [/home/rick/Dokumente/git/JobApp/jest.config.js](//home/rick/Dokumente/git/JobApp/jest.config.js) | JavaScript | -3 | 0 | -1 | -4 |
+| [/home/rick/Dokumente/git/JobApp/local/First.js](//home/rick/Dokumente/git/JobApp/local/First.js) | JavaScript | -556 | -7 | -81 | -644 |
+| [/home/rick/Dokumente/git/JobApp/local/i18n.js](//home/rick/Dokumente/git/JobApp/local/i18n.js) | JavaScript | -45 | -2 | -4 | -51 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/ar.json](//home/rick/Dokumente/git/JobApp/local/translate/ar.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/de.json](//home/rick/Dokumente/git/JobApp/local/translate/de.json) | JSON | -413 | 0 | -16 | -429 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/en.json](//home/rick/Dokumente/git/JobApp/local/translate/en.json) | JSON | -319 | 0 | -24 | -343 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/fr.json](//home/rick/Dokumente/git/JobApp/local/translate/fr.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/gr.json](//home/rick/Dokumente/git/JobApp/local/translate/gr.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/i18n.js](//home/rick/Dokumente/git/JobApp/local/translate/i18n.js) | JavaScript | -45 | -2 | -4 | -51 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/it.json](//home/rick/Dokumente/git/JobApp/local/translate/it.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/jp.json](//home/rick/Dokumente/git/JobApp/local/translate/jp.json) | JSON | -319 | 0 | -8 | -327 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/new.json](//home/rick/Dokumente/git/JobApp/local/translate/new.json) | JSON | -1 | 0 | -4 | -5 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/nl.json](//home/rick/Dokumente/git/JobApp/local/translate/nl.json) | JSON | -319 | 0 | -8 | -327 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/pl.json](//home/rick/Dokumente/git/JobApp/local/translate/pl.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/ru.json](//home/rick/Dokumente/git/JobApp/local/translate/ru.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/tr.json](//home/rick/Dokumente/git/JobApp/local/translate/tr.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/local/translate/ua.json](//home/rick/Dokumente/git/JobApp/local/translate/ua.json) | JSON | -319 | 0 | -6 | -325 |
+| [/home/rick/Dokumente/git/JobApp/metro.config.js](//home/rick/Dokumente/git/JobApp/metro.config.js) | JavaScript | -6 | 0 | -4 | -10 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/build.gradle](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/build.gradle) | Groovy | -35 | -4 | -5 | -44 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/AndroidManifest.xml](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/AndroidManifest.xml) | XML | -2 | 0 | -1 | -3 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt) | Kotlin | -27 | -16 | -8 | -51 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt) | Kotlin | -21 | -5 | -5 | -31 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/expo-module.config.json](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/expo-module.config.json) | JSON | -9 | 0 | -1 | -10 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/index.ts](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/index.ts) | TypeScript | -3 | -2 | -1 | -6 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkit.podspec](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkit.podspec) | Ruby | -19 | -1 | -4 | -24 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitModule.swift](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitModule.swift) | Swift | -214 | -7 | -53 | -274 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitView.swift](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/ios/ExpoMapkitView.swift) | Swift | -30 | -2 | -7 | -39 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/package.json](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/package.json) | JSON | -12 | 0 | -1 | -13 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkit.types.ts](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkit.types.ts) | TypeScript | -15 | 0 | -5 | -20 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.ts](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.ts) | TypeScript | -8 | -1 | -4 | -13 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.web.ts](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.web.ts) | TypeScript | -15 | 0 | -5 | -20 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.tsx](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.tsx) | TypeScript JSX | -8 | 0 | -4 | -12 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.web.tsx](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/ExpoMapkitView.web.tsx) | TypeScript JSX | -13 | 0 | -3 | -16 |
+| [/home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/index.js](//home/rick/Dokumente/git/JobApp/modules/expo-mapkit/src/index.js) | JavaScript | -20 | 0 | -7 | -27 |
+| [/home/rick/Dokumente/git/JobApp/nav/navigator.js](//home/rick/Dokumente/git/JobApp/nav/navigator.js) | JavaScript | -147 | -6 | -28 | -181 |
+| [/home/rick/Dokumente/git/JobApp/package-lock.json](//home/rick/Dokumente/git/JobApp/package-lock.json) | JSON | -15,870 | 0 | -1 | -15,871 |
+| [/home/rick/Dokumente/git/JobApp/package.json](//home/rick/Dokumente/git/JobApp/package.json) | JSON | -120 | 0 | -1 | -121 |
+| [/home/rick/Dokumente/git/JobApp/scripts/reset-project.js](//home/rick/Dokumente/git/JobApp/scripts/reset-project.js) | JavaScript | -89 | -10 | -14 | -113 |
+| [/home/rick/Dokumente/git/JobApp/tsconfig.json](//home/rick/Dokumente/git/JobApp/tsconfig.json) | JSON with Comments | -17 | 0 | -1 | -18 |
+| [/home/rick/Dokumente/git/JobApp/www/city.db](//home/rick/Dokumente/git/JobApp/www/city.db) | MS SQL | -12,619 | 0 | -2,057 | -14,676 |
+| [/home/rick/Dokumente/git/JobApp/www/street.db](//home/rick/Dokumente/git/JobApp/www/street.db) | MS SQL | -116,283 | 0 | -11,010 | -127,293 |
+| [App.js](/App.js) | JavaScript | 4 | 3 | 3 | 10 |
+| [Gemfile](/Gemfile) | Ruby | 10 | 3 | 4 | 17 |
+| [README.md](/README.md) | Markdown | 31 | 0 | 20 | 51 |
+| [\_\_tests\_\_/App.test.tsx](/__tests__/App.test.tsx) | TypeScript JSX | 8 | 3 | 3 | 14 |
+| [android/app/build.gradle](/android/app/build.gradle) | Groovy | 100 | 70 | 25 | 195 |
+| [android/app/src/main/AndroidManifest.xml](/android/app/src/main/AndroidManifest.xml) | XML | 39 | 0 | 0 | 39 |
+| [android/app/src/main/res/drawable/rn\_edit\_text\_material.xml](/android/app/src/main/res/drawable/rn_edit_text_material.xml) | XML | 12 | 23 | 3 | 38 |
+| [android/app/src/main/res/values/strings.xml](/android/app/src/main/res/values/strings.xml) | XML | 8 | 0 | 0 | 8 |
+| [android/app/src/main/res/values/styles.xml](/android/app/src/main/res/values/styles.xml) | XML | 14 | 0 | 0 | 14 |
+| [android/build.gradle](/android/build.gradle) | Groovy | 20 | 1 | 4 | 25 |
+| [android/gradle.properties](/android/gradle.properties) | Properties | 14 | 37 | 15 | 66 |
+| [android/gradle/wrapper/gradle-wrapper.properties](/android/gradle/wrapper/gradle-wrapper.properties) | Properties | 7 | 0 | 1 | 8 |
+| [android/gradlew.bat](/android/gradlew.bat) | Batch | 41 | 32 | 22 | 95 |
+| [android/settings.gradle](/android/settings.gradle) | Groovy | 33 | 0 | 7 | 40 |
+| [api/cryp.js](/api/cryp.js) | JavaScript | 40 | 5 | 18 | 63 |
+| [api/dbJob.js](/api/dbJob.js) | JavaScript | 18 | 0 | 2 | 20 |
+| [api/first.js](/api/first.js) | JavaScript | 377 | 22 | 58 | 457 |
+| [api/jobapp.go](/api/jobapp.go) | Go | 691 | 16 | 136 | 843 |
+| [api/jobapp.js](/api/jobapp.js) | JavaScript | 374 | 22 | 58 | 454 |
+| [api/package.json](/api/package.json) | JSON | 35 | 0 | 1 | 36 |
+| [app.config.js](/app.config.js) | JavaScript | 20 | 0 | 3 | 23 |
+| [app.json](/app.json) | JSON with Comments | 114 | 0 | 1 | 115 |
+| [app/(tabs)/\_layout.tsx](/app/(tabs)/_layout.tsx) | TypeScript JSX | 67 | 3 | 7 | 77 |
+| [app/(tabs)/index.js](/app/(tabs)/index.js) | JavaScript | 1,086 | 17 | 87 | 1,190 |
+| [app/(tabs)/profil.js](/app/(tabs)/profil.js) | JavaScript | 1,844 | 51 | 142 | 2,037 |
+| [app/(tabs)/upload.js](/app/(tabs)/upload.js) | JavaScript | 1,026 | 19 | 87 | 1,132 |
+| [app/\_layout.tsx](/app/_layout.tsx) | TypeScript JSX | 41 | 1 | 5 | 47 |
+| [app/application.js](/app/application.js) | JavaScript | 1,626 | 20 | 142 | 1,788 |
+| [app/change.js](/app/change.js) | JavaScript | 566 | 12 | 63 | 641 |
+| [app/changeOld.js](/app/changeOld.js) | JavaScript | 601 | 11 | 67 | 679 |
+| [app/collect.js](/app/collect.js) | JavaScript | 456 | 13 | 39 | 508 |
+| [app/email.js](/app/email.js) | JavaScript | 905 | 23 | 76 | 1,004 |
+| [app/first.js](/app/first.js) | JavaScript | 628 | 9 | 50 | 687 |
+| [app/modal.tsx](/app/modal.tsx) | TypeScript JSX | 26 | 0 | 4 | 30 |
+| [app/nameOld.js](/app/nameOld.js) | JavaScript | 401 | 5 | 20 | 426 |
+| [app/old.js](/app/old.js) | JavaScript | 920 | 12 | 66 | 998 |
+| [app/uploadFirst.js](/app/uploadFirst.js) | JavaScript | 529 | 11 | 37 | 577 |
+| [app/webview.js](/app/webview.js) | JavaScript | 180 | 6 | 9 | 195 |
+| [assets/images/background.svg](/assets/images/background.svg) | XML | 9 | 1 | 1 | 11 |
+| [babel.config.js](/babel.config.js) | JavaScript | 10 | 0 | 0 | 10 |
+| [backup/ocrui.js](/backup/ocrui.js) | JavaScript | 109 | 1 | 15 | 125 |
+| [comp/clearButton.jsx](/comp/clearButton.jsx) | JavaScript JSX | 25 | 0 | 4 | 29 |
+| [comp/documentPicker.js](/comp/documentPicker.js) | JavaScript | 179 | 14 | 15 | 208 |
+| [comp/info.js](/comp/info.js) | JavaScript | 213 | 0 | 10 | 223 |
+| [comp/keyboardDummy.jsx](/comp/keyboardDummy.jsx) | JavaScript JSX | 54 | 6 | 11 | 71 |
+| [comp/keyboardHeight.js](/comp/keyboardHeight.js) | JavaScript | 21 | 2 | 6 | 29 |
+| [comp/name.js](/comp/name.js) | JavaScript | 834 | 25 | 82 | 941 |
+| [comp/sorter.jsx](/comp/sorter.jsx) | JavaScript JSX | 71 | 0 | 8 | 79 |
+| [components/external-link.tsx](/components/external-link.tsx) | TypeScript JSX | 21 | 2 | 3 | 26 |
+| [components/haptic-tab.tsx](/components/haptic-tab.tsx) | TypeScript JSX | 16 | 1 | 2 | 19 |
+| [components/hello-wave.tsx](/components/hello-wave.tsx) | TypeScript JSX | 18 | 0 | 2 | 20 |
+| [components/parallax-scroll-view.tsx](/components/parallax-scroll-view.tsx) | TypeScript JSX | 73 | 0 | 7 | 80 |
+| [components/themed-text.tsx](/components/themed-text.tsx) | TypeScript JSX | 55 | 0 | 6 | 61 |
+| [components/themed-view.tsx](/components/themed-view.tsx) | TypeScript JSX | 10 | 0 | 5 | 15 |
+| [components/ui/collapsible.tsx](/components/ui/collapsible.tsx) | TypeScript JSX | 40 | 0 | 6 | 46 |
+| [components/ui/icon-symbol.ios.tsx](/components/ui/icon-symbol.ios.tsx) | TypeScript JSX | 31 | 0 | 2 | 33 |
+| [components/ui/icon-symbol.tsx](/components/ui/icon-symbol.tsx) | TypeScript JSX | 26 | 11 | 5 | 42 |
+| [constants/theme.ts](/constants/theme.ts) | TypeScript | 41 | 8 | 5 | 54 |
+| [eas.json](/eas.json) | JSON with Comments | 27 | 0 | 1 | 28 |
+| [eslint.config.js](/eslint.config.js) | JavaScript | 8 | 1 | 2 | 11 |
+| [hooks/use-color-scheme.ts](/hooks/use-color-scheme.ts) | TypeScript | 1 | 0 | 1 | 2 |
+| [hooks/use-color-scheme.web.ts](/hooks/use-color-scheme.web.ts) | TypeScript | 13 | 3 | 6 | 22 |
+| [hooks/use-theme-color.ts](/hooks/use-theme-color.ts) | TypeScript | 14 | 4 | 4 | 22 |
+| [inc/CutLine.js](/inc/CutLine.js) | JavaScript | 13 | 3 | 4 | 20 |
+| [inc/CutTheLine.js](/inc/CutTheLine.js) | JavaScript | 5 | 0 | 2 | 7 |
+| [inc/Keyboard.js](/inc/Keyboard.js) | JavaScript | 31 | 1 | 11 | 43 |
+| [inc/animation.js](/inc/animation.js) | JavaScript | 57 | 1 | 8 | 66 |
+| [inc/ba.css](/inc/ba.css) | PostCSS | 0 | 0 | 1 | 1 |
+| [inc/colors.js](/inc/colors.js) | JavaScript | 15 | 0 | 1 | 16 |
+| [inc/craw.js](/inc/craw.js) | JavaScript | 82 | 4 | 21 | 107 |
+| [inc/cryp.js](/inc/cryp.js) | JavaScript | 102 | 15 | 21 | 138 |
+| [inc/crypNew.js](/inc/crypNew.js) | JavaScript | 50 | 34 | 12 | 96 |
+| [inc/cvScan.js](/inc/cvScan.js) | JavaScript | 139 | 3 | 26 | 168 |
+| [inc/date.js](/inc/date.js) | JavaScript | 9 | 2 | 4 | 15 |
+| [inc/db.js](/inc/db.js) | JavaScript | 119 | 1 | 32 | 152 |
+| [inc/documentPickerAi.js](/inc/documentPickerAi.js) | JavaScript | 111 | 8 | 17 | 136 |
+| [inc/downloadDb.js](/inc/downloadDb.js) | JavaScript | 50 | 3 | 8 | 61 |
+| [inc/downloader.js](/inc/downloader.js) | JavaScript | 173 | 31 | 24 | 228 |
+| [inc/header.js](/inc/header.js) | JavaScript | 122 | 0 | 13 | 135 |
+| [inc/keyboardStorage.js](/inc/keyboardStorage.js) | JavaScript | 54 | 12 | 15 | 81 |
+| [inc/ocr.js](/inc/ocr.js) | JavaScript | 135 | 6 | 25 | 166 |
+| [inc/palette.js](/inc/palette.js) | JavaScript | 21 | 4 | 4 | 29 |
+| [inc/pan.js](/inc/pan.js) | JavaScript | 28 | 8 | 3 | 39 |
+| [inc/popup.js](/inc/popup.js) | JavaScript | 82 | 4 | 11 | 97 |
+| [inc/popupDownload.js](/inc/popupDownload.js) | JavaScript | 84 | 1 | 7 | 92 |
+| [inc/raminfo.js](/inc/raminfo.js) | JavaScript | 47 | 2 | 6 | 55 |
+| [inc/scrapper.js](/inc/scrapper.js) | JavaScript | 474 | 81 | 1 | 556 |
+| [inc/string.js](/inc/string.js) | JavaScript | 10 | 6 | 0 | 16 |
+| [index.js](/index.js) | JavaScript | 4 | 3 | 3 | 10 |
+| [ios/.xcode.env](/ios/.xcode.env) | Dotenv | 1 | 9 | 2 | 12 |
+| [ios/Podfile](/ios/Podfile) | Ruby | 46 | 3 | 12 | 61 |
+| [jest.config.js](/jest.config.js) | JavaScript | 3 | 0 | 1 | 4 |
+| [local/First.js](/local/First.js) | JavaScript | 556 | 7 | 81 | 644 |
+| [local/i18n.js](/local/i18n.js) | JavaScript | 54 | 2 | 5 | 61 |
+| [local/translate/ar.json](/local/translate/ar.json) | JSON | 509 | 0 | 27 | 536 |
+| [local/translate/bks.json](/local/translate/bks.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/de.json](/local/translate/de.json) | JSON | 568 | 0 | 1 | 569 |
+| [local/translate/el.json](/local/translate/el.json) | JSON | 568 | 0 | 0 | 568 |
+| [local/translate/en.json](/local/translate/en.json) | JSON | 514 | 0 | 26 | 540 |
+| [local/translate/es.json](/local/translate/es.json) | JSON | 509 | 0 | 27 | 536 |
+| [local/translate/fa.json](/local/translate/fa.json) | JSON | 472 | 0 | 27 | 499 |
+| [local/translate/fr.json](/local/translate/fr.json) | JSON | 509 | 0 | 25 | 534 |
+| [local/translate/i18n.js](/local/translate/i18n.js) | JavaScript | 45 | 2 | 4 | 51 |
+| [local/translate/it.json](/local/translate/it.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/jp.json](/local/translate/jp.json) | JSON | 636 | 0 | 6 | 642 |
+| [local/translate/new.json](/local/translate/new.json) | JSON | 1 | 0 | 4 | 5 |
+| [local/translate/nl.json](/local/translate/nl.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/pl.json](/local/translate/pl.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/ro.json](/local/translate/ro.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/ru.json](/local/translate/ru.json) | JSON | 509 | 0 | 26 | 535 |
+| [local/translate/tr.json](/local/translate/tr.json) | JSON | 568 | 0 | 0 | 568 |
+| [local/translate/ua.json](/local/translate/ua.json) | JSON | 509 | 0 | 27 | 536 |
+| [metro.config.js](/metro.config.js) | JavaScript | 6 | 0 | 4 | 10 |
+| [modules/expo-mapkit/android/build.gradle](/modules/expo-mapkit/android/build.gradle) | Groovy | 35 | 4 | 5 | 44 |
+| [modules/expo-mapkit/android/src/main/AndroidManifest.xml](/modules/expo-mapkit/android/src/main/AndroidManifest.xml) | XML | 2 | 0 | 1 | 3 |
+| [modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt](/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt) | Kotlin | 27 | 16 | 8 | 51 |
+| [modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt](/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt) | Kotlin | 21 | 5 | 5 | 31 |
+| [modules/expo-mapkit/expo-module.config.json](/modules/expo-mapkit/expo-module.config.json) | JSON | 9 | 0 | 1 | 10 |
+| [modules/expo-mapkit/index.ts](/modules/expo-mapkit/index.ts) | TypeScript | 3 | 2 | 1 | 6 |
+| [modules/expo-mapkit/ios/ExpoMapkit.podspec](/modules/expo-mapkit/ios/ExpoMapkit.podspec) | Ruby | 19 | 1 | 4 | 24 |
+| [modules/expo-mapkit/ios/ExpoMapkitModule.swift](/modules/expo-mapkit/ios/ExpoMapkitModule.swift) | Swift | 214 | 7 | 53 | 274 |
+| [modules/expo-mapkit/ios/ExpoMapkitView.swift](/modules/expo-mapkit/ios/ExpoMapkitView.swift) | Swift | 30 | 2 | 7 | 39 |
+| [modules/expo-mapkit/package.json](/modules/expo-mapkit/package.json) | JSON | 12 | 0 | 1 | 13 |
+| [modules/expo-mapkit/src/ExpoMapkit.types.ts](/modules/expo-mapkit/src/ExpoMapkit.types.ts) | TypeScript | 15 | 0 | 5 | 20 |
+| [modules/expo-mapkit/src/ExpoMapkitModule.ts](/modules/expo-mapkit/src/ExpoMapkitModule.ts) | TypeScript | 8 | 1 | 4 | 13 |
+| [modules/expo-mapkit/src/ExpoMapkitModule.web.ts](/modules/expo-mapkit/src/ExpoMapkitModule.web.ts) | TypeScript | 15 | 0 | 5 | 20 |
+| [modules/expo-mapkit/src/ExpoMapkitView.tsx](/modules/expo-mapkit/src/ExpoMapkitView.tsx) | TypeScript JSX | 8 | 0 | 4 | 12 |
+| [modules/expo-mapkit/src/ExpoMapkitView.web.tsx](/modules/expo-mapkit/src/ExpoMapkitView.web.tsx) | TypeScript JSX | 13 | 0 | 3 | 16 |
+| [modules/expo-mapkit/src/index.js](/modules/expo-mapkit/src/index.js) | JavaScript | 20 | 0 | 7 | 27 |
+| [nav/navigator.js](/nav/navigator.js) | JavaScript | 147 | 6 | 28 | 181 |
+| [package-lock.json](/package-lock.json) | JSON | 16,488 | 0 | 1 | 16,489 |
+| [package.json](/package.json) | JSON | 120 | 0 | 1 | 121 |
+| [scripts/reset-project.js](/scripts/reset-project.js) | JavaScript | 89 | 10 | 14 | 113 |
+| [stryker.config.json](/stryker.config.json) | JSON | 16 | 0 | 0 | 16 |
+| [tsconfig.json](/tsconfig.json) | JSON with Comments | 17 | 0 | 1 | 18 |
+| [www/city.db](/www/city.db) | MS SQL | 12,619 | 0 | 2,057 | 14,676 |
+| [www/street.db](/www/street.db) | MS SQL | 116,283 | 0 | 11,010 | 127,293 |
+
+[Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details

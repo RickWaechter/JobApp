@@ -1,18 +1,18 @@
 // OldScreen.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   Alert,
   Animated,
+  BackHandler,
   Dimensions,
-  PanResponder,
-  Pressable,
-  ScrollView,
-  StyleSheet,
   FlatList,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -26,16 +26,37 @@ import CompanySearchModal from '../comp/name.js';
 import colors from '../inc/colors.js';
 import { encryp } from '../inc/cryp.js';
 import ChangeScreenOld from './changeOld.js';
-const {width} = Dimensions.get('window');
+
+const { width, height } = Dimensions.get('window');
+const DB_NAME = 'firstNew.db';
+
+/* ── Eintrag Card (Memoisiert) ─────────────────────────────────────────── */
 const HistoryEntryCard = memo(
-  ({ entry, index, onUseTemplate, onOpenApplication, onDelete, panHandlers }) => {
+  ({ entry, index, onUseTemplate, onOpenApplication, onDelete }) => {
     const { t } = useTranslation();
 
+    const handleTemplate = useCallback(() => {
+      onUseTemplate(entry);
+    }, [entry, onUseTemplate]);
+
+    const handleOpen = useCallback(() => {
+      onOpenApplication(entry);
+    }, [entry, onOpenApplication]);
+
+    const handleDelete = useCallback(() => {
+      onDelete(index);
+    }, [index, onDelete]);
+
+    const wrapText = (text, max = 14) =>
+      text?.length > max
+        ? text.replace(new RegExp(`(.{1,${max}})(\\s+|$)`, 'g'), '$1\n').trim()
+        : text || '';
+
     return (
-      <View style={styles.cardWrapper} {...panHandlers}>
+      <View style={styles.cardWrapper}>
         <Pressable
-          onPress={() => onUseTemplate(entry)}
-          onLongPress={() => onOpenApplication(entry)}
+          onPress={handleTemplate}
+          onLongPress={handleOpen}
           delayLongPress={280}
           style={({ pressed }) => [styles.entryCard, pressed && styles.cardPressed]}
         >
@@ -52,7 +73,7 @@ const HistoryEntryCard = memo(
             </View>
 
             <TouchableOpacity
-              onPress={() => onDelete(index)}
+              onPress={handleDelete}
               style={styles.deleteBtn}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -85,17 +106,8 @@ const HistoryEntryCard = memo(
           <View style={styles.cardFooter}>
             <TouchableOpacity
               style={styles.primaryActionBtn}
-              onPress={() => onOpenApplication(entry)}
+              onPress={handleTemplate}
               activeOpacity={0.8}
-            >
-              <MaterialIcons name="folder-open" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.primaryActionBtnText}>{t('history.openFolder')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.secondaryActionBtn}
-              onPress={() => onUseTemplate(entry)}
-              activeOpacity={0.7}
             >
               <MaterialIcons
                 name="auto-awesome"
@@ -105,191 +117,395 @@ const HistoryEntryCard = memo(
               />
               <Text style={styles.secondaryActionBtnText}>{t('history.reuseTemplate')}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryActionBtn}
+              onPress={handleOpen}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="folder-open" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.primaryActionBtnText}>{wrapText(t('history.openFolder'))}</Text>
+            </TouchableOpacity>
           </View>
         </Pressable>
       </View>
     );
   }
 );
+
+/* ── OldScreen Hauptkomponente ─────────────────────────────────────────── */
 const OldScreen = () => {
   const { t } = useTranslation();
   const { items } = useLocalSearchParams();
-const [resetSignal, setResetSignal] = useState(0);
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState(() => {
+    if (!items) return [];
+    try {
+      const parsed = JSON.parse(items);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [changeOldScreen, setChangeOldScreen] = useState(false);
-const inputRef = useRef(null);
-  const lastTimeClick = useRef(0);
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    if (items) {
-      try {
-        const parsed = JSON.parse(items);
-        setEntries(Array.isArray(parsed) ? parsed : []);
-      } catch (err) {
-        console.error('Fehler beim Parsen der Items:', err);
-        setEntries([]);
-      }
+  const inputRef = useRef(null);
+  const lastOpenClick = useRef(0);
+  const lastTemplateClick = useRef(0);
+  const kbListenerRef = useRef(null);
+  const kbFallbackRef = useRef(null);
+
+  /* ── Animationen ChangeScreenOld & Haupt-Container ── */
+  const animProgress = useRef(new Animated.Value(0)).current;
+  const animProgressY = useRef(new Animated.Value(0)).current;
+  const animProgressOpacity = useRef(new Animated.Value(0)).current;
+  const animViewOpacity = useRef(new Animated.Value(1)).current;
+
+  /* ── Animationen CompanySearch Modal ── */
+  const nameProgressX = useRef(new Animated.Value(-width)).current;
+  const nameProgressY = useRef(new Animated.Value(1)).current;
+  const nameOpacity = useRef(new Animated.Value(0)).current;
+
+  /* ── Zentraler Reset auf Standardwerte ── */
+  const resetAllToDefaults = useCallback(() => {
+    if (kbListenerRef.current) {
+      kbListenerRef.current.remove();
+      kbListenerRef.current = null;
     }
-    setLoading(false);
-  }, [items]);
+    if (kbFallbackRef.current) {
+      clearTimeout(kbFallbackRef.current);
+      kbFallbackRef.current = null;
+    }
 
-  const resetCardAnimation = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [slideAnim, fadeAnim]);
+    setModalVisible(false);
+    setChangeOldScreen(false);
+    setSelectedEntry(null);
+
+    animProgress.setValue(0);
+    animProgressY.setValue(0);
+    animProgressOpacity.setValue(0);
+    animViewOpacity.setValue(1);
+
+    nameProgressX.setValue(0);
+    nameProgressY.setValue(1);
+    nameOpacity.setValue(0);
+  }, [
+    animProgress,
+    animProgressY,
+    animProgressOpacity,
+    animViewOpacity,
+    nameProgressX,
+    nameProgressY,
+    nameOpacity,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
-      resetCardAnimation();
-    }, [resetCardAnimation])
+      return () => {
+        resetAllToDefaults();
+      };
+    }, [resetAllToDefaults])
   );
 
-
-// beim Fokussieren des Screens ebenfalls zurücksetzen:
-useFocusEffect(
-  useCallback(() => {
-    setResetSignal((s) => s + 1);
-  }, [])
-);
-
-const entriesRef = useRef(entries);
-useEffect(() => { entriesRef.current = entries; }, [entries]);
-
-const lastOpenClick = useRef(0);
-const lastTemplateClick = useRef(0);
-
-const openTemplateModal = useCallback((entry) => {
-  setSelectedEntry(entry);
-  setModalVisible(true);
-
-  // parallel & fire-and-forget, blockiert den UI-Thread nicht
-  Promise.all([
-    EncryptedStorage.setItem('job', entry.job || ''),
-    EncryptedStorage.setItem('text', entry.text || ''),
-    EncryptedStorage.setItem('subject', entry.subject || ''),
-  ]).catch((e) => console.error('Storage error', e));
-}, []);
-
-const handleUseTemplate = useCallback((entry) => {
-  const now = Date.now();
-  if (now - lastTemplateClick.current < 350) return;
-  lastTemplateClick.current = now;
-  openTemplateModal(entry);
-}, [openTemplateModal]);
-
-const handleOpenApplication = useCallback(async (entry) => {
-  const now = Date.now();
-  if (now - lastOpenClick.current < 600) return;
-  lastOpenClick.current = now;
-
-  if (entry.link && Object.values(entry).length > 2) {
-    try {
-      await Promise.all([
-        EncryptedStorage.setItem('merge', `${entry.link}.pdf`),
-        EncryptedStorage.setItem('result', 'collect'),
-      ]);
-      router.push('/collect');
-    } catch (e) {
-      console.error('Routing error to collect:', e);
+  /* ── CompanySearch Modal: Sanfter Slide-In nach Keyboard-Start (wie StartApp) ── */
+  const triggerNameSlideDown = useCallback(() => {
+    if (kbFallbackRef.current) {
+      clearTimeout(kbFallbackRef.current);
+      kbFallbackRef.current = null;
     }
-  } else {
-    Alert.alert('Datei nicht gefunden', 'Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden.');
-  }
-}, []);
- const triggerSwipeRightAndOpenModal = (entry) => {
-    setSelectedEntry(entry);
-    setModalVisible(true); // Sofort öffnen, keine 80ms Verzögerung
+    if (kbListenerRef.current) {
+      kbListenerRef.current.remove();
+      kbListenerRef.current = null;
+    }
 
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: -width * 0.9,
-        duration: 320, // Vorher 320ms -> auf 200-220ms reduzieren für knackiges Feedback
+      Animated.timing(nameProgressX, {
+        toValue: 1, // Fährt von 0 (width) auf 1 (0) in die Mitte
+        duration: 400,
         useNativeDriver: true,
       }),
-      Animated.timing(fadeAnim, {
-        toValue: 0.2,
-        duration: 320,
+      Animated.timing(nameOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 0,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start();
+  }, [nameProgressX, nameOpacity, animViewOpacity]);
 
-    // Storage direkt im Hintergrund schreiben, ohne auf das Ende der Animation zu warten
-    EncryptedStorage.setItem('job', entry.job || '');
-    EncryptedStorage.setItem('text', entry.text || '');
-    EncryptedStorage.setItem('subject', entry.subject || '');
-  };
+  const openTemplateModal = useCallback(
+    (entry) => {
+      setSelectedEntry(entry);
+      setModalVisible(true);
+      nameProgressX.setValue(0); // Startet rechts außerhalb (width)
+      nameProgressY.setValue(1);
+      nameOpacity.setValue(0);
 
-  const handleCardPress = (entry) => {
-    const now = Date.now();
-    if (now - lastTimeClick.current < 800) return;
-    lastTimeClick.current = now;
-    triggerSwipeRightAndOpenModal(entry);
-  };
+      Promise.all([
+        EncryptedStorage.setItem('job', entry.job || ''),
+        EncryptedStorage.setItem('text', entry.text || ''),
+        EncryptedStorage.setItem('subject', entry.subject || ''),
+      ]).catch((e) => console.error('Storage error', e));
 
-  const createPanResponder = (entry) =>
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) =>
-        Math.abs(gestureState.dx) > 15 && Math.abs(gestureState.dy) < 20,
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx > 0) {
-          slideAnim.setValue(gestureState.dx);
-          fadeAnim.setValue(Math.max(0.2, 1 - gestureState.dx / width));
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > SWIPE_THRESHOLD || gestureState.vx > 0.5) {
-          triggerSwipeRightAndOpenModal(entry);
-        } else {
-          resetCardAnimation();
-        }
-      },
-      onPanResponderTerminate: resetCardAnimation,
+      const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+
+      kbListenerRef.current = Keyboard.addListener(showEvent, () => {
+        triggerNameSlideDown();
+      });
+
+      kbFallbackRef.current = setTimeout(() => {
+        triggerNameSlideDown();
+      }, 240);
+    },
+    [nameProgressX, nameProgressY, nameOpacity, triggerNameSlideDown]
+  );
+
+  const closeModal = useCallback(() => {
+    Keyboard.dismiss();
+
+    if (kbListenerRef.current) {
+      kbListenerRef.current.remove();
+      kbListenerRef.current = null;
+    }
+    if (kbFallbackRef.current) {
+      clearTimeout(kbFallbackRef.current);
+      kbFallbackRef.current = null;
+    }
+
+    Animated.parallel([
+      Animated.timing(nameProgressY, {
+        toValue: 2, // Schiebt die Card von 1 (Mitte) auf 2 (-height) nach oben raus
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(nameOpacity, {
+        toValue: 0,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        setModalVisible(false);
+        nameProgressX.setValue(0);
+        nameProgressY.setValue(1);
+      }
     });
+  }, [nameProgressY, nameOpacity, animViewOpacity, nameProgressX]);
 
-  const deleteEntry = (indexToDelete) => {
-    const item = entries[indexToDelete];
+  /* ── Firmenübernahme: Tastatur bleibt oben, synchroner Slide-Übergang zu ChangeScreenOld ── */
+  const handleCompanySaved = useCallback(
+    (name, street, city) => {
+      Promise.all([
+        EncryptedStorage.setItem('yourName', name || ''),
+        EncryptedStorage.setItem('yourStreet', street || ''),
+        EncryptedStorage.setItem('yourCity', city || ''),
+        EncryptedStorage.setItem('result', 'changeOld'),
+      ]).catch((err) => console.error('Storage error:', err));
+
+      // 1. ChangeScreenOld sofort einhängen
+      setChangeOldScreen(true);
+      animProgress.setValue(0); // startet bei translateX = width
+      animProgressY.setValue(0);
+      animProgressOpacity.setValue(1);
+
+      // 2. Fokus sofort nahtlos übergeben -> Tastatur bleibt ohne Unterbrechung oben
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+
+      // 3. Name fährt nach links raus (-width * 0.65), ChangeScreenOld fährt von rechts rein (0)
+      Animated.parallel([
+        Animated.timing(nameProgressX, {
+          toValue: 2,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+        Animated.timing(nameOpacity, {
+          toValue: 0,
+          duration: 320,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animProgress, {
+          toValue: 1,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => {
+        if (finished) {
+          setModalVisible(false);
+          nameProgressX.setValue(0);
+          nameProgressY.setValue(0);
+        }
+      });
+    },
+    [nameProgressX, nameProgressY, nameOpacity, animProgress, animProgressY, animProgressOpacity]
+  );
+
+  const closeChangeOldScreen = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.parallel([
+      Animated.timing(animProgressY, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setChangeOldScreen(false);
+      setModalVisible(false);
+      setSelectedEntry(null);
+      animProgress.setValue(0);
+      nameProgressX.setValue(0);
+      nameProgressY.setValue(1);
+      animProgressY.setValue(0);
+    });
+  }, [animProgress, animProgressY, animProgressOpacity, animViewOpacity, nameProgressX, nameProgressY]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (modalVisible) {
+        closeModal();
+        return true;
+      }
+      if (changeOldScreen) {
+        closeChangeOldScreen();
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [modalVisible, changeOldScreen, closeModal, closeChangeOldScreen]);
+
+  const handleUseTemplate = useCallback(
+    (entry) => {
+      const now = Date.now();
+      if (now - lastTemplateClick.current < 450) return;
+      lastTemplateClick.current = now;
+      openTemplateModal(entry);
+    },
+    [openTemplateModal]
+  );
+
+  const handleOpenApplication = useCallback(async (entry) => {
+    const now = Date.now();
+    if (now - lastOpenClick.current < 600) return;
+    lastOpenClick.current = now;
+
+    const hasLink = Boolean(entry?.link);
+    const entryValuesLength = entry ? Object.values(entry).length : 0;
+    const conditionMet = hasLink && entryValuesLength > 2;
+
+    if (conditionMet) {
+      const pdfTarget = `${entry.link}.pdf`;
+      const resultTarget = 'collect';
+      const routeTarget = '/collect';
+
+      try {
+        await Promise.all([
+          EncryptedStorage.setItem('merge', pdfTarget),
+          EncryptedStorage.setItem('result', resultTarget),
+        ]);
+        router.push(routeTarget);
+      } catch (e) {
+        console.error('Routing / Storage Error:', e);
+      }
+    } else {
+      Alert.alert(
+        'Datei nicht gefunden',
+        'Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden.'
+      );
+    }
+  }, []);
+
+  const deleteEntry = useCallback((indexToDelete) => {
+    setEntries((prevEntries) => {
+      const item = prevEntries[indexToDelete];
+      if (!item) return prevEntries;
+
+      Alert.alert(
+        'Eintrag löschen',
+        `Möchtest du die Bewerbung für "${item.job}" wirklich aus der Historie entfernen?`,
+        [
+          { text: 'Abbrechen', style: 'cancel' },
+          {
+            text: 'Löschen',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const newList = prevEntries.filter((_, idx) => idx !== indexToDelete);
+                setEntries(newList);
+
+                const oldParts = newList.map(
+                  (entry) =>
+                    `${entry.job}#${entry.date}#${entry.myType?.split(' / ')[0] || ''}#${
+                      entry.myType?.split(' / ')[1] || ''
+                    }#${entry.subject || ''}#${entry.text || ''}`
+                );
+                const pdfLinks = newList.map((entry) => entry.link || '');
+                const key = await EncryptedStorage.getItem('key');
+
+                const encOld =
+                  newList.length > 0 ? await encryp(oldParts.join('&') + '&', key) : '';
+                const encPdf =
+                  newList.length > 0 ? await encryp(pdfLinks.join(','), key) : '';
+
+                const deviceId = await DeviceInfo.getUniqueId();
+                const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+
+                db.transaction((tx) => {
+                  tx.executeSql(
+                    'UPDATE files SET old = ?, mergePdf = ? WHERE ident = ?;',
+                    [encOld, encPdf, deviceId]
+                  );
+                });
+              } catch (error) {
+                console.error('Fehler beim Löschen des Eintrags:', error);
+              }
+            },
+          },
+        ]
+      );
+      return prevEntries;
+    });
+  }, []);
+
+  /* ── Gesamten Verlauf leeren ── */
+  const clearAllEntries = useCallback(() => {
+    if (entries.length === 0) return;
+
     Alert.alert(
-      'Eintrag löschen',
-      `Möchtest du die Bewerbung für "${item.job}" wirklich aus der Historie entfernen?`,
+      'Gesamten Verlauf löschen',
+      'Möchtest du wirklich alle Bewerbungen unwiderruflich aus der Datenbank entfernen?',
       [
         { text: 'Abbrechen', style: 'cancel' },
         {
-          text: 'Löschen',
+          text: 'Alle löschen',
           style: 'destructive',
           onPress: async () => {
             try {
-              const newList = [...entries];
-              newList.splice(indexToDelete, 1);
-              setEntries(newList);
-
-              const oldParts = newList.map(
-                (entry) =>
-                  `${entry.job}#${entry.date}#${entry.myType?.split(' / ')[0] || ''}#${
-                    entry.myType?.split(' / ')[1] || ''
-                  }#${entry.subject || ''}#${entry.text || ''}`
-              );
-              const pdfLinks = newList.map((entry) => entry.link || '');
-              const key = await EncryptedStorage.getItem('key');
-
-              const encOld =
-                newList.length > 0 ? await encryp(oldParts.join('&') + '&', key) : '';
-              const encPdf =
-                newList.length > 0 ? await encryp(pdfLinks.join(','), key) : '';
+              setEntries([]);
 
               const deviceId = await DeviceInfo.getUniqueId();
               const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
@@ -297,120 +513,193 @@ const handleOpenApplication = useCallback(async (entry) => {
               db.transaction((tx) => {
                 tx.executeSql(
                   'UPDATE files SET old = ?, mergePdf = ? WHERE ident = ?;',
-                  [encOld, encPdf, deviceId]
+                  ['', '', deviceId]
                 );
               });
             } catch (error) {
-              console.error('Fehler beim Löschen des Eintrags:', error);
+              console.error('Fehler beim Löschen aller Einträge:', error);
             }
           },
         },
       ]
     );
-  };
+  }, [entries.length]);
 
- return (
-  <SafeAreaView style={styles.safeArea}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.badgeHub}>
-          <View style={styles.statusDot} />
-          <Text style={styles.badgeHubText}>{t('history.headerBadge')}</Text>
-        </View>
-        <Text style={styles.titleMain}>{t('history.title')}</Text>
-        <Text style={styles.subtitleMain}>
-          {t('history.subtitle')}
-        </Text>
+  const renderItem = useCallback(
+    ({ item, index }) => (
+      <HistoryEntryCard
+        entry={item}
+        index={index}
+        onUseTemplate={handleUseTemplate}
+        onOpenApplication={handleOpenApplication}
+        onDelete={deleteEntry}
+      />
+    ),
+    [handleUseTemplate, handleOpenApplication, deleteEntry]
+  );
 
-        {/* ── Gesamtanzahl Badge ── */}
-        {!loading && entries.length > 0 && (
-          <View style={styles.counterRow}>
-            <View style={styles.counterBadge}>
-              <MaterialIcons name="folder-open" size={14} color="#60A5FA" />
-              <Text style={styles.counterText}>
-                {t('history.totalCount', { count: entries.length })}
-              </Text>
-            </View>
-          </View>
-        )}
-      </View>
+  const keyExtractor = useCallback(
+    (item, index) => (item.link ? String(item.link) : `${item.job || 'entry'}-${index}`),
+    []
+  );
 
-      {/* Content */}
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
-        </View>
-      ) : entries.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconWrap}>
-            <MaterialIcons name="history" size={36} color="rgba(255,255,255,0.25)" />
-          </View>
-          <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
-          <Text style={styles.emptySubtitle}>
-            {t('history.emptySubtitle')}
+  const renderListHeader = useCallback(() => {
+    return (
+      <View style={styles.listActionBar}>
+        <TouchableOpacity
+          style={styles.clearAllBtn}
+          onPress={clearAllEntries}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MaterialIcons name="delete-sweep" size={17} color="#EF4444" />
+          <Text style={styles.clearAllBtnText}>Alles löschen</Text>
+        </TouchableOpacity>
+        <View style={styles.countBadge}>
+          <MaterialIcons name="folder-shared" size={15} color="#60A5FA" />
+          <Text style={styles.countBadgeText}>
+            {entries.length} {entries.length === 1 ? 'Bewerbung' : 'Bewerbungen'}
           </Text>
-          <TouchableOpacity
-            style={styles.newAppBtn}
-            onPress={() => router.push('/first')}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.newAppBtnText}>{t('history.newApplicationBtn')}</Text>
-          </TouchableOpacity>
         </View>
-      ) : (
-      <FlatList
-  data={entries}
-  keyExtractor={(item, index) => (item.link ? String(item.link) : `${item.job || 'entry'}-${index}`)}
-  renderItem={({ item }) => (
-    <HistoryEntryCard
-      entry={item}
-      onUseTemplate={handleUseTemplate}
-      onOpenApplication={handleOpenApplication}
-      onDelete={deleteEntry}
-      resetSignal={resetSignal}
-    />
-  )}
-  contentContainerStyle={styles.scrollContent}
-  showsVerticalScrollIndicator={false}
-  initialNumToRender={6}
-  maxToRenderPerBatch={8}
-  windowSize={7}
-/>
+      </View>
+    );
+  }, [entries.length, clearAllEntries]);
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <Animated.View style={[styles.container, { opacity: animViewOpacity }]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.titleMain}>{t('history.title')}</Text>
+          <Text style={styles.subtitleMain}>{t('history.subtitle')}</Text>
+        </View>
+
+        {/* Content */}
+        {entries.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconWrap}>
+              <MaterialIcons name="history" size={36} color="rgba(255,255,255,0.25)" />
+            </View>
+            <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+            <Text style={styles.emptySubtitle}>{t('history.emptySubtitle')}</Text>
+            <TouchableOpacity
+              style={styles.newAppBtn}
+              onPress={() => router.dismissAll('/(tabs)')}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.newAppBtnText}>{t('history.newApplicationBtn')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={entries}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            ListHeaderComponent={renderListHeader}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={5}
+            removeClippedSubviews={Platform.OS === 'android'}
+          />
+        )}
+      </Animated.View>
+
+      {/* ══ CompanySearch Modal Overlay ══ */}
+      {modalVisible && (
+        <View style={styles.modalOverlay} pointerEvents="box-none">
+          <Animated.View
+            renderToHardwareTextureAndroid={true}
+            shouldRasterizeIOS={true}
+            style={[
+              styles.cardAnimatedWrap,
+              {
+                opacity: nameOpacity,
+                transform: [
+                  {
+                    translateX: nameProgressX.interpolate({
+                      inputRange: [0, 1, 2],
+                      outputRange: [width, 0, -width * 0.65],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                  {
+                    translateY: nameProgressY.interpolate({
+                      inputRange: [0, 1, 2],
+                      outputRange: [height, 0, -height],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <CompanySearchModal
+              visible={modalVisible}
+              onClose={closeModal}
+              onSaved={handleCompanySaved}
+              initialName={selectedEntry?.job || ''}
+            />
+          </Animated.View>
+        </View>
       )}
-    </View>
 
-    {/* Firmen-Such Modal */}
-    <CompanySearchModal
-      visible={modalVisible}
-      nextScreen={changeOldScreen}
-      initialName={selectedEntry?.job || ''}
-      durationIn={200}
-      onClose={() => {
-        setModalVisible(false);
-        resetCardAnimation();
-      }}
-      onSaved={async () => {
-        setChangeOldScreen(true);
-        inputRef.current.focus();
-          
-        setModalVisible(false);
-        await EncryptedStorage.setItem('result', 'changeOld');
-      }}
-    />
+      {/* ══ Overlay & Slide-In Container (ChangeScreenOld) ══ */}
+      {changeOldScreen && (
+        <View style={styles.changeOverlay}>
+          <Animated.View
+            style={[
+              styles.backdrop,
+              {
+                opacity: animProgressOpacity.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 1],
+                }),
+              },
+            ]}
+          >
+            <Pressable style={StyleSheet.absoluteFill} onPress={closeChangeOldScreen} />
+          </Animated.View>
 
-    {/* Editor Overlay für Altdaten */}
-    <ChangeScreenOld
-      visible={changeOldScreen}
-      ref={inputRef}
-      onClose={() => {
-        setChangeOldScreen(false);
-        setModalVisible(false);
-      }}
-    />
-  </SafeAreaView>
-);};
+          <Animated.View
+            renderToHardwareTextureAndroid={true}
+            shouldRasterizeIOS={true}
+            style={[
+              styles.cardAnimatedWrap,
+              {
+                transform: [
+                  {
+                    translateX: animProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [width, 0],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                  {
+                    translateY: animProgressY.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -height],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <ChangeScreenOld
+              visible={changeOldScreen}
+              ref={inputRef}
+              onClose={closeChangeOldScreen}
+              paddingFactor={1.05}
+            />
+          </Animated.View>
+        </View>
+      )}
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -425,42 +714,21 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 16,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   badgeHub: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 8,
-  },
-  counterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  counterBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.25)',
-    gap: 6,
-  },
-  counterText: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  counterHighlight: {
-    color: '#60A5FA',
-    fontWeight: '800',
   },
   statusDot: {
     width: 6,
@@ -475,6 +743,46 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.8,
   },
+  listActionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    marginBottom: 12,
+  },
+  countBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+  },
+  countBadgeText: {
+    color: '#60A5FA',
+    fontSize: 12.5,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  clearAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
+  clearAllBtnText: {
+    color: '#EF4444',
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
   titleMain: {
     color: '#FFFFFF',
     fontSize: 26,
@@ -486,9 +794,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     lineHeight: 18,
-  },
-  scrollView: {
-    flex: 1,
   },
   scrollContent: {
     paddingBottom: 30,
@@ -672,10 +977,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  loadingContainer: {
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 110,
+    elevation: 25,
+  },
+  changeOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    elevation: 20,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10, 12, 18, 0.82)',
+  },
+  cardAnimatedWrap: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 

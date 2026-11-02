@@ -23,17 +23,20 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import RNFS from "react-native-fs";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SQLite from "react-native-sqlite-storage";
+
 import KeyboardDummy from "../../comp/keyboardDummy.jsx";
-import Bewerbung from "../application.js";
-import ChangeScreen from "../change.js";
+import Info from "../../comp/info.js";
 import CompanySearchModal from "../../comp/name.js";
-import Info from "../../comp/info.js"; // <-- Info Komponente eingebunden
 import colors from "../../inc/colors.js";
 import { decryp } from "../../inc/cryp.js";
 import { runQuery } from "../../inc/db.js";
+import Bewerbung from "../application.js";
+import ChangeScreen from "../change.js";
+import ChangeScreenOld from "../changeOld.js";
 
 const { width, height } = Dimensions.get("window");
 const DB_NAME = "firstNew.db";
+const EASING_FLOW = Easing.bezier(0.25, 0.1, 0.25, 1);
 
 const ROUTE_MAP = {
   name: "/name",
@@ -140,6 +143,7 @@ const SecondaryActionCard = memo(
 
 export default function StartApp() {
   const { t } = useTranslation();
+
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [isLoadingOld, setIsLoadingOld] = useState(false);
   const [showCompanySearch, setShowCompanySearch] = useState(false);
@@ -148,44 +152,364 @@ export default function StartApp() {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [textInfo, setTextInfo] = useState("");
 
+  /* ── Subscreen Visibility ── */
+  const [screen, setScreen] = useState(false);
   const [screenApp, setScreenApp] = useState(false);
   const [screenChange, setScreenChange] = useState(false);
-  const [screen, setScreen] = useState(false);
+  const [changeOldScreen, setChangeOldScreen] = useState(false);
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
-
-  const changeScreenRef = useRef(null);
+const nameAnimationRunning = useRef(false);
   const lastClickTime = useRef(0);
   const bewerbungRef = useRef(null);
+  const changeScreenRef = useRef(null);
+  const changeOldRef = useRef(null);
   const focusTimeoutRef = useRef(null);
 
-  /* ── Animationen ── */
+  /* ── Animation Values ── */
   const animResume = useRef(new Animated.Value(0)).current;
   const animProgress = useRef(new Animated.Value(0)).current;
   const animProgressY = useRef(new Animated.Value(0)).current;
-  const animStep = useRef(new Animated.Value(0)).current;
   const animProgressOpacity = useRef(new Animated.Value(0)).current;
+  const animStep = useRef(new Animated.Value(0)).current;
+  const animViewOpacity = useRef(new Animated.Value(1)).current;
+
+  /* ── CompanySearch Modal Animations ── */
+  const nameProgressX = useRef(new Animated.Value(0)).current;
+  const nameProgressY = useRef(new Animated.Value(1)).current;
+  const nameOpacity = useRef(new Animated.Value(0)).current;
+  const kbListenerRef = useRef(null);
+  const kbFallbackRef = useRef(null);
 
   /* ── Info Handler ── */
   const handleInfo = useCallback(
     (val) => {
       switch (val) {
-       case 'new':
-        setInfoModalVisible(true);
-        setTextInfo(t("info.new"));
-        break;
-        case 'old':
-        setInfoModalVisible(true);
-        setTextInfo(t("info.old"));
-        break;
-        case 'resume':
-        setInfoModalVisible(true);
-        setTextInfo(t("info.resume"));
-        default:
+        case "new":
+          setTextInfo(t("info.new"));
           break;
+        case "old":
+          setTextInfo(t("info.old"));
+          break;
+        case "resume":
+          setTextInfo(t("info.resume"));
+          break;
+        default:
+          return;
       }
+      setInfoModalVisible(true);
     },
-    []
+    [t]
   );
+
+  /* ── CompanySearch Slide-In ── */
+   const triggerNameSlideDown = useCallback(() => {
+  if (nameAnimationRunning.current) return;
+
+  nameAnimationRunning.current = true;
+
+  if (kbFallbackRef.current) {
+    clearTimeout(kbFallbackRef.current);
+    kbFallbackRef.current = null;
+  }
+
+  if (kbListenerRef.current) {
+    kbListenerRef.current.remove();
+    kbListenerRef.current = null;
+  }
+
+    Animated.parallel([
+      Animated.timing(nameProgressX, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(nameOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 0,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [nameProgressX, nameOpacity, animViewOpacity]);
+
+  const openName = useCallback(() => {
+    nameAnimationRunning.current = false;
+    setShowCompanySearch(true);
+    nameProgressX.setValue(0);
+    nameProgressY.setValue(1);
+    nameOpacity.setValue(0);
+
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    kbListenerRef.current = Keyboard.addListener(showEvent, triggerNameSlideDown);
+
+    kbFallbackRef.current = setTimeout(() => {
+      triggerNameSlideDown();
+    }, 240);
+  }, [nameProgressX, nameProgressY, nameOpacity, triggerNameSlideDown]);
+
+  const closeName = useCallback(() => {
+    Keyboard.dismiss();
+
+    if (kbListenerRef.current) {
+      kbListenerRef.current.remove();
+      kbListenerRef.current = null;
+    }
+    if (kbFallbackRef.current) {
+      clearTimeout(kbFallbackRef.current);
+      kbFallbackRef.current = null;
+    }
+
+    Animated.parallel([
+      Animated.timing(nameProgressY, {
+        toValue: 2,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(nameOpacity, {
+        toValue: 0,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        setShowCompanySearch(false);
+        nameProgressX.setValue(0);
+        nameProgressY.setValue(1);
+      }
+    });
+  }, [nameProgressY, nameOpacity, animViewOpacity, nameProgressX]);
+
+  /* ── Overlay Dismiss (Gemeinsame Schließ-Logik) ── */
+  const closeAllOverlays = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.parallel([
+      Animated.timing(animProgressY, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animViewOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setScreen(false);
+      setScreenApp(false);
+      setScreenChange(false);
+      setChangeOldScreen(false);
+      setShowCompanySearch(false);
+
+      animProgress.setValue(0);
+      animProgressY.setValue(0);
+      animProgressOpacity.setValue(0);
+      animStep.setValue(0);
+      nameProgressX.setValue(0);
+      nameProgressY.setValue(1);
+    });
+  }, [animProgressY, animProgressOpacity, animViewOpacity, animProgress, animStep, nameProgressX, nameProgressY]);
+
+  /* ── Subscreen Openers ── */
+  const openBewerbung = useCallback(() => {
+    setScreenApp(true);
+    setScreenChange(false);
+    setChangeOldScreen(false);
+    setScreen(true);
+
+    animProgress.setValue(0);
+    animProgressY.setValue(0);
+    animStep.setValue(0);
+
+    setTimeout(() => {
+      bewerbungRef.current?.focusName?.();
+    }, 25);
+
+    Animated.parallel([
+      Animated.timing(animProgress, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+
+  const openChange = useCallback(() => {
+    setScreenApp(false);
+    setChangeOldScreen(false);
+    setScreenChange(true);
+    setScreen(true);
+
+    animProgress.setValue(0);
+    animProgressY.setValue(0);
+    animStep.setValue(1);
+
+    Animated.parallel([
+      Animated.timing(animProgressOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgress, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      changeScreenRef.current?.focus?.();
+    });
+  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+
+  const openChangeOld = useCallback(() => {
+    setScreenApp(false);
+    setChangeOldScreen(true);
+    setScreen(true);
+
+    animProgress.setValue(0);
+    animProgressY.setValue(0);
+    animStep.setValue(0);
+
+    requestAnimationFrame(() => {
+      changeOldRef.current?.focus?.();
+    });
+
+    Animated.parallel([
+      Animated.timing(animViewOpacity, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgressOpacity, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animProgress, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [animProgress, animProgressY, animStep, animProgressOpacity, animViewOpacity]);
+
+ const navigateToChange = useCallback(() => {
+    changeScreenRef.current?.focus?.();
+
+    setScreenChange(true);
+
+    // Sofort übergeben – kein Warten auf das Ende der 380ms Animation:
+
+    Animated.timing(animStep, {
+      toValue: 1,
+      duration: 380,
+      useNativeDriver: true,
+    }).start();
+  }, [animStep]);
+
+  const backToBewerbung = useCallback(() => {
+    Keyboard.dismiss();
+
+    Animated.timing(animStep, {
+      toValue: 0,
+      duration: 350,
+      useNativeDriver: true,
+    }).start(() => {
+      setScreenChange(false);
+    });
+  }, [animStep]);
+
+  /* ── Firmenauswahl Übergang zu Bewerbung ── */
+  const handleCompanySaved = useCallback(
+    (name, street, city) => {
+      setSavedCompany({ name, street, city });
+      EncryptedStorage.setItem("result", "application").catch((err) =>
+        console.error("Storage Error:", err)
+      );
+      setIsButtonVisible(true);
+
+      setScreen(true);
+      setScreenApp(true);
+      setScreenChange(false);
+      setChangeOldScreen(false);
+      animStep.setValue(0);
+      animProgress.setValue(0);
+      animProgressOpacity.setValue(1);
+
+      requestAnimationFrame(() => {
+        bewerbungRef.current?.focusName?.();
+      });
+
+      Animated.parallel([
+        Animated.timing(nameProgressX, {
+          toValue: 2,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+        Animated.timing(nameOpacity, {
+          toValue: 0,
+          duration: 320,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animProgress, {
+          toValue: 1,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => {
+        if (finished) {
+          setShowCompanySearch(false);
+          nameProgressX.setValue(0);
+          nameProgressY.setValue(1);
+        }
+      });
+    },
+    [nameProgressX, nameProgressY, nameOpacity, animProgress, animStep, animProgressOpacity]
+  );
+
+  /* ── Hardware Back-Button ── */
+  useEffect(() => {
+    const onBackPress = () => {
+      if (showCompanySearch) {
+        closeName();
+        return true;
+      }
+      if (changeOldScreen) {
+        closeAllOverlays();
+        return true;
+      }
+      if (screenChange) {
+        backToBewerbung();
+        return true;
+      }
+      if (screenApp) {
+        closeAllOverlays();
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => sub.remove();
+  }, [showCompanySearch, changeOldScreen, screenChange, screenApp, closeName, closeAllOverlays, backToBewerbung]);
 
   /* ── Cross-Platform DB Check ── */
   useEffect(() => {
@@ -208,10 +532,12 @@ export default function StartApp() {
 
     return () => {
       if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
+      if (kbFallbackRef.current) clearTimeout(kbFallbackRef.current);
+      if (kbListenerRef.current) kbListenerRef.current.remove();
     };
   }, []);
 
-  /* ── Sync Status ── */
+  /* ── Sync Storage Status ── */
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
@@ -243,203 +569,61 @@ export default function StartApp() {
     }
   }, [isButtonVisible, animResume]);
 
-  /* ── Modal & Overlay Steuerung ── */
-  const openBewerbung = useCallback(() => {
-    setScreenApp(true);
-    setScreenChange(false);
-    setScreen(true);
-
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(0);
-
-    Animated.parallel([
-      Animated.timing(animProgress, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animProgressOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      bewerbungRef.current?.focusName?.();
-    });
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
-
-  const navigateToChange = useCallback(() => {
-    changeScreenRef.current?.focus();
-    setScreenChange(true);
-
-    Animated.timing(animStep, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-  }, [animStep]);
-
-  const backToBewerbung = useCallback(() => {
-    Keyboard.dismiss();
-
-    Animated.timing(animStep, {
-      toValue: 0,
-      duration: 280,
-      useNativeDriver: true,
-    }).start(() => {
-      setScreenChange(false);
-    });
-  }, [animStep]);
-
-  const closeBewerbung = useCallback(() => {
-    Keyboard.dismiss();
-
-    Animated.parallel([
-      Animated.timing(animProgressY, {
-        toValue: 1,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animProgressOpacity, {
-        toValue: 0,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setScreen(false);
-      setScreenApp(false);
-      setScreenChange(false);
-      setShowCompanySearch(false);
-      animProgress.setValue(0);
-      animProgressY.setValue(0);
-      animStep.setValue(0);
-    });
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
-
-  const closeChange = useCallback(() => {
-    Keyboard.dismiss();
-
-    Animated.parallel([
-      Animated.timing(animProgressY, {
-        toValue: 1,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animProgressOpacity, {
-        toValue: 0,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setScreen(false);
-      setScreenApp(false);
-      setScreenChange(false);
-      setShowCompanySearch(false);
-      animProgress.setValue(0);
-      animProgressY.setValue(0);
-      animStep.setValue(0);
-    });
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
-
-  const openChange = useCallback(() => {
-    setScreenApp(false);
-    setScreen(true);
-    setScreenChange(true);
-
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(1);
-
-    Animated.timing(animProgressOpacity, {
-      toValue: 1,
-      duration: 320,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(animProgress, {
-      toValue: 1,
-      duration: 320,
-      useNativeDriver: true,
-    }).start(() => {
-      changeScreenRef.current?.focus();
-    });
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
-
-  useEffect(() => {
-    const onBackPress = () => {
-      if (screenChange) {
-        backToBewerbung();
-        return true;
+  /* ── Alte Bewerbungen Abrufen ── */
+  const getOld = async () => {
+    try {
+      const key = await EncryptedStorage.getItem("key");
+      if (!key || typeof key !== "string" || key.trim() === "") {
+        console.warn("getOld: Kein gültiger Encryption-Key gefunden.");
+        return [];
       }
-      if (screenApp) {
-        closeBewerbung();
-        return true;
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
+
+      const result = await runQuery(
+        db,
+        "SELECT old, mergePdf FROM files WHERE ident = ?;",
+        [deviceId]
+      );
+
+      const rows = result?.rows?.raw() ?? [];
+      if (rows.length === 0 || !rows[0].old) return [];
+
+      const rawOld = rows[0].old;
+      if (!rawOld || typeof rawOld !== "string") return [];
+
+      const encData = await decryp(rawOld, key);
+      let decMerge = "";
+      if (rows[0].mergePdf && typeof rows[0].mergePdf === "string") {
+        decMerge = await decryp(rows[0].mergePdf, key);
       }
-      return false;
-    };
 
-    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-    return () => sub.remove();
-  }, [screenApp, screenChange, closeBewerbung, backToBewerbung]);
+      if (!encData) return [];
 
-const getOld = async () => {
-  try {
-    const key = await EncryptedStorage.getItem("key");
-    // Wenn kein Key vorhanden ist, darf keine Entschlüsselung aufgerufen werden!
-    if (!key || typeof key !== "string" || key.trim() === "") {
-      console.warn("getOld: Kein gültiger Encryption-Key gefunden.");
+      const oldFull = encData.split("&").filter(Boolean);
+      const oldArray = decMerge ? decMerge.split(",") : [];
+
+      const newEntries = [];
+      for (let i = oldFull.length - 1; i >= 0; i--) {
+        const parts = oldFull[i].split("#");
+        if (parts.length >= 3) {
+          newEntries.push({
+            job: parts[0],
+            date: parts[1] || "",
+            myType: `${parts[2] || ""} / ${parts[3] || ""}`,
+            subject: parts[4] || "Kein Betreff",
+            text: parts[5] || "",
+            link: oldArray[i] || "",
+          });
+        }
+      }
+      return newEntries;
+    } catch (error) {
+      console.error("getOld Error:", error);
       return [];
     }
-
-    const deviceId = await DeviceInfo.getUniqueId();
-    const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
-
-    const result = await runQuery(
-      db,
-      "SELECT old, mergePdf FROM files WHERE ident = ?;",
-      [deviceId]
-    );
-
-    const rows = result?.rows?.raw() ?? [];
-    if (rows.length === 0 || !rows[0].old) return [];
-
-    // Vor dem Entschlüsseln prüfen:
-    const rawOld = rows[0].old;
-    if (!rawOld || typeof rawOld !== "string") return [];
-
-    const encData = await decryp(rawOld, key);
-    
-    let decMerge = "";
-    if (rows[0].mergePdf && typeof rows[0].mergePdf === "string") {
-      decMerge = await decryp(rows[0].mergePdf, key);
-    }
-
-    if (!encData) return [];
-
-    const oldFull = encData.split("&").filter(Boolean);
-    const oldArray = decMerge ? decMerge.split(",") : [];
-
-    const newEntries = [];
-    for (let i = oldFull.length - 1; i >= 0; i--) {
-      const parts = oldFull[i].split("#");
-      if (parts.length >= 3) {
-        newEntries.push({
-          job: parts[0],
-          date: parts[1] || "",
-          myType: `${parts[2] || ""} / ${parts[3] || ""}`,
-          subject: parts[4] || "Kein Betreff",
-          text: parts[5] || "",
-          link: oldArray[i] || "",
-        });
-      }
-    }
-    return newEntries;
-  } catch (error) {
-    console.error("getOld Error:", error);
-    return [];
-  }
-};
+  };
 
   const handleNewApplication = async () => {
     try {
@@ -474,7 +658,7 @@ const getOld = async () => {
         );
         router.push("/uploadFirst");
       } else {
-        setShowCompanySearch(true);
+        openName();
       }
     } catch (error) {
       console.error("Application Validation Error:", error);
@@ -504,16 +688,6 @@ const getOld = async () => {
     }
   };
 
-  const handleCompanySaved = async (name, street, city) => {
-    setSavedCompany({ name, street, city });
-    EncryptedStorage.setItem("result", "application").catch((err) =>
-      console.error("Storage Error:", err)
-    );
-    setIsButtonVisible(true);
-    setShowCompanySearch(false);
-    openBewerbung();
-  };
-
   const handleResume = async () => {
     const now = Date.now();
     if (now - lastClickTime.current < 800) return;
@@ -528,12 +702,11 @@ const getOld = async () => {
         openBewerbung();
       } else if (targetRoute === "/change") {
         openChange();
-      }
-      else if (targetRoute === "/collect") {
+      } else if (targetRoute === "/collect") {
         router.push("/collect");
-        
+      } else if (targetRoute === "/changeOld") {
+        openChangeOld();
       }
-      console.log("Routing to:", targetRoute);
     } catch (e) {
       console.error("Routing error:", e);
     }
@@ -541,7 +714,7 @@ const getOld = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.contentWrapper}>
+      <Animated.View style={[styles.contentWrapper, { opacity: animViewOpacity }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.badgeHub}>
@@ -555,7 +728,7 @@ const getOld = async () => {
           </Text>
         </View>
 
-        {/* Aktionskarten mit Icon-Pressable für Info-Modal */}
+        {/* Aktionskarten */}
         <View style={styles.actionContainer}>
           <PrimaryActionCard
             title={t("BewerbungGenerieren") || "Neue Bewerbung"}
@@ -618,8 +791,7 @@ const getOld = async () => {
                       handleInfo("resume");
                     }}
                   >
-                  
-                  <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
+                    <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
                   </Pressable>
                 </View>
                 <View>
@@ -639,7 +811,7 @@ const getOld = async () => {
             </TouchableOpacity>
           </Animated.View>
         )}
-      </View>
+      </Animated.View>
 
       {/* Info Modal */}
       <Info
@@ -648,50 +820,27 @@ const getOld = async () => {
         message={textInfo}
       />
 
-      {/* Company Search Modal */}
-      <CompanySearchModal
-        visible={showCompanySearch}
-        onClose={() => setShowCompanySearch(false)}
-        onSaved={handleCompanySaved}
-        initialName={savedCompany.name}
-        initialStreet={savedCompany.street}
-        initialCity={savedCompany.city}
-      />
-
-      {/* ══ Overlay & Slide-In Container ══ */}
-      {screen && (
-        <View style={styles.bewerbungOverlay}>
-          <Animated.View
-            style={[
-              styles.backdrop,
-              {
-                opacity: animProgressOpacity.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1, 1],
-                }),
-              },
-            ]}
-          >
-            <Pressable style={StyleSheet.absoluteFill} onPress={closeBewerbung} />
-          </Animated.View>
-
+      {/* ══ CompanySearch Modal Overlay ══ */}
+      {showCompanySearch && (
+        <View style={styles.modalOverlay} pointerEvents="box-none">
           <Animated.View
             renderToHardwareTextureAndroid={true}
             style={[
               styles.cardAnimatedWrap,
               {
+                opacity: nameOpacity,
                 transform: [
                   {
-                    translateX: animProgress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [width, 0],
+                    translateX: nameProgressX.interpolate({
+                      inputRange: [0, 1, 2],
+                      outputRange: [width, 0, -width * 0.65],
                       extrapolate: "clamp",
                     }),
                   },
                   {
-                    translateY: animProgressY.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, -height],
+                    translateY: nameProgressY.interpolate({
+                      inputRange: [0, 1, 2],
+                      outputRange: [height, 0, -height],
                       extrapolate: "clamp",
                     }),
                   },
@@ -699,58 +848,142 @@ const getOld = async () => {
               },
             ]}
           >
-            {/* Screen 1: Bewerbung */}
-         <Animated.View
-  style={[
-    StyleSheet.absoluteFillObject,
-    {
-      opacity: animStep.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 0], // bleibt leicht abgedunkelt im Hintergrund
-      }),
-    },
-  ]}
-  pointerEvents={screenChange ? "none" : "auto"}
->
-              <Bewerbung
-                changeScreen={navigateToChange}
-                visibleApp={screenApp}
-                isNextStep={screenChange}
-                ref={bewerbungRef}
-                onClose={closeBewerbung}
-              />
-            </Animated.View>
+            <CompanySearchModal
+              visible={showCompanySearch}
+              onClose={closeName}
+              onSaved={handleCompanySaved}
+              initialName={savedCompany.name}
+              initialStreet={savedCompany.street}
+              initialCity={savedCompany.city}
+            />
+          </Animated.View>
+        </View>
+      )}
 
-            {/* Screen 2: ChangeScreen */}
+      {/* ══ Multi-Step Overlay (Bewerbung, ChangeScreen, ChangeScreenOld) ══ */}
+     {/* ══ Multi-Step Overlay (Bewerbung, ChangeScreen, ChangeScreenOld) ══ */}
+{screen && (
+  <View style={styles.bewerbungOverlay}>
+    <Animated.View
+      style={[
+        styles.backdrop,
+        {
+          opacity: animProgressOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+          }),
+        },
+      ]}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={closeAllOverlays} />
+    </Animated.View>
+
+    <Animated.View
+      renderToHardwareTextureAndroid={true}
+      style={[
+        styles.cardAnimatedWrap,
+        {
+          transform: [
+            {
+              translateX: animProgress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [width, 0],
+                extrapolate: "clamp",
+              }),
+            },
+            {
+              translateY: animProgressY.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -height],
+                extrapolate: "clamp",
+              }),
+            },
+          ],
+        },
+      ]}
+    >
+      {/* ── FLOW 1: NEUE BEWERBUNG (Bewerbung -> ChangeScreen) ── */}
+      {!changeOldScreen && (
+        <>
+          {/* Step 1: Bewerbung */}
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                opacity: animStep.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 0],
+                }),
+                transform: [
+                  {
+                    translateX: animStep.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -width * 0.35],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                ],
+              },
+            ]}
+            pointerEvents={screenApp && !screenChange ? "auto" : "none"}
+          >
+            <Bewerbung
+              changeScreen={navigateToChange}
+              visibleApp={screenApp}
+              isNextStep={screenChange}
+              ref={bewerbungRef}
+              onClose={closeAllOverlays}
+            />
+          </Animated.View>
+
+          {/* Step 2: ChangeScreen (nur rendern wenn der Schritt aktiv ist!) */}
             <Animated.View
               style={[
                 StyleSheet.absoluteFillObject,
                 {
                   opacity: animStep.interpolate({
-                    inputRange: [0, 0.2, 1],
-                    outputRange: [0, 1, 1],
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
                   }),
                   transform: [
                     {
                       translateX: animStep.interpolate({
                         inputRange: [0, 1],
                         outputRange: [width, 0],
+                        extrapolate: "clamp",
                       }),
                     },
                   ],
                 },
               ]}
-              pointerEvents={screenChange ? "auto" : "none"}
+              pointerEvents="auto"
             >
               <ChangeScreen
                 visible={screenChange}
-                onClose={closeChange}
+                onClose={closeAllOverlays}
                 ref={changeScreenRef}
               />
             </Animated.View>
-          </Animated.View>
-        </View>
+        </>
       )}
+
+      {/* ── FLOW 2: ALTE BEWERBUNG (ChangeScreenOld isoliert) ── */}
+      {changeOldScreen && (
+        <Animated.View
+          style={StyleSheet.absoluteFillObject}
+          pointerEvents="auto"
+        >
+          <ChangeScreenOld
+            visible={changeOldScreen}
+            ref={changeOldRef}
+            onClose={closeAllOverlays}
+            paddingFactor={0.9}
+          />
+        </Animated.View>
+      )}
+    </Animated.View>
+  </View>
+)}
       <KeyboardDummy />
     </SafeAreaView>
   );
@@ -967,6 +1200,11 @@ const styles = StyleSheet.create({
   resumeSubtitle: {
     color: "rgba(255, 255, 255, 0.45)",
     fontSize: 11.5,
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 110,
+    elevation: 25,
   },
   bewerbungOverlay: {
     ...StyleSheet.absoluteFillObject,

@@ -1,8 +1,6 @@
 // changeOld.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import { Buffer } from 'buffer';
 import { router } from 'expo-router';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
 import React, {
   forwardRef,
   useEffect,
@@ -14,71 +12,106 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
-  Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import {generate} from '../inc/generate.js';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import RNFS from 'react-native-fs';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SQLite from 'react-native-sqlite-storage';
 
-import colors from '../inc/colors.js';
-import { decryp, decryptBase, encryp, encryptBase64, genIv } from '../inc/cryp.js';
-import { getCurrentDateTime } from '../inc/date.js';
-import { runQuery } from '../inc/db.js';
-import { sanitizeForPdf } from '../inc/string.js';
-const { width } = Dimensions.get('window');
+
 const DB_NAME = 'firstNew.db';
 
-const ChangeScreenOld = forwardRef(({ visible = false, onClose }, ref) => {
+const ChangeScreenOld = forwardRef(({paddingFactor , visible = false, onClose }, ref) => {
   const { t } = useTranslation();
 
   const [text, setText] = useState('');
   const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(false);
   const [dots, setDots] = useState('');
+  const [section, setSection] = useState({ start: 0, end: 0 });
 
-  const animCardX = useRef(new Animated.Value(width)).current;
   const textAreaRef = useRef(null);
 
+  /* ── Ref nach außen bereitstellen (analog zu ChangeScreen.js) ── */
   useImperativeHandle(ref, () => ({
-    focus: () => textAreaRef.current?.focus(),
-    blur: () => textAreaRef.current?.blur(),
-    clear: () => textAreaRef.current?.clear(),
+    focus: () => {
+      textAreaRef.current?.focus();
+        textAreaRef.current?.setNativeProps({
+        selection: { start: 0, end: 0 },
+      });
+
+      setTimeout(() => {
+        textAreaRef.current?.setNativeProps({
+          selection: { start: 0, end: 0 },
+        });
+      }, 60);
+    },
+    blur: () => {
+      textAreaRef.current?.blur();
+    },
+    clear: () => {
+      textAreaRef.current?.clear();
+    },
     inputRef: textAreaRef.current,
   }));
 
-  useEffect(() => {
-    if (visible) {
-      Animated.timing(animCardX, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(animCardX, {
-        toValue: width,
-        duration: 350,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, animCardX]);
+  /* ── Dynamische Anpassung an die Tastaturhöhe (aus ChangeScreen.js) ── */
+  // Falls die Tastatur durch CompanySearchModal bereits offen ist, greift sofort der Startwert:
+  const keyboardPadding = useRef(
+    new Animated.Value((Keyboard.metrics?.()?.height || 0)  )
+  ).current;
 
+  useEffect(() => {
+    // Synchronisiert die Höhe sofort beim Einblenden, falls das Event vor dem Mounten lief
+    if (visible) {
+      const currentHeight = Keyboard.metrics?.()?.height || 0;
+      if (currentHeight > 0) {
+        keyboardPadding.setValue(currentHeight* paddingFactor);
+      }
+    }
+  }, [visible, keyboardPadding]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onKeyboardShow = (event) => {
+      Animated.timing(keyboardPadding, {
+        toValue: event.endCoordinates.height * paddingFactor,
+        duration: Platform.OS === 'ios' ? event.duration || 250 : 180,
+        useNativeDriver: false,
+      }).start();
+    };
+
+    const onKeyboardHide = (event) => {
+      Animated.timing(keyboardPadding, {
+        toValue: 0,
+        duration: Platform.OS === 'ios' ? event?.duration || 250 : 180,
+        useNativeDriver: false,
+      }).start();
+    };
+
+    const subShow = Keyboard.addListener(showEvent, onKeyboardShow);
+    const subHide = Keyboard.addListener(hideEvent, onKeyboardHide);
+
+    return () => {
+      subShow.remove();
+      subHide.remove();
+    };
+  }, [keyboardPadding]);
+
+  /* ── Text laden ── */
   useEffect(() => {
     const loadText = async () => {
       try {
-        const [anrede, name, subj, myText] = await Promise.all([
+        const [, , subj, myText] = await Promise.all([
           EncryptedStorage.getItem('anrede'),
           EncryptedStorage.getItem('name'),
           EncryptedStorage.getItem('subject'),
@@ -88,14 +121,20 @@ const ChangeScreenOld = forwardRef(({ visible = false, onClose }, ref) => {
         if (subj) setSubject(subj);
 
         if (myText) {
-          setText(myText);
+          const newText = myText
+            .replace(/\u202F/g, ' ')
+            .replace(/[\u2010-\u2015]/g, '-')
+            .replace(/[\u201C\u201D\u201E]/g, '"')
+            .replace(/\*/g, '')
+              .replace(/\u00a0/g, ' ');
+          setText(newText);
         }
       } catch (error) {
         console.error('Fehler beim Laden des Textes:', error);
       }
     };
 
-    if (visible) {
+    if (visible !== false) {
       loadText();
     }
   }, [visible]);
@@ -105,483 +144,139 @@ const ChangeScreenOld = forwardRef(({ visible = false, onClose }, ref) => {
     return text.trim().split(/\s+/).length;
   }, [text]);
 
-  const saveText = async () => {
+  const handleGenerate = async () => {
+    if (loading) return;
+    setLoading(true);
     try {
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      const date = getCurrentDateTime();
-      const deviceId = await DeviceInfo.getUniqueId();
-
-      const [myKey, time, myType, storedText, storedSubject, job] = await Promise.all([
-        EncryptedStorage.getItem('key'),
-        EncryptedStorage.getItem('time'),
-        EncryptedStorage.getItem('type'),
-        EncryptedStorage.getItem('text'),
-        EncryptedStorage.getItem('subject'),
-        EncryptedStorage.getItem('beruf'),
-      ]);
-
-      const join = `${job}#${date}#${time}#${myType}#${storedSubject}#${storedText}&`;
-
-      const oldData = await new Promise((resolve, reject) => {
-        db.transaction((tx) => {
-          tx.executeSql(
-            'SELECT old FROM files WHERE ident = ?;',
-            [deviceId],
-            (_, res) => resolve(res.rows.length ? res.rows.item(0).old : null),
-            (_, err) => reject(err)
-          );
-        });
-      });
-
-      let decrypted = '';
-      if (oldData) {
-        decrypted = await decryp(oldData, myKey);
-      }
-      const encryptedNew = await encryp(decrypted + join, myKey);
-
-      db.transaction((tx) => {
-        tx.executeSql('UPDATE files SET old = ? WHERE ident = ?;', [encryptedNew, deviceId]);
-      });
-    } catch (e) {
-      console.error('SaveText Error:', e);
-    }
-  };
-
-  const mergeFilesFromDB = async () => {
-    let count = 0;
-    const interval = setInterval(() => {
-      count = (count + 1) % 4;
-      setDots('.'.repeat(count));
-    }, 200);
-
-    try {
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-      const deviceId = await DeviceInfo.getUniqueId();
-
-      const result = await runQuery(
-        db,
-        'SELECT mergePdf, lebenslauf, anschreiben, add1, add2, add3, add4, add5, add6, add7, add8, add9, add10 FROM files WHERE ident = ?',
-        [deviceId]
-      );
-
-      const files = result?.rows?.raw() ?? [];
-      if (files.length < 1) return;
-
-      const firstFile = files[0];
-      const myKey = await EncryptedStorage.getItem('key');
-      const lebenslaufDecryp = await decryp(firstFile.lebenslauf, myKey);
-      const output = `${RNFS.LibraryDirectoryPath}/${lebenslaufDecryp}`;
-
-      const name = await EncryptedStorage.getItem('yourName');
-      const anschreibenPath = await decryp(firstFile.anschreiben, myKey);
-
-      const filePaths = [anschreibenPath, output];
-
-      for (let i = 1; i <= 10; i++) {
-        const addField = firstFile[`add${i}`];
-        if (addField) {
-          const addPath = await decryp(addField, myKey);
-          filePaths.push(`${RNFS.LibraryDirectoryPath}/${addPath}`);
-        }
-      }
-
-      const pdfDocs = await Promise.all(
-        filePaths.map(async (filePath) => {
-          const buffer = await RNFS.readFile(filePath, 'base64');
-          const buffer2 = await RNFS.readFile(`${filePath}_1`, 'base64');
-          const decoded = await decryptBase(buffer, myKey);
-          const together = decoded + buffer2;
-          return PDFDocument.load(Buffer.from(together, 'base64'), { ignoreEncryption: true });
-        })
-      );
-
-      const mergedPdf = await PDFDocument.create();
-      for (const doc of pdfDocs) {
-        const pages = await mergedPdf.copyPages(doc, doc.getPageIndices());
-        pages.forEach((page) => mergedPdf.addPage(page));
-      }
-
-      const mergedPdfBytes = await mergedPdf.save();
-      const blue = `${name || 'Bewerbung'}_Bewerbungsmappe`;
-      const mergedPdfBase64 = Buffer.from(mergedPdfBytes).toString('base64');
-      const merge1 = mergedPdfBase64.slice(0, 16);
-      const merge2 = mergedPdfBase64.slice(16);
-      const outputPath = `${RNFS.LibraryDirectoryPath}/${blue}.pdf`;
-
-      const iv = await genIv();
-      const encrypFile = await encryptBase64(merge1, iv, myKey);
-      await RNFS.writeFile(outputPath, encrypFile, 'base64');
-      await RNFS.writeFile(`${outputPath}_1`, merge2, 'base64');
-
-      if (firstFile.mergePdf && firstFile.mergePdf.length > 5) {
-        const oldFilePath = await decryp(firstFile.mergePdf, myKey);
-        const FilePath = `${oldFilePath},${blue}`;
-        const encryptedFilePath = await encryp(FilePath, myKey);
-        await db.executeSql('UPDATE files SET mergePdf = ? WHERE ident = ?', [
-          encryptedFilePath,
-          deviceId,
-        ]);
-      } else {
-        const encryptedFilePath = await encryp(blue, myKey);
-        await db.executeSql('UPDATE files SET mergePdf = ? WHERE ident = ?', [
-          encryptedFilePath,
-          deviceId,
-        ]);
-      }
-
-      await saveText();
-      clearInterval(interval);
-      setDots('');
-      await EncryptedStorage.setItem('result', 'collect');
-      router.replace('collect');
+      await generate({ text, router });
     } catch (err) {
-      console.error('Error during merging:', err);
-      if (err.message && err.message.includes('ENOENT')) {
-        Alert.alert(
-          'Anlagen-Fehler',
-          'Es gab ein Problem beim Lesen der Anlagen. Bitte überprüfe deine Dokumente im Anlagen-Menü.',
-          [{ text: 'OK', onPress: () => router.dismissTo('upload') }]
-        );
-      } else {
-        Alert.alert('Fehler', 'Bewerbungsmappe konnte nicht zusammengefügt werden.');
-      }
+      console.error('Generierungsfehler:', err);
     } finally {
-      clearInterval(interval);
-      setDots('');
       setLoading(false);
     }
   };
 
-  const splitTextIntoLinesWithoutFont = (textBlock, maxChars) => {
-    const words = textBlock.split(' ');
-    const lines = [];
-    let currentLine = '';
-
-    words.forEach((word) => {
-      if ((currentLine + ' ' + word).trim().length > maxChars) {
-        lines.push(currentLine.trim());
-        currentLine = word;
-      } else {
-        currentLine += ' ' + word;
-      }
-    });
-
-    if (currentLine.trim().length > 0) {
-      lines.push(currentLine.trim());
-    }
-    return lines;
-  };
-
- const generate = async () => {
-  if (loading) return;
-  setLoading(true);
-
-  try {
-    const pdfDoc1 = await PDFDocument.create();
-    const helvetica = await pdfDoc1.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc1.embedFont(StandardFonts.HelveticaBold);
-    const page = pdfDoc1.addPage([600, 800]);
-    const { height: pageH } = page.getSize();
-
-    const fontSize = 11;
-    const leftMargin = 60;
-    const maxChars = 90;
-    const lineHeight = fontSize + 4;
-    let currentY = pageH - 60;
-    const textWidth = 450;
-
-    const [
-      rawMyName,
-      rawMyStreet,
-      rawMyCity,
-      rawYourCompany,
-      rawYourStreet,
-      rawYourCity,
-      myKey,
-    ] = await Promise.all([
-      EncryptedStorage.getItem('name'),
-      EncryptedStorage.getItem('street'),
-      EncryptedStorage.getItem('city'),
-      EncryptedStorage.getItem('yourName'),
-      EncryptedStorage.getItem('yourStreet'),
-      EncryptedStorage.getItem('yourCity'),
-      EncryptedStorage.getItem('key'),
-    ]);
-
-    // Alle Eingabefelder sanitizen
-    const myName = sanitizeForPdf(rawMyName);
-    const myStreet = sanitizeForPdf(rawMyStreet);
-    const myCity = sanitizeForPdf(rawMyCity);
-    const yourCompany = sanitizeForPdf(rawYourCompany);
-    const yourStreet = sanitizeForPdf(rawYourStreet);
-    const yourCity = sanitizeForPdf(rawYourCity);
-    const sanitizedSubject = sanitizeForPdf(subject);
-    const sanitizedText = sanitizeForPdf(text);
-
-    const today = new Date().toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
-
-    // Absender
-    page.drawText(myName, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(myStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(myCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= 4 * lineHeight;
-
-    // Empfänger
-    page.drawText(yourCompany, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(yourStreet, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= lineHeight;
-    page.drawText(yourCity, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-    currentY -= 2 * lineHeight;
-
-    // Datum
-    const dateX = leftMargin + textWidth - 50;
-    page.drawText(today, { x: dateX, y: currentY, size: fontSize, font: helvetica });
-    currentY -= 2 * lineHeight;
-
-    // Betreff
-    const subjectLines = splitTextIntoLinesWithoutFont(sanitizedSubject, 70);
-    subjectLines.forEach((line) => {
-      page.drawText(line, { x: leftMargin, y: currentY, size: fontSize + 2, font: helveticaBold });
-      currentY -= lineHeight;
-    });
-    currentY -= 1 * lineHeight;
-
-    // Haupttext
-    const paragraphs = sanitizedText.split('\n\n');
-    paragraphs.forEach((paragraph) => {
-      const lines = splitTextIntoLinesWithoutFont(paragraph, maxChars);
-      lines.forEach((line) => {
-        page.drawText(line, { x: leftMargin, y: currentY, size: fontSize, font: helvetica });
-        currentY -= lineHeight;
-      });
-      currentY -= lineHeight;
-    });
-
-    const pdfBase641 = await pdfDoc1.saveAsBase64();
-    const iv = await genIv();
-    const Base64Part1 = pdfBase641.slice(0, 16);
-    const Base64Part2 = pdfBase641.slice(16);
-    const encrypted = await encryptBase64(Base64Part1, iv, myKey);
-
-    const outputPath = `${RNFS.LibraryDirectoryPath}/anschreiben.pdf`;
-    const outputPathNew = await encryp(outputPath, myKey);
-
-    await Promise.all([
-      EncryptedStorage.setItem('subject', sanitizedSubject),
-      RNFS.writeFile(outputPath, encrypted, 'base64'),
-      RNFS.writeFile(`${outputPath}_1`, Base64Part2, 'base64'),
-    ]);
-
-    const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
-    const deviceId = await DeviceInfo.getUniqueId();
-    await db.executeSql('UPDATE files SET anschreiben = ? WHERE ident = ?', [
-      outputPathNew,
-      deviceId,
-    ]);
-
-    await mergeFilesFromDB();
-  } catch (error) {
-    console.error('Error during PDF generation:', error);
-    setLoading(false);
-    Alert.alert('Fehler', 'PDF konnte nicht generiert werden.');
-  }
-};
- return (
-  <Animated.View
-    pointerEvents={visible ? 'auto' : 'none'}
-    style={[
-      styles.overlayContainer,
-      {
-        transform: [{ translateX: animCardX }],
-      },
-    ]}
-  >
+  return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
-        >
-          <View style={styles.container}>
-            {/* Header mit Schließen-Button */}
-            <View style={styles.header}>
-              <View style={styles.headerTopRow}>
-
-              
-              </View>
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            paddingBottom: Animated.add(
+              keyboardPadding,
+              Platform.OS === 'ios' ? 0 : 0
+            ),
+          },
+        ]}
+      >
+        <View style={styles.editorCard}>
+          <View style={styles.editorHeader}>
+            <View style={styles.editorHeaderLeft}>
+              <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
+              <Text style={styles.editorHeaderText}>
+                {t('changeOld.editorHeader')}
+              </Text>
             </View>
 
-            {/* Editor Card */}
-            <View style={styles.editorCard}>
-              
-              <View style={styles.editorHeader}>
-                
-                <View style={styles.editorHeaderLeft}>
-                  <MaterialIcons name="edit-note" size={20} color="#60A5FA" />
-                  <Text style={styles.editorHeaderText}>
-                    {t('changeOld.editorHeader')}
-                  </Text>
-                </View>
-                <View style={styles.wordBadge}>
-                  
-                  <Text style={styles.wordBadgeText}>
-                    {t('changeOld.wordCount', { count: wordCount })}
-                  </Text>
-                </View>
-                  {onClose && (
-                  <TouchableOpacity
-                    onPress={onClose}
-                    style={styles.closeBtn}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <MaterialIcons name="close" size={22} color="rgba(255, 255, 255, 0.7)" />
-                  </TouchableOpacity>
-                )}
+            <View style={styles.editorHeaderRight}>
+              <View style={styles.wordBadge}>
+                <Text style={styles.wordBadgeText}>
+                  {t('changeOld.wordCount', { count: wordCount })}
+                </Text>
               </View>
 
-              <TextInput
-                style={styles.subjectInput}
-                value={subject}
-                onChangeText={setSubject}
-                placeholder={t('changeOld.subjectPlaceholder')}
-                placeholderTextColor="rgba(255, 255, 255, 0.35)"
-                multiline={false}
-                returnKeyType="next"
-              />
-
-              <View style={styles.divider} />
-
-              <TextInput
-                ref={textAreaRef}
-                style={styles.textArea}
-                value={text}
-                onChangeText={setText}
-                placeholder={t('changeOld.textPlaceholder')}
-                placeholderTextColor="rgba(255, 255, 255, 0.35)"
-                multiline={true}
-                textAlignVertical="top"
-                showsVerticalScrollIndicator={true}
-              />
-            </View>
-
-            {/* CTA Button */}
-            <View style={styles.actionContainer}>
-              <TouchableOpacity
-                style={styles.generateButton}
-                disabled={loading}
-                onPress={generate}
-                activeOpacity={0.85}
-              >
-                {loading ? (
-                  <View style={styles.loadingRow}>
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                    <Text style={styles.generateBtnText}>
-                      {t('changeOld.creatingFolder', { dots })}
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.loadingRow}>
-                    <MaterialIcons
-                      name="picture-as-pdf"
-                      size={20}
-                      color="#FFFFFF"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.generateBtnText}>
-                      {t('changeOld.submitButton')}
-                    </Text>
-                    <MaterialIcons
-                      name="arrow-forward"
-                      size={18}
-                      color="#FFFFFF"
-                      style={{ marginLeft: 6 }}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
+              {onClose && (
+                <TouchableOpacity
+                  style={styles.closeBtn}
+                  onPress={onClose}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  activeOpacity={0.7}
+                >
+                  <MaterialIcons name="close" size={17} color="rgba(255, 255, 255, 0.7)" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
-  </Animated.View>
-);
-})
 
-// Styles unverändert übernommen
+          <TextInput
+            style={styles.subjectInput}
+            value={subject}
+            onChangeText={setSubject}
+            placeholder={t('changeOld.subjectPlaceholder')}
+            placeholderTextColor="rgba(255, 255, 255, 0.35)"
+            multiline={false}
+            returnKeyType="next"
+          />
+
+          <View style={styles.divider} />
+
+          <TextInput
+  ref={textAreaRef}
+  style={styles.textArea}
+  value={text}
+  onChangeText={setText}
+  placeholder={t('editor.placeholder')}
+  placeholderTextColor="rgba(255, 255, 255, 0.35)"
+  multiline={true}
+  textAlignVertical="top"
+  scrollEnabled={true}
+  showsVerticalScrollIndicator={true}
+/>
+        
+        </View>
+
+        <View style={styles.actionContainer}>
+          <TouchableOpacity
+            style={styles.generateButton}
+            disabled={loading}
+            onPress={handleGenerate}
+            activeOpacity={0.85}
+          >
+            {loading ? (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.generateBtnText}>
+                  {t('changeOld.creatingFolder', { dots })}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.loadingRow}>
+                <MaterialIcons
+                  name="picture-as-pdf"
+                  size={20}
+                  color="#FFFFFF"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.generateBtnText}>
+                  {t('changeOld.submitButton')}
+                </Text>
+                <MaterialIcons
+                  name="arrow-forward"
+                  size={18}
+                  color="#FFFFFF"
+                  style={{ marginLeft: 6 }}
+                />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    </SafeAreaView>
+  );
+});
+
+export default ChangeScreenOld;
+
 const styles = StyleSheet.create({
-  overlayContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.background || '#0F1117',
-    zIndex: 999,
-  },
   safeArea: {
     flex: 1,
     backgroundColor: 'transparent',
-  },
-  keyboardView: {
-    flex: 1,
   },
   container: {
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: Platform.OS === 'ios' ? 12 : 18,
     justifyContent: 'space-between',
-  },
-  header: {},
-  headerTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  stepBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  stepDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#3B82F6',
-    marginRight: 6,
-  },
-  stepBadgeText: {
-    color: '#60A5FA',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  titleMain: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  subtitleMain: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 12.5,
-    marginTop: 2,
-    lineHeight: 17,
   },
   editorCard: {
     flex: 1,
@@ -612,6 +307,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  editorHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   editorHeaderText: {
     color: '#FFFFFF',
     fontSize: 13,
@@ -629,6 +329,16 @@ const styles = StyleSheet.create({
     color: '#60A5FA',
     fontSize: 11,
     fontWeight: '700',
+  },
+  closeBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   subjectInput: {
     color: '#FFFFFF',
@@ -676,5 +386,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
-export default ChangeScreenOld;

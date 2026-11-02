@@ -2,29 +2,31 @@
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { useFocusEffect } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import  { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Dimensions,
+  LayoutAnimation,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  UIManager,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Modal from 'react-native-modal';
 import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import RNFS from 'react-native-fs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
 import Pdf from 'react-native-pdf';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 
 import colors from '../../inc/colors.js';
@@ -36,10 +38,15 @@ import {
   genIv,
 } from '../../inc/cryp.js';
 import Info from "../../comp/info.js";
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
 
 const orderedKeys = [
@@ -63,15 +70,13 @@ const DocumentActionCard = memo(({ title, onIconPress, description, iconName, on
         onPress={(e) => {
           e?.stopPropagation?.();
           onIconPress?.();
-          
-        }
-      }
+        }}
       >
-      <MaterialIcons
-        name={iconName}
-        size={22}
-        color={isPrimary ? '#FFFFFF' : '#60A5FA'}
-      />
+        <MaterialIcons
+          name={iconName}
+          size={22}
+          color={isPrimary ? '#FFFFFF' : '#60A5FA'}
+        />
       </Pressable>
     </View>
 
@@ -101,6 +106,7 @@ const DocumentActionCard = memo(({ title, onIconPress, description, iconName, on
 
 const UploadScreen = () => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
@@ -109,12 +115,56 @@ const UploadScreen = () => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [textInfo, setTextInfo] = useState('');
   const [db, setDb] = useState(null);
-  const [source, setSource] = useState({});
-  const [pdfView, setPdfView] = useState(false);
-  const [isModalSortVisible, setModalSortVisible] = useState(false);
+  const [source, setSource] = useState(null);
+  const [activePdfId, setActivePdfId] = useState(null);
+  const [previewLoadingId, setPreviewLoadingId] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
+  const [isSortActive, setIsSortActive] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
+  const innerHeightRef = useRef("");
   const dbRef = useRef(null);
+  const animSlide = useRef(new Animated.Value(0)).current;
+
+  /* ── Animationen ─────────────────────────────────────── */
+  const animX = useRef(new Animated.Value(0)).current;
+  const slideAnimX = useRef(new Animated.Value(width)).current;
+
+  const openSortView = () => {
+    setIsSortActive(true);
+    Animated.parallel([
+      Animated.timing(animX, {
+        toValue: -width,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnimX, {
+        toValue: 0,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const closeSortView = (onEndCallback) => {
+    closePdf();
+    Animated.parallel([
+      Animated.timing(slideAnimX, {
+        toValue: width,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animX, {
+        toValue: 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsSortActive(false);
+      slideAnimX.setValue(width);
+      onEndCallback?.();
+    });
+  };
 
   /* ── Fetch Data from DB ──────────────────────────────── */
   const fetchData = async () => {
@@ -153,7 +203,6 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
 
       const uniquePathsArray = [...new Set(allDecryptedPaths)];
 
-      // Bereinigung in DB falls Duplikate vorhanden sind
       const encryptedForDb = await Promise.all(
         uniquePathsArray.map(async (path) => await encryp(path, myKey))
       );
@@ -163,7 +212,6 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
       const updateQuery = `UPDATE files SET ${orderedKeys.map((key) => `${key} = ?`).join(', ')} WHERE ident = ?`;
       await database.executeSql(updateQuery, queryParams);
 
-      // UI Liste generieren
       const uiData = uniquePathsArray.map((filePath, index) => {
         const fileName = filePath.match(/[^/]+$/)?.[0] || 'Unbekannte Datei';
         return {
@@ -173,6 +221,9 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
           column: orderedKeys[index],
         };
       });
+      const innerHeight = uiData.length > 0 ? 155 + uiData.length * 80 : 300;
+      innerHeightRef.current = innerHeight;
+      animSlide.setValue(innerHeight);
 
       setData(uiData);
     } catch (err) {
@@ -198,6 +249,10 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
   };
 
   const deleteItem = async (itemToDelete) => {
+    if (activePdfId === itemToDelete.id) {
+      closePdf();
+    }
+
     const newData = data.filter((item) => item.id !== itemToDelete.id);
     setData(newData);
 
@@ -223,7 +278,7 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
       await db.executeSql(updateQuery, [...dbValues, deviceId]);
 
       if (newData.length < 1) {
-        setModalSortVisible(false);
+        closeSortView();
       }
     } catch (error) {
       console.error('Fehler beim Löschen:', error);
@@ -413,11 +468,17 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
     }
   };
 
-  /* ── PDF Vorschau ────────────────────────────────────── */
+  /* ── PDF Vorschau Toggle (Unterhalb des Elements) ─────── */
   const handleItemClick = async (item) => {
+    if (activePdfId === item.id) {
+      closePdf();
+      return;
+    }
+
     try {
+      setPreviewLoadingId(item.id);
       const output = `${RNFS.LibraryDirectoryPath}/${item.name}`;
-      const temp = `${RNFS.TemporaryDirectoryPath}/temp.pdf`;
+      const temp = `${RNFS.TemporaryDirectoryPath}/temp_${Date.now()}.pdf`;
       const credentials = await Keychain.getGenericPassword();
       const myKey = credentials.password;
 
@@ -428,317 +489,383 @@ const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
       const encData3 = decryptedData + encData2;
       await RNFS.writeFile(temp, encData3, 'base64');
 
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setSource({ uri: `file://${temp}`, cache: true });
-      setModalSortVisible(false);
-      setTimeout(() => setPdfView(true), 450);
+      setActivePdfId(item.id);
+
+      Animated.timing(animSlide, {
+        toValue: 1000,
+        duration: 600,
+        useNativeDriver: false,
+      }).start();
     } catch (err) {
       console.error('Fehler beim Laden der Vorschau:', err);
+      Alert.alert('Fehler', 'Vorschau konnte nicht geladen werden.');
+    } finally {
+      setPreviewLoadingId(null);
     }
   };
 
   const closePdf = async () => {
-    try {
-      const temp = `${RNFS.TemporaryDirectoryPath}/temp.pdf`;
-      const exists = await RNFS.exists(temp);
-      if (exists) await RNFS.unlink(temp);
-      setPdfView(false);
-      setTimeout(() => setModalSortVisible(true), 450);
-    } catch (err) {
-      setPdfView(false);
+    setIsPdfModalOpen(false);
+    const theValue = innerHeightRef.current;
+    Animated.timing(animSlide, {
+      toValue: theValue,
+      duration: 500,
+      useNativeDriver: false,
+    }).start(async () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setActivePdfId(null);
+      setSource(null);
+
+      try {
+        const tempFiles = await RNFS.readDir(RNFS.TemporaryDirectoryPath);
+        for (const f of tempFiles) {
+          if (f.name.startsWith('temp_') && f.name.endsWith('.pdf')) {
+            await RNFS.unlink(f.path);
+          }
+        }
+      } catch (err) {
+        console.error('Fehler beim Aufräumen der PDFs:', err);
+      }
+    });
+  };
+
+  const handleInfo = (val) => {
+    switch (val) {
+      case 'choose':
+        setInfoModalVisible(true);
+        setTextInfo(t("info.choose"));
+        break;
+      case 'sort':
+        setInfoModalVisible(true);
+        setTextInfo(t("info.sort"));
+        break;
+      default:
+        break;
     }
   };
-const handleInfo = (val) => {
-  switch (val) {
-    case 'choose':
-     setInfoModalVisible(true);
-     setTextInfo(t("info.choose"));
-      break;
-    case 'sort':
-      setInfoModalVisible(true);
-      setTextInfo(t("info.sort"));
-      break;
-      case 'personal':
 
-    default:
-      break;
-  }
-}
+  const activeItem = data.find((item) => item.id === activePdfId);
+
   return (
-<View style={[styles.safeArea, { paddingTop: insets.top }]}>
+    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
           <View style={styles.badgeHub}>
             <View style={styles.statusDot} />
-   <Text style={styles.badgeHubText}>{t('upload.headerBlue')}</Text>
-  </View>
-  <Text style={styles.titleMain}>{t('upload.headerWhite')}</Text>
-  <Text style={styles.subtitleMain}>{t('upload.headerInfo')}</Text>
+            <Text style={styles.badgeHubText}>{t('upload.headerBlue')}</Text>
+          </View>
+          <Text style={styles.titleMain}>{t('upload.headerWhite')}</Text>
+          <Text style={styles.subtitleMain}>{t('upload.headerInfo')}</Text>
         </View>
 
-        {/* ── Normaler Modus ── */}
-        {files.length === 0 ? (
-          <View style={styles.cardsWrapper}>
-            <DocumentActionCard
-              isPrimary={true}
-              onIconPress={() => handleInfo('choose')}
-              iconName="upload-file"
-              title={t('uploadFiles') || 'Dateien auswählen'}
-              description={t('selectFilesToUpload') || 'PDFs oder Bilder von deinem Gerät auswählen.'}
-              onPress={handleFileChange}
-            />
+        {/* ── Hauptbereich ── */}
+        <View style={styles.contentArea}>
+          {files.length === 0 ? (
+            <>
+              {/* 1. Dashboard Action Cards */}
+              <Animated.View
+                pointerEvents={isSortActive ? 'none' : 'auto'}
+                style={[styles.cardsWrapper, { transform: [{ translateX: animX }] }]}
+              >
+                <DocumentActionCard
+                  isPrimary={true}
+                  onIconPress={() => handleInfo('choose')}
+                  iconName="upload-file"
+                  title={t('uploadFiles') || 'Dateien auswählen'}
+                  description={t('selectFilesToUpload') || 'PDFs oder Bilder von deinem Gerät auswählen.'}
+                  onPress={handleFileChange}
+                />
 
-            <DocumentActionCard
-              iconName="reorder"
-              onIconPress={() => handleInfo('sort')}
-              title={t('sortAttachments') || 'Anlagen sortieren'}
-              description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
-              badgeText={dataLoading ? undefined : `${data.length} Datei${data.length === 1 ? '' : 'en'}`}
-              onPress={() => {
-                if (data.length > 0) setModalSortVisible(true);
-                else Alert.alert('Keine Anlagen', 'Bitte lade zuerst Unterlagen hoch.');
-              }}
-            />
-          </View>
-        ) : (
-          /* ── Staging Modus ── */
-          <View style={styles.stagedContainer}>
-            <View style={styles.stagedCard}>
-              <View style={styles.stagedHeader}>
-                <View style={styles.stagedHeaderLeft}>
-                  <MaterialIcons name="inventory-2" size={20} color="#60A5FA" />
-                  <Text style={styles.stagedTitle}>
-                    {files.length} {files.length === 1 ? 'Datei' : 'Dateien'} ausgewählt
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => setFiles([])}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Text style={styles.cancelText}>Verwerfen</Text>
-                </TouchableOpacity>
-              </View>
+                <DocumentActionCard
+                  iconName="reorder"
+                  onIconPress={() => handleInfo('sort')}
+                  title={t('sortAttachments') || 'Anlagen sortieren'}
+                  description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
+                  onPress={openSortView}
+                />
+              </Animated.View>
 
-              <ScrollView style={styles.stagedList} showsVerticalScrollIndicator={false}>
-                {files.map((file, index) => (
-                  <View key={index} style={styles.stagedItem}>
-                    <MaterialIcons name="picture-as-pdf" size={18} color="rgba(255,255,255,0.6)" />
-                    <Text style={styles.stagedFileName} numberOfLines={1}>
-                      {file.decrypName}
+              {/* 2. Slide-In Sortier-Ansicht */}
+              <Animated.View
+                pointerEvents={isSortActive ? 'auto' : 'none'}
+                style={[
+                  styles.sortSlideContainer,
+                  { transform: [{ translateX: slideAnimX }] },
+                ]}
+              >
+                <Animated.View style={[styles.sortInnerCard, { height: animSlide }]}>
+                  <View style={styles.modalHeader}>
+                    <View>
+                      <Text style={styles.modalTitle}>{t('sortAttachments') || 'Anlagen sortieren'}</Text>
+                      <Text style={styles.modalSubtitle}>{t("upload.press")}</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => closeSortView()}
+                      style={styles.modalCloseBtn}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <MaterialIcons name="close" size={18} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <GestureHandlerRootView style={styles.listWrapper}>
+                    <DraggableFlatList
+                      data={data}
+                      onDragEnd={({ data: reorderedData }) => {
+                        setData(reorderedData);
+                        handleNewSort(reorderedData);
+                      }}
+                      keyExtractor={(item) => item.id}
+                      showsVerticalScrollIndicator={false}
+                      renderItem={({ item, getIndex, drag, isActive }) => {
+                        const currentIndex = getIndex?.() ?? 0;
+                        const isFirst = currentIndex === 0;
+                        const isExpanded = activePdfId === item.id;
+                        const isLoading = previewLoadingId === item.id;
+
+                        return (
+                          <View style={styles.itemContainer}>
+                            <View style={[styles.sortCard, (isActive || isExpanded) && styles.sortCardActive]}>
+                              <View style={[styles.badge, isFirst && styles.badgeCv]}>
+                                <Text style={styles.badgeText}>{isFirst ? 'CV' : `${currentIndex}`}</Text>
+                              </View>
+
+                              <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => handleItemClick(item)}
+                                onLongPress={drag}
+                                delayLongPress={150}
+                                style={styles.fileInfoArea}
+                              >
+                                {isLoading ? (
+                                  <ActivityIndicator size="small" color="#60A5FA" style={{ marginRight: 8 }} />
+                                ) : (
+                                  <MaterialIcons
+                                    name="picture-as-pdf"
+                                    size={20}
+                                    color={isExpanded ? '#60A5FA' : (isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)')}
+                                    style={{ marginRight: 8 }}
+                                  />
+                                )}
+                                <View style={{ flex: 1 }}>
+                                  <Text style={styles.sortFileName} numberOfLines={1}>
+                                    {item.name}
+                                  </Text>
+                                  <Text style={styles.sortFileRole}>
+                                    {isFirst
+                                      ? t('upload.mainDocument')
+                                      : t('upload.attachment', { index: currentIndex })}
+                                  </Text>
+                                </View>
+
+                                <MaterialIcons
+                                  name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                                  size={22}
+                                  color="rgba(255, 255, 255, 0.4)"
+                                  style={{ marginHorizontal: 4 }}
+                                />
+                              </TouchableOpacity>
+
+                              <View style={styles.cardActions}>
+                                <TouchableOpacity
+                                  style={styles.trashBtn}
+                                  onPress={() =>
+                                    Alert.alert(
+                                      t('upload.deleteAlertTitle'),
+                                      t('upload.deleteAlertMessage', { name: item.name }),
+                                      [
+                                        { text: t('upload.deleteAlertCancel'), style: 'cancel' },
+                                        { text: t('upload.deleteAlertConfirm'), style: 'destructive', onPress: () => deleteItem(item) },
+                                      ]
+                                    )
+                                  }
+                                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                >
+                                  <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  onLongPress={drag}
+                                  delayLongPress={100}
+                                  style={styles.dragHandle}
+                                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                >
+                                  <MaterialIcons
+                                    name="drag-indicator"
+                                    size={22}
+                                    color={isActive ? '#FFFFFF' : 'rgba(255,255,255,0.4)'}
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+
+                            {/* ── Unterer Ausklapp-Bereich für das PDF ── */}
+                            {isExpanded && source && (
+                              <View style={styles.inlinePdfDropdown}>
+                                <View style={styles.inlinePdfHeader}>
+                                  <Text style={styles.inlinePdfTitle} numberOfLines={1}>
+                                    Vorschau: {item.name}
+                                  </Text>
+                                  <View style={styles.inlineHeaderActions}>
+                                    {/* Button für Fullscreen Modal */}
+                                    <TouchableOpacity
+                                      onPress={() => setIsPdfModalOpen(true)}
+                                      style={styles.inlinePdfExpandBtn}
+                                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                      <MaterialIcons name="fullscreen" size={18} color="#60A5FA" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      onPress={closePdf}
+                                      style={styles.inlinePdfCloseBtn}
+                                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                      <MaterialIcons name="close" size={16} color="#FFFFFF" />
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+
+                                {/* PDF Bereich mit Klick-Trigger ins Modal */}
+                                <View style={styles.inlinePdfBody}>
+                                  <Pdf
+                                    source={source}
+                                    style={styles.pdf}
+                                    onError={(err) => console.error('PDF Error:', err)}
+                                  />
+                                  {/* Transparenter Klick-Layer: Klick öffnet das Modal */}
+                                  <TouchableOpacity
+                                    activeOpacity={0.15}
+                                    style={styles.pdfTouchOverlay}
+                                    onPress={() => setIsPdfModalOpen(true)}
+                                  >
+                                    <View style={styles.tapBadgeHint}>
+                                      <MaterialIcons name="zoom-in" size={15} color="#FFFFFF" />
+                                      <Text style={styles.tapBadgeHintText}>Antippen zum Vergrößern</Text>
+                                    </View>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+                            )}
+                          </View>
+                        );
+                      }}
+                    />
+                  </GestureHandlerRootView>
+
+                  <TouchableOpacity
+                    style={styles.modalDoneBtn}
+                    onPress={() => closeSortView()}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.modalDoneBtnText}>{t("finish")}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              </Animated.View>
+            </>
+          ) : (
+            /* ── Staging Modus ── */
+            <View style={styles.stagedContainer}>
+              <View style={styles.stagedCard}>
+                <View style={styles.stagedHeader}>
+                  <View style={styles.stagedHeaderLeft}>
+                    <MaterialIcons name="inventory-2" size={20} color="#60A5FA" />
+                    <Text style={styles.stagedTitle}>
+                      {files.length} {files.length === 1 ? 'Datei' : 'Dateien'} ausgewählt
                     </Text>
                   </View>
-                ))}
-              </ScrollView>
-            </View>
+                  <TouchableOpacity
+                    onPress={() => setFiles([])}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text style={styles.cancelText}>Verwerfen</Text>
+                  </TouchableOpacity>
+                </View>
 
-            {/* Staging Buttons */}
-            <View style={styles.stagedActionGroup}>
-              <TouchableOpacity
-                style={styles.btnPrimary}
-                onPress={addToDB}
-                disabled={isProcessing}
-                activeOpacity={0.8}
-              >
-                {isProcessing ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <>
-                    <MaterialIcons name="add" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.btnPrimaryText}>Zu bestehenden hinzufügen</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+                <ScrollView style={styles.stagedList} showsVerticalScrollIndicator={false}>
+                  {files.map((file, index) => (
+                    <View key={index} style={styles.stagedItem}>
+                      <MaterialIcons name="picture-as-pdf" size={18} color="rgba(255,255,255,0.6)" />
+                      <Text style={styles.stagedFileName} numberOfLines={1}>
+                        {file.decrypName}
+                      </Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
 
-              <TouchableOpacity
-                style={styles.btnSecondary}
-                onPress={handleSaveToDB}
-                disabled={isProcessing}
-                activeOpacity={0.8}
-              >
-                <MaterialIcons name="sync" size={18} color="rgba(255,255,255,0.8)" style={{ marginRight: 6 }} />
-                <Text style={styles.btnSecondaryText}>Alle alten Dateien ersetzen</Text>
-              </TouchableOpacity>
+              <View style={styles.stagedActionGroup}>
+                <TouchableOpacity
+                  style={styles.btnPrimary}
+                  onPress={addToDB}
+                  disabled={isProcessing}
+                  activeOpacity={0.8}
+                >
+                  {isProcessing ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <MaterialIcons name="add" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.btnPrimaryText}>Zu bestehenden hinzufügen</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.btnSecondary}
+                  onPress={handleSaveToDB}
+                  disabled={isProcessing}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="sync" size={18} color="rgba(255,255,255,0.8)" style={{ marginRight: 6 }} />
+                  <Text style={styles.btnSecondaryText}>Alle alten Dateien ersetzen</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          )}
+        </View>
       </View>
 
-      {/* ── Sortier-Modal (Native React Native Modal) ── */}
+      {/* ── Vollbild PDF Vorschau Modal ── */}
       <Modal
-  isVisible={isModalSortVisible}
-  animationIn="zoomIn"
-  animationOut="zoomOut"
-  animationInTiming={260}
-  animationOutTiming={400}
-  backdropTransitionInTiming={260}
-  backdropTransitionOutTiming={400}
-  backdropOpacity={0.7}
-  hideModalContentWhileAnimating={true}
-  useNativeDriver={true}
-  useNativeDriverForBackdrop={true}
-  statusBarTranslucent={true}
-  onBackdropPress={() => setModalSortVisible(false)}
-  onBackButtonPress={() => setModalSortVisible(false)}
-  style={{ margin: 0, justifyContent: 'center', alignItems: 'center' }}
->
-  {/* Dein Modal Inhalt */}
-
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => setModalSortVisible(false)}>
-            <View style={styles.modalBackdrop} />
-          </TouchableWithoutFeedback>
-
-          <View style={styles.sortModalContainer}>
-            <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitle}>{t('sortAttachments') || 'Anlagen sortieren'}</Text>
-                <Text style={styles.modalSubtitle}>{t("upload.press")}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setModalSortVisible(false)}
-                style={styles.modalCloseBtn}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MaterialIcons name="close" size={18} color="#FFFFFF" />
-              </TouchableOpacity>
+        visible={isPdfModalOpen && Boolean(source)}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setIsPdfModalOpen(false)}
+      >
+        <View style={[styles.fullModalContainer, { paddingTop: insets.top > 0 ? insets.top : 16 }]}>
+          <View style={styles.fullModalHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fullModalTitle} numberOfLines={1}>
+                {activeItem?.name || 'Dokumentvorschau'}
+              </Text>
+              <Text style={styles.fullModalSubtitle}>Vorschau & Details</Text>
             </View>
-
-            <GestureHandlerRootView style={styles.listWrapper}>
-              <DraggableFlatList
-                data={data}
-                onDragEnd={({ data: reorderedData }) => {
-                  setData(reorderedData);
-                  handleNewSort(reorderedData);
-                }}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item, getIndex, drag, isActive }) => {
-                  const currentIndex = getIndex?.() ?? 0;
-                  const isFirst = currentIndex === 0;
-
-                  return (
-                    <View style={[styles.sortCard, isActive && styles.sortCardActive]}>
-                      <View style={[styles.badge, isFirst && styles.badgeCv]}>
-                        <Text style={styles.badgeText}>{isFirst ? 'CV' : `${currentIndex}`}</Text>
-                      </View>
-
-                      <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() => handleItemClick(item)}
-                        onLongPress={drag}
-                        delayLongPress={150}
-                        style={styles.fileInfoArea}
-                      >
-                        <MaterialIcons
-                          name="picture-as-pdf"
-                          size={20}
-                          color={isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)'}
-                          style={{ marginRight: 8 }}
-                        />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.sortFileName} numberOfLines={1}>
-                            {item.name}
-                          </Text>
-                          <Text style={styles.sortFileRole}>
-                         {isFirst 
-  ? t('upload.mainDocument') 
-  : t('upload.attachment', { index: currentIndex })}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-
-                      <View style={styles.cardActions}>
-                        <TouchableOpacity
-                          style={styles.trashBtn}
-                          onPress={() =>
-  Alert.alert(
-    t('upload.deleteAlertTitle'),
-    t('upload.deleteAlertMessage', { name: item.name }),
-    [
-      { text: t('upload.deleteAlertCancel'), style: 'cancel' },
-      { text: t('upload.deleteAlertConfirm'), style: 'destructive', onPress: () => deleteItem(item) },
-    ]
-  )
-}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                          <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onLongPress={drag}
-                          delayLongPress={100}
-                          style={styles.dragHandle}
-                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        >
-                          <MaterialIcons
-                            name="drag-indicator"
-                            size={22}
-                            color={isActive ? '#FFFFFF' : 'rgba(255,255,255,0.4)'}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  );
-                }}
-              />
-            </GestureHandlerRootView>
-
             <TouchableOpacity
-              style={styles.modalDoneBtn}
-              onPress={() => setModalSortVisible(false)}
-              activeOpacity={0.8}
+              onPress={() => setIsPdfModalOpen(false)}
+              style={styles.fullModalCloseBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Text style={styles.modalDoneBtnText}>{t("finish")}</Text>
+              <MaterialIcons name="close" size={22} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
 
-      {/* ── PDF Preview Modal (Native React Native Modal) ── */}
-      <Modal
-       isVisible={pdfView}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={300}
-        animationOutTiming={300}
-        backdropTransitionInTiming={300}
-        backdropTransitionOutTiming={300}
-        backdropOpacity={0.7}
-        hideModalContentWhileAnimating={true}
-        useNativeDriver={true}
-        useNativeDriverForBackdrop={true}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={closePdf}>
-            <View style={styles.modalBackdrop} />
-          </TouchableWithoutFeedback>
-
-          <View style={styles.pdfModalContainer}>
-            <View style={styles.modalHeader}>
-              <View style={styles.pdfHeaderTitleWrap}>
-                <MaterialIcons name="picture-as-pdf" size={20} color="#60A5FA" />
-                <Text style={styles.modalTitle} numberOfLines={1}>
-                  Dokumentenvorschau
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={closePdf}
-                style={styles.modalCloseBtn}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MaterialIcons name="close" size={18} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.pdfWrapper}>
-              <Pdf source={source} style={styles.pdf} />
-            </View>
+          <View style={styles.fullModalPdfWrapper}>
+            {source && (
+              <Pdf
+                source={source}
+                style={styles.fullModalPdf}
+                enablePaging={false}
+                onError={(err) => console.error('Full Modal PDF Error:', err)}
+              />
+            )}
           </View>
         </View>
       </Modal>
-            <Info  message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
-      
+
+      <Info message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
     </View>
   );
 };
@@ -754,12 +881,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 24,
-    justifyContent: 'space-between',
   },
 
   /* ── Header ── */
   header: {
     marginTop: 8,
+    marginBottom: 16,
   },
   badgeHub: {
     flexDirection: 'row',
@@ -799,10 +926,17 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  /* ── Action Cards ── */
+  /* ── Gemeinsamer Inhaltsbereich ── */
+  contentArea: {
+    flex: 1,
+    position: 'relative',
+  },
+
+  /* ── Action Cards (Menü) ── */
   cardsWrapper: {
+    flex: 1,
+    justifyContent: 'center',
     gap: 16,
-    marginVertical: 'auto',
   },
   actionCard: {
     flexDirection: 'row',
@@ -877,111 +1011,14 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
 
-  /* ── Staging Modus ── */
-  stagedContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    marginVertical: 14,
-  },
-  stagedCard: {
-    backgroundColor: '#171B26',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    maxHeight: height * 0.45,
-  },
-  stagedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  stagedHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stagedTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  cancelText: {
-    color: '#EF4444',
-    fontSize: 12.5,
-    fontWeight: '600',
-  },
-  stagedList: {
-    marginTop: 8,
-  },
-  stagedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  stagedFileName: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 13,
-    flex: 1,
-  },
-  stagedActionGroup: {
-    gap: 10,
-    marginTop: 14,
-  },
-  btnPrimary: {
-    height: 50,
-    backgroundColor: '#3B82F6',
-    borderRadius: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  btnPrimaryText: {
-    color: '#FFFFFF',
-    fontSize: 14.5,
-    fontWeight: '700',
-  },
-  btnSecondary: {
-    height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  btnSecondaryText: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '600',
-  },
-
-  /* ── Native Modal Wrappers ── */
-  modalOverlay: {
+  /* ── Sortier-Container ── */
+  sortSlideContainer: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: 9999,
+    zIndex: 10,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5, 7, 12, 0.8)',
-  },
-  sortModalContainer: {
-    width: width * 0.92,
-    maxHeight: '82%',
+  sortInnerCard: {
+    maxHeight: '100%',
     backgroundColor: '#171B26',
     borderRadius: 24,
     borderWidth: 1,
@@ -1021,8 +1058,11 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   listWrapper: {
-    maxHeight: 380,
+    flex: 1,
     marginVertical: 10,
+  },
+  itemContainer: {
+    marginVertical: 4,
   },
   sortCard: {
     flexDirection: 'row',
@@ -1031,14 +1071,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    marginVertical: 4,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   sortCardActive: {
     borderColor: 'rgba(59, 130, 246, 0.6)',
     backgroundColor: '#1E2433',
-    transform: [{ scale: 1.02 }],
   },
   badge: {
     width: 30,
@@ -1083,6 +1121,136 @@ const styles = StyleSheet.create({
   dragHandle: {
     padding: 6,
   },
+
+  /* ── Aufklappbare PDF-Vorschau unter der Card ── */
+  inlinePdfDropdown: {
+    backgroundColor: '#0F131C',
+    borderRadius: 14,
+    marginTop: 6,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.35)',
+    overflow: 'hidden',
+  },
+  inlinePdfHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#171B26',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  inlinePdfTitle: {
+    color: '#60A5FA',
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+  },
+  inlineHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  inlinePdfExpandBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inlinePdfCloseBtn: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inlinePdfBody: {
+    height: 320,
+    width: '100%',
+    backgroundColor: '#0F1117',
+    position: 'relative',
+  },
+  pdfTouchOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  tapBadgeHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(15, 17, 23, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  tapBadgeHintText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  pdf: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+  },
+
+  /* ── Fullscreen PDF Modal ── */
+  fullModalContainer: {
+    flex: 1,
+    backgroundColor: '#0F1117',
+  },
+  fullModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#171B26',
+  },
+  fullModalTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  fullModalSubtitle: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  fullModalCloseBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  fullModalPdfWrapper: {
+    flex: 1,
+    backgroundColor: '#0F1117',
+  },
+  fullModalPdf: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#0F1117',
+  },
+
   modalDoneBtn: {
     width: '100%',
     height: 46,
@@ -1098,35 +1266,95 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  /* ── PDF Preview Modal Container ── */
-  pdfModalContainer: {
-    width: width * 0.94,
-    height: height * 0.88,
-    backgroundColor: '#171B26',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    overflow: 'hidden',
-    padding: 14,
+  /* ── Staging Modus ── */
+  stagedContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 4,
   },
-  pdfHeaderTitleWrap: {
+  stagedCard: {
+    backgroundColor: '#171B26',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    flex: 1,
+    marginBottom: 14,
+  },
+  stagedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  stagedHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  stagedTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  cancelText: {
+    color: '#EF4444',
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+  stagedList: {
+    marginTop: 8,
+  },
+  stagedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  stagedFileName: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 13,
     flex: 1,
   },
-  pdfWrapper: {
-    flex: 1,
-    marginTop: 10,
+  stagedActionGroup: {
+    gap: 10,
+  },
+  btnPrimary: {
+    height: 50,
+    backgroundColor: '#3B82F6',
     borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: '#0F1117',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  pdf: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
+  btnPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 14.5,
+    fontWeight: '700',
+  },
+  btnSecondary: {
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnSecondaryText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '600',
   },
 });
 

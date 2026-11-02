@@ -146,7 +146,6 @@ const Name = () => {
         return;
       }
       lastTimeClick.current = now;
-     await EncryptedStorage.setItem('result', 'changeOld');
     if (yourName && yourCity && yourStreet) {
       await EncryptedStorage.setItem("yourName", yourName);
       await EncryptedStorage.setItem("yourCity", yourCity);

@@ -7,34 +7,42 @@ import { sha512 } from 'js-sha512';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Clipboard from 'expo-clipboard';
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
   Platform,
+  Animated,
+  Easing,
   Pressable,
+  AppState,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   UIManager,
+  Keyboard,
   View,
+  LayoutAnimation, // <-- HIER HINZUFÜGEN
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import DocPicker, {EMAIL_SERVERS_SHORT} from '../../comp/documentPicker.js';
 import DropDownPicker from 'react-native-dropdown-picker';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
-import {scanCv} from '../../inc/cvScan.js';
+import { scanCv } from '../../inc/cvScan.js';
 import colors from '../../inc/colors.js';
 import { decryp, encryp } from '../../inc/cryp.js';
 import { runQuery } from '../../inc/db.js';
 import '../../local/i18n.js';
 import { enc } from 'react-native-crypto-js';
 import Info from '../../comp/info.js';
+
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -43,6 +51,24 @@ if (
 }
 
 const { height, width } = Dimensions.get('window');
+
+/* ══════════════════════════════════════════════════════════
+   EINE Geometrie-Quelle für Menü + alle "exact"-Modals
+   (Modal 1 Persönliche Daten, Modal 2 E-Mail, Modal 3 Sprache)
+   SCREEN_PADDING_H muss zu styles.scrollContent.paddingHorizontal passen
+   CONTENT_TOP_PAD  muss zu styles.scrollContent.paddingTop passen
+   (nur Fallback-Werte, echte Werte kommen aus measureInWindow)
+══════════════════════════════════════════════════════════ */
+const SCREEN_PADDING_H = 20;
+const CONTENT_TOP_PAD = 16;
+const CONTENT_W = width - SCREEN_PADDING_H * 2;
+const MENU_OUT_X = -width; // Menü komplett aus dem Screen
+const MENU_ANIM_MS = 380;  // gemeinsame Dauer für Menü + Modal
+const APP_BG = colors.background || '#0F1117';
+const MENU_SURFACE = '#16181E'; // = APP_BG + 3 % Weiß
+
+/* Menü-Rahmen (cardGroup) – für identische Optik im Modal */
+const MENU_BORDER = 'rgba(255, 255, 255, 0.08)';
 
 const adUnitId = __DEV__
   ? TestIds.REWARDED
@@ -56,6 +82,7 @@ const rewarded = RewardedAd.createForAdRequest(adUnitId, {
 const itemsLang = [
   { label: 'Deutsch', value: 'de', flag: '🇩🇪' },
   { label: 'English', value: 'en', flag: '🇬🇧' },
+  { label: 'Ελληνικά', value: 'el', flag: '🇬🇷' },
   { label: 'Türkçe', value: 'tr', flag: '🇹🇷' },
   { label: 'العربية', value: 'ar', flag: '🇸🇦' },
   { label: 'Français', value: 'fr', flag: '🇫🇷' },
@@ -66,26 +93,18 @@ const itemsLang = [
   { label: 'Română', value: 'ro', flag: '🇷🇴' },
   { label: 'Русский', value: 'ru', flag: '🇷🇺' },
   { label: 'Українська', value: 'uk', flag: '🇺🇦' },
-  { label: 'Bosanski / Hrvatski / Srpski', value: 'bks', flag: '🇭🇷'}, 
+  { label: 'Bosanski / Hrvatski / Srpski', value: 'bks', flag: '🇭🇷' },
   { label: 'فارسی / دری', value: 'fa', flag: '🇮🇷' },
-  { label: 'Ελληνικά', value: 'el', flag: '🇬🇷' },
-  { label: '日本語', value: 'ja', flag: '🇯🇵' },
-];
-
-const emailServers = [
-  { label: 'mail.de (smtp.mail.de)', value: 'smtp.mail.de' },
-  { label: 'web.de (smtp.web.de)', value: 'Smtp.web.de' },
-  { label: 't-online.de (securesmtp.t-online.de)', value: 'Securesmtp.t-online.de' },
-  { label: 'gmail.com (smtp.gmail.com)', value: 'Smtp.gmail.com' },
+  { label: '日本語', value: 'jp', flag: '🇯🇵' },
 ];
 
 /* ── Wiederverwendbare Einstellungs-Kachel ──────────────── */
-const SettingsCard = memo(({onIconPress, title, description, iconName, onPress, badgeText }) => (
+const SettingsCard = memo(({ onIconPress, title, description, iconName, onPress, badgeText }) => (
   <Pressable
     onPress={onPress}
     style={({ pressed }) => [styles.settingsCard, pressed && styles.cardPressed]}
   >
- <TouchableOpacity 
+    <TouchableOpacity
       activeOpacity={0.7}
       onPress={(e) => {
         // Verhindert, dass das äußere Pressable mitauslöst
@@ -94,10 +113,10 @@ const SettingsCard = memo(({onIconPress, title, description, iconName, onPress, 
       }}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
     >
-    <View style={styles.settingsIconWrap}>
-      <MaterialIcons name={iconName} size={22} color="#60A5FA" />
-    </View>
-</TouchableOpacity>
+      <View style={styles.settingsIconWrap}>
+        <MaterialIcons name={iconName} size={22} color="#60A5FA" />
+      </View>
+    </TouchableOpacity>
     <View style={styles.settingsContent}>
       <View style={styles.settingsTitleRow}>
         <Text style={styles.settingsTitle} numberOfLines={1}>
@@ -116,16 +135,69 @@ const SettingsCard = memo(({onIconPress, title, description, iconName, onPress, 
       )}
     </View>
 
-    <MaterialIcons
-      name="chevron-right"
-      size={22}
-      color="rgba(255, 255, 255, 0.3)"
-    />
+    <MaterialIcons name="chevron-right" size={22} color="rgba(255, 255, 255, 0.3)" />
   </Pressable>
 ));
 
 /* ── Memoisiertes Eingabefeld für Modals ────────────────── */
-const ModalInput = memo(({ icon, placeholder, value, onChangeText, secureTextEntry = false }) => (
+/* ── Basis-Eingabefeld (optional mit Suffix rechts) ─────── */
+const ModalInput = memo(
+  ({
+    icon,
+    placeholder,
+    value,
+    onChangeText,
+    secureTextEntry = false,
+    keyboardType = 'default',
+    suffix = null,
+    containerStyle,
+  }) => (
+    <View style={[styles.inputShell, containerStyle]}>
+      <MaterialIcons
+        name={icon}
+        size={20}
+        color="rgba(255,255,255,0.4)"
+        style={styles.inputIcon}
+      />
+
+      <TextInput
+        style={styles.textInputField}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="rgba(255,255,255,0.35)"
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        autoCorrect={false}
+        spellCheck={false}
+        autoComplete="off"
+        textContentType="none"
+        importantForAutofill="no"
+        autoCapitalize="none"
+        smartInsertDelete={false}
+      />
+
+
+      {suffix ? (
+        <>
+          <View style={styles.inputSuffixDivider} />
+          <View style={styles.inputSuffixSlot}>{suffix}</View>
+        </>
+      ) : null}
+
+      {Boolean(value?.length) && (
+        <TouchableOpacity
+          onPress={() => onChangeText('')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.clearBtn}
+        >
+          <MaterialIcons name="cancel" size={18} color="rgba(255,255,255,0.35)" />
+        </TouchableOpacity>
+      )}
+    </View>
+  )
+);
+const ModalInputEmail = memo(({ icon, placeholder, value, onChangeText, secureTextEntry = false }) => (
   <View style={styles.inputContainer}>
     <MaterialIcons name={icon} size={20} color="rgba(255,255,255,0.4)" style={styles.inputIcon} />
     <TextInput
@@ -135,8 +207,17 @@ const ModalInput = memo(({ icon, placeholder, value, onChangeText, secureTextEnt
       placeholder={placeholder}
       placeholderTextColor="rgba(255,255,255,0.35)"
       secureTextEntry={secureTextEntry}
-      autoCorrect={false}
+      
+        autoCorrect={false}
+        spellCheck={false}
+        autoComplete="off"
+        textContentType="none"
+        importantForAutofill="no"
+        autoCapitalize="none"
+        smartInsertDelete={false}
+
     />
+
     {Boolean(value?.length) && (
       <TouchableOpacity
         onPress={() => onChangeText('')}
@@ -147,12 +228,15 @@ const ModalInput = memo(({ icon, placeholder, value, onChangeText, secureTextEnt
     )}
   </View>
 ));
-
 const ProfilScreen = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
-const DB_MAIN_NAME = 'firstNew.db';
-const [textInfo, setTextInfo] = useState('fdfdsfds');
+  const DB_MAIN_NAME = 'firstNew.db';
+  const [textInfo, setTextInfo] = useState('fdfdsfds');
+  const [isScanningCv, setIsScanningCv] = useState(false); // <-- NEU: Zeigt Lade-Status im Modal & Menü
+  const pollTimerRef = useRef(null);                       // <-- NEU: Hält den Polling-Intervall-Timer
+
+  
   /* ── State: Profil & Daten ───────────────────────────── */
   const [myName, setMyName] = useState('');
   const [myStreet, setMyStreet] = useState('');
@@ -161,74 +245,429 @@ const [textInfo, setTextInfo] = useState('fdfdsfds');
   const [password, setPassword] = useState('');
   const [emailServerValue, setEmailServerValue] = useState('smtp.mail.de');
   const [openServerDropdown, setOpenServerDropdown] = useState(false);
-const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [emailText, setEmailText] = useState('');
   /* ── State: Coins & Ads ──────────────────────────────── */
   const [coins, setCoins] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [source, setSource] = useState(false);
   const [adLoadedState, setAdLoadedState] = useState(false);
   const adLoaded = useRef(false);
-  const insets = useSafeAreaInsets(); // <-- Synchroner Inset-Hook ab Render 1
-const dbMainRef = useRef(null);
+  const insets = useSafeAreaInsets();
+  const dbMainRef = useRef(null);
+  const animationMenu = useRef(new Animated.Value(0)).current;
+
   /* ── State: Modals ───────────────────────────────────── */
   const [isModalDataVisible, setModalDataVisible] = useState(false);
   const [isModalEmailVisible, setModalEmailVisible] = useState(false);
   const [isModalLangVisible, setModalLangVisible] = useState(false);
   const [isModalPayVisible, setModalPayVisible] = useState(false);
-const [isModalCvVisible, setModalCvVisible] = useState(false);
-const [experiences, setExperiences] = useState([
-  { 
-    id: '1', 
-    role: 'Anwendungsentwickler', 
-    company: 'Musterfirma GmbH', 
-    period: '02/2024 – Heute',
-    tasks: '• Entwicklung mobiler Komponenten\n• Anbindung der REST-Schnittstellen in Go',
-  },
-]);
-
-const saveExperiences = async () => {
-  // 1. Früher Abbruch, falls die Referenz nicht existiert
-  if (!dbMainRef.current) {
-    console.warn('Datenbankverbindung ist nicht bereit oder geschlossen.');
-    return;
-  }
-
-  try {
-    const key = await EncryptedStorage.getItem('key');
-    const deviceId = await DeviceInfo.getUniqueId();
-    const string = JSON.stringify(experiences);
-    const encString = await encryp(string, key);
-
-    // Nochmalige Prüfung vor dem eigentlichen Ausführen
-    if (!dbMainRef.current) return;
-
-    await dbMainRef.current.executeSql(
-      `UPDATE files SET skills = ? WHERE ident = ?`,
-      [encString, deviceId]
-    );
-
-    console.log('Experiences saved successfully');
-    setModalCvVisible(false);
-  } catch (error) {
-    console.error('Fehler beim Speichern der Erfahrungen:', error);
-  }
-};
-const handleAddExperience = () => {
-  setExperiences((prev) => [
-    ...prev,
-    { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
+  const [isSendExpanded, setIsSendExpanded] = useState(false); // <-- NEU: Zustand für Aufklappen
+  const [isModalCvVisible, setModalCvVisible] = useState(false);
+  const [experiences, setExperiences] = useState([
+    {
+      id: '1',
+      role: 'Anwendungsentwickler',
+      company: 'Musterfirma GmbH',
+      period: '02/2024 – Heute',
+      tasks: '• Entwicklung mobiler Komponenten\n• Anbindung der REST-Schnittstellen in Go',
+    },
   ]);
-};
+/* ── State: Eigene ID & Coins Senden ─────────────────── */
+  const [myUserId, setMyUserId] = useState('');
+  const [copiedId, setCopiedId] = useState(false);
+  const [receiverId, setReceiverId] = useState('');
+  const [sendCoinsAmount, setSendCoinsAmount] = useState('');
+  const [isSendingCoins, setIsSendingCoins] = useState(false);
+const toggleSendExpanded = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsSendExpanded((prev) => !prev);
+  };
+  // Eigene ID einmalig beim Start generieren / laden
+  useEffect(() => {
+    const loadMyId = async () => {
+      try {
+        const deviceId = await DeviceInfo.getUniqueId();
+        const key = sha512(deviceId);
+        setMyUserId(key);
+      } catch (err) {
+        console.error('Fehler beim Laden der ID:', err);
+      }
+    };
+    loadMyId();
+  }, []);
 
-const handleUpdateExperience = (id, field, value) => {
-  setExperiences((prev) =>
-    prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+  // Eigene ID in die Zwischenablage kopieren
+  const handleCopyId = () => {
+    if (!myUserId) return;
+    try {
+      Clipboard.setString(myUserId);
+      // Falls expo-clipboard: Clipboard.setStringAsync(myUserId);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    } catch (err) {
+      console.error('Kopieren fehlgeschlagen:', err);
+    }
+  };
+
+  // Coins an anderen Nutzer übermitteln
+  const handleSendCoins = async () => {
+    Keyboard.dismiss();
+    const cleanReceiver = receiverId.trim();
+    const amountNum = parseInt(sendCoinsAmount, 10);
+
+    if (!cleanReceiver) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib die Empfänger-ID ein.');
+      return;
+    }
+
+    if (cleanReceiver === myUserId) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Du kannst dir nicht selbst Coins senden.');
+      return;
+    }
+
+    if (isNaN(amountNum) || amountNum <= 0) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib eine gültige Anzahl an Coins ein.');
+      return;
+    }
+
+    const currentCoins = Number(coins) || 0;
+    if (amountNum > currentCoins) {
+      Alert.alert(t('profil.error') || 'Fehler', `Du hast nur ${currentCoins} Coins zur Verfügung.`);
+      return;
+    }
+
+    setIsSendingCoins(true);
+    try {
+      // Go-Backend Endpoint anpassen falls nötig (z.B. /sendCoins oder /transferCoins)
+      const res = await axios.post('https://api.jobapp2.de/sendCoins', {
+        senderKey: myUserId,
+        receiverKey: cleanReceiver,
+        coins: amountNum,
+      });
+
+      if (res.data?.success || res.status === 200) {
+        setCoins((prev) => Math.max(0, (Number(prev) || 0) - amountNum));
+        setReceiverId('');
+        setSendCoinsAmount('');
+        Alert.alert(t('profil.title') || 'Erfolg', `${amountNum} Coins wurden erfolgreich übertragen.`);
+      } else {
+        Alert.alert(t('profil.error') || 'Fehler', res.data?.message || 'Übertragung fehlgeschlagen.');
+      }
+    } catch (err) {
+      console.error('Fehler beim Senden der Coins:', err);
+      Alert.alert(
+        t('profil.error') || 'Fehler',
+        err?.response?.data?.error || 'Netzwerkfehler beim Übertragen der Coins.'
+      );
+    } finally {
+      setIsSendingCoins(false);
+    }
+  };
+  /* ══════════════════════════════════════════════════════
+     Geometrie des Menüs = Geometrie der "exact"-Modals
+     (1: Persönliche Daten · 2: E-Mail · 3: Sprache)
+  ══════════════════════════════════════════════════════ */
+  const menuRef = useRef(null);
+  const [menuBox, setMenuBox] = useState({
+    x: SCREEN_PADDING_H,
+    y: insets.top + CONTENT_TOP_PAD,
+    w: CONTENT_W,
+    h: 0,
+  });
+
+  /* Menü-Rechteck in Fenster-Koordinaten messen.
+     WICHTIG: nur messen, solange translateX === 0 ist. */
+  const syncMenuBox = useCallback(() => {
+    menuRef.current?.measureInWindow?.((x, y, w, h) => {
+      if (!w || !h) return;
+      setMenuBox((prev) =>
+        Math.abs(prev.x - x) < 0.5 &&
+        Math.abs(prev.y - y) < 0.5 &&
+        Math.abs(prev.w - w) < 0.5 &&
+        Math.abs(prev.h - h) < 0.5
+          ? prev
+          : { x, y, w, h }
+      );
+    });
+  }, []);
+
+  const animateMenuTo = useCallback(
+    (toValue) => {
+      Animated.timing(animationMenu, {
+        toValue,
+        duration: MENU_ANIM_MS,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    },
+    [animationMenu]
   );
-};
 
-const handleDeleteExperience = (id) => {
-  setExperiences((prev) => prev.filter((item) => item.id !== id));
-};
+  /* Generisch: Menü fährt links raus, Sheet fährt von rechts ins GLEICHE Rechteck */
+  const openExactModal = useCallback(
+    (setVisible) => {
+      syncMenuBox();            // frische Maße, solange Menü noch bei 0 steht
+      setVisible(true);
+      animateMenuTo(MENU_OUT_X);
+    },
+    [animateMenuTo, syncMenuBox]
+  );
+
+  /* Generisch: Sheet fährt rechts raus, Menü kommt zurück */
+  const closeExactModal = useCallback(
+    (setVisible) => {
+      Keyboard.dismiss();
+
+      setVisible(false);
+      animateMenuTo(0);
+    },
+    [animateMenuTo]
+  );
+
+  /* Benannte Wrapper – ALLE Schließ-Pfade müssen hierüber laufen */
+  const openDataModal = useCallback(
+    () => openExactModal(setModalDataVisible),
+    [openExactModal]
+  );
+  const closeDataModal = useCallback(
+    () => closeExactModal(setModalDataVisible),
+    [closeExactModal]
+  );
+
+  const openEmailModal = useCallback(
+    () => openExactModal(setModalEmailVisible),
+    [openExactModal]
+  );
+  const closeEmailModal = useCallback(
+    () => closeExactModal(setModalEmailVisible),
+    [closeExactModal]
+  );
+
+  const openLangModal = useCallback(
+    () => openExactModal(setModalLangVisible),
+    [openExactModal]
+  );
+  const closeLangModal = useCallback(
+    () => closeExactModal(setModalLangVisible),
+    [closeExactModal]
+  );
+
+  /* Messen nach Mount (Layout steht) + Reset beim Verlassen */
+  useEffect(() => {
+    const id = setTimeout(syncMenuBox, 0);
+    return () => clearTimeout(id);
+  }, [syncMenuBox]);
+
+  useFocusEffect(
+    useCallback(() => {
+      syncMenuBox();
+      return () => {
+        animationMenu.setValue(0);
+      };
+    }, [animationMenu, syncMenuBox])
+  );
+
+  const saveExperiences = async () => {
+    if (!dbMainRef.current) {
+      console.warn('Datenbankverbindung ist nicht bereit oder geschlossen.');
+      return;
+    }
+
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      const string = JSON.stringify(experiences);
+      const encString = await encryp(string, key);
+
+      if (!dbMainRef.current) return;
+
+      await dbMainRef.current.executeSql(
+        `UPDATE files SET skills = ? WHERE ident = ?`,
+        [encString, deviceId]
+      );
+
+      console.log('Experiences saved successfully');
+      setModalCvVisible(false);
+    } catch (error) {
+      console.error('Fehler beim Speichern der Erfahrungen:', error);
+    }
+  };
+
+  /* ── Hilfsfunktion: Neue CV-Stationen direkt in SQLite + State sichern ── */
+  const appendAndSaveExperiencesToDb = useCallback(async (workExperience) => {
+    const newExperiences = (workExperience || [])
+      .filter((exp) => exp.company)
+      .map((exp) => ({
+        id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+        company: exp.company,
+        role: exp.position,
+        period: exp.period,
+        tasks: Array.isArray(exp.tasks) ? exp.tasks.join('\n') : (exp.tasks || ''),
+      }));
+
+    if (newExperiences.length === 0) return 0;
+
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db =
+        dbMainRef.current ||
+        (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+
+      // Aktuellen Stand aus der DB lesen, damit nichts überschrieben wird
+      let existingList = [];
+      const [results] = await db.executeSql(
+        'SELECT skills FROM files WHERE ident = ?',
+        [deviceId]
+      );
+      const rows = results?.rows?.raw?.() || [];
+      if (rows[0]?.skills && key) {
+        try {
+          const dec = await decryp(rows[0].skills, key);
+          if (dec && dec.trim().length > 0) {
+            existingList = JSON.parse(dec);
+          }
+        } catch (e) {
+          console.warn('Konnte bestehende Skills nicht entschlüsseln:', e);
+        }
+      }
+
+      const merged = [...existingList, ...newExperiences];
+      setExperiences(merged);
+
+      if (key && deviceId) {
+        const encString = await encryp(JSON.stringify(merged), key);
+        await db.executeSql(
+          'UPDATE files SET skills = ? WHERE ident = ?',
+          [encString, deviceId]
+        );
+      }
+    } catch (err) {
+      console.error('Fehler beim Speichern des Hintergrund-Scans in SQLite:', err);
+    }
+
+    return newExperiences.length;
+  }, []);
+
+  /* ── Pollt den Go-Endpoint /scan-cv-status?jobId=... ── */
+  const pollCvStatus = useCallback(
+    async (jobId) => {
+      if (!jobId) return;
+          const pending = await EncryptedStorage.getItem('pending_cv_job_id');
+
+      try {
+        const res = await axios.get(
+          `https://api.jobapp2.de/scan-cv-status?jobId=${encodeURIComponent(jobId)}`
+        );
+        const { status, data, error } = res.data || {};
+
+        if (status === 'done') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+
+          const addedCount = await appendAndSaveExperiencesToDb(data?.work_experience);
+          Alert.alert(
+            t('profil.title'),
+            `Lebenslauf erfolgreich analysiert (${addedCount} Stationen hinzugefügt).`
+          );
+        } else if (status === 'error' || status === 'not_found') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+          Alert.alert(t('profil.error'), error || 'Scan fehlgeschlagen.');
+        }
+        // Bei status === 'processing' (oder 'praocessing') läuft das Intervall einfach weiter
+      } catch (err) {
+        // 404 vom Backend -> Job abgelaufen oder existiert nicht mehr
+        if (err?.response?.status === 404) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+        }
+        console.log('Warte auf Hintergrund-Scan...', err?.message);
+      }
+    },
+    [appendAndSaveExperiencesToDb, t]
+  );
+
+  /* ── Startet oder nimmt das Polling für eine gespeicherte jobId wieder auf ── */
+  const resumePollingIfNeeded = useCallback(async () => {
+    const savedJobId = await EncryptedStorage.getItem('pending_cv_job_id');
+    if (!savedJobId) return;
+
+    setIsScanningCv(true);
+    // Sofort einmal prüfen (wichtig wenn der User aus dem Hintergrund zurückkommt!)
+    await pollCvStatus(savedJobId);
+
+    // Falls noch nicht fertig, alle 3 Sekunden weiterfragen
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    pollTimerRef.current = setInterval(() => {
+      pollCvStatus(savedJobId);
+    }, 3000);
+  }, [pollCvStatus]);
+
+  /* ── AppState Listener: Prüft sofort den Status, wenn die App wieder geöffnet wird ── */
+  useEffect(() => {
+    resumePollingIfNeeded();
+
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        resumePollingIfNeeded();
+      }
+    });
+
+    return () => {
+      sub.remove();
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, [resumePollingIfNeeded]);
+
+  /* ── Neuer handleScan: Startet Upload, speichert jobId und pollt im Hintergrund ── */
+  const handleScan = async () => {
+    if (isScanningCv) return;
+
+    try {
+      const response = await scanCv();
+      if (!response) return; // User hat DocumentPicker abgebrochen
+
+      // Fall A: Dein neuer Go-Server liefert { status: "processing", jobId: "..." }
+      if (response.jobId) {
+        setIsScanningCv(true);
+        await EncryptedStorage.setItem('pending_cv_job_id', response.jobId);
+        await resumePollingIfNeeded();
+        return;
+      }
+
+      // Fall B: Fallback, falls direkt work_experience zurückkam
+      if (response.work_experience) {
+        await appendAndSaveExperiencesToDb(response.work_experience);
+      }
+    } catch (error) {
+      console.error('Failed to start CV scan:', error);
+      setIsScanningCv(false);
+    }
+  };
+  const handleAddExperience = () => {
+    setExperiences((prev) => [
+      ...prev,
+      { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
+    ]);
+  };
+
+  const handleUpdateExperience = (id, field, value) => {
+    setExperiences((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleDeleteExperience = (id) => {
+    setExperiences((prev) => prev.filter((item) => item.id !== id));
+  };
 
   /* ── In-App Purchases (IAP) ──────────────────────────── */
   const { requestPurchase, finishTransaction } = useIAP({
@@ -275,21 +714,24 @@ const handleDeleteExperience = (id) => {
       setLoaded(false);
     }
   };
-useEffect(() => {
-  const initDB = async () => {
-    try {
-      dbMainRef.current = await SQLite.openDatabase({ 
-        name: DB_MAIN_NAME, 
-        location: 'default' 
-      });
-      console.log('Datenbank erfolgreich geöffnet');
-    } catch (error) {
-      console.error('Fehler beim Öffnen der DB:', error);
-    }
-  };
 
-  initDB(); // <-- Funktion MUSS aufgerufen werden!
-}, []); // Leeres Array, damit es einmal beim Laden ausgeführt wird
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        dbMainRef.current = await SQLite.openDatabase({
+          name: DB_MAIN_NAME,
+          location: 'default',
+        });
+        console.log('Datenbank erfolgreich geöffnet');
+      } catch (error) {
+        console.error('Fehler beim Öffnen der DB:', error);
+      }
+    };
+
+    initDB();
+  }, []);
+// ── Test: Lebenslauf direkt mit OvisOCR3 analysieren ──
+
   /* ── Rewarded Ads ────────────────────────────────────── */
   useEffect(() => {
     const putCoins = async (amount) => {
@@ -300,7 +742,7 @@ useEffect(() => {
           username: key,
           coins: amount,
         });
-        
+
         setCoins((prev) => (Number(prev) || 0) + amount);
       } catch (error) {
         console.error('Fehler beim Gutschreiben der Coins:', error);
@@ -361,44 +803,43 @@ useEffect(() => {
       fetchCoins();
     }, [])
   );
-useEffect(() => {
-  let isMounted = true;
 
-  const loadFileData = async () => {
-    // Sicherstellen, dass DB-Referenz und deviceId existieren
-    const key = await EncryptedStorage.getItem('key');
-    const deviceId = await DeviceInfo.getUniqueId();
-    if (!dbMainRef.current || !deviceId) return;
+  useEffect(() => {
+    let isMounted = true;
 
-    try {
-      // executeSql liefert ein Array mit [results] zurück
-      const [results] = await dbMainRef.current.executeSql(
-        'SELECT skills FROM files WHERE ident = ?',
-        [deviceId]
-      );
+    const loadFileData = async () => {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      if (!dbMainRef.current || !deviceId) return;
 
-      // In react-native-sqlite-storage: results.rows.raw() liefert das echte JS-Array
-      const data = results?.rows?.raw() || [];
+      try {
+        const [results] = await dbMainRef.current.executeSql(
+          'SELECT skills FROM files WHERE ident = ?',
+          [deviceId]
+        );
 
-      if (isMounted) {
-        console.log('Geladene Daten:', data);
-        const decSkills = await decryp(data[0]?.skills, key);
-        console.log('Entschlüsselte Daten:', decSkills);
-        const jsonSkills = JSON.parse(decSkills);
-        setExperiences(jsonSkills);
-        // setMyDataState(data);
+        const data = results?.rows?.raw() || [];
+
+        if (isMounted) {
+          console.log('Geladene Daten:', data);
+          const decSkills = await decryp(data[0]?.skills, key);
+          console.log('Entschlüsselte Daten:', decSkills);
+          if (!decSkills || decSkills.trim().length === 0) return;
+          const jsonSkills = JSON.parse(decSkills);
+          setExperiences(jsonSkills);
+        }
+      } catch (err) {
+        console.error('SQL Fehler:', err);
       }
-    } catch (err) {
-      console.error('SQL Fehler:', err);
-    }
-  };
+    };
 
-  loadFileData();
+    loadFileData();
 
-  return () => {
-    isMounted = false; // Verhindert State-Updates nach Unmount
-  };
-}, [dbMainRef.current]); // Feuert nur, wenn deviceId oder DB bereit sind
+    return () => {
+      isMounted = false;
+    };
+  }, [dbMainRef.current]);
+
   /* ── Daten initial aus DB / Storage synchronisieren ──── */
   const loadLocalData = async () => {
     try {
@@ -439,7 +880,8 @@ useEffect(() => {
         if (decName) setMyName(decName);
         if (decStreet) setMyStreet(decStreet);
         if (decCity) setMyCity(decCity);
-        if (decEmail) setEmail(decEmail);
+        if (decEmail) setEmailText(decEmail);
+        if (decEmail) setEmail(decEmail.split('@')[0]);
         if (decPassword) setPassword(decPassword);
         if (decServer) setEmailServerValue(decServer);
       } else {
@@ -467,10 +909,11 @@ useEffect(() => {
   useEffect(() => {
     loadLocalData();
   }, []);
-useEffect(() => {
-  console.log("experience",experiences);
 
-}, [experiences])
+  useEffect(() => {
+    console.log('experience', experiences);
+  }, [experiences]);
+
   /* ── Speichern: Persönliche Daten ────────────────────── */
   const handleSavePersonalData = async () => {
     try {
@@ -504,7 +947,7 @@ useEffect(() => {
       );
 
       Alert.alert(t('profil.title'), t('profil.infoData'), [
-        { text: 'OK', onPress: () => setModalDataVisible(false) },
+        { text: 'OK', onPress: closeDataModal }, // <-- Menü kommt zurück
       ]);
     } catch (error) {
       console.error('Fehler beim Speichern der Stammdaten:', error);
@@ -514,18 +957,30 @@ useEffect(() => {
 
   /* ── Speichern: E-Mail Konfiguration ─────────────────── */
   const handleSaveEmailConfig = async () => {
+
     try {
       if (!emailServerValue || !email?.trim() || !password?.trim()) {
         Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
         return;
       }
+   let newEmail, newProvider
+   for (let i = 0; i < EMAIL_SERVERS_SHORT.length; i++) {
+    if (EMAIL_SERVERS_SHORT[i].value === emailServerValue) {
+      newEmail = EMAIL_SERVERS_SHORT[i].value
+      newProvider = EMAIL_SERVERS_SHORT[i].label
+    }
+    
+  }
 
       const deviceId = await DeviceInfo.getUniqueId();
       const key = await EncryptedStorage.getItem('key');
 
-      const trimmedEmail = email.trim();
       const trimmedPw = password.trim();
-
+      console.log("emaidsal", newEmail);
+      console.log("email", email);
+      console.log("trimmedEmail", newProvider);
+      const trimmedEmail = email.trim() + newProvider;
+      console.log("trimmedEmail", trimmedEmail);
       await EncryptedStorage.setItem('email', trimmedEmail);
       await EncryptedStorage.setItem('emailPassword', trimmedPw);
       await EncryptedStorage.setItem('emailServer', emailServerValue);
@@ -544,7 +999,7 @@ useEffect(() => {
       );
 
       Alert.alert(t('profil.title'), t('profil.infoEmail'), [
-        { text: 'OK', onPress: () => setModalEmailVisible(false) },
+        { text: 'OK', onPress: closeEmailModal },
       ]);
     } catch (error) {
       console.error('Fehler beim Speichern der Maildaten:', error);
@@ -557,70 +1012,46 @@ useEffect(() => {
     try {
       await i18n.changeLanguage(langCode);
       await EncryptedStorage.setItem('lang', langCode);
-      setModalLangVisible(false);
+      closeLangModal(); // <-- Menü kommt zurück
     } catch (err) {
       console.error('Sprachwechsel fehlgeschlagen:', err);
     }
   };
 
- const handleScan = async () => {
-  try {
-    const text = await scanCv();
-    console.log('Scanned text:', text);
 
-    const workExperience = text?.work_experience || [];
 
-    // Map all experiences into a single list of objects
-    const newExperiences = workExperience
-      .filter((exp) => exp.company)
-      .map((exp) => ({
-         id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-        company: exp.company,
-        role: exp.position,
-        period: exp.period,
-        // If tasks is an array of strings, join them; otherwise keep as-is or fallback to empty string
-        tasks: Array.isArray(exp.tasks) ? exp.tasks.join('\n') : (exp.tasks || ''),
-      }));
-
-    // Perform a single state update
-    setExperiences((prev) => [...prev, ...newExperiences]);
-  } catch (error) {
-    console.error('Failed to scan CV:', error);
-  }
-};
   const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
-const handleInfo = (val) => {
-  switch (val) {
-    case 'lang':
-     setInfoModalVisible(true);
-     setTextInfo(t("info.language"));
-      break;
-    case 'email':
-      setInfoModalVisible(true);
-      setTextInfo(t("info.email"));
-      break;
+
+  const handleInfo = (val) => {
+    switch (val) {
+      case 'lang':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.language'));
+        break;
+      case 'email':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.email'));
+        break;
       case 'personal':
-      setInfoModalVisible(true);
-      setTextInfo(t("info.personal"));
-      break;
-      case'experience':
-      setInfoModalVisible(true);
-      setTextInfo(t("info.experience"));
-      break;
+        setInfoModalVisible(true);
+        setTextInfo(t('info.personal'));
+        break;
+      case 'experience':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.experience'));
+        break;
       case 'coins':
-      setInfoModalVisible(true);
-      setTextInfo(t("info.coins"));
-      break;
-    default:
-      break;
-  }
-}
-return (
-<View style={[styles.container, { paddingTop: insets.top }]}>
-        <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        setInfoModalVisible(true);
+        setTextInfo(t('info.coins'));
+        break;
+      default:
+        break;
+    }
+  };
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* ── Profil-Header Card ── */}
         <View style={styles.profileHeaderCard}>
           <View style={styles.profileInfoRow}>
@@ -641,22 +1072,23 @@ return (
             onPress={() => setModalPayVisible(true)}
             style={styles.coinBadge}
           >
-              <View style={styles.coinIconCircle}>
+            <View style={styles.coinIconCircle}>
               <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
             </View>
-           
+
             <Text style={styles.coinText}>
-              {coins !== null 
-                ? `${coins} `
-                : t('profil.coinsCountLoading')}
+              {coins !== null ? `${coins} ` : t('profil.coinsCountLoading')}
             </Text>
-          
           </TouchableOpacity>
         </View>
 
-        {/* ── Settings Liste ── */}
-        <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>{t('profil.sectionSettings')}</Text>
+        {/* ── Settings Liste (wird gemessen – Quelle der Modal-Geometrie) ── */}
+        <Animated.View
+          ref={menuRef}
+          collapsable={false}
+          onLayout={syncMenuBox}
+          style={[styles.sectionWrap, { transform: [{ translateX: animationMenu }] }]}
+        >
 
           <View style={styles.cardGroup}>
             <SettingsCard
@@ -666,7 +1098,7 @@ return (
               description={myName ? `${myStreet}, ${myCity}` : t('profil.defaultAddressDesc')}
               onPress={() => {
                 loadLocalData();
-                setModalDataVisible(true);
+                openDataModal();
               }}
             />
 
@@ -676,11 +1108,8 @@ return (
               onIconPress={() => handleInfo('email')}
               iconName="alternate-email"
               title={t('configureEmail')}
-              description={email ? email : t('profil.defaultEmailDesc')}
-              onPress={() => {
-                loadLocalData();
-                setModalEmailVisible(true);
-              }}
+              description={emailText ? emailText  : t('profil.defaultEmailDesc')}
+              onPress={openEmailModal}
             />
 
             <View style={styles.divider} />
@@ -691,24 +1120,28 @@ return (
               title={t('settings.languageChange')}
               description={currentLangObj?.label || 'Deutsch'}
               badgeText={`${currentLangObj?.flag || '🇩🇪'} ${currentLangObj?.value?.toUpperCase()}`}
-              onPress={() => setModalLangVisible(true)}
+              onPress={openLangModal}
             />
 
             <View style={styles.divider} />
 
-            <SettingsCard
+        <SettingsCard
               onIconPress={() => handleInfo('experience')}
               iconName="work-outline"
               title={t('profil.experienceTitle')}
-              description={t('profil.experienceDesc', { count: experiences.length })}
+              description={
+                isScanningCv
+                  ? 'Wird im Hintergrund ausgewertet…'
+                  : t('profil.experienceDesc', { count: experiences.length })
+              }
+              badgeText={isScanningCv ? 'SCAN…' : undefined}
               onPress={() => setModalCvVisible(true)}
             />
           </View>
-        </View>
+        </Animated.View>
 
         {/* ── Coin Shop Banner ── */}
         <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>{t('profil.sectionTopUp')}</Text>
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => setModalPayVisible(true)}
@@ -717,59 +1150,70 @@ return (
             <View style={styles.shopBannerGlow} />
             <View style={styles.shopBannerContent}>
               <View style={styles.shopIconContainer}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => handleInfo('coins')}
-                >
+                <TouchableOpacity activeOpacity={0.7} onPress={() => handleInfo('coins')}>
                   <MaterialIcons name="stars" size={24} color="#F59E0B" />
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <Text style={styles.shopBannerTitle}>{t('profil.coinsVerwalten')}</Text>
-                <Text style={styles.shopBannerSubtitle}>
-                  {t('profil.coinsText')}
-                </Text>
+                <Text style={styles.shopBannerSubtitle}>{t('profil.coinsText')}</Text>
               </View>
               <MaterialIcons name="arrow-forward-ios" size={14} color="rgba(255,255,255,0.4)" />
             </View>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
 
       {/* ═══════════════════════════════════════════════════════════════
           MODAL 1: Persönliche Daten
+          → gleiche Fläche wie das Menü (x / y / w / h aus menuBox)
+          → Menü fährt links raus, Sheet fährt von rechts rein
       ═══════════════════════════════════════════════════════════════ */}
       <Modal
         isVisible={isModalDataVisible}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={260}
-        animationOutTiming={400}
-        backdropTransitionInTiming={260}
-        backdropTransitionOutTiming={400}
-        backdropOpacity={0.75}
+        animationIn="slideInRight"
+        animationOut="slideOutRight"
+        animationInTiming={MENU_ANIM_MS}
+        animationOutTiming={MENU_ANIM_MS}
+        backdropTransitionInTiming={200}
+        backdropTransitionOutTiming={MENU_ANIM_MS}
+        backdropOpacity={0}
         hideModalContentWhileAnimating={true}
         useNativeDriver={true}
         useNativeDriverForBackdrop={true}
-        onBackdropPress={() => setModalDataVisible(false)}
-        onBackButtonPress={() => setModalDataVisible(false)}
-        style={styles.modalBackdrop}
+        statusBarTranslucent={true}
+        onBackdropPress={closeDataModal}
+        onBackButtonPress={closeDataModal}
+        onModalHide={() => animateMenuTo(0)}
+        style={styles.modalBackdropExact}
       >
-        <View style={styles.modalSheet}>
+        <View
+          style={[
+            styles.modalSheetFrame,
+            menuBox.h > 0 && { height: menuBox.h },
+            {
+              marginLeft: menuBox.x,
+              marginTop: menuBox.y,
+              width: menuBox.w,
+            },
+          ]}
+        >
           <View style={styles.modalHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.modalTitle}>{t('personalData')}</Text>
               <Text style={styles.modalSubtitle}>{t('profil.modalDataSubtitle')}</Text>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalDataVisible(false)}
-              style={styles.modalCloseBtn}
-            >
+            <TouchableOpacity onPress={closeDataModal} style={styles.modalCloseBtn}>
               <MaterialIcons name="close" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.modalBody}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingVertical: 14, gap: 12 }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
             <ModalInput
               icon="person"
               placeholder={t('placeholderName')}
@@ -788,10 +1232,10 @@ return (
               value={myCity}
               onChangeText={setMyCity}
             />
-          </View>
+          </ScrollView>
 
           <TouchableOpacity
-            style={styles.primaryButton}
+            style={[styles.primaryButton, { marginTop: 8 }]}
             onPress={handleSavePersonalData}
             activeOpacity={0.8}
           >
@@ -802,43 +1246,81 @@ return (
 
       {/* ═══════════════════════════════════════════════════════════════
           MODAL 2: E-Mail Konfiguration
+          → exakt gleiche Fläche wie das Menü (x / y / w / h aus menuBox)
+          → fährt von rechts rein, während das Menü links rausfährt
       ═══════════════════════════════════════════════════════════════ */}
-      <Modal
+     <Modal
         isVisible={isModalEmailVisible}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={260}
-        animationOutTiming={400}
-        backdropTransitionInTiming={260}
-        backdropTransitionOutTiming={400}
-        backdropOpacity={0.75}
+        animationIn="slideInRight"
+        animationOut="slideOutRight"
+        animationInTiming={MENU_ANIM_MS}
+        animationOutTiming={MENU_ANIM_MS}
+        backdropTransitionInTiming={200}
+        backdropTransitionOutTiming={MENU_ANIM_MS}
+        backdropOpacity={0}
         hideModalContentWhileAnimating={true}
         useNativeDriver={true}
         useNativeDriverForBackdrop={true}
-        onBackdropPress={() => setModalEmailVisible(false)}
-        onBackButtonPress={() => setModalEmailVisible(false)}
-        style={styles.modalBackdrop}
+        statusBarTranslucent={true}
+        onBackdropPress={() => {
+          setOpenServerDropdown(false);
+          closeEmailModal();
+        }}
+        onBackButtonPress={() => {
+          setOpenServerDropdown(false);
+          closeEmailModal();
+        }}
+        onModalHide={() => {
+          setOpenServerDropdown(false);
+          animateMenuTo(0);
+        }}
+        style={styles.modalBackdropExact}
       >
-        <View style={styles.modalSheet}>
+        <View
+          style={[
+            styles.modalSheetFrame,
+            menuBox.h > 0 && { height: menuBox.h },
+            {
+              marginLeft: menuBox.x,
+              marginTop: menuBox.y,
+              width: menuBox.w,
+            },
+          ]}
+        >
           <View style={styles.modalHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.modalTitle}>{t('profil.modalEmailTitle')}</Text>
               <Text style={styles.modalSubtitle}>{t('profil.modalEmailSubtitle')}</Text>
             </View>
             <TouchableOpacity
-              onPress={() => setModalEmailVisible(false)}
+              onPress={() => {
+                setOpenServerDropdown(false);
+                closeEmailModal();
+              }}
               style={styles.modalCloseBtn}
             >
               <MaterialIcons name="close" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.modalBody}>
+          <View
+            style={{ flex: 1, overflow: 'visible', gap: 12, paddingVertical: 8 }}
+          >
             <ModalInput
               icon="mail"
               placeholder={t('placeholderEmail')}
               value={email}
               onChangeText={setEmail}
+              // Hebt die E-Mail-Zeile in der Z-Achse über das Passwort-Feld darunter
+              containerStyle={{ zIndex: openServerDropdown ? 5000 : 10, elevation: openServerDropdown ? 10 : 0 }}
+              suffix={
+                <DocPicker
+                  open={openServerDropdown}
+                  setOpen={setOpenServerDropdown}
+                  value={emailServerValue}
+                  setValue={setEmailServerValue}
+                />
+              }
             />
 
             <ModalInput
@@ -847,70 +1329,65 @@ return (
               value={password}
               onChangeText={setPassword}
               secureTextEntry={true}
+              containerStyle={{ zIndex: 1 }}
             />
-
-            <View style={{ zIndex: 3000, marginTop: 4 }}>
-              <DropDownPicker
-                open={openServerDropdown}
-                value={emailServerValue}
-                items={emailServers}
-                setOpen={setOpenServerDropdown}
-                setValue={setEmailServerValue}
-                placeholder={t('placeholderEmailServer')}
-                style={styles.dropdown}
-                dropDownContainerStyle={styles.dropdownContainer}
-                textStyle={{ color: '#FFFFFF', fontSize: 14 }}
-                arrowIconStyle={{ tintColor: '#FFFFFF' }}
-              />
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.primaryButton, { marginTop: 16 }]}
+              <TouchableOpacity
+            style={[styles.primaryButton, { marginTop: 8, zIndex: 1 }]}
             onPress={handleSaveEmailConfig}
             activeOpacity={0.8}
           >
             <Text style={styles.primaryButtonText}>{t('saveAndClose')}</Text>
           </TouchableOpacity>
-        </View>
-      </Modal>
+          </View>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          MODAL 3: Sprachauswahl
-      ═══════════════════════════════════════════════════════════════ */}
+        
+        </View></Modal>
+
+     
       <Modal
         isVisible={isModalLangVisible}
-        animationIn="zoomIn"
-        animationOut="zoomOut"
-        animationInTiming={260}
-        animationOutTiming={400}
-        backdropTransitionInTiming={260}
-        backdropTransitionOutTiming={400}
-        backdropOpacity={0.75}
+        animationIn="slideInRight"
+        animationOut="slideOutRight"
+        animationInTiming={MENU_ANIM_MS}
+        animationOutTiming={MENU_ANIM_MS}
+        backdropTransitionInTiming={200}
+        backdropTransitionOutTiming={MENU_ANIM_MS}
+        backdropOpacity={0}
         hideModalContentWhileAnimating={true}
         useNativeDriver={true}
         useNativeDriverForBackdrop={true}
-        onBackdropPress={() => setModalLangVisible(false)}
-        onBackButtonPress={() => setModalLangVisible(false)}
-        style={styles.modalBackdrop}
+        statusBarTranslucent={true}
+        onBackdropPress={closeLangModal}
+        onBackButtonPress={closeLangModal}
+        onModalHide={() => animateMenuTo(0)}
+        style={styles.modalBackdropExact}
       >
-        <View style={[styles.modalSheet, { maxHeight: height * 0.58 }]}>
+        <View
+          style={[
+            styles.modalSheetFrame,
+            menuBox.h > 0 && { height: menuBox.h },
+            {
+              marginLeft: menuBox.x,
+              marginTop: menuBox.y,
+              width: menuBox.w,
+            },
+          ]}
+        >
           <View style={styles.modalHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.modalTitle}>{t('profil.modalLangTitle')}</Text>
               <Text style={styles.modalSubtitle}>{t('profil.modalLangSubtitle')}</Text>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalLangVisible(false)}
-              style={styles.modalCloseBtn}
-            >
+            <TouchableOpacity onPress={closeLangModal} style={styles.modalCloseBtn}>
               <MaterialIcons name="close" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
           <ScrollView
-            style={styles.langList}
+            style={{ flex: 1, marginTop: 12 }}
+            contentContainerStyle={{ paddingBottom: 4 }}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
             {itemsLang.map((item) => {
               const isSelected = i18n.language === item.value;
@@ -940,6 +1417,9 @@ return (
       {/* ═══════════════════════════════════════════════════════════════
           MODAL 4: Coins Shop & Video Belohnung
       ═══════════════════════════════════════════════════════════════ */}
+{/* ═══════════════════════════════════════════════════════════════
+          MODAL 4: Coins Shop, Eigene ID & Coins Senden
+      ═══════════════════════════════════════════════════════════════ */}
       <Modal
         isVisible={isModalPayVisible}
         animationIn="zoomIn"
@@ -952,8 +1432,14 @@ return (
         hideModalContentWhileAnimating={true}
         useNativeDriver={true}
         useNativeDriverForBackdrop={true}
-        onBackdropPress={() => setModalPayVisible(false)}
-        onBackButtonPress={() => setModalPayVisible(false)}
+        onBackdropPress={() => {
+          Keyboard.dismiss();
+          setModalPayVisible(false);
+        }}
+        onBackButtonPress={() => {
+          Keyboard.dismiss();
+          setModalPayVisible(false);
+        }}
         style={styles.modalBackdrop}
       >
         <View style={styles.modalSheet}>
@@ -963,15 +1449,164 @@ return (
               <Text style={styles.modalSubtitle}>{t('profil.modalCoinsSubtitle')}</Text>
             </View>
             <TouchableOpacity
-              onPress={() => setModalPayVisible(false)}
+              onPress={() => {
+                Keyboard.dismiss();
+                setModalPayVisible(false);
+              }}
               style={styles.modalCloseBtn}
             >
               <MaterialIcons name="close" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
-          <View style={{ gap: 12, marginVertical: 14 }}>
-            {/* Option 1: In-App Purchase */}
+          {/* ScrollView verhindert das Abschneiden bei geöffneter Tastatur */}
+          {/* ScrollView verhindert das Abschneiden bei geöffneter Tastatur */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingVertical: 14, gap: 12 }}
+            style={{ maxHeight: height * 0.72 }}
+          >
+            {/* ── 1. PERSÖNLICHE ID MIT KOPIER-FUNKTION ── */}
+            <View style={styles.myIdCard}>
+              <View style={styles.myIdHeaderRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <MaterialIcons name="fingerprint" size={16} color="#60A5FA" />
+                  <Text style={styles.myIdLabel}>Deine persönliche ID</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={handleCopyId}
+                  style={[styles.copyPillBtn, copiedId && styles.copyPillBtnActive]}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <MaterialIcons
+                    name={copiedId ? 'check' : 'content-copy'}
+                    size={13}
+                    color={copiedId ? '#10B981' : '#60A5FA'}
+                  />
+                  <Text style={[styles.copyPillText, copiedId && { color: '#10B981' }]}>
+                    {copiedId ? 'Kopiert!' : 'Kopieren'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.myIdValue} numberOfLines={1} ellipsizeMode="middle">
+                {myUserId || 'Wird geladen…'}
+              </Text>
+              <Text style={styles.myIdHelpText}>
+                Gib diese ID anderen, damit sie dir direkt Coins überweisen können.
+              </Text>
+            </View>
+<View
+              style={[
+                styles.sendAccordionCard,
+                isSendExpanded && styles.sendAccordionCardActive,
+              ]}
+            >
+              {/* Klickbarer Header – gleiche Maße wie Option 1 & 2 */}
+              <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={toggleSendExpanded}
+                style={styles.sendOptionHeader}
+              >
+                <View style={styles.sendOptionIconWrap}>
+                  <MaterialIcons name="send" size={20} color="#60A5FA" />
+                </View>
+                <View style={{ flex: 1, paddingHorizontal: 12 }}>
+                  <Text style={styles.payOptionTitle}>Coins an Freund senden</Text>
+                  <Text style={styles.payOptionDesc}>
+                    {isSendExpanded ? 'Empfänger und Anzahl festlegen' : 'Guthaben per ID übertragen'}
+                  </Text>
+                </View>
+                <MaterialIcons
+                  name={isSendExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                  size={24}
+                  color={isSendExpanded ? '#60A5FA' : 'rgba(255,255,255,0.4)'}
+                />
+              </TouchableOpacity>
+
+              {/* Ausklappbarer Bereich mit Inputs & Send-Button */}
+              {isSendExpanded && (
+                <View style={styles.sendAccordionBody}>
+                  <View style={styles.sendDivider} />
+
+                  {/* Empfänger-ID Input */}
+                  <View style={styles.sendInputWrap}>
+                    <MaterialIcons
+                      name="badge"
+                      size={18}
+                      color="rgba(255,255,255,0.4)"
+                      style={{ marginRight: 8 }}
+                    />
+                    <TextInput
+                      style={styles.sendTextInput}
+                      placeholder="Empfänger-ID einfügen"
+                      placeholderTextColor="rgba(255,255,255,0.35)"
+                      value={receiverId}
+                      onChangeText={setReceiverId}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      spellCheck={false}
+                    />
+                    {Boolean(receiverId.length) && (
+                      <TouchableOpacity
+                        onPress={() => setReceiverId('')}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <MaterialIcons name="cancel" size={16} color="rgba(255,255,255,0.3)" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {/* Anzahl Coins Input + Max Button */}
+                  <View style={styles.sendInputWrap}>
+                    <MaterialIcons
+                      name="monetization-on"
+                      size={18}
+                      color="#F59E0B"
+                      style={{ marginRight: 8 }}
+                    />
+                    <TextInput
+                      style={styles.sendTextInput}
+                      placeholder="Anzahl Coins (z.B. 10)"
+                      placeholderTextColor="rgba(255,255,255,0.35)"
+                      keyboardType="numeric"
+                      value={sendCoinsAmount}
+                      onChangeText={(val) => setSendCoinsAmount(val.replace(/[^0-9]/g, ''))}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setSendCoinsAmount(String(coins || 0))}
+                      style={styles.sendMaxBtn}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.sendMaxBtnText}>MAX</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Send Button */}
+                  <TouchableOpacity
+                    onPress={handleSendCoins}
+                    disabled={isSendingCoins || !receiverId.trim() || !sendCoinsAmount}
+                    activeOpacity={0.85}
+                    style={[
+                      styles.sendSubmitBtn,
+                      (!receiverId.trim() || !sendCoinsAmount || isSendingCoins) && { opacity: 0.5 },
+                    ]}
+                  >
+                    {isSendingCoins ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <MaterialIcons name="arrow-upward" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                        <Text style={styles.sendSubmitBtnText}>Jetzt senden</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+            {/* ── 2. AUFLADE-OPTION 1: In-App Purchase ── */}
             <TouchableOpacity
               onPress={() => handlePurchase('JA2C0002')}
               disabled={loaded}
@@ -982,12 +1617,7 @@ return (
                 <MaterialIcons name="shopping-bag" size={22} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.payOptionTitle}>{t('profil.packTitle')}</Text>
-                  <View style={styles.bestValueBadge}>
-                    <Text style={styles.bestValueBadgeText}>{t('profil.packBadge')}</Text>
-                  </View>
-                </View>
+                <Text style={styles.payOptionTitle}>{t('profil.packTitle')}</Text>
                 <Text style={styles.payOptionDesc}>{t('profil.packDesc')}</Text>
               </View>
               {loaded ? (
@@ -997,7 +1627,7 @@ return (
               )}
             </TouchableOpacity>
 
-            {/* Option 2: Rewarded Video */}
+            {/* ── 3. AUFLADE-OPTION 2: Rewarded Video ── */}
             <TouchableOpacity
               onPress={showRewarded}
               disabled={loaded}
@@ -1014,13 +1644,19 @@ return (
               {loaded ? (
                 <ActivityIndicator size="small" color="#F59E0B" />
               ) : (
-                <MaterialIcons name="arrow-forward" size={18} color="rgba(255,255,255,0.4)" />
+                <MaterialIcons
+                  name="arrow-forward"
+                  size={18}
+                  color="rgba(255,255,255,0.4)"
+                />
               )}
             </TouchableOpacity>
-          </View>
+
+            {/* ── 4. AUFKLAPPBARE KACHEL: Coins an Freund senden ── */}
+            
+          </ScrollView>
         </View>
       </Modal>
-
       {/* ═══════════════════════════════════════════════════════════════
           MODAL 5: Werdegang & CV Modal
       ═══════════════════════════════════════════════════════════════ */}
@@ -1057,26 +1693,41 @@ return (
           </View>
 
           {/* ── 2. FEST: OCR Scan Button ── */}
+     {/* ── 2. FEST: OCR Scan Button ── */}
           <TouchableOpacity
             onPress={handleScan}
+            disabled={isScanningCv}
             activeOpacity={0.82}
-            style={styles.scanActionCard}
+            style={[
+              styles.scanActionCard,
+              isScanningCv && { borderColor: '#F59E0B', opacity: 0.85 },
+            ]}
           >
             <View style={styles.scanIconWrap}>
-              <MaterialIcons name="document-scanner" size={22} color="#60A5FA" />
+              {isScanningCv ? (
+                <ActivityIndicator size="small" color="#60A5FA" />
+              ) : (
+                <MaterialIcons name="document-scanner" size={22} color="#60A5FA" />
+              )}
             </View>
             <View style={{ flex: 1, paddingHorizontal: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={styles.scanCardTitle}>{t('profil.scanTitle')}</Text>
+                <Text style={styles.scanCardTitle}>
+                  {isScanningCv ? 'Analyse läuft im Hintergrund…' : t('profil.scanTitle')}
+                </Text>
                 <View style={styles.badgeAi}>
                   <Text style={styles.badgeAiText}>{t('profil.scanBadge')}</Text>
                 </View>
               </View>
               <Text style={styles.scanCardDesc}>
-                {t('profil.scanDesc')}
+                {isScanningCv
+                  ? 'Du kannst dieses Fenster schließen oder die App verlassen.'
+                  : t('profil.scanDesc')}
               </Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
+            {!isScanningCv && (
+              <MaterialIcons name="arrow-forward" size={18} color="#60A5FA" />
+            )}
           </TouchableOpacity>
 
           {/* ── 3. FEST: Sektions-Leiste ── */}
@@ -1103,10 +1754,12 @@ return (
           >
             {experiences.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <MaterialIcons name="work-outline" size={32} color="rgba(255,255,255,0.2)" />
-                <Text style={styles.emptyText}>
-                  {t('profil.emptyExperience')}
-                </Text>
+                <MaterialIcons
+                  name="work-outline"
+                  size={32}
+                  color="rgba(255,255,255,0.2)"
+                />
+                <Text style={styles.emptyText}>{t('profil.emptyExperience')}</Text>
               </View>
             ) : (
               experiences.map((exp, index) => (
@@ -1142,7 +1795,9 @@ return (
                       <TextInput
                         style={styles.textInput}
                         value={exp.company}
-                        onChangeText={(val) => handleUpdateExperience(exp.id, 'company', val)}
+                        onChangeText={(val) =>
+                          handleUpdateExperience(exp.id, 'company', val)
+                        }
                         placeholder={t('profil.placeholderCompany')}
                         placeholderTextColor="rgba(255, 255, 255, 0.3)"
                       />
@@ -1153,7 +1808,9 @@ return (
                       <TextInput
                         style={styles.textInput}
                         value={exp.period}
-                        onChangeText={(val) => handleUpdateExperience(exp.id, 'period', val)}
+                        onChangeText={(val) =>
+                          handleUpdateExperience(exp.id, 'period', val)
+                        }
                         placeholder={t('profil.placeholderPeriod')}
                         placeholderTextColor="rgba(255, 255, 255, 0.3)"
                       />
@@ -1183,16 +1840,26 @@ return (
             onPress={() => saveExperiences()}
             activeOpacity={0.85}
           >
-            <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <MaterialIcons
+              name="check"
+              size={18}
+              color="#FFFFFF"
+              style={{ marginRight: 6 }}
+            />
             <Text style={styles.saveModalBtnText}>{t('saveAndClose')}</Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      <Info message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
+      <Info
+        message={textInfo}
+        visible={infoModalVisible}
+        onClose={() => setInfoModalVisible(false)}
+      />
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1203,149 +1870,250 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 40,
   },
-modalScrollArea: {
-  marginBottom: 12,
-},
-scanActionCard: {
+  scanActionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 18,
+  },
+  scanIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanCardTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  experienceScrollArea: {
+    maxHeight: height * 0.4,
+  },
+  badgeAi: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  badgeAiText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  scanCardDesc: {
+    color: 'rgba(255, 255, 255, 0.55)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    borderRadius: 8,
+  },
+  /* ── Aufklappbare Accordion-Kachel für Coins Senden ── */
+  sendAccordionCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+  },
+  sendAccordionCardActive: {
+    backgroundColor: 'rgba(59, 130, 246, 0.04)',
+    borderColor: 'rgba(59, 130, 246, 0.28)',
+  },
+  sendOptionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+  },
+  sendOptionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendAccordionBody: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  sendDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 4,
+  },
+  sendInputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#12151D',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  sendTextInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 13,
+    paddingVertical: 0,
+  },
+  sendMaxBtn: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sendMaxBtnText: {
+    color: '#F59E0B',
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  sendSubmitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    height: 42,
+    marginTop: 2,
+  },
+  sendSubmitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  addBtnText: {
+    color: '#60A5FA',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  experienceCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.07)',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+  },
+  expCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  expBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  expBadgeText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  inputShell: {
   flexDirection: 'row',
   alignItems: 'center',
-  backgroundColor: 'rgba(59, 130, 246, 0.08)',
-  borderWidth: 1,
-  borderColor: 'rgba(59, 130, 246, 0.3)',
-  borderRadius: 16,
-  padding: 14,
-  marginBottom: 18,
-},
-scanIconWrap: {
-  width: 44,
-  height: 44,
-  borderRadius: 12,
-  backgroundColor: 'rgba(59, 130, 246, 0.15)',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-scanCardTitle: {
-  color: '#FFFFFF',
-  fontSize: 15,
-  fontWeight: '700',
-},
-experienceScrollArea: {
-  maxHeight: height * 0.4,
-},
-badgeAi: {
-  backgroundColor: '#3B82F6',
-  paddingHorizontal: 6,
-  paddingVertical: 2,
-  borderRadius: 6,
-},
-badgeAiText: {
-  color: '#FFFFFF',
-  fontSize: 10,
-  fontWeight: '800',
-},
-scanCardDesc: {
-  color: 'rgba(255, 255, 255, 0.55)',
-  fontSize: 12,
-  marginTop: 2,
-},
-sectionHeaderRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 10,
-  marginTop: 4,
-},
-sectionTitle: {
-  color: '#FFFFFF',
-  fontSize: 14,
-  fontWeight: '700',
-},
-addBtn: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 4,
-  paddingVertical: 4,
-  paddingHorizontal: 8,
-  backgroundColor: 'rgba(59, 130, 246, 0.12)',
-  borderRadius: 8,
-},
-addBtnText: {
-  color: '#60A5FA',
-  fontSize: 12,
-  fontWeight: '600',
-},
-experienceCard: {
-  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-  borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.07)',
+  backgroundColor: 'rgba(255, 255, 255, 0.04)',
   borderRadius: 14,
-  padding: 12,
-  marginBottom: 10,
-},
-expCardHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 8,
-},
-expBadge: {
-  backgroundColor: 'rgba(255, 255, 255, 0.07)',
-  paddingHorizontal: 8,
-  paddingVertical: 2,
-  borderRadius: 6,
-},
-expBadgeText: {
-  color: 'rgba(255, 255, 255, 0.7)',
-  fontSize: 11,
-  fontWeight: '600',
-},
-inputLabel: {
-  color: 'rgba(255, 255, 255, 0.5)',
-  fontSize: 11,
-  marginBottom: 4,
-  marginTop: 4,
-},
-textInput: {
-  backgroundColor: '#12151D',
   borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.09)',
-  borderRadius: 10,
-  paddingHorizontal: 10,
-  paddingVertical: 8,
+  borderColor: 'rgba(255, 255, 255, 0.1)',
+  paddingLeft: 12,
+  paddingRight: 6,
+  minHeight: 48,          // statt height: 48 → Picker kann nicht gequetscht werden
+},
+inputIcon: {
+  marginRight: 10,
+},
+textInputField: {
+  flex: 1,
+  minWidth: 0,            // wichtig auf Android, sonst sprengt Text die Zeile
   color: '#FFFFFF',
-  fontSize: 13,
+  fontSize: 14.5,
+  paddingVertical: 12,
 },
-inputRow: {
-  flexDirection: 'row',
-  gap: 8,
+clearBtn: {
+  flexShrink: 0,
 },
-emptyContainer: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingVertical: 28,
-  paddingHorizontal: 20,
-},
-emptyText: {
-  color: 'rgba(255, 255, 255, 0.4)',
-  fontSize: 13,
-  textAlign: 'center',
-  marginTop: 10,
-  lineHeight: 18,
-},
-saveModalBtn: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#3B82F6',
-  borderRadius: 14,
-  height: 46,
-  marginTop: 8,
-},
-saveModalBtnText: {
-  color: '#FFFFFF',
-  fontSize: 14,
-  fontWeight: '700',
-},
+
+  inputLabel: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 11,
+    marginBottom: 4,
+    marginTop: 4,
+  },
+  textInput: {
+    backgroundColor: '#12151D',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.09)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    color: '#FFFFFF',
+    fontSize: 13,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 10,
+    lineHeight: 18,
+  },
+  saveModalBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    borderRadius: 14,
+    height: 46,
+    marginTop: 8,
+  },
+  saveModalBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
   /* ── Profile Header Card ── */
   profileHeaderCard: {
     backgroundColor: '#171B26',
@@ -1414,26 +2182,10 @@ saveModalBtnText: {
     fontSize: 13,
     fontWeight: '700',
   },
-  coinAddBtn: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#F59E0B',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
 
   /* ── Sections & Cards ── */
   sectionWrap: {
     marginBottom: 24,
-  },
-  sectionTitle: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: 10,
-    paddingLeft: 4,
   },
   cardGroup: {
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
@@ -1537,17 +2289,39 @@ saveModalBtnText: {
     marginTop: 2,
   },
 
-  /* ── Modals General (Symmetrisch & Flackerfrei) ── */
+  /* ── Modals General (zentriert) – nur noch Modal 4 & 5 ── */
   modalBackdrop: {
     justifyContent: 'center',
     alignItems: 'center',
     margin: 0,
     paddingHorizontal: 16,
   },
-  modalSheet: {
-    width: '100%',
-    maxWidth: 460,
-    backgroundColor: colors.background || '#121620',
+modalSheet: {
+  width: '100%',
+  maxWidth: 460,
+  backgroundColor: MENU_SURFACE,            // ← wie Menü
+  borderRadius: 22,
+  padding: 20,
+  borderWidth: 1,
+  borderColor: MENU_BORDER,                 // ← wie cardGroup
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.5,
+  shadowRadius: 20,
+  elevation: 16,
+},
+
+
+  /* ── "exact"-Modals (1, 2, 3): identische Fläche wie das Menü ── */
+  modalBackdropExact: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    margin: 0,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
+  modalSheetFrame: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: 22,
     padding: 20,
     borderWidth: 1,
@@ -1557,7 +2331,9 @@ saveModalBtnText: {
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 16,
+    overflow: 'hidden',
   },
+
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1585,10 +2361,6 @@ saveModalBtnText: {
     alignItems: 'center',
     marginLeft: 8,
   },
-  modalBody: {
-    gap: 12,
-    marginVertical: 14,
-  },
 
   /* ── Inputs ── */
   inputContainer: {
@@ -1609,17 +2381,6 @@ saveModalBtnText: {
     color: '#FFFFFF',
     fontSize: 14.5,
     height: '100%',
-  },
-  dropdown: {
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 14,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    height: 48,
-  },
-  dropdownContainer: {
-    backgroundColor: '#1A1E29',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 14,
   },
 
   /* ── Buttons ── */
@@ -1643,10 +2404,6 @@ saveModalBtnText: {
   },
 
   /* ── Language List ── */
-  langList: {
-    marginTop: 12,
-    marginBottom: 4,
-  },
   langOption: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1698,17 +2455,6 @@ saveModalBtnText: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bestValueBadge: {
-    backgroundColor: '#3B82F6',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 6,
-  },
-  bestValueBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '800',
-  },
   payOptionTitle: {
     color: '#FFFFFF',
     fontSize: 15,
@@ -1735,6 +2481,108 @@ saveModalBtnText: {
     backgroundColor: 'rgba(245, 158, 11, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  /* ── My Personal ID Card ── */
+  myIdCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+    borderRadius: 16,
+    padding: 12,
+  },
+  myIdHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  myIdLabel: {
+    color: '#93C5FD',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  myIdValue: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    backgroundColor: '#0F1117',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  myIdHelpText: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 10.5,
+    marginTop: 6,
+  },
+  copyPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  copyPillBtnActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  copyPillText: {
+    color: '#60A5FA',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  /* ── Coins Senden Bereich ── */
+  sendInputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#12151D',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  sendTextInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 13,
+    paddingVertical: 0,
+  },
+  sendMaxBtn: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sendMaxBtnText: {
+    color: '#F59E0B',
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  sendSubmitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    height: 42,
+    marginTop: 4,
+  },
+  sendSubmitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
 });
 

@@ -3,8 +3,52 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import * as Keychain from "react-native-keychain";
 import SQLite from "react-native-sqlite-storage";
 import { decryp, decryptAndStore } from "./cryp";
+import {Platform} from "react-native";
+import RNFS from 'react-native-fs';
+
 const DB_NAME = 'firstNew.db';
 
+export const getDatabaseConnection = async (dbName = DB_NAME) => {
+  if (Platform.OS === 'ios') {
+    const localDbDir = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
+    
+    // 1. Ordner sicherstellen
+    if (!(await RNFS.exists(localDbDir))) {
+      await RNFS.mkdir(localDbDir);
+    }
+
+    const mainDb = `${localDbDir}/${dbName}`;
+    const walFile = `${localDbDir}/${dbName}-wal`;
+    const shmFile = `${localDbDir}/${dbName}-shm`;
+
+    const mainExists = await RNFS.exists(mainDb);
+
+    // 2. Wenn Hauptdatei fehlt ODER 0 Byte groß ist -> Verwaiste WAL/SHM entfernen!
+    if (!mainExists) {
+      if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
+      if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
+    } else {
+      const stat = await RNFS.stat(mainDb);
+      if (stat.size === 0) {
+        await RNFS.unlink(mainDb);
+        if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
+        if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
+      }
+    }
+  }
+
+  // 3. Timeout-Absicherung gegen Hänger
+  const openPromise = SQLite.openDatabase({
+    name: dbName,
+    location: 'default',
+  });
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('TIMEOUT_OPEN_DB')), 4000)
+  );
+
+  return await Promise.race([openPromise, timeoutPromise]);
+};
 export const selectDb = async () => {
     const deviceId = await DeviceInfo.getUniqueId();
     try {

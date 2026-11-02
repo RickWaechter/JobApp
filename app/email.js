@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  FlatList,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -88,10 +87,11 @@ const ContactForm = () => {
   useFocusEffect(
     useCallback(() => {
       const initializeForm = async () => {
-        const splits = await selectDb();
-        setEmails(splits);
+        try {
+          const splits = await selectDb();
+          setEmails(splits);
 
-        const publicKeyPem = `-----BEGIN PUBLIC KEY-----
+          const publicKeyPem = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqKkQnDPIazdOj1PXol7M
 fSBIvT6cw79qlTXHBLVWdHLwL3S/2A2jgQbgwT9ZgWZeHAUxCX/vzhV3KSM8nDpi
 Jpeut3tqpiXCUvqdfvT7oaeALBdGhf+UWN0JLkQGx3UgDOhkSaIZ14hUYBMwvho4
@@ -101,7 +101,6 @@ LPGYqYu0+MSuRO6/ufuHOWiNWYotcV3P89ESWh7KiDrP+xEp/Q3Q9v454FSlxfbz
 XwIDAQAB
 -----END PUBLIC KEY-----`;
 
-        try {
           const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
           const key = await EncryptedStorage.getItem('key');
           const encryptedData = publicKey.encrypt(key, 'RSA-OAEP');
@@ -147,7 +146,6 @@ XwIDAQAB
             );
           });
 
-          // PDF-Anhänge laden und entschlüsseln
           const mergeName = await EncryptedStorage.getItem('merge');
           let dataPath = '';
 
@@ -186,6 +184,7 @@ XwIDAQAB
   useEffect(() => {
     (async () => {
       const key = await EncryptedStorage.getItem('key');
+      if (!key) return;
       const encMail = await encryp(decEmail, key);
       setFormData((prevData) => ({
         ...prevData,
@@ -284,7 +283,6 @@ XwIDAQAB
   };
 
   /* ── E-Mail in DB merken ─────────────────────────────── */
-  /* ── E-Mail in DB merken ─────────────────────────────── */
   const saveButton = async () => {
     try {
       const key = await EncryptedStorage.getItem('key');
@@ -294,7 +292,6 @@ XwIDAQAB
         location: 'default',
       });
 
-      // 1. Emails synchron/gekapselt auslesen
       let rawEmails = null;
       let recordExists = false;
 
@@ -320,7 +317,6 @@ XwIDAQAB
 
       if (!recordExists) return;
 
-      // 2. Asynchrone Krypto-Operationen AUSSERHALB der Transaktion durchführen
       let emailArray = [];
       let encEmails = '';
 
@@ -344,7 +340,6 @@ XwIDAQAB
         }
       }
 
-      // 3. Update in einer frischen, sauberen Transaktion speichern
       await new Promise((resolve, reject) => {
         db.transaction((tx) => {
           tx.executeSql(
@@ -376,7 +371,7 @@ XwIDAQAB
     try {
       const companyName = await EncryptedStorage.getItem('yourName');
       const results = await crawlEmails(companyName, (status, found) => {
-        setCrawlStatusText(t('emailSearch') );
+        setCrawlStatusText(t('emailSearch') || 'Suche Kontakte...');
         setCrawlProgress((prev) => Math.min(prev + 5, 100));
       });
 
@@ -417,7 +412,8 @@ XwIDAQAB
 
 Vorgaben:
 - Lass den Betreff komplett weg.
-- Der Beruf ist: ${beruf || ''}.
+- Der Beruf ist: 
+${beruf || ''}.
 - Erwähne am Ende keinen Namen, keinen Wohnort und keine Platzhalter.
 - Beende den Text direkt nach dem letzten Satz des zweiten Absatzes. Schreibe KEINE Grußformel (kein "Mit freundlichen Grüßen", "Viele Grüße" o.ä.) und keine Verabschiedung am Ende.`;
 
@@ -496,9 +492,8 @@ Vorgaben:
     }
   };
 
-return (
-  <SafeAreaView style={styles.safeArea}>
-    <TouchableWithoutFeedback onPress={() => setIsFlatListVisible(false)} accessible={false}>
+  return (
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -512,9 +507,10 @@ return (
               <Text style={styles.badgeHubText}>DIREKTER VERSAND</Text>
             </View>
             <Text style={styles.titleMain}>Bewerbung versenden</Text>
-            
+           
           </View>
 
+          {/* ── Formular-Scrollbereich ── */}
           <ScrollView
             style={styles.scrollArea}
             contentContainerStyle={styles.scrollContent}
@@ -543,11 +539,12 @@ return (
                   onChangeText={handleMail}
                 />
 
-                {saveButtonVisible && decEmail.length > 0 ? (
+                {saveButtonVisible && decEmail.trim().length > 0 ? (
                   <TouchableOpacity
                     onPress={saveButton}
                     style={styles.iconActionBtn}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    activeOpacity={0.7}
                   >
                     <MaterialIcons name="bookmark-border" size={18} color="#60A5FA" />
                   </TouchableOpacity>
@@ -557,6 +554,7 @@ return (
                     style={styles.iconActionBtn}
                     disabled={isCrawling}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    activeOpacity={0.7}
                   >
                     <MaterialIcons
                       name="travel-explore"
@@ -577,44 +575,44 @@ return (
                 </View>
               )}
 
-              {/* Suggestions Dropdown */}
+              {/* Suggestions Dropdown (.map statt FlatList zur Vermeidung von VirtualizedList-Errors) */}
               {!isCrawling && isFlatListVisible && suggestions.length > 0 && (
                 <View style={styles.suggestionsCard}>
-                  <FlatList
-                    data={suggestions}
-                    keyExtractor={(item, index) => index.toString()}
+                  <ScrollView
+                    style={styles.suggestionsScroll}
+                    nestedScrollEnabled={true}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                       <TouchableOpacity
+                  >
+                    {suggestions.map((item, index) => (
+                      <View key={`${item}-${index}`} style={styles.suggestionRow}>
+                        <TouchableOpacity
                           onPress={() => handleSuggestionClick(item)}
                           style={styles.suggestionTextArea}
                           activeOpacity={0.7}
                         >
-                      <View style={styles.suggestionRow}>
-                       
                           <MaterialIcons
                             name="history"
                             size={15}
-                            color="rgba(255,255,255,0.4)"
+                            color="rgba(255, 255, 255, 0.4)"
                             style={{ marginRight: 8 }}
                           />
                           <Text style={styles.suggestionText} numberOfLines={1}>
                             {item}
                           </Text>
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                           onPress={() => deleteItem(item)}
                           style={styles.deleteSuggestionBtn}
                           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          activeOpacity={0.6}
                         >
-                          <MaterialIcons name="close" size={15} color="rgba(255,255,255,0.4)" />
+                          <MaterialIcons name="close" size={15} color="rgba(255, 255, 255, 0.4)" />
                         </TouchableOpacity>
                       </View>
-                        </TouchableOpacity>
-
-                    )}
-                  />
+                    ))}
+                  </ScrollView>
                 </View>
               )}
             </View>
@@ -665,7 +663,7 @@ return (
             >
               {isLoaded ? (
                 <View style={styles.loadingRow}>
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
                   <Text style={styles.sendButtonText}>
                     {t('pleaseWait') || 'Wird gesendet...'}
                   </Text>
@@ -687,47 +685,48 @@ return (
           </View>
         </View>
       </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
 
-    {/* ── Natives WebView Modal ── */}
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={modalVisible}
-      statusBarTranslucent={true}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalBackdrop} />
-        </TouchableWithoutFeedback>
+      {/* ── Natives WebView Modal ── */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        statusBarTranslucent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalBackdrop} />
+          </TouchableWithoutFeedback>
 
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalHeaderTitleWrap}>
-              <MaterialIcons name="language" size={20} color="#60A5FA" />
-              <Text style={styles.modalHeaderTitle} numberOfLines={1}>
-                Web-Vorschau
-              </Text>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderTitleWrap}>
+                <MaterialIcons name="language" size={20} color="#60A5FA" />
+                <Text style={styles.modalHeaderTitle} numberOfLines={1}>
+                  Web-Vorschau
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.modalCloseBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="close" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.modalCloseBtn}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <MaterialIcons name="close" size={18} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.webviewWrapper}>
-            <WebView source={{ uri: webUrl }} style={styles.webview} />
+            <View style={styles.webviewWrapper}>
+              <WebView source={{ uri: webUrl }} style={styles.webview} />
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-  </SafeAreaView>
-);
-}
+      </Modal>
+    </SafeAreaView>
+  );
+};
+
 export default ContactForm;
 
 /* ── Styles ─────────────────────────────────────────────── */
@@ -800,7 +799,8 @@ const styles = StyleSheet.create({
   },
   emailFieldContainer: {
     position: 'relative',
-    zIndex: 100, // Garantiert, dass die Suggestion-Liste über den unteren Feldern liegt
+    zIndex: Platform.OS === 'ios' ? 1000 : undefined,
+    elevation: Platform.OS === 'android' ? 10 : undefined,
   },
   fieldContainer: {
     position: 'relative',
@@ -862,7 +862,7 @@ const styles = StyleSheet.create({
   },
   suggestionsCard: {
     position: 'absolute',
-    top: 64, // Positioniert sich direkt unter dem E-Mail-Input
+    top: 64,
     left: 0,
     right: 0,
     maxHeight: 145,
@@ -874,14 +874,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
-    elevation: 12,
+    elevation: 20,
     zIndex: 9999,
     overflow: 'hidden',
+  },
+  suggestionsScroll: {
+    maxHeight: 145,
   },
   suggestionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    justifyContent: 'space-between',
+    paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
@@ -890,14 +894,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 10,
   },
   suggestionText: {
+    flex: 1,
     color: '#FFFFFF',
     fontSize: 12.5,
   },
   deleteSuggestionBtn: {
     padding: 4,
-    marginLeft: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   /* ── Textarea ── */

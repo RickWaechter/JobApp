@@ -1,6 +1,7 @@
 // StartScreen.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { router } from 'expo-router';
+import * as Localization from 'expo-localization';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,16 +20,17 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import DropDownPicker from 'react-native-dropdown-picker';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import RNFS from 'react-native-fs';
 import * as Keychain from 'react-native-keychain';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sha256 } from 'react-native-sha256';
 import SQLite from 'react-native-sqlite-storage';
-import { saveKeyboardHeight } from '../inc/keyboardStorage.js';
 import colors from '../inc/colors.js';
 import { encryp } from '../inc/cryp.js';
+import { downloader } from '../inc/downloader.js';
+import { saveKeyboardHeight } from '../inc/keyboardStorage.js';
+import {getDatabaseConnection} from '../inc/db.js';
 
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
@@ -38,79 +40,111 @@ const DB_NAME = 'firstNew.db';
 
 const StartScreen = () => {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   /* ── States ──────────────────────────────────────────── */
   const [name, setName] = useState('');
   const [yourStreet, setYourStreet] = useState('');
   const [yourCity, setYourCity] = useState('');
   const [value, setValue] = useState('de');
-  const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   /* ── Refs ────────────────────────────────────────────── */
   const nameRef = useRef(null);
   const streetRef = useRef(null);
   const cityRef = useRef(null);
+  const scrollRef = useRef(null);
 
   const items = [
     { label: 'Deutsch', value: 'de' },
     { label: 'English', value: 'en' },
+    { label: 'Ελληνικά', value: 'el' },
     { label: 'Türkçe', value: 'tr' },
     { label: 'Français', value: 'fr' },
     { label: 'Italiano', value: 'it' },
     { label: 'Polski', value: 'pl' },
     { label: 'Nederlands', value: 'nl' },
-    { label: 'Română', value: 'ru' },
+    { label: 'Română', value: 'ro' },
     { label: 'Українська', value: 'ua' },
     { label: 'العربية', value: 'ar' },
-    { label: 'Ελληνικά', value: 'gr' },
     { label: '日本語', value: 'jp' },
+    { label: 'Español', value: 'es' },
   ];
 
-  /* ── Tastatur-Größe (Höhe) beim Ausfahren speichern ───── */
+  /* ── Sprache erkennen & Tastatur-Handling ─────────────── */
   useEffect(() => {
-    const showEvent =
-      Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidShow';
+    const rawLang = Localization.getLocales()[0]?.languageCode;
+    let targetLang = 'de';
 
-    const sub = Keyboard.addListener(showEvent, (e) => {
+    switch (rawLang) {
+      case 'de':
+      case 'en':
+      case 'tr':
+      case 'ar':
+      case 'fr':
+      case 'it':
+      case 'nl':
+      case 'pl':
+      case 'ro':
+      case 'es':
+        targetLang = rawLang;
+        break;
+      case 'el':
+      case 'gr':
+        targetLang = 'el';
+        break;
+      case 'ja':
+      case 'jp':
+        targetLang = 'jp';
+        break;
+      case 'uk':
+      case 'ua':
+        targetLang = 'ua';
+        break;
+      case 'bs':
+      case 'hr':
+      case 'sr':
+      case 'bks':
+        targetLang = 'bks';
+        break;
+      default:
+        targetLang = 'de';
+        break;
+    }
+
+    i18n.changeLanguage(targetLang);
+    setValue(targetLang);
+
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setIsKeyboardVisible(true);
       const h = e?.endCoordinates?.height;
       if (h && h > 0) {
-        const roundedHeight = String(Math.round(h));
-        console.log('Keyboard Height:', roundedHeight);
-       saveKeyboardHeight(roundedHeight);
+        saveKeyboardHeight(String(Math.round(h)));
       }
     });
 
-    return () => sub.remove();
-  }, []);
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [i18n]);
 
   /* ── Jobs-DB Download im Hintergrund ─────────────────── */
   useEffect(() => {
     const setupDatabase = async () => {
       try {
-        const DB_DIR = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
-        const dest = `${DB_DIR}/jobs.db`;
-
-        const folderExists = await RNFS.exists(DB_DIR);
-        if (!folderExists) {
-          await RNFS.mkdir(DB_DIR);
-        }
-
-        const dbExists = await RNFS.exists(dest);
-        if (!dbExists) {
-          const getUrl = `https://api.jobapp2.de/get-secure-link/jobs.db`;
-          const response = await fetch(getUrl);
-          const data = await response.json();
-          if (data?.url) {
-            const secureUrl = data.url.replace('http://', 'https://');
-            await RNFS.downloadFile({
-              fromUrl: secureUrl,
-              toFile: dest,
-            }).promise;
-          }
-        }
-      } catch (e) {
-        console.warn('Jobs DB download error:', e);
+        downloader('jobs.db', 'LocalDatabase');
+        console.log('DB Downloaded');
+      } catch (err) {
+        console.error('DB Download Error:', err);
       }
     };
 
@@ -119,11 +153,73 @@ const StartScreen = () => {
 
   /* ── Musterdaten einfügen ────────────────────────────── */
   const handleFillSampleData = () => {
-    nameRef.current.focus();
+    nameRef.current?.focus();
     setName('Max Mustermann');
-    setYourStreet('Musterstraße 12');
-    setYourCity('10115 Berlin');
+    setYourStreet('Rosensteinstraße 21');
+    setYourCity('70191 Stuttgart');
     setValue('de');
+    i18n.changeLanguage('de');
+  };
+
+  /* ── Datenbanken löschen (jobs.db & firstNew.db) ────────── */
+  const handleDeleteDatabases = () => {
+    Alert.alert(
+      'Datenbanken löschen',
+      'Möchtest du "jobs.db" und "firstNew.db" wirklich unwiderruflich vom Gerät löschen?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Löschen',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // 1. SQLite-Datenbank firstNew.db schließen & löschen
+              try {
+                await SQLite.deleteDatabase({ name: DB_NAME, location: 'default' });
+              } catch (e) {
+                console.warn('SQLite.deleteDatabase firstNew.db:', e);
+              }
+
+              try {
+                await SQLite.deleteDatabase({ name: 'jobs.db', location: 'default' });
+              } catch (e) {
+                console.warn('SQLite.deleteDatabase jobs.db:', e);
+              }
+
+              // 2. Physische Dateien via RNFS bereinigen
+              const docDir = RNFS.DocumentDirectoryPath;
+              const libraryDir = RNFS.LibraryDirectoryPath || docDir;
+
+              const candidatePaths = [
+                `${docDir}/firstNew.db`,
+                `${docDir}/jobs.db`,
+                `${libraryDir}/LocalDatabase/firstNew.db`,
+                `${libraryDir}/LocalDatabase/jobs.db`,
+                `${libraryDir}/firstNew.db`,
+                `${libraryDir}/jobs.db`,
+              ];
+
+              for (const path of candidatePaths) {
+                const exists = await RNFS.exists(path);
+                if (exists) {
+                  await RNFS.unlink(path);
+                }
+              }
+
+              // Formular-State zurücksetzen
+              setName('');
+              setYourStreet('');
+              setYourCity('');
+
+              Alert.alert('Erfolg', 'Beide Datenbanken wurden erfolgreich gelöscht.');
+            } catch (err) {
+              console.error('Fehler beim Löschen der Datenbanken:', err);
+              Alert.alert('Fehler', 'Datenbanken konnten nicht vollständig gelöscht werden.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   /* ── Straße & Stadt Parser (falls kombiniert eingefügt) ── */
@@ -140,11 +236,12 @@ const StartScreen = () => {
   };
 
   /* ── Speichern & Datenbank initialisieren ────────────── */
+/* ── Speichern & Datenbank initialisieren ────────────── */
   const init = async () => {
     if (!name.trim() || !yourStreet.trim() || !yourCity.trim()) {
       Alert.alert(
-        t('first.error') || 'Angaben unvollständig',
-        'Bitte fülle deinen Namen, deine Straße und deinen Wohnort aus.'
+        t('first.errorMissingFieldsTitle'),
+        t('first.errorMissingFieldsMsg')
       );
       return;
     }
@@ -153,7 +250,7 @@ const StartScreen = () => {
 
     try {
       const deviceId = await DeviceInfo.getUniqueId();
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+      const db = await getDatabaseConnection(DB_NAME);
 
       await db.executeSql(`
         CREATE TABLE IF NOT EXISTS files (
@@ -198,12 +295,12 @@ const StartScreen = () => {
 
       await make(deviceId, db);
     } catch (err) {
-      setIsSaving(false);
       console.error('Error opening/creating database:', err);
-      Alert.alert('Fehler', 'Datenbank konnte nicht initialisiert werden.');
+      Alert.alert(t('common.error'), t('first.dbInitError'));
+    } finally {
+      setIsSaving(false); // Stoppt das Dauerladen unter allen Umständen
     }
   };
-
   const make = async (deviceId, db) => {
     try {
       const cleanName = name.trim();
@@ -237,54 +334,68 @@ const StartScreen = () => {
     } catch (err) {
       setIsSaving(false);
       console.error('Fehler bei der Verschlüsselung / Speicherung:', err);
-      Alert.alert('Fehler', 'Daten konnten nicht sicher verschlüsselt werden.');
+      Alert.alert(t('common.error'), t('first.encryptionError'));
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
-        >
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.container}>
-            {/* ── Header ── */}
-            <View style={styles.header}>
-              <View style={styles.badgeHub}>
-                <View style={styles.statusDot} />
-                <Text style={styles.badgeHubText}>ERSTEINRICHTUNG</Text>
-              </View>
-              <Text style={styles.titleMain}>
-                {t('first.heading') || 'Profil einrichten'}
-              </Text>
-              <Text style={styles.subtitleMain}>
-                Trage deine Kontaktdaten ein, damit Anschreiben und Dokumente automatisch personalisiert werden.
-              </Text>
-            </View>
-
+            {/* ── Scrollbarer Bereich für Header & Formular ── */}
             <ScrollView
+              ref={scrollRef}
               style={styles.scrollArea}
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              {/* ── Button für Musterdaten ── */}
-              <TouchableOpacity
-                style={styles.sampleDataBtn}
-                onPress={handleFillSampleData}
-                activeOpacity={0.75}
-              >
-                <MaterialIcons name="auto-fix-high" size={18} color="#60A5FA" />
-                <Text style={styles.sampleDataBtnText}>Musterdaten einfügen</Text>
-              </TouchableOpacity>
+              {/* Header */}
+              <View style={styles.header}>
+                <View style={styles.headerTopRow}>
+                  <View style={styles.badgeHub}>
+                    <View style={styles.statusDot} />
+                    <Text style={styles.badgeHubText}>{t('first.badge')}</Text>
+                  </View>
 
-              {/* ── Eingabekarte ── */}
+                  {/* DB Löschen Button im Header */}
+                  <TouchableOpacity
+                    style={styles.headerDeleteBtn}
+                    onPress={handleDeleteDatabases}
+                    activeOpacity={0.75}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <MaterialIcons name="delete-forever" size={18} color="#F87171" />
+                    <Text style={styles.headerDeleteBtnText}>DBs löschen</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.titleMain}>{t('first.heading')}</Text>
+                <Text style={styles.subtitleMain}>{t('first.subtitle')}</Text>
+              </View>
+
+              {/* Aktionsleiste: Musterdaten */}
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={styles.sampleDataBtn}
+                  onPress={handleFillSampleData}
+                  activeOpacity={0.75}
+                >
+                  <MaterialIcons name="auto-fix-high" size={18} color="#60A5FA" />
+                  <Text style={styles.sampleDataBtnText}>{t('first.insertSampleData')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Formular-Karte */}
               <View style={styles.formCard}>
                 {/* 1. Name */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>VOLLSTÄNDIGER NAME</Text>
+                  <Text style={styles.fieldLabel}>{t('first.labelName')}</Text>
                   <View style={styles.inputWrapper}>
                     <MaterialIcons
                       name="person-outline"
@@ -295,7 +406,7 @@ const StartScreen = () => {
                     <TextInput
                       ref={nameRef}
                       style={styles.textInput}
-                      placeholder={t('ownName') || 'z.B. Max Mustermann'}
+                      placeholder={t('first.placeholderName')}
                       placeholderTextColor="rgba(255,255,255,0.35)"
                       value={name}
                       onChangeText={setName}
@@ -317,7 +428,7 @@ const StartScreen = () => {
 
                 {/* 2. Straße & Hausnummer */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>STRASSE & HAUSNUMMER</Text>
+                  <Text style={styles.fieldLabel}>{t('first.labelStreet')}</Text>
                   <View style={styles.inputWrapper}>
                     <MaterialIcons
                       name="home"
@@ -328,7 +439,7 @@ const StartScreen = () => {
                     <TextInput
                       ref={streetRef}
                       style={styles.textInput}
-                      placeholder={t('ownStreet') || 'z.B. Musterstraße 12'}
+                      placeholder={t('first.placeholderStreet')}
                       placeholderTextColor="rgba(255,255,255,0.35)"
                       value={yourStreet}
                       onChangeText={handleMyStreet}
@@ -351,7 +462,7 @@ const StartScreen = () => {
 
                 {/* 3. PLZ & Wohnort */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>PLZ & WOHNORT</Text>
+                  <Text style={styles.fieldLabel}>{t('first.labelCity')}</Text>
                   <View style={styles.inputWrapper}>
                     <MaterialIcons
                       name="location-city"
@@ -362,7 +473,7 @@ const StartScreen = () => {
                     <TextInput
                       ref={cityRef}
                       style={styles.textInput}
-                      placeholder={t('ownCity') || 'z.B. 10115 Berlin'}
+                      placeholder={t('first.placeholderCity')}
                       placeholderTextColor="rgba(255,255,255,0.35)"
                       value={yourCity}
                       onChangeText={setYourCity}
@@ -383,50 +494,57 @@ const StartScreen = () => {
                 </View>
 
                 {/* 4. Sprache */}
-               {/* 4. Sprache (Horizontale Scroll-Leiste statt Dropdown) */}
-  <Text style={styles.fieldLabel}>SPRACHE</Text>
-  <View style={styles.languageScrollWrapper}>
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.languageScrollContent}
-      keyboardShouldPersistTaps="handled"
-    >
-      {items.map((item) => {
-        const isSelected = value === item.value;
-        return (
-          <TouchableOpacity
-            key={item.value}
-            style={[
-              styles.langPill,
-              isSelected && styles.langPillActive,
-            ]}
-            onPress={() => setValue(item.value)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[
-                styles.langPillText,
-                isSelected && styles.langPillTextActive,
-              ]}
-            >
-              {item.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  </View>
-</View>
-
-              <Text style={styles.infoHintText}>
-                {t('first.theDrop') ||
-                  'Deine Daten werden ausschließlich lokal und sicher verschlüsselt auf diesem Gerät gespeichert.'}
-              </Text>
+                <Text style={styles.fieldLabel}>{t('first.labelLanguage')}</Text>
+                <View style={styles.languageScrollWrapper}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.languageScrollContent}
+                    keyboardShouldPersistTaps="handled"
+                  >
+                    {items.map((item) => {
+                      const isSelected = value === item.value;
+                      return (
+                        <TouchableOpacity
+                          key={item.value}
+                          style={[
+                            styles.langPill,
+                            isSelected && styles.langPillActive,
+                          ]}
+                          onPress={() => {
+                            setValue(item.value);
+                            i18n.changeLanguage(item.value);
+                          }}
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            style={[
+                              styles.langPillText,
+                              isSelected && styles.langPillTextActive,
+                            ]}
+                          >
+                            {item.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </View>
             </ScrollView>
 
-            {/* ── Primary CTA Button ── */}
-          <TouchableOpacity
+            {/* ── Footer: Sitzt direkt über der Tastatur ── */}
+            <View
+              style={[
+                styles.footer,
+                {
+                  paddingBottom: isKeyboardVisible
+                    ? 8
+                    : Math.max(insets.bottom, 16),
+                },
+              ]}
+            >
+              <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={init}
                 disabled={isSaving}
@@ -435,13 +553,11 @@ const StartScreen = () => {
                 {isSaving ? (
                   <View style={styles.loadingRow}>
                     <ActivityIndicator size="small" color="#FFFFFF" />
-                    <Text style={styles.primaryButtonText}>Wird gespeichert...</Text>
+                    <Text style={styles.primaryButtonText}>{t('first.saving')}</Text>
                   </View>
                 ) : (
                   <View style={styles.loadingRow}>
-                    <Text style={styles.primaryButtonText}>
-                      {t('save') || 'Profil speichern & weiter'}
-                    </Text>
+                    <Text style={styles.primaryButtonText}>{t('first.saveBtn')}</Text>
                     <MaterialIcons
                       name="arrow-forward"
                       size={18}
@@ -451,16 +567,21 @@ const StartScreen = () => {
                   </View>
                 )}
               </TouchableOpacity>
+
+              {!isKeyboardVisible && (
+                <Text style={styles.infoHintText}>{t('first.privacyNotice')}</Text>
+              )}
+            </View>
           </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
 /* ── Styles ─────────────────────────────────────────────── */
 const styles = StyleSheet.create({
-  safeArea: {
+  root: {
     flex: 1,
     backgroundColor: colors.background || '#0F1117',
   },
@@ -469,13 +590,32 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: Platform.OS === 'ios' ? 12 : 20,
-    justifyContent: 'space-between',
   },
   header: {
-    marginBottom: 12,
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  headerDeleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248, 113, 113, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.25)',
+    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    gap: 4,
+  },
+  headerDeleteBtnText: {
+    color: '#F87171',
+    fontSize: 11,
+    fontWeight: '700',
   },
   badgeHub: {
     flexDirection: 'row',
@@ -487,7 +627,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 6,
   },
   statusDot: {
     width: 6,
@@ -495,38 +634,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: '#3B82F6',
     marginRight: 6,
-  },
-  languageScrollWrapper: {
-    height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  languageScrollContent: {
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    gap: 8,
-  },
-  langPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  langPillActive: {
-    backgroundColor: '#3B82F6',
-  },
-  langPillText: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  langPillTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
   },
   badgeHubText: {
     color: '#60A5FA',
@@ -548,12 +655,19 @@ const styles = StyleSheet.create({
   },
   scrollArea: {
     flex: 1,
+    paddingHorizontal: 20,
   },
   scrollContent: {
-    paddingVertical: 6,
+    paddingTop: 8,
+    paddingBottom: 20,
     gap: 12,
   },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   sampleDataBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -608,28 +722,42 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
     height: '100%',
   },
-  dropdown: {
+  languageScrollWrapper: {
+    height: 48,
     backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderRadius: 14,
+    borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    height: 48,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  dropDownContainer: {
-    backgroundColor: '#1E2433',
-    borderColor: 'rgb(19, 17, 17)',
-    borderRadius: 14,
-    zIndex: 3000, 
+  languageScrollContent: {
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    gap: 8,
   },
-  infoHintText: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 11.5,
-    textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 10,
-    marginTop: 4,
+  langPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  langPillActive: {
+    backgroundColor: '#3B82F6',
+  },
+  langPillText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  langPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   footer: {
-    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    backgroundColor: colors.background || '#0F1117',
   },
   primaryButton: {
     width: '100%',
@@ -653,6 +781,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  infoHintText: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 11.5,
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 10,
+    marginTop: 8,
   },
 });
 

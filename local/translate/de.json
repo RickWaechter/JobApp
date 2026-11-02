@@ -16,7 +16,7 @@
   "placeholderPassword": "Passwort",
   "placeholderEmailServer": "Wähle einen E-Mail-Server",
   "saveAndClose": "Speichern & Schließen",
-  "activateAndClose": "Aktivieren ",
+  "activateAndClose": "Aktivieren",
   "deactivateAndClose": "Deaktivieren",
   "save": "Speichern",
   "downloadProgress": "",
@@ -29,7 +29,7 @@
   "replaceExistingAttachments": "Ersetze deine bestehenden Anlagen durch die neu ausgewählten.",
   "selectedFiles": "Ausgewählte Datei(en)",
   "searchCompany": "Hier Adresse suchen",
-  "searchResult":"Hier werden die Suchergebnisse angezeigt.",
+  "searchResult": "Hier werden die Suchergebnisse angezeigt.",
   "searchCompanyOld": "Adresse der Firma suchen...",
   "companyName": "Name der Firma",
   "companyStreet": "Straße und Hausnummer der Firma",
@@ -44,7 +44,7 @@
   "generateCoverLetter": "Anschreiben generieren",
   "next": "Weiter",
   "toHome": "Schließen",
-  "ok": "Ja, klar !",
+  "ok": "Ja, klar!",
   "cancel": "Nein",
   "pleaseWait": "Bitte warten",
   "finish": "Fertig",
@@ -55,9 +55,7 @@
   "Profile": "Profil",
   "Anlagen": "Anlagen",
   "Info": "Information",
-
   "Fortsetzen": "Fortsetzen",
-
   "employmentOptions": {
     "vollzeit": "Vollzeit",
     "teilzeit": "Teilzeit",
@@ -90,12 +88,128 @@
     "minijob": "auf Minijob-Basis",
     "default": ""
   },
+  "uploadFirst": {
+    "stepBadge": "SCHRITT 2 VON 2",
+    "title": "Lebenslauf & Anlagen",
+    "subtitle": "Lade deine Bewerbungsunterlagen (Lebenslauf, Zeugnisse, Zertifikate) als PDF oder Bild hoch.",
+    "uploadHint": "Erste Datei ist automatisch dein Hauptdokument (Lebenslauf).",
+    "encryptionNotice": "Alle Dokumente werden Ende-zu-Ende verschlüsselt und ausschließlich lokal auf deinem Gerät gespeichert.",
+    "filesReady": "{{count}} Dateien bereit",
+    "filesReady_one": "1 Datei bereit",
+    "reselect": "Neu wählen",
+    "mainDoc": "Hauptdokument",
+    "attachment": "Anhang {{index}}",
+    "saving": "Wird verschlüsselt & gespeichert...",
+    "saveAndStart": "Speichern & Starten",
+    "skipLater": "Später hinzufügen",
+    "selectFilesTitle": "Dateien auswählen",
+  },
+  "bewerbung": {
+    "stepBadge": "SCHRITT 1 VON 2",
+    "mainTitle": "Bewerbung konfigurieren",
+    "sectionSalutation": "ANREDE & ANSPRECHPARTNER",
+    "sectionJob": "BERUF ODER STELLEN-LINK",
+    "sectionSkills": "KENNTNISSE & ERFAHRUNG",
+    "sectionAccordion": "Erweiterte Einstellungen",
+    "labelEmployment": "ANSTELLUNGSART",
+    "labelAppType": "BEWERBUNGSTYP",
+    "labelFont": "SCHRIFTART IM PDF",
+    "labelQuality": "Generierungsqualität",
+    "quality": {
+      "best": "Beste Qualität",
+      "medium": "Hohe Qualität",
+      "light": "Standard"
+    },
+    "options": "Optionen",
+    "btnStart": "Starten",
+    "btnBack": "Zurück",
+    "skillsSelectedCount": "{{count}} Fähigkeiten ausgewählt",
+    "skillsSelectedCount_one": "1 Fähigkeit ausgewählt",
+    "placeholderSalutation": "Nachname Ansprechpartner (z.B. Schmidt)",
+    "placeholderJob": "Berufsbezeichnung oder Link einfügen...",
+    "placeholderSkills": "z.B. 3 Jahre React Native, Teamleitung...",
+    "placeholderFont": "Schriftart wählen",
+    "btnAnalyze": "Analysieren",
+    "btnGenerate": "Anschreiben generieren",
+    "creatingApplication": "Bewerbung wird erstellt",
+    "btnCancel": "Abbrechen",
+    "infoModalMessage": "Kopiere einfach den Link einer Stellenanzeige (Indeed, StepStone, Arbeitsagentur, etc.) in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!\n\nAlternativ reicht auch einfach deine Berufsbezeichnung.",
+    "extractingTitle": "Stellenanzeige wird analysiert...",
+    "extractingSubtitle": "Wir extrahieren Keywords & Aufgaben der Stelle",
+    "extractSuccessTitle": "Erfolg!",
+    "extractSuccessMsg": "Stellenanzeige wurde erfolgreich analysiert.",
+    "extractHintTitle": "Hinweis",
+    "extractDefaultError": "Konnte keine Daten extrahieren.",
+    "invalidLinkTitle": "Ungültiger Link",
+    "invalidLinkMsg": "Bitte füge einen vollständigen Link zur Stellenanzeige ein.",
+    "timeoutTitle": "Timeout",
+    "timeoutMsg": "Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.",
+    "savedTitle": "Gespeichert",
+    "jobSavedMsg": "Berufsbezeichnung für Vorschläge gemerkt.",
+    "skillSavedMsg": "Kenntnis für Vorschläge gemerkt.",
+    "networkError": "Netzwerkfehler beim Erstellen des Textes.",
+    "salutationDearAll": "Sehr geehrte Damen und Herren,",
+    "salutationDearMr": "Sehr geehrter Herr {{name}},",
+    "salutationDearMrs": "Sehr geehrte Frau {{name}},",
+    "subjectCoverLetterFor": "e Bewerbung als ",
+    "subjectCoverLetter": "Bewerbung als ",
+    "errorTitle": "Fehler",
+    "errorLoadJob": "Stellenanzeige konnte nicht geladen werden.",
+    "fonts": {
+      "helvetica": "Helvetica (Modern & Klar)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Klassisch Serif)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Monospace)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+  "companySearchModal": {
+    "badgeManual": "ADRESSE PRÜFEN",
+    "badgeAuto": "AUTO-SUCHE",
+    "titleManual": "Firmendaten",
+    "titleAuto": "Unternehmen finden",
+    "searchPlaceholder": "Firmenname oder Ort eingeben...",
+    "promptTypeSuggestions": "Tippe, um Vorschläge anzuzeigen",
+    "searching": "Suche nach Orten...",
+    "noResults": "Keine Treffer gefunden",
+    "btnManual": "Manuell eingeben",
+    "namePlaceholder": "Firmenname",
+    "streetPlaceholder": "Straße & Hausnummer",
+    "cityPlaceholder": "PLZ & Ort",
+    "btnContinue": "Übernehmen",
+    "btnBackToSearch": "Zurück zur Suche",
+    "errorTitle": "Fehler",
+    "saveErrorMsg": "Deine Daten konnten nicht gespeichert werden.",
+    "btnOk": "OK"
+  },
+  "first": {
+    "badge": "ERSTEINRICHTUNG",
+    "heading": "Profil einrichten",
+    "subtitle": "Trage deine Kontaktdaten ein, damit Anschreiben und Dokumente automatisch personalisiert werden.",
+    "theDrop": "Alle Daten bleiben verschlüsselt und lokal auf Ihrem Gerät gespeichert – sicher und privat. Sie können diese jederzeit ändern.",
+    "insertSampleData": "Musterdaten einfügen",
+    "labelName": "VOLLSTÄNDIGER NAME",
+    "placeholderName": "z. B. Max Mustermann",
+    "labelStreet": "STRASSE & HAUSNUMMER",
+    "placeholderStreet": "z. B. Musterstraße 12",
+    "labelCity": "PLZ & WOHNORT",
+    "placeholderCity": "z. B. 10115 Berlin",
+    "labelLanguage": "SPRACHE",
+    "privacyNotice": "Deine Daten werden ausschließlich lokal und sicher verschlüsselt auf diesem Gerät gespeichert.",
+    "saving": "Wird gespeichert...",
+    "saveBtn": "Profil speichern & weiter",
+    "error": "Bitte fülle alle Felder aus",
+    "errorMissingFieldsTitle": "Angaben unvollständig",
+    "errorMissingFieldsMsg": "Bitte fülle deinen Namen, deine Straße und deinen Wohnort aus.",
+    "dbInitError": "Datenbank konnte nicht initialisiert werden.",
+    "encryptionError": "Daten konnten nicht sicher verschlüsselt werden."
+  },
   "enterText": "Gib hier deinen Text ein...",
   "saveCoverLetter": "Anschreiben speichern",
   "merge": "Zusammenführen",
   "viewApplication": "Bewerbung ansehen",
   "viewApplicationDescription": "Überprüfe deine Bewerbungsmappe, um Fehler vor dem Herunterladen oder Versenden zu vermeiden.",
-
   "downloadDescription": "Speichere die Bewerbungsmappe als PDF auf deinem Gerät und sende sie an deine Wunschposition.",
   "sendEmail": "Per E-Mail senden",
   "sendEmailDescription": "Sende deine Bewerbungsmappe direkt per E-Mail. Der Nachrichtentext wird automatisch generiert, kann aber vor dem Versand angepasst werden. ✉️",
@@ -124,7 +238,6 @@
     "email": {
       "placeholder": "E-Mail",
       "sendButton": "E-Mail senden"
-
     },
     "subject": {
       "placeholder": "Betreff"
@@ -132,8 +245,10 @@
     "message": {
       "placeholder": "Nachricht"
     },
+    
     "messageText": "Sehr geehrte Damen und Herren,\n\nhiermit bewerbe ich mich auf die Stelle als {{jobTitle}} bei {{companyName}}.\n\nMit freundlichen Grüßen,\n{{applicantName}}"
   },
+  "closing": "Mit freundlichen Grüßen",
   "emailSent": {
     "success": "E-Mail erfolgreich gesendet!",
     "error": "Fehler beim Senden der E-Mail. Bitte versuche es erneut."
@@ -225,7 +340,6 @@
       "required": "Bitte Anrede wählen",
       "contactRequired": "Bitte Ansprechpartner eintragen"
     },
-  
     "job": {
       "required": "Beruf ist erforderlich!"
     },
@@ -236,12 +350,11 @@
       "required": "Bitte gib deinen Namen ein",
       "minWords": "Der Name muss mindestens aus 2 Wörtern bestehen!"
     },
-
-     "nameCompany": {
+    "nameCompany": {
       "required": "Bitte gib den Firmennamen ein"
     },
     "city": {
-      "required": "Biite gebe die Postleitzahl und Stadt an."
+      "required": "Bitte gebe die Postleitzahl und Stadt an."
     },
     "street": {
       "required": "Bitte gebe die Straße und Hausnummer an.",
@@ -251,7 +364,7 @@
       "required": "Bitte gib eine E-Mail-Adresse ein",
       "invalid": "Bitte gib eine korrekte E-Mail-Adresse ein"
     },
-    "generating": "Bitte warten. \n Dein Bewerbungstext wird generiert."
+    "generating": "Bitte warten.\nDein Bewerbungstext wird generiert."
   },
   "alerts": {
     "error": {
@@ -262,18 +375,17 @@
     }
   },
   "common": {
+    "error": "Fehler",
     "ok": "OK",
-     "infoBadge": "Informationen",
-  "understood": "Verstanden"
+    "infoBadge": "Informationen",
+    "understood": "Verstanden"
   },
-
   "email": {
     "sendButton": "Absenden",
     "placeholder": "E-Mail-Adresse"
   },
   "offlineHeader": "Lokal Bewerbung erstellen",
   "offlineMain": "Erstelle deine Bewerbung einfach und professionell, ganz lokal auf deinem Gerät",
-
   "settings": {
     "title": "Einstellungen",
     "language": "Menü-Sprache",
@@ -282,8 +394,8 @@
     "lightMode": "Hellmodus",
     "languageSaved": "Sprache gespeichert",
     "languageChange": "Sprache ändern",
-    "apiKey": "Eigene API vewenden",
-    "apiKeyKey": "Api-Key eingeben",
+    "apiKey": "Eigene API verwenden",
+    "apiKeyKey": "API-Key eingeben",
     "changeMode": "Dunkelmodus aktivieren",
     "pleaseApi": "Bitte wählen Sie eine API aus.",
     "changeApiText": "API-Key verwenden",
@@ -294,11 +406,6 @@
   "saveFile": "Datei speichern",
   "saveFileText": "Speichere die Anlagen, um sie später für deine Bewerbungsmappen zu verwenden.",
   "Continue": "Überspringen",
-  "first": {
-    "heading": "Willkommen bei JobApp 2",
-    "theDrop": "Alle Daten bleiben verschlüsselt und lokal auf Ihrem Gerät gespeichert – sicher und privat. Sie können diese jederzeit ändern.",
-    "error": "Bitte fülle alle Felder aus"
-  },
   "ownName": "Ihren Vor- und Nachnamen",
   "ownStreet": "Ihre Straße und Hausnummer",
   "ownCity": "Ihre PLZ und Ort",
@@ -307,10 +414,10 @@
   "download": {
     "titleFirma": "Firmenliste herunterladen",
     "messageFirma": "Möchten Sie das Verzeichnis für ca. 5.3 Millionen Namen von Firmen bzw. Unternehmen in Deutschland herunterladen? (Keine Adressen)",
-    "titleStreet": "Firmenliste herunterladen",
+    "titleStreet": "Straßenliste herunterladen",
     "messageStreet": "Möchten Sie alle Straßennamen von Deutschland herunterladen?",
-    "titleCity": "Firmenliste herunterladen",
-    "messageCity": "Möchten Sie alle Städte inklsuiver ihrer Postleitzahl herunterladen?",
+    "titleCity": "Städteliste herunterladen",
+    "messageCity": "Möchten Sie alle Städte inklusive ihrer Postleitzahl herunterladen?",
     "titleJob": "Berufsliste herunterladen",
     "messageJob": "Möchten Sie über 3500 Berufe-Namen herunterladen?",
     "button": "Herunterladen"
@@ -320,29 +427,29 @@
     "applicationSent": "Deine Bewerbungsmappe wurde erfolgreich versendet"
   },
   "changeOld": {
-  "stepBadge": "VORLAGE ANPASSEN",
-  "editorHeader": "Betreff & Text",
-  "wordCount": "{{count}} Wörter",
-  "wordCount_one": "1 Wort",
-  "subjectPlaceholder": "Betreff eingeben...",
-  "textPlaceholder": "Hier Text eingeben...",
-  "creatingFolder": "Bewerbungsmappe wird erstellt{{dots}}",
-  "submitButton": "Mappe generieren & fortsetzen"
-},
+    "stepBadge": "VORLAGE ANPASSEN",
+    "editorHeader": "Betreff & Text",
+    "wordCount": "{{count}} Wörter",
+    "wordCount_one": "1 Wort",
+    "subjectPlaceholder": "Betreff eingeben...",
+    "textPlaceholder": "Hier Text eingeben...",
+    "creatingFolder": "Bewerbungsmappe wird erstellt{{dots}}",
+    "submitButton": "Mappe generieren & fortsetzen"
+  },
   "upload": {
     "title": "Erfolgreich",
     "info": "Dateien wurden erfolgreich gespeichert.",
-    "error":"Zuviele Dateien ausgewählt. Bitte nur maximal 11 Dateien auswählen.",
+    "error": "Zu viele Dateien ausgewählt. Bitte nur maximal 11 Dateien auswählen.",
     "headerBlue": "DOKUMENTE & ANLAGEN",
-    "headerWhite":"Unterlagen verwalten",
+    "headerWhite": "Unterlagen verwalten",
     "headerInfo": "Lade deinen Lebenslauf und Zeugnisse hoch oder passe die Reihenfolge deiner Mappe an.",
     "press": "Gedrückt halten & ziehen, um zu ordnen",
     "mainDocument": "Hauptdokument (Lebenslauf)",
-  "attachment": "Anhang {{index}}",
-  "deleteAlertTitle": "Anhang löschen",
-  "deleteAlertMessage": "Möchtest du \"{{name}}\" wirklich entfernen?",
-  "deleteAlertCancel": "Abbrechen",
-  "deleteAlertConfirm": "Löschen"
+    "attachment": "Anhang {{index}}",
+    "deleteAlertTitle": "Anhang löschen",
+    "deleteAlertMessage": "Möchtest du \"{{name}}\" wirklich entfernen?",
+    "deleteAlertCancel": "Abbrechen",
+    "deleteAlertConfirm": "Löschen"
   },
   "profil": {
     "title": "Erfolgreich",
@@ -351,120 +458,58 @@
     "error": "Fehler",
     "errorDataEmail": "Bitte alle Felder ausfüllen.",
     "errorEmail": "Deine E-Mail-Einstellungen konnten nicht gespeichert werden.",
-    "languageError": "Bitte wähle Sie eine Sprache aus.",
+    "languageError": "Bitte wählen Sie eine Sprache aus.",
     "languageSaved": "Ihre ausgewählte Sprache ist nun verfügbar",
     "buyCancel": "Kauf wurde abgebrochen.",
-    "coinsVerwalten": "Coins verwalten",
-    "coinsText":" Erhalte neue Coins per Video oder Sofort-Aufladung",
     "welcomeBack": "Willkommen zurück",
+    "defaultProfileName": "Mein Profil",
+    "coinsCount": "{{count}} Coins",
+    "coinsCountLoading": "… Coins",
+    "sectionSettings": "EINSTELLUNGEN & DATEN",
+    "sectionTopUp": "GUTHABEN AUFLADEN",
+    "defaultAddressDesc": "Adresse & Name hinterlegen",
+    "defaultEmailDesc": "SMTP-Daten für direkten Versand",
+    "coinsVerwalten": "Coins verwalten",
+    "coinsText": "Erhalte neue Coins per Video oder Sofort-Aufladung",
     "experienceTitle": "Werdegang & Fähigkeiten",
-  "experienceDesc": "Aktuell {{count}} Stationen hinterlegt",
-  "experienceDesc_one": "Aktuell 1 Station hinterlegt"
-
-    
+    "experienceDesc": "Aktuell {{count}} Stationen hinterlegt",
+    "experienceDesc_one": "Aktuell 1 Station hinterlegt",
+    "modalDataSubtitle": "Diese Daten werden im Anschreiben genutzt",
+    "modalEmailTitle": "E-Mail Versand",
+    "modalEmailSubtitle": "Absenderdaten für automatische Bewerbungen",
+    "modalLangTitle": "Sprache wählen",
+    "modalLangSubtitle": "Wähle deine bevorzugte Sprache",
+    "modalCoinsTitle": "Coins aufladen",
+    "modalCoinsSubtitle": "Nutze Coins für das Erstellen von Bewerbungen",
+    "packTitle": "+40 Coins Paket",
+    "packBadge": "BELIEBT",
+    "packDesc": "Sofortige Freischaltung ohne Werbung",
+    "adTitle": "+4 Coins gratis",
+    "adDesc": "Kurzes Werbevideo ansehen",
+    "cvModalTitle": "Werdegang & CV",
+    "cvModalSubtitle": "Stationen verwalten oder einscannen",
+    "scanTitle": "Lebenslauf scannen",
+    "scanBadge": "OCR",
+    "scanDesc": "PDF oder Bild wählen – Daten automatisch einfügen",
+    "sectionExperience": "Werdegang ({{count}})",
+    "btnAdd": "Hinzufügen",
+    "emptyExperience": "Noch keine Stationen hinterlegt.",
+    "stationBadge": "Station #{{index}}",
+    "labelRole": "Position / Rolle",
+    "placeholderRole": "z. B. Fachinformatiker",
+    "labelCompany": "Unternehmen",
+    "placeholderCompany": "z. B. Daimler AG",
+    "labelPeriod": "Zeitraum",
+    "placeholderPeriod": "08/2020 – Heute",
+    "labelTasks": "Tätigkeiten & Erfolge (Stichpunkte)",
+    "placeholderTasks": "• Entwicklung von React Native Apps\n• Migration auf Go Microservices",
+    "btnSaveCv": "Übernehmen & Schließen"
   },
-        "emailDelete": "Email erfolgreich gelöscht",
-"deleteTitle": "Eintrag löschen",
-"deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
-"delete": "Löschen",
-
-"profil": {
-  "welcomeBack": "Willkommen zurück",
-  "defaultProfileName": "Mein Profil",
-  "coinsCount": "{{count}} Coins",
-  "coinsCountLoading": "… Coins",
-  "sectionSettings": "EINSTELLUNGEN & DATEN",
-  "sectionTopUp": "GUTHABEN AUFLADEN",
-  "defaultAddressDesc": "Adresse & Name hinterlegen",
-  "defaultEmailDesc": "SMTP-Daten für direkten Versand",
-  "coinsVerwalten": "Coins verwalten",
-  "coinsText": "Erhalte neue Coins per Video oder Sofort-Aufladung",
-  "experienceTitle": "Werdegang & Fähigkeiten",
-  "experienceDesc": "Aktuell {{count}} Stationen hinterlegt",
-  "experienceDesc_one": "Aktuell 1 Station hinterlegt",
-  "modalDataSubtitle": "Diese Daten werden im Anschreiben genutzt",
-  "modalEmailTitle": "E-Mail Versand",
-  "modalEmailSubtitle": "Absenderdaten für automatische Bewerbungen",
-  "modalLangTitle": "Sprache wählen",
-  "modalLangSubtitle": "Wähle deine bevorzugte Sprache",
-  "modalCoinsTitle": "Coins aufladen",
-  "modalCoinsSubtitle": "Nutze Coins für das Erstellen von Bewerbungen",
-  "packTitle": "+40 Coins Paket",
-  "packBadge": "BELIEBT",
-  "packDesc": "Sofortige Freischaltung ohne Werbung",
-  "adTitle": "+4 Coins gratis",
-  "adDesc": "Kurzes Werbevideo ansehen",
-  "cvModalTitle": "Werdegang & CV",
-  "cvModalSubtitle": "Stationen verwalten oder einscannen",
-  "scanTitle": "Lebenslauf scannen",
-  "scanBadge": "OCR",
-  "scanDesc": "PDF oder Bild wählen – Daten automatisch einfügen",
-  "sectionExperience": "Werdegang ({{count}})",
-  "btnAdd": "Hinzufügen",
-  "emptyExperience": "Noch keine Stationen hinterlegt.",
-  "stationBadge": "Station #{{index}}",
-  "labelRole": "Position / Rolle",
-  "placeholderRole": "z. B. Fachinformatiker",
-  "labelCompany": "Unternehmen",
-  "placeholderCompany": "z. B. Daimler AG",
-  "labelPeriod": "Zeitraum",
-  "placeholderPeriod": "08/2020 – Heute",
-  "labelTasks": "Tätigkeiten & Erfolge (Stichpunkte)",
-  "placeholderTasks": "• Entwicklung von React Native Apps\n• Migration auf Go Microservices",
-  "btnSaveCv": "Übernehmen & Schließen"
-},
-
-"emailSearch": "Emails werden gesucht.",
-"bewerbung": {
-    "stepBadge": "SCHRITT 1 VON 2",
-    "mainTitle": "Bewerbung konfigurieren",
-    "sectionSalutation": "ANREDE & ANSPRECHPARTNER",
-    "sectionJob": "BERUF ODER STELLEN-LINK",
-    "sectionSkills": "KENNTNISSE & ERFAHRUNG",
-    "sectionAccordion": "Erweiterte Einstellungen",
-    "labelEmployment": "ANSTELLUNGSART",
-    "labelAppType": "BEWERBUNGSTYP",
-    "labelFont": "SCHRIFTART IM PDF",
-    "placeholderSalutation": "Nachname Ansprechpartner (z.B. Schmidt)",
-    "placeholderJob": "Berufsbezeichnung oder Link einfügen...",
-    "placeholderSkills": "z.B. 3 Jahre React Native, Teamleitung...",
-    "placeholderFont": "Schriftart wählen",
-    "btnAnalyze": "Analysieren",
-    "btnGenerate": "Anschreiben generieren",
-    "creatingApplication": "Bewerbung wird erstellt",
-    "btnCancel": "Abbrechen",
-    "infoModalMessage": "Kopiere einfach den Link einer Stellenanzeige (Indeed, StepStone, Arbeitsagentur, etc.) in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!\n\nAlternativ reicht auch einfach deine Berufsbezeichnung.",
-    "extractingTitle": "Stellenanzeige wird analysiert...",
-    "extractingSubtitle": "Wir extrahieren Keywords & Aufgaben der Stelle",
-    "extractSuccessTitle": "Erfolg!",
-    "extractSuccessMsg": "Stellenanzeige wurde erfolgreich analysiert.",
-    "extractHintTitle": "Hinweis",
-    "extractDefaultError": "Konnte keine Daten extrahieren.",
-    "invalidLinkTitle": "Ungültiger Link",
-    "invalidLinkMsg": "Bitte füge einen vollständigen Link zur Stellenanzeige ein.",
-    "timeoutTitle": "Timeout",
-    "timeoutMsg": "Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.",
-    "savedTitle": "Gespeichert",
-    "jobSavedMsg": "Berufsbezeichnung für Vorschläge gemerkt.",
-    "skillSavedMsg": "Kenntnis für Vorschläge gemerkt.",
-    "networkError": "Netzwerkfehler beim Erstellen des Textes.",
-    "salutationDearAll": "Sehr geehrte Damen und Herren,",
-    "salutationDearMr": "Sehr geehrter Herr {{name}},",
-    "salutationDearMrs": "Sehr geehrte Frau {{name}},",
-    "subjectCoverLetterFor": "e Bewerbung als ",
-    "subjectCoverLetter": "Bewerbung als ",
-    "errorTitle": "Fehler",
-    "errorLoadJob": "Stellenanzeige konnte nicht geladen werden.",
-    "fonts": {
-      "helvetica": "Helvetica (Modern & Klar)",
-      "helveticaOblique": "Helvetica Oblique",
-      "timesRoman": "Times Roman (Klassisch Serif)",
-      "timesRomanItalic": "Times Roman Italic",
-      "courier": "Courier (Monospace)",
-      "courierOblique": "Courier Oblique"
-    }
-  },
-  
+  "emailDelete": "E-Mail erfolgreich gelöscht",
+  "deleteTitle": "Eintrag löschen",
+  "deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+  "delete": "Löschen",
+  "emailSearch": "E-Mails werden gesucht.",
   "startApp": {
     "badgeHub": "BEWERBUNGS-ASSISTENT",
     "titleMain": "Wie möchtest du starten?",
@@ -481,26 +526,7 @@
     "alertDbLoadError": "Fehler beim Laden der Daten.",
     "alertDbConnectionError": "Datenbankverbindung fehlgeschlagen."
   },
-  "companySearchModal": {
-    "badgeManual": "ADRESSE PRÜFEN",
-    "badgeAuto": "AUTO-SUCHE",
-    "titleManual": "Firmendaten",
-    "titleAuto": "Unternehmen finden",
-    "searchPlaceholder": "Firmenname oder Ort eingeben...",
-    "promptTypeSuggestions": "Tippe, um Vorschläge anzuzeigen",
-    "searching": "Suche nach Orten...",
-    "noResults": "Keine Treffer gefunden",
-    "btnManual": "Manuell eingeben",
-    "namePlaceholder": "Firmenname",
-    "streetPlaceholder": "Straße & Hausnummer",
-    "cityPlaceholder": "PLZ & Ort",
-    "btnContinue": "Übernehmen",
-    "btnBackToSearch": "Zurück zur Suche",
-    "errorTitle": "Fehler",
-    "saveErrorMsg": "Deine Daten konnten nicht gespeichert werden.",
-    "btnOk": "OK"
-  },
-"info": {
+  "info": {
     "title": "Info",
     "subtitle": "Fehler beim Laden der Daten.",
     "btnOk": "Verstanden",
@@ -511,36 +537,35 @@
     "coins": "Laden Sie Ihr Guthaben flexibel auf, indem Sie kurze Werbeclips ansehen oder zusätzliche Coins im Shop erwerben.\n\nIhre Coins können Sie anschließend jederzeit für die Erstellung neuer Bewerbungen einlösen.",
     "choose": "Wählen Sie hier die Dokumente und Nachweise aus, die Ihrer Bewerbung beigefügt werden sollen.\n\nSie können neue Anlagen hinzufügen, bestehende Dateien flexibel austauschen oder nicht mehr benötigte Dokumente entfernen.",
     "sort": "Bringen Sie Ihre Anlagen in die gewünschte Reihenfolge. Die Dokumente werden genau in dieser Abfolge an Ihre Bewerbung angehängt.\n\nHalten Sie einen Eintrag gedrückt, um ihn nach oben oder unten zu verschieben.",
-  "new": "Erstellen Sie ein maßgeschneidertes Anschreiben, das exakt auf das Anforderungsprofil Ihrer Wunschstelle abgestimmt ist.\n\nGeben Sie einfach die Eckdaten des Unternehmens und der Stelle ein – der Assistent formuliert den Text passgenau anhand Ihres Profils.",
+    "new": "Erstellen Sie ein maßgeschneidertes Anschreiben, das exakt auf das Anforderungsprofil Ihrer Wunschstelle abgestimmt ist.\n\nGeben Sie einfach die Eckdaten des Unternehmens und der Stelle ein – der Assistent formuliert den Text passgenau anhand Ihres Profils.",
     "old": "Greifen Sie auf bereits erstellte Bewerbungen zurück, um Zeit und Aufwand zu sparen.\n\nSie können frühere Dokumente als Vorlage verwenden, Inhalte für eine ähnliche Stelle adaptieren oder einzelne Abschnitte flexibel aktualisieren.",
-  "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können."
-  
-},
-"history": {
-  "headerBadge": "HISTORIE & VORLAGEN",
-  "title": "Frühere Bewerbungen",
-  "subtitle": "Öffne fertige Mappen oder passe bestehende Texte für eine neue Firma an.",
-  "totalCount": "{{count}} Bewerbungen insgesamt",
-  "totalCount_one": "1 Bewerbung insgesamt",
-  "emptyTitle": "Keine Vorlagen vorhanden",
-  "emptySubtitle": "Sobald du deine erste Bewerbung erstellst, wird sie hier automatisch gespeichert.",
-  "newApplicationBtn": "Neue Bewerbung starten",
-  "defaultJobTitle": "Unbenannte Bewerbung",
-  "pdfAttached": "PDF vorhanden",
-  "openFolder": "Mappe öffnen",
-  "reuseTemplate": "Neu verwenden"
-},
-"editor": {
-  "headerTitle": "Text-Editor",
-  "wordCount": "{{count}} Wörter",
-  "wordCount_one": "1 Wort",
-  "placeholder": "Hier Text eingeben...",
-  "creatingFolder": "Bewerbungsmappe wird erstellt",
-  "generateButton": "Mappe generieren & fortsetzen"
-},
-"completed": {
-  "badge": "FERTIGGESTELLT",
-  "title": "Bewerbungsmappe bereit!",
-  "subtitle": "Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt."
-}
+    "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können."
+  },
+  "history": {
+    "headerBadge": "HISTORIE & VORLAGEN",
+    "title": "Frühere Bewerbungen",
+    "subtitle": "Öffne fertige Mappen oder passe bestehende Texte für eine neue Firma an.",
+    "totalCount": "{{count}} Bewerbungen insgesamt",
+    "totalCount_one": "1 Bewerbung insgesamt",
+    "emptyTitle": "Keine Vorlagen vorhanden",
+    "emptySubtitle": "Sobald du deine erste Bewerbung erstellst, wird sie hier automatisch gespeichert.",
+    "newApplicationBtn": "Neue Bewerbung starten",
+    "defaultJobTitle": "Unbenannte Bewerbung",
+    "pdfAttached": "PDF vorhanden",
+    "openFolder": "Mappe öffnen",
+    "reuseTemplate": "Neu verwenden"
+  },
+  "editor": {
+    "headerTitle": "Text-Editor",
+    "wordCount": "{{count}} Wörter",
+    "wordCount_one": "1 Wort",
+    "placeholder": "Hier Text eingeben...",
+    "creatingFolder": "Bewerbungsmappe wird erstellt",
+    "generateButton": "Mappe generieren & fortsetzen"
+  },
+  "completed": {
+    "badge": "FERTIGGESTELLT",
+    "title": "Bewerbungsmappe bereit!",
+    "subtitle": "Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt."
+  }
 }

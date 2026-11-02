@@ -195,116 +195,140 @@ const UploadScreen = () => {
     router.dismissTo('(tabs)');
   };
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* ── Header ── */}
-        <View style={styles.header}>
-          <View style={styles.badgeHub}>
-            <View style={styles.statusDot} />
-            <Text style={styles.badgeHubText}>SCHRITT 2 VON 2</Text>
-          </View>
-          <Text style={styles.titleMain}>Lebenslauf & Anlagen</Text>
-          <Text style={styles.subtitleMain}>
-            Lade deine Bewerbungsunterlagen (Lebenslauf, Zeugnisse, Zertifikate) als PDF oder Bild hoch.
-          </Text>
+return (
+  <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
+      {/* ── Header ── */}
+      <View style={styles.header}>
+        <View style={styles.badgeHub}>
+          <View style={styles.statusDot} />
+          <Text style={styles.badgeHubText}>{t('uploadFirst.stepBadge')}</Text>
         </View>
-
-        {/* ── Modus 1: Keine Dateien ausgewählt ── */}
-        {files.length === 0 ? (
-          <View style={styles.centerContainer}>
-            <UploadActionCard
-              iconName="upload-file"
-              title={t('uploadFiles') || 'Dateien auswählen'}
-              description={t('selectFilesToUpload') || 'Erste Datei ist automatisch dein Hauptdokument (Lebenslauf).'}
-              onPress={handleFileChange}
-            />
-
-            <View style={styles.infoBox}>
-              <MaterialIcons name="lock-outline" size={18} color="#60A5FA" style={{ marginRight: 8 }} />
-              <Text style={styles.infoBoxText}>
-                Alle Dokumente werden Ende-zu-Ende verschlüsselt und ausschließlich lokal auf deinem Gerät gespeichert.
-              </Text>
-            </View>
-          </View>
-        ) : (
-          /* ── Modus 2: Dateien in Staging-Ansicht ── */
-          <View style={styles.stagedContainer}>
-            <View style={styles.stagedCard}>
-              <View style={styles.stagedHeader}>
-                <View style={styles.stagedHeaderLeft}>
-                  <MaterialIcons name="inventory-2" size={20} color="#60A5FA" />
-                  <Text style={styles.stagedTitle}>
-                    {files.length} {files.length === 1 ? 'Datei' : 'Dateien'} bereit
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => setFiles([])}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Text style={styles.cancelText}>Neu wählen</Text>
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView style={styles.stagedList} showsVerticalScrollIndicator={false}>
-                {files.map((file, index) => (
-                  <View key={index} style={styles.stagedItem}>
-                    <View style={[styles.fileBadge, index === 0 && styles.fileBadgeCv]}>
-                      <Text style={styles.fileBadgeText}>{index === 0 ? 'CV' : `${index}`}</Text>
-                    </View>
-                    <View style={styles.fileItemInfo}>
-                      <Text style={styles.stagedFileName} numberOfLines={1}>
-                        {file.filename}
-                      </Text>
-                      <Text style={styles.stagedFileSize}>
-                        {index === 0 ? 'Hauptdokument' : `Anhang ${index}`} • {(file.size / 1024).toFixed(0)} KB
-                      </Text>
-                    </View>
-                    <MaterialIcons name="check-circle" size={18} color="#10B981" />
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-
-            {/* Speichern Button */}
-            <TouchableOpacity
-              style={styles.primaryBtn}
-              onPress={handleSaveToDB}
-              disabled={isSaving || isProcessing}
-              activeOpacity={0.85}
-            >
-              {isSaving ? (
-                <View style={styles.loadingRow}>
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                  <Text style={styles.primaryBtnText}>Wird verschlüsselt & gespeichert...</Text>
-                </View>
-              ) : (
-                <View style={styles.loadingRow}>
-                  <Text style={styles.primaryBtnText}>Speichern & Starten</Text>
-                  <MaterialIcons name="arrow-forward" size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* ── Footer ── */}
-        {files.length === 0 && (
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.ghostBtn}
-              onPress={handleSkipOrContinue}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.ghostBtnText}>Später hinzufügen</Text>
-              <MaterialIcons name="arrow-forward-ios" size={13} color="rgba(255,255,255,0.4)" style={{ marginLeft: 6 }} />
-            </TouchableOpacity>
-          </View>
-        )}
+        <Text style={styles.titleMain}>{t('uploadFirst.title')}</Text>
+        <Text style={styles.subtitleMain}>{t('uploadFirst.subtitle')}</Text>
       </View>
-    </SafeAreaView>
-  );
-};
+
+      {/* ── Modus 1: Keine Dateien ausgewählt ── */}
+      {files.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <UploadActionCard
+            iconName="upload-file"
+            title={t('uploadFirst.selectFilesTitle')}
+            description={t('uploadFirst.uploadHint')}
+            onPress={handleFileChange}
+          />
+
+          <View style={styles.infoBox}>
+            <MaterialIcons
+              name="lock-outline"
+              size={18}
+              color="#60A5FA"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.infoBoxText}>
+              {t('uploadFirst.encryptionNotice')}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        /* ── Modus 2: Dateien in Staging-Ansicht ── */
+        <View style={styles.stagedContainer}>
+          <View style={styles.stagedCard}>
+            <View style={styles.stagedHeader}>
+              <View style={styles.stagedHeaderLeft}>
+                <MaterialIcons name="inventory-2" size={20} color="#60A5FA" />
+                <Text style={styles.stagedTitle}>
+                  {t('uploadFirst.filesReady', { count: files.length })}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setFiles([])}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.cancelText}>{t('uploadFirst.reselect')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              style={styles.stagedList}
+              showsVerticalScrollIndicator={false}
+            >
+              {files.map((file, index) => (
+                <View key={index} style={styles.stagedItem}>
+                  <View
+                    style={[styles.fileBadge, index === 0 && styles.fileBadgeCv]}
+                  >
+                    <Text style={styles.fileBadgeText}>
+                      {index === 0 ? t('uploadFirst.cvBadge') : `${index}`}
+                    </Text>
+                  </View>
+                  <View style={styles.fileItemInfo}>
+                    <Text style={styles.stagedFileName} numberOfLines={1}>
+                      {file.filename}
+                    </Text>
+                    <Text style={styles.stagedFileSize}>
+                      {index === 0
+                        ? t('uploadFirst.mainDoc')
+                        : t('uploadFirst.attachment', { index })}{' '}
+                      • {(file.size / 1024).toFixed(0)} KB
+                    </Text>
+                  </View>
+                  <MaterialIcons name="check-circle" size={18} color="#10B981" />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Speichern Button */}
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={handleSaveToDB}
+            disabled={isSaving || isProcessing}
+            activeOpacity={0.85}
+          >
+            {isSaving ? (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={styles.primaryBtnText}>{t('uploadFirst.saving')}</Text>
+              </View>
+            ) : (
+              <View style={styles.loadingRow}>
+                <Text style={styles.primaryBtnText}>
+                  {t('uploadFirst.saveAndStart')}
+                </Text>
+                <MaterialIcons
+                  name="arrow-forward"
+                  size={18}
+                  color="#FFFFFF"
+                  style={{ marginLeft: 6 }}
+                />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* ── Footer ── */}
+      {files.length === 0 && (
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.ghostBtn}
+            onPress={handleSkipOrContinue}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.ghostBtnText}>{t('uploadFirst.skipLater')}</Text>
+            <MaterialIcons
+              name="arrow-forward-ios"
+              size={13}
+              color="rgba(255,255,255,0.4)"
+              style={{ marginLeft: 6 }}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  </SafeAreaView>
+);}
 
 /* ── Styles ─────────────────────────────────────────────── */
 const styles = StyleSheet.create({

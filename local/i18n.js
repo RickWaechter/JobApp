@@ -11,7 +11,7 @@ import en from './translate/en.json';
 import es from './translate/es.json';   // Spanisch
 import fa from './translate/fa.json';   // Persisch / Farsi / Dari
 import fr from './translate/fr.json';
-import gr from './translate/gr.json';
+import el from './translate/el.json';
 import it from './translate/it.json';
 import jp from './translate/jp.json';
 import nl from './translate/nl.json';
@@ -26,7 +26,7 @@ const resources = {
   de: { translation: de },
   tr: { translation: tr },
   ar: { translation: ar },
-  gr: { translation: gr },
+  el: { translation: el },
   fr: { translation: fr },
   it: { translation: it },
   jp: { translation: jp },
