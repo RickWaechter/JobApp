@@ -28,6 +28,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Keychain from 'react-native-keychain';
 import Pdf from 'react-native-pdf';
 import SQLite from 'react-native-sqlite-storage';
+import Info, { useInfoModal } from "../../comp/info.js";
 
 import colors from '../../inc/colors.js';
 import {
@@ -37,7 +38,6 @@ import {
   encryptBase64,
   genIv,
 } from '../../inc/cryp.js';
-import Info from "../../comp/info.js";
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -107,13 +107,11 @@ const DocumentActionCard = memo(({ title, onIconPress, description, iconName, on
 const UploadScreen = () => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-
+  const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [data, setData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [textInfo, setTextInfo] = useState('');
   const [db, setDb] = useState(null);
   const [source, setSource] = useState(null);
   const [activePdfId, setActivePdfId] = useState(null);
@@ -572,7 +570,7 @@ const UploadScreen = () => {
               >
                 <DocumentActionCard
                   isPrimary={true}
-                  onIconPress={() => handleInfo('choose')}
+                  onIconPress={() => openInfo(t('info.choose'))}
                   iconName="upload-file"
                   title={t('uploadFiles') || 'Dateien auswählen'}
                   description={t('selectFilesToUpload') || 'PDFs oder Bilder von deinem Gerät auswählen.'}
@@ -581,7 +579,7 @@ const UploadScreen = () => {
 
                 <DocumentActionCard
                   iconName="reorder"
-                  onIconPress={() => handleInfo('sort')}
+                  onIconPress={() => openInfo(t('info.sort'))}
                   title={t('sortAttachments') || 'Anlagen sortieren'}
                   description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
                   onPress={openSortView}
@@ -820,6 +818,8 @@ const UploadScreen = () => {
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="sync" size={18} color="rgba(255,255,255,0.8)" style={{ marginRight: 6 }} />
+            
+                  
                   <Text style={styles.btnSecondaryText}>Alle alten Dateien ersetzen</Text>
                 </TouchableOpacity>
               </View>
@@ -864,8 +864,11 @@ const UploadScreen = () => {
           </View>
         </View>
       </Modal>
-
-      <Info message={textInfo} visible={infoModalVisible} onClose={() => setInfoModalVisible(false)} />
+ <Info
+        visible={infoVisible}
+        onClose={closeInfo}
+        message={infoMessage}
+      />
     </View>
   );
 };

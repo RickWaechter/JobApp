@@ -27,10 +27,10 @@ import {
   View,
 } from 'react-native';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import {thePrompt} from '../inc/ai.js'
+import { thePrompt } from '../inc/ai.js';
 import axios from 'axios';
 import { InteractionManager } from 'react-native';
-import {  getI18nCode, itemsLang } from '../inc/language.js';
+import { getI18nCode, itemsLang } from '../inc/language.js';
 import { sha512 } from 'js-sha512';
 import { useTranslation } from 'react-i18next';
 import DeviceInfo from 'react-native-device-info';
@@ -40,9 +40,8 @@ import RNFS from 'react-native-fs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
 import { WebView } from 'react-native-webview';
-
 import { decryp } from '../inc/cryp.js';
-import Info from '../comp/info.js';
+import Info, { useInfoModal } from '../comp/info.js';
 import colors from '../inc/colors.js';
 import { runQuery } from '../inc/db.js';
 import { getKeyboardHeight } from '../inc/keyboardStorage.js';
@@ -54,7 +53,6 @@ import {
   stepstoneScript,
 } from '../inc/scrapper.js';
 
-// Falls downloader aus einem anderen Modul bezogen wird, Pfad hier anpassen:
 import { downloader } from '../inc/downloader.js';
 
 const { width, height } = Dimensions.get('window');
@@ -97,16 +95,35 @@ const PLATFORMS = [
 ];
 
 /* ── Subkomponenten ─────────────────────────────────────── */
-const CardHeader = memo(({ icon, title, rightElement }) => (
+const CardHeader = memo(({ icon, title, rightElement, onInfo }) => (
   <View style={styles.cardHeaderRow}>
-    <View style={styles.headerLeft}>
+    <TouchableOpacity
+      style={styles.headerLeft}
+      onPress={onInfo}
+      disabled={!onInfo}
+      activeOpacity={0.7}
+      hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+    >
       <View style={styles.iconBadge}>
         <MaterialIcons name={icon} size={18} color={WARM.iconLeading} />
       </View>
       <Text style={styles.fieldLabel}>{title}</Text>
-    </View>
+    </TouchableOpacity>
     {rightElement}
   </View>
+));
+
+const FieldLabelWithIcon = memo(({ icon, label, onPress }) => (
+  <TouchableOpacity
+    style={styles.labelRowWithIcon}
+    onPress={onPress}
+    disabled={!onPress}
+    activeOpacity={0.7}
+    hitSlop={{ top: 8, bottom: 8, left: 6, right: 8 }}
+  >
+    <MaterialIcons name={icon} size={15} color={WARM.iconLeading} />
+    <Text style={styles.subFieldLabelText}>{label}</Text>
+  </TouchableOpacity>
 ));
 
 const SegmentedPills = memo(({ options, selected, onSelect, labels }) => (
@@ -351,11 +368,11 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 
 /* ── Hauptkomponente ────────────────────────────────────── */
 const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, onClose }, ref) => {
-  const { t, i18n } = useTranslation(); // <-- i18n ergänzt
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width: winW } = useWindowDimensions();
   const { dbMainRef, dbJobsRef, isDbReady } = useDatabase();
-
+  const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
   const [inputValue, setInputValue] = useState('');
   const [scrapedDescription, setScrapedDescription] = useState('');
   const [name, setName] = useState('');
@@ -374,7 +391,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [saveJobVisible, setSaveJobVisible] = useState(false);
   const [saveSkillVisible, setSaveSkillVisible] = useState(false);
-
   const [accordionOpen, setAccordionOpen] = useState(false);
 
   /* Schriftart & Sprache DropDowns */
@@ -387,7 +403,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const [downloadingFonts, setDownloadingFonts] = useState({});
   const [downloadedFonts, setDownloadedFonts] = useState({});
 
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ name: '', job: '', skill: '', anrede: '' });
   const [kbHeight, setKbHeight] = useState(0);
@@ -397,6 +412,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const jobRef = useRef(null);
   const jobRef2 = useRef(null);
   const searchTimeout = useRef(null);
+  const skillBlurTimeout = useRef(null);
 
   /* ── Horizontale Ausfahr-Animation ── */
   const animCardX = useRef(new Animated.Value(0)).current;
@@ -490,58 +506,56 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   );
 
   /* Prüfen, welche Schriften bereits lokal vorhanden sind */
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const checkExistingFonts = async () => {
-    try {
-      const candidatePaths = [
-        `${RNFS.LibraryDirectoryPath}/fonts`,
-        `${RNFS.DocumentDirectoryPath}/fonts`,
-      ];
+    const checkExistingFonts = async () => {
+      try {
+        const candidatePaths = [
+          `${RNFS.LibraryDirectoryPath}/fonts`,
+          `${RNFS.DocumentDirectoryPath}/fonts`,
+        ];
 
-      const existingFiles = new Set();
+        const existingFiles = new Set();
 
-      // 1. Alle vorhandenen Dateien aus beiden Pfaden sammeln
-      for (const dir of candidatePaths) {
-        if (await RNFS.exists(dir)) {
-          const files = await RNFS.readDir(dir);
-          files.forEach((f) => existingFiles.add(f.name.toLowerCase()));
+        for (const dir of candidatePaths) {
+          if (await RNFS.exists(dir)) {
+            const files = await RNFS.readDir(dir);
+            files.forEach((f) => existingFiles.add(f.name.toLowerCase()));
+          }
         }
-      }
 
-      const alreadyDownloaded = {};
+        const alreadyDownloaded = {};
 
-      // 2. Exakt prüfen, ob [name].ttf UND [name]-Bold.ttf existieren
-      fontOptions.forEach((f) => {
-        const rawName = f.fontName || f.value || '';
-        const base = rawName.replace(/\.ttf$/i, '').toLowerCase();
+        fontOptions.forEach((f) => {
+          const rawName = f.fontName || f.value || '';
+          const base = rawName.replace(/\.ttf$/i, '').toLowerCase();
 
-        const hasRegular = existingFiles.has(`${base}.ttf`);
-        const hasBold =
-          existingFiles.has(`${base}-bold.ttf`) ||
-          existingFiles.has(`${base}_bold.ttf`);
+          const hasRegular = existingFiles.has(`${base}.ttf`);
+          const hasBold =
+            existingFiles.has(`${base}-bold.ttf`) ||
+            existingFiles.has(`${base}_bold.ttf`);
 
-        // Nur als geladen markieren, wenn BEIDE Schnitte da sind
-        if (hasRegular && hasBold) {
-          alreadyDownloaded[f.value] = true;
+          if (hasRegular && hasBold) {
+            alreadyDownloaded[f.value] = true;
+          }
+        });
+
+        if (isMounted) {
+          setDownloadedFonts((prev) => ({ ...prev, ...alreadyDownloaded }));
         }
-      });
-
-      if (isMounted) {
-        setDownloadedFonts((prev) => ({ ...prev, ...alreadyDownloaded }));
+      } catch (err) {
+        console.warn('Font-Check Warnung:', err);
       }
-    } catch (err) {
-      console.warn('Font-Check Warnung:', err);
-    }
-  };
+    };
 
-  checkExistingFonts();
+    checkExistingFonts();
 
-  return () => {
-    isMounted = false;
-  };
-}, [fontOptions]);
+    return () => {
+      isMounted = false;
+    };
+  }, [fontOptions]);
+
   /* Font-Download ausführen */
   const handleDownloadFont = useCallback(
     async (item) => {
@@ -578,17 +592,14 @@ useEffect(() => {
   const renderFontItem = useCallback(
     ({ item }) => {
       const fontName = item.fontName || item.value;
-      console.log('niuiu', fontName)
       const isDownloading = Boolean(downloadingFonts[fontName]);
       const isDownloaded = Boolean(downloadedFonts[item.value]);
       const isSelected = fontValue === item.value;
-      const handleSelect =async  () => {
-      setFontValue(item.value);     // 1. Value im State setzen
-      setFontPickerOpen(false);     // 2. Dropdown schließen
-      console.log('niuiu', item.value)
-      await EncryptedStorage.setItem('font', item.value);
-
-    };
+      const handleSelect = async () => {
+        setFontValue(item.value);
+        setFontPickerOpen(false);
+        await EncryptedStorage.setItem('font', item.value);
+      };
       return (
         <View style={[styles.fontItemContainer, isSelected && styles.fontItemSelected]}>
           <TouchableOpacity
@@ -625,10 +636,8 @@ useEffect(() => {
         </View>
       );
     },
-    [downloadingFonts, downloadedFonts, handleDownloadFont]
+    [downloadingFonts, downloadedFonts, fontValue, handleDownloadFont]
   );
-
- 
 
   const employmentOptions = useMemo(
     () => [
@@ -690,70 +699,68 @@ useEffect(() => {
     injectScript,
   } = useWebExtractor({ onExtractSuccess });
 
-  /* ── Skills Laden wenn DB bereit ── */
   /* ── Skills & zuvor gespeicherte Auswahl laden ── */
-useEffect(() => {
-  if (!isDbReady || !dbMainRef.current) return;
-  let active = true;
+  useEffect(() => {
+    if (!isDbReady || !dbMainRef.current) return;
+    let active = true;
 
-  const task = InteractionManager.runAfterInteractions(async () => {
-    try {
-      const key = await EncryptedStorage.getItem('key');
-      const deviceId = await DeviceInfo.getUniqueId();
-      if (!active || !dbMainRef.current) return;
+    const task = InteractionManager.runAfterInteractions(async () => {
+      try {
+        const key = await EncryptedStorage.getItem('key');
+        const deviceId = await DeviceInfo.getUniqueId();
+        if (!active || !dbMainRef.current) return;
 
-      const res = await runQuery(
-        dbMainRef.current,
-        'SELECT skills FROM files WHERE ident = ? LIMIT 1',
-        [deviceId]
-      );
-      if (!active) return;
+        const res = await runQuery(
+          dbMainRef.current,
+          'SELECT skills FROM files WHERE ident = ? LIMIT 1',
+          [deviceId]
+        );
+        if (!active) return;
 
-      const raw = res?.rows?.raw()?.[0]?.skills;
-      if (typeof raw === 'string' && raw.trim().length > 0) {
-        try {
-          const decSkills = await decryp(raw, key);
-          if (!active || !decSkills) return;
-          const parsed = JSON.parse(decSkills);
+        const raw = res?.rows?.raw()?.[0]?.skills;
+        if (typeof raw === 'string' && raw.trim().length > 0) {
+          try {
+            const decSkills = await decryp(raw, key);
+            if (!active || !decSkills) return;
+            const parsed = JSON.parse(decSkills);
 
-          if (Array.isArray(parsed)) {
-            setSkills(parsed);
-            setSkillsFiltered(parsed);
+            if (Array.isArray(parsed)) {
+              setSkills(parsed);
+              setSkillsFiltered(parsed);
 
-            // Zuvor gespeicherte Auswahl aus EncryptedStorage laden
-            const savedSelectedRaw = await EncryptedStorage.getItem('selected_skills');
-            if (savedSelectedRaw && active) {
-              const savedIds = JSON.parse(savedSelectedRaw);
-              if (Array.isArray(savedIds) && savedIds.length > 0) {
-                const restored = parsed.filter((item) => {
-                  const itemKey = item?.id ?? (typeof item === 'string' ? item : item?.role);
-                  return savedIds.includes(itemKey);
-                });
+              const savedSelectedRaw = await EncryptedStorage.getItem('selected_skills');
+              if (savedSelectedRaw && active) {
+                const savedIds = JSON.parse(savedSelectedRaw);
+                if (Array.isArray(savedIds) && savedIds.length > 0) {
+                  const restored = parsed.filter((item) => {
+                    const itemKey = item?.id ?? (typeof item === 'string' ? item : item?.role);
+                    return savedIds.includes(itemKey);
+                  });
 
-                if (restored.length > 0) {
-                  setSelectedSkills(restored);
-                  const labels = restored
-                    .map((s) => (typeof s === 'string' ? s : s.role || ''))
-                    .filter(Boolean);
-                  setErfahrung(labels.join(', '));
+                  if (restored.length > 0) {
+                    setSelectedSkills(restored);
+                    const labels = restored
+                      .map((s) => (typeof s === 'string' ? s : s.role || ''))
+                      .filter(Boolean);
+                    setErfahrung(labels.join(', '));
+                  }
                 }
               }
             }
+          } catch (err) {
+            console.error('Decryption/Parsing failed:', err);
           }
-        } catch (err) {
-          console.error('Decryption/Parsing failed:', err);
         }
+      } catch (err) {
+        console.error('Failed to load user skills:', err);
       }
-    } catch (err) {
-      console.error('Failed to load user skills:', err);
-    }
-  });
+    });
 
-  return () => {
-    active = false;
-    task?.cancel?.();
-  };
-}, [isDbReady]);
+    return () => {
+      active = false;
+      task?.cancel?.();
+    };
+  }, [isDbReady, dbMainRef]);
 
   const buildSelectedSkillsString = useCallback(() => {
     if (selectedSkills.length === 0) return erfahrung;
@@ -770,38 +777,61 @@ useEffect(() => {
       .join('\n\n');
   }, [selectedSkills, erfahrung]);
 
-const handleToggleSelectSkill = useCallback((skillItem) => {
-  const itemKey = skillItem?.id ?? (typeof skillItem === 'string' ? skillItem : skillItem?.role);
-
-  setSelectedSkills((prev) => {
-    const exists = prev.some(
-      (s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) === itemKey
-    );
-    let updated;
-    if (exists) {
-      updated = prev.filter(
-        (s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) !== itemKey
-      );
-    } else {
-      updated = [...prev, skillItem];
+  const handleToggleSkillDropdown = useCallback(() => {
+    if (skillBlurTimeout.current) {
+      clearTimeout(skillBlurTimeout.current);
+      skillBlurTimeout.current = null;
     }
 
-    const labels = updated
-      .map((s) => (typeof s === 'string' ? s : s.role || ''))
-      .filter(Boolean);
-    setErfahrung(labels.join(', '));
+    setShowSkillDropdown((prev) => {
+      const nextState = !prev;
+      if (nextState) {
+        const query = erfahrung.trim().toLowerCase();
+        if (query && skills.length > 0) {
+          const filtered = skills.filter((skill) => {
+            const roleText = typeof skill === 'string' ? skill : skill?.role;
+            return roleText ? roleText.toLowerCase().includes(query) : false;
+          });
+          setSkillsFiltered(filtered.length > 0 ? filtered : skills);
+        } else {
+          setSkillsFiltered(skills);
+        }
+      }
+      return nextState;
+    });
+  }, [erfahrung, skills]);
 
-    // IDs / Keys in EncryptedStorage persistieren
-    const keysToSave = updated.map(
-      (s) => s?.id ?? (typeof s === 'string' ? s : s?.role)
-    );
-    EncryptedStorage.setItem('selected_skills', JSON.stringify(keysToSave)).catch((err) =>
-      console.error('Fehler beim Speichern der ausgewählten Skills:', err)
-    );
+  const handleToggleSelectSkill = useCallback((skillItem) => {
+    const itemKey = skillItem?.id ?? (typeof skillItem === 'string' ? skillItem : skillItem?.role);
 
-    return updated;
-  });
-}, []);
+    setSelectedSkills((prev) => {
+      const exists = prev.some(
+        (s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) === itemKey
+      );
+      let updated;
+      if (exists) {
+        updated = prev.filter(
+          (s) => (s?.id ?? (typeof s === 'string' ? s : s?.role)) !== itemKey
+        );
+      } else {
+        updated = [...prev, skillItem];
+      }
+
+      const labels = updated
+        .map((s) => (typeof s === 'string' ? s : s.role || ''))
+        .filter(Boolean);
+      setErfahrung(labels.join(', '));
+
+      const keysToSave = updated.map(
+        (s) => s?.id ?? (typeof s === 'string' ? s : s?.role)
+      );
+      EncryptedStorage.setItem('selected_skills', JSON.stringify(keysToSave)).catch((err) =>
+        console.error('Fehler beim Speichern der ausgewählten Skills:', err)
+      );
+
+      return updated;
+    });
+  }, []);
 
   const toggleAccordion = useCallback((val) => {
     if (val) {
@@ -974,91 +1004,82 @@ const handleToggleSelectSkill = useCallback((skillItem) => {
     setLoading(true);
 
     try {
-      const timepart = selectedOption2
-        ? `${selectedOption2}e Bewerbung als `
-        : 'Bewerbung als ';
-    // ── 1. Zielsprache festlegen ─────────────────────────────
-const targetLng = getI18nCode(languageValue) || 'de';
-console.log('targetLng', targetLng);
-const closing = i18n.t('closing', { lng: targetLng, defaultValue: 'Mit freundlichen Grüßen,' });
+      const targetLng = getI18nCode(languageValue) || 'de';
+      const closing = i18n.t('closing', { lng: targetLng, defaultValue: 'Mit freundlichen Grüßen,' });
 
-// ── 2. Anrede anhand der gewählten Option auflösen ───────
-// ── 2. Anrede anhand der gewählten Option auflösen ───────
-let salutationKey = 'default';
-const opt3Lower = (selectedOption3 || '').toLowerCase();
+      let salutationKey = 'default';
+      const opt3Lower = (selectedOption3 || '').toLowerCase();
 
-const isDamenUndHerrenSelected =
-  opt3Lower.includes('damen') ||
-  selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
+      const isDamenUndHerrenSelected =
+        opt3Lower.includes('damen') ||
+        selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
 
-if (isDamenUndHerrenSelected) {
-  salutationKey = 'default';
-} else if (opt3Lower.includes('frau') || selectedOption3 === t('anredeOptions.frau')) {
-  salutationKey = 'frau';
-} else if (opt3Lower.includes('herr') || selectedOption3 === t('anredeOptions.herr')) {
-  salutationKey = 'herr';
-}
-let anrede = '';
-if (salutationKey === 'herr') {
-  const prefix = i18n.t('salutation.herr', {
-    lng: targetLng,
-    defaultValue: 'Sehr geehrter Herr ',
-  });
-  anrede = `${prefix}${name.trim()},`;
-} else if (salutationKey === 'frau') {
-  const prefix = i18n.t('salutation.frau', {
-    lng: targetLng,
-    defaultValue: 'Sehr geehrte Frau ',
-  });
-  anrede = `${prefix}${name.trim()},`;
-} else {
-  anrede = i18n.t('salutation.default', {
-    lng: targetLng,
-    defaultValue: 'Sehr geehrte Damen und Herren,',
-  });
-}
+      if (isDamenUndHerrenSelected) {
+        salutationKey = 'default';
+      } else if (opt3Lower.includes('frau') || selectedOption3 === t('anredeOptions.frau')) {
+        salutationKey = 'frau';
+      } else if (opt3Lower.includes('herr') || selectedOption3 === t('anredeOptions.herr')) {
+        salutationKey = 'herr';
+      }
 
-console.log('anrede', anrede);
-// ── 3. Betreff / Bewerbungstyp auflösen ───────────────────
-let appTypeKey = 'default';
-const opt2Lower = (selectedOption2 || '').toLowerCase();
+      let anrede = '';
+      if (salutationKey === 'herr') {
+        const prefix = i18n.t('salutation.herr', {
+          lng: targetLng,
+          defaultValue: 'Sehr geehrter Herr ',
+        });
+        anrede = `${prefix}${name.trim()},`;
+      } else if (salutationKey === 'frau') {
+        const prefix = i18n.t('salutation.frau', {
+          lng: targetLng,
+          defaultValue: 'Sehr geehrte Frau ',
+        });
+        anrede = `${prefix}${name.trim()},`;
+      } else {
+        anrede = i18n.t('salutation.default', {
+          lng: targetLng,
+          defaultValue: 'Sehr geehrte Damen und Herren,',
+        });
+      }
 
-if (opt2Lower.includes('initiativ') || selectedOption2 === t('applicationOptions.initiativ')) {
-  appTypeKey = 'initiativ';
-} else if (opt2Lower.includes('praktik') || selectedOption2 === t('applicationOptions.praktikum')) {
-  appTypeKey = 'praktikum';
-} else if (
-  opt2Lower.includes('regulär') ||
-  opt2Lower.includes('regular') ||
-  selectedOption2 === t('applicationOptions.regulär')
-) {
-  appTypeKey = 'regulär';
-}
+      let appTypeKey = 'default';
+      const opt2Lower = (selectedOption2 || '').toLowerCase();
 
-const typePrefix = i18n.t(`applicationOptions2.${appTypeKey}`, {
-  lng: targetLng,
-  defaultValue: i18n.t('applicationOptions2.default', {
-    lng: targetLng,
-    defaultValue: 'Bewerbung als ',
-  }),
-});
+      if (opt2Lower.includes('initiativ') || selectedOption2 === t('applicationOptions.initiativ')) {
+        appTypeKey = 'initiativ';
+      } else if (opt2Lower.includes('praktik') || selectedOption2 === t('applicationOptions.praktikum')) {
+        appTypeKey = 'praktikum';
+      } else if (
+        opt2Lower.includes('regulär') ||
+        opt2Lower.includes('regular') ||
+        selectedOption2 === t('applicationOptions.regulär')
+      ) {
+        appTypeKey = 'regulär';
+      }
 
-const choicePart = selectedOption?.trim() ? ` (${selectedOption.trim()})` : '';
-const subject = `${typePrefix}${inputValue.trim()}${choicePart}`;
-console.log('subject', subject);
-console.log('cp', choicePart);
-// ── 4. Im EncryptedStorage speichern ────────────────────
-await Promise.all([
-  EncryptedStorage.setItem('font', fontValue),
-  EncryptedStorage.setItem('language', languageValue),
-  EncryptedStorage.setItem('beruf', inputValue),
-  EncryptedStorage.setItem('erfahrung', erfahrung),
-  EncryptedStorage.setItem('time', selectedOption),
-  EncryptedStorage.setItem('type', selectedOption2),
-  EncryptedStorage.setItem('subject', subject),
-  EncryptedStorage.setItem('anrede', anrede),
-  EncryptedStorage.setItem('closing', closing),
-]);
+      const typePrefix = i18n.t(`applicationOptions2.${appTypeKey}`, {
+        lng: targetLng,
+        defaultValue: i18n.t('applicationOptions2.default', {
+          lng: targetLng,
+          defaultValue: 'Bewerbung als ',
+        }),
+      });
+
+      const choicePart = selectedOption?.trim() ? ` (${selectedOption.trim()})` : '';
+      const subject = `${typePrefix}${inputValue.trim()}${choicePart}`;
+
+      await Promise.all([
+        EncryptedStorage.setItem('font', fontValue),
+        EncryptedStorage.setItem('language', languageValue),
+        EncryptedStorage.setItem('beruf', inputValue),
+        EncryptedStorage.setItem('erfahrung', erfahrung),
+        EncryptedStorage.setItem('time', selectedOption),
+        EncryptedStorage.setItem('type', selectedOption2),
+        EncryptedStorage.setItem('subject', subject),
+        EncryptedStorage.setItem('anrede', anrede),
+        EncryptedStorage.setItem('closing', closing),
+      ]);
+
       const detailedSkillsString = buildSelectedSkillsString();
 
       let prompt1 = thePrompt(inputValue, languageValue, detailedSkillsString);
@@ -1151,12 +1172,9 @@ await Promise.all([
     >
       <View style={styles.root}>
         <Info
-          visible={infoModalVisible}
-          onClose={() => setInfoModalVisible(false)}
-          message={
-            t('bewerbung.infoModalMessage') ||
-            'Kopiere einfach den Link einer Stellenanzeige in das Berufsfeld – wir ziehen die Anforderungen automatisch heraus!'
-          }
+          visible={infoVisible}
+          onClose={closeInfo}
+          message={infoMessage}
         />
 
         {/* ══ MAIN CARD ══ */}
@@ -1184,6 +1202,7 @@ await Promise.all([
                 <CardHeader
                   icon="person"
                   title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
+                  onInfo={() => openInfo(t('info.sectionSalutation') || 'Anrede & Ansprechpartner')}
                   rightElement={
                     <TouchableOpacity
                       style={styles.closeButton}
@@ -1211,12 +1230,21 @@ await Promise.all([
                       { marginTop: 12 },
                     ]}
                   >
-                    <MaterialIcons
-                      name="badge"
-                      size={20}
-                      color={isDamenUndHerren ? WARM.textDim : WARM.iconLeading}
-                      style={styles.inputIcon}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        openInfo(t('info.name') || 'Name');
+                      }}
+                      style={styles.infoIconBtn}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <MaterialIcons
+                        name="badge"
+                        size={20}
+                        color={isDamenUndHerren ? WARM.textDim : WARM.iconLeading}
+                        style={styles.inputIcon}
+                      />
+                    </TouchableOpacity>
+
                     <TextInput
                       ref={jobRef2}
                       editable={!isDamenUndHerren}
@@ -1230,7 +1258,7 @@ await Promise.all([
                       onChangeText={(txt) => setName(txt.charAt(0).toUpperCase() + txt.slice(1))}
                       autoCorrect={false}
                       returnKeyType="next"
-                      onSubmitEditing={() => handleNextStep('ansprechpartner')}
+                      onSubmitEditing={() => jobRef.current?.focus()}
                     />
                   </View>
                 </View>
@@ -1244,12 +1272,20 @@ await Promise.all([
                       Boolean(errors.job) && styles.inputWrapperError,
                     ]}
                   >
-                    <MaterialIcons
-                      name={isUrlInput ? 'link' : 'work-outline'}
-                      size={20}
-                      color={WARM.iconLeading}
-                      style={styles.inputIcon}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        openInfo(t('info.work') || 'Beruf');
+                      }}
+                      style={styles.infoIconBtn}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <MaterialIcons
+                        name={isUrlInput ? 'link' : 'work-outline'}
+                        size={20}
+                        color={WARM.iconLeading}
+                        style={styles.inputIcon}
+                      />
+                    </TouchableOpacity>
                     <TextInput
                       ref={jobRef}
                       style={styles.textInput}
@@ -1261,7 +1297,7 @@ await Promise.all([
                       onChangeText={handleJobChange}
                       autoCorrect={false}
                       returnKeyType="next"
-                      onSubmitEditing={() => handleNextStep('job')}
+                      onSubmitEditing={() => inputRef.current?.focus()}
                     />
 
                     {isUrlInput ? (
@@ -1291,10 +1327,9 @@ await Promise.all([
                         setJobs([]);
                         setShowJobDropdown(false);
                         setSaveJobVisible(false);
-                        setTimeout (() => {
-                        inputRef.current?.focus();
-                          
-                        },150)
+                        setTimeout(() => {
+                          inputRef.current?.focus();
+                        }, 150);
                       }}
                       onDelete={handleDeleteJob}
                     />
@@ -1310,12 +1345,20 @@ await Promise.all([
                       Boolean(errors.skill) && styles.inputWrapperError,
                     ]}
                   >
-                    <MaterialIcons
-                      name="stars"
-                      size={20}
-                      color={WARM.iconLeading}
-                      style={styles.inputIcon}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        openInfo(t('info.skill') || 'Fähigkeiten');
+                      }}
+                      style={styles.infoIconBtn}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <MaterialIcons
+                        name="stars"
+                        size={20}
+                        color={WARM.iconLeading}
+                        style={styles.inputIcon}
+                      />
+                    </TouchableOpacity>
                     <TextInput
                       ref={inputRef}
                       style={styles.textInput}
@@ -1326,18 +1369,15 @@ await Promise.all([
                       }
                       placeholderTextColor={WARM.textDim}
                       value={erfahrung}
-                      onFocus={() => {
-                        if (skills.length > 0) {
-                          setSkillsFiltered(skills);
-                          setShowSkillDropdown(true);
-                        }
+                      onBlur={() => {
+                        skillBlurTimeout.current = setTimeout(() => {
+                          setShowSkillDropdown(false);
+                        }, 220);
                       }}
-                      onBlur={() => setTimeout(() => setShowSkillDropdown(false), 250)}
                       onChangeText={handleErfahrungChange}
                       blurOnSubmit={false}
                       autoCorrect={false}
                       returnKeyType="done"
-                      onSubmitEditing={() => handleNextStep('skill')}
                     />
 
                     {saveSkillVisible && (
@@ -1345,6 +1385,19 @@ await Promise.all([
                         <MaterialIcons name="bookmark-add" size={20} color={WARM.iconLeading} />
                       </TouchableOpacity>
                     )}
+
+                    <TouchableOpacity
+                      onPress={handleToggleSkillDropdown}
+                      style={styles.iconBtn}
+                      hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
+                      activeOpacity={0.7}
+                    >
+                      <MaterialIcons
+                        name={showSkillDropdown ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                        size={22}
+                        color={WARM.iconLeading}
+                      />
+                    </TouchableOpacity>
                   </View>
 
                   {showSkillDropdown && skillsFiltered.length > 0 && (
@@ -1353,7 +1406,7 @@ await Promise.all([
                       onSelect={handleToggleSelectSkill}
                       onToggleSelect={handleToggleSelectSkill}
                       selectedItems={selectedSkills}
-                      theMaxHeight={height * 0.10}
+                      theMaxHeight={height * 0.1}
                       isSkill={true}
                     />
                   )}
@@ -1423,12 +1476,17 @@ await Promise.all([
           <View style={styles.responsiveContentOptions}>
             <View style={styles.accordionPanel}>
               <View style={styles.optionsHeader}>
-                <View style={styles.headerLeft}>
+                <TouchableOpacity
+                  style={styles.headerLeft}
+                  onPress={() => openInfo(t('info.options') || 'Optionen')}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                >
                   <View style={styles.iconBadge}>
                     <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
                   </View>
                   <Text style={styles.fieldLabel}>{t('Optionen') || 'OPTIONEN'}</Text>
-                </View>
+                </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -1447,85 +1505,105 @@ await Promise.all([
                 nestedScrollEnabled={true}
                 bounces={false}
               >
-                <Text style={styles.subFieldLabel}>
-                  {t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
-                </Text>
+                {/* 1. ANSTELLUNGSART */}
+                <FieldLabelWithIcon
+                  icon="schedule"
+                  label={t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
+                  onPress={() => openInfo(t('info.employment') || 'Anstellungsart')}
+                />
                 <SegmentedPills
                   options={employmentOptions}
                   selected={selectedOption}
                   onSelect={(opt) => setSelectedOption((p) => (p === opt ? '' : opt))}
                 />
 
-                <Text style={[styles.subFieldLabel, { marginTop: 8 }]}>
-                  {t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
-                </Text>
-                <SegmentedPills
-                  options={applicationOptions}
-                  selected={selectedOption2}
-                  onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
-                />
-
-                <Text style={[styles.subFieldLabel, { marginTop: 8 }]}>
-                  {t('QUALITÄT') || 'Qualität'}
-                </Text>
-                <SegmentedPills
-                  options={qualityKeys}
-                  selected={selectedQuality}
-                  onSelect={(val) => {setSelectedQuality(val); console.log(val)}}
-                  labels={qualityLabels}
-                />
-
-                {/* 1. DROP-DOWN: SCHRIFTART MIT DOWNLOAD-BUTTONS */}
-                <Text style={[styles.subFieldLabel, { marginTop: 8 }]}>
-                  {t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
-                </Text>
-                <View style={{ zIndex: 3000, marginTop: 4, marginBottom: 8 }}>
-                  <DropDownPicker
-                    open={fontPickerOpen}
-                    value={fontValue}
-                    items={fontOptions}
-                    setOpen={setFontPickerOpen}
-                    onOpen={() => setLanguagePickerOpen(false)}
-                    placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropdownList}
-                    textStyle={{
-                      color: WARM.textMain,
-                      fontSize: 13.5,
-                      fontWeight: '500',
-                    }}
-                    arrowIconStyle={{ tintColor: WARM.iconArrow }}
-                    dropDownDirection="TOP"
-                    listMode="SCROLLVIEW"
-                    renderListItem={renderFontItem}
-                    
+                {/* 2. BEWERBUNGSTYP */}
+                <View style={{ marginTop: 12 }}>
+                  <FieldLabelWithIcon
+                    icon="category"
+                    label={t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
+                    onPress={() => openInfo(t('info.appType') || 'Bewerbungstyp')}
+                  />
+                  <SegmentedPills
+                    options={applicationOptions}
+                    selected={selectedOption2}
+                    onSelect={(opt) => setSelectedOption2((p) => (p === opt ? '' : opt))}
                   />
                 </View>
 
-                {/* 2. DROP-DOWN: SPRACHE */}
-                <Text style={[styles.subFieldLabel, { marginTop: 8 }]}>
-                  {t('bewerbung.labelLanguage') || 'SPRACHE DES ANSCHREIBENS'}
-                </Text>
-                <View style={{ zIndex: 4000, marginTop: 4, marginBottom: 12 }}>
-                  <DropDownPicker
-                    open={languagePickerOpen}
-                    value={languageValue}
-                    items={itemsLang}
-                    setOpen={setLanguagePickerOpen}
-                    setValue={setLanguageValue}
-                    onOpen={() => setFontPickerOpen(false)}
-                    placeholder={itemsLang[0].label}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropdownList}
-                    textStyle={{
-                      color: WARM.textMain,
-                      fontSize: 13.5,
-                      fontWeight: '500',
-                    }}
-                    arrowIconStyle={{ tintColor: WARM.iconArrow }}
-                    dropDownDirection="TOP"
-                    listMode="SCROLLVIEW"
+                {/* 3. QUALITÄT */}
+                <View style={{ marginTop: 12 }}>
+                  <FieldLabelWithIcon
+                    icon="speed"
+                    label={t('QUALITÄT') || 'QUALITÄT'}
+                    onPress={() => openInfo(t('info.quality') || 'Qualität')}
                   />
+                  <SegmentedPills
+                    options={qualityKeys}
+                    selected={selectedQuality}
+                    onSelect={(val) => setSelectedQuality(val)}
+                    labels={qualityLabels}
+                  />
+                </View>
+
+                {/* 4. SCHRIFTART IM PDF */}
+                <View style={{ marginTop: 12 }}>
+                  <FieldLabelWithIcon
+                    icon="font-download"
+                    label={t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
+                    onPress={() => openInfo(t('info.font') || 'Schriftart im PDF')}
+                  />
+                  <View style={{ zIndex: 3000, marginTop: 4, marginBottom: 8 }}>
+                    <DropDownPicker
+                      open={fontPickerOpen}
+                      value={fontValue}
+                      items={fontOptions}
+                      setOpen={setFontPickerOpen}
+                      onOpen={() => setLanguagePickerOpen(false)}
+                      placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
+                      style={styles.dropdown}
+                      dropDownContainerStyle={styles.dropdownList}
+                      textStyle={{
+                        color: WARM.textMain,
+                        fontSize: 13.5,
+                        fontWeight: '500',
+                      }}
+                      arrowIconStyle={{ tintColor: WARM.iconArrow }}
+                      dropDownDirection="TOP"
+                      listMode="SCROLLVIEW"
+                      renderListItem={renderFontItem}
+                    />
+                  </View>
+                </View>
+
+                {/* 5. SPRACHE DES ANSCHREIBENS */}
+                <View style={{ marginTop: 4 }}>
+                  <FieldLabelWithIcon
+                    icon="translate"
+                    label={t('bewerbung.labelLanguage') || 'SPRACHE DES ANSCHREIBENS'}
+                    onPress={() => openInfo(t('info.language') || 'Sprache des Anschreibens')}
+                  />
+                  <View style={{ zIndex: 4000, marginTop: 4, marginBottom: 12 }}>
+                    <DropDownPicker
+                      open={languagePickerOpen}
+                      value={languageValue}
+                      items={itemsLang}
+                      setOpen={setLanguagePickerOpen}
+                      setValue={setLanguageValue}
+                      onOpen={() => setFontPickerOpen(false)}
+                      placeholder={itemsLang[0].label}
+                      style={styles.dropdown}
+                      dropDownContainerStyle={styles.dropdownList}
+                      textStyle={{
+                        color: WARM.textMain,
+                        fontSize: 13.5,
+                        fontWeight: '500',
+                      }}
+                      arrowIconStyle={{ tintColor: WARM.iconArrow }}
+                      dropDownDirection="TOP"
+                      listMode="SCROLLVIEW"
+                    />
+                  </View>
                 </View>
               </ScrollView>
 
@@ -1535,6 +1613,7 @@ await Promise.all([
                   onPress={() => toggleAccordion(false)}
                   activeOpacity={0.8}
                 >
+                  <MaterialIcons name="arrow-back" size={18} color={WARM.iconLeading} />
                   <Text style={styles.settingsButtonText} numberOfLines={1}>
                     {t('Zurück') || 'Zurück'}
                   </Text>
@@ -1734,12 +1813,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.6,
   },
-  subFieldLabel: {
+  labelRowWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  subFieldLabelText: {
     color: WARM.textMuted,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.6,
-    marginBottom: 8,
   },
   suggestionsField: {
     width: '100%',
@@ -1776,6 +1861,10 @@ const styles = StyleSheet.create({
   },
   iconBtn: {
     padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoIconBtn: {
     justifyContent: 'center',
     alignItems: 'center',
   },

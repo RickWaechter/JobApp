@@ -654,8 +654,9 @@ const toggleSendExpanded = () => {
   };
   const handleAddExperience = () => {
     setExperiences((prev) => [
-      ...prev,
+     
       { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
+       ...prev,
     ]);
   };
 

@@ -25,7 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SQLite from "react-native-sqlite-storage";
 
 import KeyboardDummy from "../../comp/keyboardDummy.jsx";
-import Info from "../../comp/info.js";
+import Info, { useInfoModal } from "../../comp/info.js";
 import CompanySearchModal from "../../comp/name.js";
 import colors from "../../inc/colors.js";
 import { decryp } from "../../inc/cryp.js";
@@ -158,90 +158,87 @@ export default function StartApp() {
   const [screenChange, setScreenChange] = useState(false);
   const [changeOldScreen, setChangeOldScreen] = useState(false);
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
-const nameAnimationRunning = useRef(false);
+
+  const nameAnimationRunning = useRef(false);
   const lastClickTime = useRef(0);
   const bewerbungRef = useRef(null);
   const changeScreenRef = useRef(null);
   const changeOldRef = useRef(null);
   const focusTimeoutRef = useRef(null);
+  const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
 
-  /* ── Animation Values ── */
-  const animResume = useRef(new Animated.Value(0)).current;
-  const animProgress = useRef(new Animated.Value(0)).current;
-  const animProgressY = useRef(new Animated.Value(0)).current;
-  const animProgressOpacity = useRef(new Animated.Value(0)).current;
-  const animStep = useRef(new Animated.Value(0)).current;
-  const animViewOpacity = useRef(new Animated.Value(1)).current;
+  /* ══════════════════════════════════════════════════════════════════
+     EINDEUTIGE ANIMATION REFS (Keine Doppelbelegung mehr)
+  ══════════════════════════════════════════════════════════════════ */
+  // 1. Home Screen & Resume Banner
+  const animHomeOpacity = useRef(new Animated.Value(1)).current;
+  const animResumeBanner = useRef(new Animated.Value(0)).current;
 
-  /* ── CompanySearch Modal Animations ── */
-  const nameProgressX = useRef(new Animated.Value(0)).current;
-  const nameProgressY = useRef(new Animated.Value(1)).current;
-  const nameOpacity = useRef(new Animated.Value(0)).current;
+  // 2. CompanySearchModal (Name)
+  const animNameModalX = useRef(new Animated.Value(0)).current;
+  const animNameModalY = useRef(new Animated.Value(1)).current;
+  const animNameModalOpacity = useRef(new Animated.Value(0)).current;
+
+  // 3. Multi-Step Overlay Container & Backdrop
+  const animOverlayWrapperX = useRef(new Animated.Value(0)).current;
+  const animOverlayWrapperY = useRef(new Animated.Value(0)).current;
+  const animBackdropOpacity = useRef(new Animated.Value(0)).current;
+
+  // 4. Step 1: Bewerbung Screen
+  const animBewerbungX = useRef(new Animated.Value(0)).current;
+  const animBewerbungOpacity = useRef(new Animated.Value(0)).current;
+
+  // 5. Step 2: ChangeScreen
+  const animChangeScreenX = useRef(new Animated.Value(0)).current;
+  const animChangeScreenOpacity = useRef(new Animated.Value(0)).current;
+
+  // 6. Flow 2: ChangeScreenOld
+  const animChangeOldOpacity = useRef(new Animated.Value(0)).current;
+
   const kbListenerRef = useRef(null);
   const kbFallbackRef = useRef(null);
 
-  /* ── Info Handler ── */
-  const handleInfo = useCallback(
-    (val) => {
-      switch (val) {
-        case "new":
-          setTextInfo(t("info.new"));
-          break;
-        case "old":
-          setTextInfo(t("info.old"));
-          break;
-        case "resume":
-          setTextInfo(t("info.resume"));
-          break;
-        default:
-          return;
-      }
-      setInfoModalVisible(true);
-    },
-    [t]
-  );
-
   /* ── CompanySearch Slide-In ── */
-   const triggerNameSlideDown = useCallback(() => {
-  if (nameAnimationRunning.current) return;
+  const triggerNameSlideDown = useCallback(() => {
+    if (nameAnimationRunning.current) return;
 
-  nameAnimationRunning.current = true;
+    nameAnimationRunning.current = true;
 
-  if (kbFallbackRef.current) {
-    clearTimeout(kbFallbackRef.current);
-    kbFallbackRef.current = null;
-  }
+    if (kbFallbackRef.current) {
+      clearTimeout(kbFallbackRef.current);
+      kbFallbackRef.current = null;
+    }
 
-  if (kbListenerRef.current) {
-    kbListenerRef.current.remove();
-    kbListenerRef.current = null;
-  }
+    if (kbListenerRef.current) {
+      kbListenerRef.current.remove();
+      kbListenerRef.current = null;
+    }
 
     Animated.parallel([
-      Animated.timing(nameProgressX, {
+      Animated.timing(animNameModalX, {
         toValue: 1,
         duration: 400,
         useNativeDriver: true,
       }),
-      Animated.timing(nameOpacity, {
+      Animated.timing(animNameModalOpacity, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
       }),
-      Animated.timing(animViewOpacity, {
+      Animated.timing(animHomeOpacity, {
         toValue: 0,
         duration: 380,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [nameProgressX, nameOpacity, animViewOpacity]);
+  }, [animNameModalX, animNameModalOpacity, animHomeOpacity]);
 
   const openName = useCallback(() => {
     nameAnimationRunning.current = false;
     setShowCompanySearch(true);
-    nameProgressX.setValue(0);
-    nameProgressY.setValue(1);
-    nameOpacity.setValue(0);
+    animNameModalX.setValue(0);
+    animNameModalY.setValue(1);
+    animNameModalOpacity.setValue(0);
 
     const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
     kbListenerRef.current = Keyboard.addListener(showEvent, triggerNameSlideDown);
@@ -249,7 +246,7 @@ const nameAnimationRunning = useRef(false);
     kbFallbackRef.current = setTimeout(() => {
       triggerNameSlideDown();
     }, 240);
-  }, [nameProgressX, nameProgressY, nameOpacity, triggerNameSlideDown]);
+  }, [animNameModalX, animNameModalY, animNameModalOpacity, triggerNameSlideDown]);
 
   const closeName = useCallback(() => {
     Keyboard.dismiss();
@@ -264,17 +261,17 @@ const nameAnimationRunning = useRef(false);
     }
 
     Animated.parallel([
-      Animated.timing(nameProgressY, {
+      Animated.timing(animNameModalY, {
         toValue: 2,
         duration: 380,
         useNativeDriver: true,
       }),
-      Animated.timing(nameOpacity, {
+      Animated.timing(animNameModalOpacity, {
         toValue: 0,
         duration: 320,
         useNativeDriver: true,
       }),
-      Animated.timing(animViewOpacity, {
+      Animated.timing(animHomeOpacity, {
         toValue: 1,
         duration: 380,
         useNativeDriver: true,
@@ -282,28 +279,28 @@ const nameAnimationRunning = useRef(false);
     ]).start(({ finished }) => {
       if (finished) {
         setShowCompanySearch(false);
-        nameProgressX.setValue(0);
-        nameProgressY.setValue(1);
+        animNameModalX.setValue(0);
+        animNameModalY.setValue(1);
       }
     });
-  }, [nameProgressY, nameOpacity, animViewOpacity, nameProgressX]);
+  }, [animNameModalY, animNameModalOpacity, animHomeOpacity, animNameModalX]);
 
   /* ── Overlay Dismiss (Gemeinsame Schließ-Logik) ── */
   const closeAllOverlays = useCallback(() => {
     Keyboard.dismiss();
 
     Animated.parallel([
-      Animated.timing(animProgressY, {
+      Animated.timing(animOverlayWrapperY, {
         toValue: 1,
         duration: 280,
         useNativeDriver: true,
       }),
-      Animated.timing(animProgressOpacity, {
+      Animated.timing(animBackdropOpacity, {
         toValue: 0,
         duration: 280,
         useNativeDriver: true,
       }),
-      Animated.timing(animViewOpacity, {
+      Animated.timing(animHomeOpacity, {
         toValue: 1,
         duration: 380,
         useNativeDriver: true,
@@ -315,14 +312,37 @@ const nameAnimationRunning = useRef(false);
       setChangeOldScreen(false);
       setShowCompanySearch(false);
 
-      animProgress.setValue(0);
-      animProgressY.setValue(0);
-      animProgressOpacity.setValue(0);
-      animStep.setValue(0);
-      nameProgressX.setValue(0);
-      nameProgressY.setValue(1);
+      // Alle Refs sauber zurücksetzen
+      animOverlayWrapperX.setValue(0);
+      animOverlayWrapperY.setValue(0);
+      animBackdropOpacity.setValue(0);
+
+      animBewerbungX.setValue(0);
+      animBewerbungOpacity.setValue(0);
+
+      animChangeScreenX.setValue(0);
+      animChangeScreenOpacity.setValue(0);
+
+      animChangeOldOpacity.setValue(0);
+
+      animNameModalX.setValue(0);
+      animNameModalY.setValue(1);
+      animNameModalOpacity.setValue(0);
     });
-  }, [animProgressY, animProgressOpacity, animViewOpacity, animProgress, animStep, nameProgressX, nameProgressY]);
+  }, [
+    animOverlayWrapperY,
+    animBackdropOpacity,
+    animHomeOpacity,
+    animOverlayWrapperX,
+    animBewerbungX,
+    animBewerbungOpacity,
+    animChangeScreenX,
+    animChangeScreenOpacity,
+    animChangeOldOpacity,
+    animNameModalX,
+    animNameModalY,
+    animNameModalOpacity,
+  ]);
 
   /* ── Subscreen Openers ── */
   const openBewerbung = useCallback(() => {
@@ -331,111 +351,181 @@ const nameAnimationRunning = useRef(false);
     setChangeOldScreen(false);
     setScreen(true);
 
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(0);
+    animOverlayWrapperX.setValue(0);
+    animOverlayWrapperY.setValue(0);
+
+    animBewerbungX.setValue(0);
+    animBewerbungOpacity.setValue(0);
+    animChangeScreenX.setValue(0);
+    animChangeScreenOpacity.setValue(0);
 
     setTimeout(() => {
       bewerbungRef.current?.focusName?.();
     }, 25);
 
     Animated.parallel([
-      Animated.timing(animProgress, {
+      Animated.timing(animOverlayWrapperX, {
         toValue: 1,
-        duration: 380,
+        duration: 400,
         useNativeDriver: true,
       }),
-      Animated.timing(animProgressOpacity, {
+      Animated.timing(animBewerbungOpacity, {
         toValue: 1,
-        duration: 380,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animBackdropOpacity, {
+        toValue: 1,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+  }, [
+    animOverlayWrapperX,
+    animOverlayWrapperY,
+    animBackdropOpacity,
+    animBewerbungX,
+    animBewerbungOpacity,
+    animChangeScreenX,
+    animChangeScreenOpacity,
+  ]);
 
   const openChange = useCallback(() => {
     setScreenApp(false);
     setChangeOldScreen(false);
     setScreenChange(true);
     setScreen(true);
+    changeScreenRef.current?.focus?.();
 
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(1);
+    animOverlayWrapperX.setValue(0);
+    animOverlayWrapperY.setValue(0);
+    animBackdropOpacity.setValue(0);
+
+    // ChangeScreen ist hier direkt an Position 1 (sichtbar im Container)
+    animChangeScreenOpacity.setValue(0);
 
     Animated.parallel([
-      Animated.timing(animProgressOpacity, {
+      Animated.timing(animBackdropOpacity, {
         toValue: 1,
-        duration: 380,
+        duration: 400,
         useNativeDriver: true,
       }),
-      Animated.timing(animProgress, {
+      Animated.timing(animChangeScreenX, {
         toValue: 1,
-        duration: 380,
+        duration: 450,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      changeScreenRef.current?.focus?.();
-    });
-  }, [animProgress, animProgressY, animStep, animProgressOpacity]);
+      Animated.timing(animOverlayWrapperX, {
+        toValue: 1,
+        duration: 450,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [
+    animOverlayWrapperX,
+    animOverlayWrapperY,
+    animBackdropOpacity,
+    animChangeScreenX,
+    animChangeScreenOpacity,
+  ]);
 
   const openChangeOld = useCallback(() => {
     setScreenApp(false);
+    setScreenChange(false);
     setChangeOldScreen(true);
     setScreen(true);
 
-    animProgress.setValue(0);
-    animProgressY.setValue(0);
-    animStep.setValue(0);
+    animOverlayWrapperX.setValue(0);
+    animOverlayWrapperY.setValue(0);
+    animBackdropOpacity.setValue(0);
+    animChangeOldOpacity.setValue(0);
 
     requestAnimationFrame(() => {
       changeOldRef.current?.focus?.();
     });
 
     Animated.parallel([
-      Animated.timing(animViewOpacity, {
+      Animated.timing(animHomeOpacity, {
         toValue: 1,
         duration: 280,
         useNativeDriver: true,
       }),
-      Animated.timing(animProgressOpacity, {
+      Animated.timing(animBackdropOpacity, {
         toValue: 1,
         duration: 280,
         useNativeDriver: true,
       }),
-      Animated.timing(animProgress, {
+      Animated.timing(animOverlayWrapperX, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeOldOpacity, {
         toValue: 1,
         duration: 280,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [animProgress, animProgressY, animStep, animProgressOpacity, animViewOpacity]);
+  }, [
+    animOverlayWrapperX,
+    animOverlayWrapperY,
+    animBackdropOpacity,
+    animChangeOldOpacity,
+    animHomeOpacity,
+  ]);
 
- const navigateToChange = useCallback(() => {
+  const navigateToChange = useCallback(() => {
     changeScreenRef.current?.focus?.();
-
     setScreenChange(true);
 
     // Sofort übergeben – kein Warten auf das Ende der 380ms Animation:
-
-    Animated.timing(animStep, {
-      toValue: 1,
-      duration: 380,
-      useNativeDriver: true,
-    }).start();
-  }, [animStep]);
+    Animated.parallel([
+      Animated.timing(animBewerbungX, {
+        toValue: 0,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenX, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenOpacity, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [animBewerbungX, animChangeScreenX, animChangeScreenOpacity]);
 
   const backToBewerbung = useCallback(() => {
     Keyboard.dismiss();
 
-    Animated.timing(animStep, {
-      toValue: 0,
-      duration: 350,
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.parallel([
+      Animated.timing(animBewerbungX, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenX, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenOpacity, {
+        toValue: 0,
+        duration: 350,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       setScreenChange(false);
     });
-  }, [animStep]);
+  }, [animBewerbungX, animChangeScreenX, animChangeScreenOpacity]);
 
   /* ── Firmenauswahl Übergang zu Bewerbung ── */
   const handleCompanySaved = useCallback(
@@ -450,39 +540,61 @@ const nameAnimationRunning = useRef(false);
       setScreenApp(true);
       setScreenChange(false);
       setChangeOldScreen(false);
-      animStep.setValue(0);
-      animProgress.setValue(0);
-      animProgressOpacity.setValue(1);
+
+      animOverlayWrapperX.setValue(0);
+      animOverlayWrapperY.setValue(0);
+      animBackdropOpacity.setValue(1);
+
+      animBewerbungX.setValue(0);
+      animBewerbungOpacity.setValue(0);
+      animChangeScreenX.setValue(0);
+      animChangeScreenOpacity.setValue(0);
 
       requestAnimationFrame(() => {
         bewerbungRef.current?.focusName?.();
       });
 
       Animated.parallel([
-        Animated.timing(nameProgressX, {
+        Animated.timing(animNameModalX, {
           toValue: 2,
           duration: 380,
           useNativeDriver: true,
         }),
-        Animated.timing(nameOpacity, {
+        Animated.timing(animNameModalOpacity, {
           toValue: 0,
           duration: 320,
           useNativeDriver: true,
         }),
-        Animated.timing(animProgress, {
+        Animated.timing(animOverlayWrapperX, {
           toValue: 1,
-          duration: 380,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animBewerbungOpacity, {
+          toValue: 1,
+          duration: 500,
           useNativeDriver: true,
         }),
       ]).start(({ finished }) => {
         if (finished) {
           setShowCompanySearch(false);
-          nameProgressX.setValue(0);
-          nameProgressY.setValue(1);
+          animNameModalX.setValue(0);
+          animNameModalY.setValue(1);
         }
       });
     },
-    [nameProgressX, nameProgressY, nameOpacity, animProgress, animStep, animProgressOpacity]
+    [
+      animNameModalX,
+      animNameModalY,
+      animNameModalOpacity,
+      animOverlayWrapperX,
+      animOverlayWrapperY,
+      animBackdropOpacity,
+      animBewerbungX,
+      animBewerbungOpacity,
+      animChangeScreenX,
+      animChangeScreenOpacity,
+    ]
   );
 
   /* ── Hardware Back-Button ── */
@@ -509,7 +621,15 @@ const nameAnimationRunning = useRef(false);
 
     const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
     return () => sub.remove();
-  }, [showCompanySearch, changeOldScreen, screenChange, screenApp, closeName, closeAllOverlays, backToBewerbung]);
+  }, [
+    showCompanySearch,
+    changeOldScreen,
+    screenChange,
+    screenApp,
+    closeName,
+    closeAllOverlays,
+    backToBewerbung,
+  ]);
 
   /* ── Cross-Platform DB Check ── */
   useEffect(() => {
@@ -558,16 +678,16 @@ const nameAnimationRunning = useRef(false);
   /* ── Resume Banner Animation ── */
   useEffect(() => {
     if (isButtonVisible) {
-      Animated.spring(animResume, {
+      Animated.spring(animResumeBanner, {
         toValue: 1,
         tension: 60,
         friction: 8,
         useNativeDriver: true,
       }).start();
     } else {
-      animResume.setValue(0);
+      animResumeBanner.setValue(0);
     }
-  }, [isButtonVisible, animResume]);
+  }, [isButtonVisible, animResumeBanner]);
 
   /* ── Alte Bewerbungen Abrufen ── */
   const getOld = async () => {
@@ -714,7 +834,7 @@ const nameAnimationRunning = useRef(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.View style={[styles.contentWrapper, { opacity: animViewOpacity }]}>
+      <Animated.View style={[styles.contentWrapper, { opacity: animHomeOpacity }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.badgeHub}>
@@ -739,7 +859,7 @@ const nameAnimationRunning = useRef(false);
             badgeText={t("startApp.badgeRecommended") || "EMPFOHLEN"}
             footerText={t("startApp.primaryFooter") || "Jetzt starten"}
             onPress={handleNewApplication}
-            onIconPress={() => handleInfo("new")}
+            onIconPress={() => openInfo("new")}
           />
 
           <SecondaryActionCard
@@ -750,7 +870,7 @@ const nameAnimationRunning = useRef(false);
             }
             isLoading={isLoadingOld}
             onPress={handleOldApplication}
-            onIconPress={() => handleInfo("old")}
+            onIconPress={() => openInfo("old")}
           />
         </View>
 
@@ -760,16 +880,16 @@ const nameAnimationRunning = useRef(false);
             style={[
               styles.resumeWrapper,
               {
-                opacity: animResume,
+                opacity: animResumeBanner,
                 transform: [
                   {
-                    translateY: animResume.interpolate({
+                    translateY: animResumeBanner.interpolate({
                       inputRange: [0, 1],
                       outputRange: [20, 0],
                     }),
                   },
                   {
-                    scale: animResume.interpolate({
+                    scale: animResumeBanner.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0.96, 1],
                     }),
@@ -788,7 +908,7 @@ const nameAnimationRunning = useRef(false);
                   <Pressable
                     onPress={(e) => {
                       e?.stopPropagation?.();
-                      handleInfo("resume");
+                      openInfo("resume");
                     }}
                   >
                     <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
@@ -815,9 +935,9 @@ const nameAnimationRunning = useRef(false);
 
       {/* Info Modal */}
       <Info
-        visible={infoModalVisible}
-        onClose={() => setInfoModalVisible(false)}
-        message={textInfo}
+        visible={infoVisible}
+        onClose={closeInfo}
+        message={infoMessage}
       />
 
       {/* ══ CompanySearch Modal Overlay ══ */}
@@ -828,17 +948,17 @@ const nameAnimationRunning = useRef(false);
             style={[
               styles.cardAnimatedWrap,
               {
-                opacity: nameOpacity,
+                opacity: animNameModalOpacity,
                 transform: [
                   {
-                    translateX: nameProgressX.interpolate({
+                    translateX: animNameModalX.interpolate({
                       inputRange: [0, 1, 2],
                       outputRange: [width, 0, -width * 0.65],
                       extrapolate: "clamp",
                     }),
                   },
                   {
-                    translateY: nameProgressY.interpolate({
+                    translateY: animNameModalY.interpolate({
                       inputRange: [0, 1, 2],
                       outputRange: [height, 0, -height],
                       extrapolate: "clamp",
@@ -861,129 +981,136 @@ const nameAnimationRunning = useRef(false);
       )}
 
       {/* ══ Multi-Step Overlay (Bewerbung, ChangeScreen, ChangeScreenOld) ══ */}
-     {/* ══ Multi-Step Overlay (Bewerbung, ChangeScreen, ChangeScreenOld) ══ */}
-{screen && (
-  <View style={styles.bewerbungOverlay}>
-    <Animated.View
-      style={[
-        styles.backdrop,
-        {
-          opacity: animProgressOpacity.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-          }),
-        },
-      ]}
-    >
-      <Pressable style={StyleSheet.absoluteFill} onPress={closeAllOverlays} />
-    </Animated.View>
-
-    <Animated.View
-      renderToHardwareTextureAndroid={true}
-      style={[
-        styles.cardAnimatedWrap,
-        {
-          transform: [
-            {
-              translateX: animProgress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [width, 0],
-                extrapolate: "clamp",
-              }),
-            },
-            {
-              translateY: animProgressY.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -height],
-                extrapolate: "clamp",
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      {/* ── FLOW 1: NEUE BEWERBUNG (Bewerbung -> ChangeScreen) ── */}
-      {!changeOldScreen && (
-        <>
-          {/* Step 1: Bewerbung */}
+      {screen && (
+        <View style={styles.bewerbungOverlay}>
           <Animated.View
             style={[
-              StyleSheet.absoluteFillObject,
+              styles.backdrop,
               {
-                opacity: animStep.interpolate({
+                opacity: animBackdropOpacity.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [1, 0],
+                  outputRange: [0, 1],
                 }),
+              },
+            ]}
+          >
+            <Pressable style={StyleSheet.absoluteFill} onPress={closeAllOverlays} />
+          </Animated.View>
+
+          <Animated.View
+            renderToHardwareTextureAndroid={true}
+            style={[
+              styles.cardAnimatedWrap,
+              {
                 transform: [
                   {
-                    translateX: animStep.interpolate({
+                    translateX: animOverlayWrapperX.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [0, -width * 0.35],
+                      outputRange: [width, 0],
+                      extrapolate: "clamp",
+                    }),
+                  },
+                  {
+                    translateY: animOverlayWrapperY.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -height],
                       extrapolate: "clamp",
                     }),
                   },
                 ],
               },
             ]}
-            pointerEvents={screenApp && !screenChange ? "auto" : "none"}
           >
-            <Bewerbung
-              changeScreen={navigateToChange}
-              visibleApp={screenApp}
-              isNextStep={screenChange}
-              ref={bewerbungRef}
-              onClose={closeAllOverlays}
-            />
-          </Animated.View>
-
-          {/* Step 2: ChangeScreen (nur rendern wenn der Schritt aktiv ist!) */}
-            <Animated.View
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  opacity: animStep.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 1],
-                  }),
-                  transform: [
+            {/* ── FLOW 1: NEUE BEWERBUNG (Bewerbung -> ChangeScreen) ── */}
+            {!changeOldScreen && (
+              <>
+                {/* Step 1: Bewerbung */}
+                <Animated.View
+                  style={[
+                    StyleSheet.absoluteFillObject,
                     {
-                      translateX: animStep.interpolate({
+                      opacity: animBewerbungOpacity.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [width, 0],
-                        extrapolate: "clamp",
+                        outputRange: [0, 1],
                       }),
+                      transform: [
+                        {
+                          translateX: animBewerbungX.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -width * 0.35],
+                            extrapolate: "clamp",
+                          }),
+                        },
+                      ],
                     },
-                  ],
-                },
-              ]}
-              pointerEvents="auto"
-            >
-              <ChangeScreen
-                visible={screenChange}
-                onClose={closeAllOverlays}
-                ref={changeScreenRef}
-              />
-            </Animated.View>
-        </>
-      )}
+                  ]}
+                  pointerEvents={screenApp && !screenChange ? "auto" : "none"}
+                >
+                  <Bewerbung
+                    changeScreen={navigateToChange}
+                    visibleApp={screenApp}
+                    isNextStep={screenChange}
+                    ref={bewerbungRef}
+                    onClose={closeAllOverlays}
+                  />
+                </Animated.View>
 
-      {/* ── FLOW 2: ALTE BEWERBUNG (ChangeScreenOld isoliert) ── */}
-      {changeOldScreen && (
-        <Animated.View
-          style={StyleSheet.absoluteFillObject}
-          pointerEvents="auto"
-        >
-          <ChangeScreenOld
-            visible={changeOldScreen}
-            ref={changeOldRef}
-            onClose={closeAllOverlays}
-            paddingFactor={0.9}
-          />
-        </Animated.View>
+                {/* Step 2: ChangeScreen */}
+                <Animated.View
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    {
+                      opacity: animChangeScreenOpacity.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 1],
+                      }),
+                      transform: [
+                        {
+                          translateX: animChangeScreenX.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [width, 0],
+                            extrapolate: "clamp",
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                  pointerEvents={screenChange ? "auto" : "none"}
+                >
+                  <ChangeScreen
+                    visible={screenChange}
+                    onClose={closeAllOverlays}
+                    ref={changeScreenRef}
+                  />
+                </Animated.View>
+              </>
+            )}
+
+            {/* ── FLOW 2: ALTE BEWERBUNG (ChangeScreenOld isoliert) ── */}
+            {changeOldScreen && (
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  {
+                    opacity: animChangeOldOpacity.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    }),
+                  },
+                ]}
+                pointerEvents="auto"
+              >
+                <ChangeScreenOld
+                  visible={changeOldScreen}
+                  ref={changeOldRef}
+                  onClose={closeAllOverlays}
+                  paddingFactor={0.9}
+                />
+              </Animated.View>
+            )}
+          </Animated.View>
+        </View>
       )}
-    </Animated.View>
-  </View>
-)}
       <KeyboardDummy />
     </SafeAreaView>
   );

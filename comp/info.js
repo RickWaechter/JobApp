@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -11,6 +11,43 @@ import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
+/* ── Custom Hook für Screens (StartApp, OldScreen etc.) ── */
+export const useInfoModal = () => {
+  const { t } = useTranslation();
+  const [visible, setVisible] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const openInfo = useCallback((key) => {
+    switch (key) {
+      case 'new':
+        setMessage(t('info.new'));
+        break;
+      case 'old':
+        setMessage(t('info.old'));
+        break;
+      case 'resume':
+        setMessage(t('info.resume'));
+        break;
+      default:
+        setMessage(key || '');
+        break;
+    }
+    setVisible(true);
+  }, [t]);
+
+  const closeInfo = useCallback(() => {
+    setVisible(false);
+  }, []);
+
+  return {
+    infoVisible: visible,
+    infoMessage: message,
+    openInfo,
+    closeInfo,
+  };
+};
+
+/* ── Info-Modal Komponente ────────────────────────────── */
 export default function Info({ visible, onClose, message = '' }) {
   const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -67,7 +104,7 @@ export default function Info({ visible, onClose, message = '' }) {
             }
           ]}
         >
-          {/* Subtiler Glow-Orb (wie bei primaryCard) */}
+          {/* Subtiler Glow-Orb */}
           <View style={styles.glowEffect} />
 
           {/* Top-Leiste: Badge + Schließen-Button */}
@@ -75,7 +112,7 @@ export default function Info({ visible, onClose, message = '' }) {
             <View style={styles.badgePrimary}>
               <View style={styles.statusDot} />
               <Text style={styles.badgePrimaryText}>
-                {t('common.infoBadge').toUpperCase()}
+                {t('common.infoBadge', 'INFO').toUpperCase()}
               </Text>
             </View>
 
@@ -99,7 +136,7 @@ export default function Info({ visible, onClose, message = '' }) {
             style={({ pressed }) => [styles.confirmButton, pressed && styles.btnPressed]}
           >
             <Text style={styles.confirmButtonText}>
-              {t('common.understood')}
+              {t('common.understood', 'Verstanden')}
             </Text>
           </Pressable>
         </Animated.View>
