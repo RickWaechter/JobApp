@@ -1,7 +1,7 @@
 // CollectScreen.js
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { router } from 'expo-router';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import Pdf from 'react-native-pdf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Share from 'react-native-share';
 import SQLite from 'react-native-sqlite-storage';
+import Info, { useInfoModal } from '../comp/info.js';
 
 import { sanitize } from '../inc/CutLine.js';
 import colors from '../inc/colors.js';
@@ -29,10 +30,9 @@ SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
 const { width, height } = Dimensions.get('window');
-const DB_NAME = 'firstNew.db';
 
 /* ── Wiederverwendbare Action-Kachel ────────────────────── */
-const CollectActionCard = memo(({ title, description, iconName, onPress, isPrimary = false }) => (
+const CollectActionCard = memo(({ title, description, iconName, onPress, isPrimary = false, onPressIcon }) => (
   <Pressable
     onPress={onPress}
     style={({ pressed }) => [
@@ -42,11 +42,29 @@ const CollectActionCard = memo(({ title, description, iconName, onPress, isPrima
     ]}
   >
     <View style={[styles.iconContainer, isPrimary && styles.primaryIconContainer]}>
-      <MaterialIcons
-        name={iconName}
-        size={22}
-        color={isPrimary ? '#FFFFFF' : '#60A5FA'}
-      />
+      {onPressIcon ? (
+        <TouchableOpacity
+          onPress={(e) => {
+            e?.stopPropagation?.();
+            onPressIcon();
+          }}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.iconHitArea}
+        >
+          <MaterialIcons
+            name={iconName}
+            size={22}
+            color={isPrimary ? '#FFFFFF' : '#60A5FA'}
+          />
+        </TouchableOpacity>
+      ) : (
+        <MaterialIcons
+          name={iconName}
+          size={22}
+          color={isPrimary ? '#FFFFFF' : '#60A5FA'}
+        />
+      )}
     </View>
 
     <View style={styles.cardTextContainer}>
@@ -72,8 +90,9 @@ const CollectScreen = () => {
   /* ── States ──────────────────────────────────────────── */
   const [pdfView, setPdfView] = useState(false);
   const [source, setSource] = useState({});
-  const [loadingPdf, setLoadingPdf] = useState(false);
-  const [sharing, setSharing] = useState(false);
+  const [, setLoadingPdf] = useState(false);
+  const [, setSharing] = useState(false);
+  const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
 
   const lastTimeClick = useRef(0);
 
@@ -216,15 +235,16 @@ const CollectScreen = () => {
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
-  <View style={styles.successBadge}>
-    <MaterialIcons name="check-circle" size={15} color="#10B981" />
-    <Text style={styles.successBadgeText}>{t('completed.badge')}</Text>
-  </View>
-  <Text style={styles.titleMain}>{t('completed.title')}</Text>
-  <Text style={styles.subtitleMain}>
-    {t('completed.subtitle')}
-  </Text>
-</View>
+          <View style={styles.successBadge}>
+            <MaterialIcons name="check-circle" size={15} color="#10B981" />
+            <Text style={styles.successBadgeText}>{t('completed.badge')}</Text>
+          </View>
+          <Text style={styles.titleMain}>{t('completed.title')}</Text>
+          <Text style={styles.subtitleMain}>
+            {t('completed.subtitle')}
+          </Text>
+        </View>
+
         {/* ── Action Cards ── */}
         <View style={styles.cardsWrapper}>
           <CollectActionCard
@@ -232,6 +252,7 @@ const CollectScreen = () => {
             description={t('viewApplicationDescription') || 'Überprüfe deine fertige Mappe vor dem Absenden.'}
             iconName="visibility"
             onPress={lookAtIt}
+            onPressIcon={() => openInfo(t('info.preview') || 'Hier kannst du deine vollständige Bewerbung vor dem Versand prüfen.')}
           />
 
           <CollectActionCard
@@ -240,6 +261,7 @@ const CollectScreen = () => {
             description={t('downloadDescription') || 'Als PDF exportieren, in Dateien sichern oder teilen.'}
             iconName="file-download"
             onPress={download}
+            onPressIcon={() => openInfo(t('info.download') || 'Speichere die Datei lokal oder teile sie über Messenger und AirDrop.')}
           />
 
           <CollectActionCard
@@ -247,6 +269,7 @@ const CollectScreen = () => {
             description={t('sendEmailDescription') || 'Mit deinen hinterlegten SMTP-Daten sofort versenden.'}
             iconName="send"
             onPress={email}
+            onPressIcon={() => openInfo(t('info.email') || 'Versende deine Unterlagen direkt über deinen konfigurierten E-Mail-Account.')}
           />
         </View>
 
@@ -304,6 +327,12 @@ const CollectScreen = () => {
           </View>
         </View>
       </Modal>
+
+      <Info
+        visible={infoVisible}
+        onClose={closeInfo}
+        message={infoMessage}
+      />
     </SafeAreaView>
   );
 };
@@ -397,6 +426,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
+  },
+  iconHitArea: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   primaryIconContainer: {
     backgroundColor: '#3B82F6',

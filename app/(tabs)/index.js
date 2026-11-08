@@ -37,6 +37,7 @@ import ChangeScreenOld from "../changeOld.js";
 const { width, height } = Dimensions.get("window");
 const DB_NAME = "firstNew.db";
 const EASING_FLOW = Easing.bezier(0.25, 0.1, 0.25, 1);
+const LOCK_TIME_MS = 1500; // 1.5 Sekunden Klick-Sperre
 
 const ROUTE_MAP = {
   name: "/name",
@@ -50,22 +51,28 @@ const ROUTE_MAP = {
 
 /* ── Hero Card (Hauptaktion) ────────────────────────────── */
 const PrimaryActionCard = memo(
-  ({ title, description, badgeText, footerText, onPress, onIconPress }) => (
+  ({ title, description, badgeText, footerText, onPress, onIconPress, disabled }) => (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.primaryCard, pressed && styles.cardPressed]}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.primaryCard,
+        pressed && !disabled && styles.cardPressed,
+        disabled && { opacity: 0.8 },
+      ]}
     >
       <View style={styles.primaryGlowEffect} />
 
       <View style={styles.primaryTopRow}>
         <View style={styles.primaryIconContainer}>
           <Pressable
+            disabled={disabled}
             onPress={(e) => {
               e?.stopPropagation?.();
               onIconPress?.();
             }}
             hitSlop={10}
-            style={({ pressed }) => pressed && { opacity: 0.7 }}
+            style={({ pressed }) => pressed && !disabled && { opacity: 0.7 }}
           >
             <MaterialIcons name="auto-awesome" size={24} color="#FFFFFF" />
           </Pressable>
@@ -94,14 +101,14 @@ const PrimaryActionCard = memo(
 
 /* ── Secondary Card (Bewerbung recyclen) ────────────────── */
 const SecondaryActionCard = memo(
-  ({ title, description, onPress, onIconPress, isLoading }) => (
+  ({ title, description, onPress, onIconPress, isLoading, disabled }) => (
     <Pressable
       onPress={onPress}
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       style={({ pressed }) => [
         styles.secondaryCard,
-        pressed && styles.cardPressed,
-        isLoading && { opacity: 0.7 },
+        pressed && !disabled && styles.cardPressed,
+        (isLoading || disabled) && { opacity: 0.7 },
       ]}
     >
       <View style={styles.secondaryIconContainer}>
@@ -109,12 +116,13 @@ const SecondaryActionCard = memo(
           <ActivityIndicator size="small" color="#FFFFFF" />
         ) : (
           <Pressable
+            disabled={disabled}
             onPress={(e) => {
               e?.stopPropagation?.();
               onIconPress?.();
             }}
             hitSlop={10}
-            style={({ pressed }) => pressed && { opacity: 0.7 }}
+            style={({ pressed }) => pressed && !disabled && { opacity: 0.7 }}
           >
             <MaterialIcons
               name="history"
@@ -148,9 +156,20 @@ export default function StartApp() {
   const [isLoadingOld, setIsLoadingOld] = useState(false);
   const [showCompanySearch, setShowCompanySearch] = useState(false);
 
-  /* ── Info Modal State ── */
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [textInfo, setTextInfo] = useState("");
+  /* ── Globaler Klick-Lock (1-2 Sekunden) ── */
+  const [isLocked, setIsLocked] = useState(false);
+  const lockRef = useRef(false);
+
+  const acquireLock = useCallback(() => {
+    if (lockRef.current) return false;
+    lockRef.current = true;
+    setIsLocked(true);
+    setTimeout(() => {
+      lockRef.current = false;
+      setIsLocked(false);
+    }, LOCK_TIME_MS);
+    return true;
+  }, []);
 
   /* ── Subscreen Visibility ── */
   const [screen, setScreen] = useState(false);
@@ -160,7 +179,6 @@ export default function StartApp() {
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
 
   const nameAnimationRunning = useRef(false);
-  const lastClickTime = useRef(0);
   const bewerbungRef = useRef(null);
   const changeScreenRef = useRef(null);
   const changeOldRef = useRef(null);
@@ -168,31 +186,25 @@ export default function StartApp() {
   const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
 
   /* ══════════════════════════════════════════════════════════════════
-     EINDEUTIGE ANIMATION REFS (Keine Doppelbelegung mehr)
+     ANIMATION REFS
   ══════════════════════════════════════════════════════════════════ */
-  // 1. Home Screen & Resume Banner
   const animHomeOpacity = useRef(new Animated.Value(1)).current;
   const animResumeBanner = useRef(new Animated.Value(0)).current;
 
-  // 2. CompanySearchModal (Name)
   const animNameModalX = useRef(new Animated.Value(0)).current;
   const animNameModalY = useRef(new Animated.Value(1)).current;
   const animNameModalOpacity = useRef(new Animated.Value(0)).current;
 
-  // 3. Multi-Step Overlay Container & Backdrop
   const animOverlayWrapperX = useRef(new Animated.Value(0)).current;
   const animOverlayWrapperY = useRef(new Animated.Value(0)).current;
   const animBackdropOpacity = useRef(new Animated.Value(0)).current;
 
-  // 4. Step 1: Bewerbung Screen
   const animBewerbungX = useRef(new Animated.Value(0)).current;
   const animBewerbungOpacity = useRef(new Animated.Value(0)).current;
 
-  // 5. Step 2: ChangeScreen
   const animChangeScreenX = useRef(new Animated.Value(0)).current;
   const animChangeScreenOpacity = useRef(new Animated.Value(0)).current;
 
-  // 6. Flow 2: ChangeScreenOld
   const animChangeOldOpacity = useRef(new Animated.Value(0)).current;
 
   const kbListenerRef = useRef(null);
@@ -285,7 +297,7 @@ export default function StartApp() {
     });
   }, [animNameModalY, animNameModalOpacity, animHomeOpacity, animNameModalX]);
 
-  /* ── Overlay Dismiss (Gemeinsame Schließ-Logik) ── */
+  /* ── Overlay Dismiss ── */
   const closeAllOverlays = useCallback(() => {
     Keyboard.dismiss();
 
@@ -312,7 +324,6 @@ export default function StartApp() {
       setChangeOldScreen(false);
       setShowCompanySearch(false);
 
-      // Alle Refs sauber zurücksetzen
       animOverlayWrapperX.setValue(0);
       animOverlayWrapperY.setValue(0);
       animBackdropOpacity.setValue(0);
@@ -395,14 +406,14 @@ export default function StartApp() {
     setChangeOldScreen(false);
     setScreenChange(true);
     setScreen(true);
-    changeScreenRef.current?.focus?.();
+
+    changeScreenRef.current?.disableScroll?.();
 
     animOverlayWrapperX.setValue(0);
     animOverlayWrapperY.setValue(0);
     animBackdropOpacity.setValue(0);
-
-    // ChangeScreen ist hier direkt an Position 1 (sichtbar im Container)
     animChangeScreenOpacity.setValue(0);
+    changeScreenRef.current?.focus?.();
 
     Animated.parallel([
       Animated.timing(animBackdropOpacity, {
@@ -483,7 +494,6 @@ export default function StartApp() {
     changeScreenRef.current?.focus?.();
     setScreenChange(true);
 
-    // Sofort übergeben – kein Warten auf das Ende der 380ms Animation:
     Animated.parallel([
       Animated.timing(animBewerbungX, {
         toValue: 0,
@@ -657,10 +667,13 @@ export default function StartApp() {
     };
   }, []);
 
-  /* ── Sync Storage Status ── */
+  /* ── Sync Storage Status & Lock Reset bei Screen-Rückkehr ── */
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
+      lockRef.current = false;
+      setIsLocked(false);
+
       (async () => {
         try {
           const result = await EncryptedStorage.getItem("result");
@@ -746,6 +759,8 @@ export default function StartApp() {
   };
 
   const handleNewApplication = async () => {
+    if (!acquireLock()) return;
+
     try {
       const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
       const deviceId = await DeviceInfo.getUniqueId();
@@ -790,15 +805,13 @@ export default function StartApp() {
   };
 
   const handleOldApplication = async () => {
-    const now = Date.now();
-    if (now - lastClickTime.current < 800 || isLoadingOld) return;
-    lastClickTime.current = now;
+    if (isLoadingOld || !acquireLock()) return;
 
     setIsLoadingOld(true);
     try {
       const entries = await getOld();
       router.push({
-        pathname: "/old",
+        pathname: "/first",
         params: { items: JSON.stringify(entries) },
       });
     } catch (error) {
@@ -809,9 +822,7 @@ export default function StartApp() {
   };
 
   const handleResume = async () => {
-    const now = Date.now();
-    if (now - lastClickTime.current < 800) return;
-    lastClickTime.current = now;
+    if (!acquireLock()) return;
 
     try {
       const lastStep = await EncryptedStorage.getItem("result");
@@ -831,6 +842,14 @@ export default function StartApp() {
       console.error("Routing error:", e);
     }
   };
+
+  const handleOpenInfo = useCallback(
+    (type) => {
+      if (!acquireLock()) return;
+      openInfo(type);
+    },
+    [acquireLock, openInfo]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -858,8 +877,9 @@ export default function StartApp() {
             }
             badgeText={t("startApp.badgeRecommended") || "EMPFOHLEN"}
             footerText={t("startApp.primaryFooter") || "Jetzt starten"}
+            disabled={isLocked}
             onPress={handleNewApplication}
-            onIconPress={() => openInfo("new")}
+            onIconPress={() => handleOpenInfo("new")}
           />
 
           <SecondaryActionCard
@@ -869,8 +889,9 @@ export default function StartApp() {
               "Verwende gespeicherte Daten oder ändere ein früheres Dokument ab."
             }
             isLoading={isLoadingOld}
+            disabled={isLocked}
             onPress={handleOldApplication}
-            onIconPress={() => openInfo("old")}
+            onIconPress={() => handleOpenInfo("old")}
           />
         </View>
 
@@ -900,15 +921,17 @@ export default function StartApp() {
           >
             <TouchableOpacity
               onPress={handleResume}
+              disabled={isLocked}
               activeOpacity={0.82}
-              style={styles.resumeBar}
+              style={[styles.resumeBar, isLocked && { opacity: 0.7 }]}
             >
               <View style={styles.resumeLeft}>
                 <View style={styles.resumePlayIcon}>
                   <Pressable
+                    disabled={isLocked}
                     onPress={(e) => {
                       e?.stopPropagation?.();
-                      openInfo("resume");
+                      handleOpenInfo("resume");
                     }}
                   >
                     <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
@@ -932,13 +955,6 @@ export default function StartApp() {
           </Animated.View>
         )}
       </Animated.View>
-
-      {/* Info Modal */}
-      <Info
-        visible={infoVisible}
-        onClose={closeInfo}
-        message={infoMessage}
-      />
 
       {/* ══ CompanySearch Modal Overlay ══ */}
       {showCompanySearch && (
@@ -1112,6 +1128,11 @@ export default function StartApp() {
         </View>
       )}
       <KeyboardDummy />
+      <Info
+        visible={infoVisible}
+        onClose={closeInfo}
+        message={infoMessage}
+      />
     </SafeAreaView>
   );
 }

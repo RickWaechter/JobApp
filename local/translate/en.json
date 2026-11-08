@@ -1,53 +1,53 @@
 {
   "BewerbungGenerieren": "Create New Application",
   "BewerbungGenerierenText": "Create a professional application quickly and easily.",
-  "BewerbungRecycel": "Reuse Application",
-  "BewerbungRecycelText": "Use your previous application to quickly tailor a new one for another job.",
-  "personalData": "Personal Details",
-  "personalDataDescription": "Edit your personal address information for your application here.",
+  "BewerbungRecycel": "Reuse",
+  "BewerbungRecycelText": "Use your previous application to quickly adapt it for another position.",
+  "personalData": "Personal Data",
+  "personalDataDescription": "Edit your personal address for your application here.",
   "configureEmail": "Configure Email",
-  "configureEmailDescription": "Set up your email account to send applications directly.",
+  "configureEmailDescription": "Set up your email for sending applications.",
   "sortAttachments": "Sort Attachments",
-  "sortAttachmentsDescription": "Rearrange the attachments for your application portfolio.",
+  "sortAttachmentsDescription": "Arrange your attachments for your application folder.",
   "placeholderName": "My Name",
   "placeholderStreet": "Street and House Number",
-  "placeholderZip": "ZIP Code and City",
-  "placeholderEmail": "Email Address",
+  "placeholderZip": "ZIP and City",
+  "placeholderEmail": "Email",
   "placeholderPassword": "Password",
-  "placeholderEmailServer": "Select an email server",
-  "saveAndClose": "Save & Close",
-  "activateAndClose": "Enable",
-  "deactivateAndClose": "Disable",
+  "placeholderEmailServer": "Select an Email Server",
+  "saveAndClose": "Test & Save",
+  "activateAndClose": "Activate",
+  "deactivateAndClose": "Deactivate",
   "save": "Save",
   "downloadProgress": "",
-  "bwnzg": "Your application portfolio is currently being prepared.",
+  "bwnzg": "Your application folder is now being assembled.",
   "uploadFiles": "Select Files",
-  "selectFilesToUpload": "Select the attachments you want to include in your application portfolio.",
+  "selectFilesToUpload": "Choose the attachments you want to use for your application folder.",
   "addAttachment": "Add Attachment",
-  "addAttachmentsToApplication": "Add selected attachments to your existing application portfolio.",
+  "addAttachmentsToApplication": "Add the selected attachments to your existing application folder.",
   "replaceOldFiles": "Replace Old Attachments",
-  "replaceExistingAttachments": "Replace your current attachments with the newly selected files.",
+  "replaceExistingAttachments": "Replace your existing attachments with the newly selected ones.",
   "selectedFiles": "Selected File(s)",
-  "searchCompany": "Search address here",
-  "searchResult": "Search results will appear here.",
+  "searchCompany": "Search Address Here",
+  "searchResult": "Search results will be displayed here.",
   "searchCompanyOld": "Search company address...",
   "companyName": "Company Name",
-  "companyStreet": "Company Street & House Number",
-  "companyStreet2": "Company Street & House Number",
-  "companyCity": "ZIP Code & City of Company Location",
+  "companyStreet": "Company Street and House Number",
+  "companyStreet2": "Company Street and House Number",
+  "companyCity": "Company ZIP and City",
   "continue": "Continue",
   "enterManually": "Enter Manually",
   "nameAnsprechpartner": "Name, Contact Person",
-  "beruf": "Job Title",
+  "beruf": "Occupation",
   "skillsErfahrung": "Skills / Experience",
   "fontPlaceholder": "Helvetica (Default Font)",
   "generateCoverLetter": "Generate Cover Letter",
   "next": "Next",
   "toHome": "Close",
-  "ok": "Sure!",
+  "ok": "Yes, of course!",
   "cancel": "No",
   "pleaseWait": "Please wait",
-  "finish": "Finish",
+  "finish": "Done",
   "close": "Close",
   "nextStep": "Next",
   "previousStep": "Back",
@@ -55,86 +55,22 @@
   "Profile": "Profile",
   "Anlagen": "Attachments",
   "Info": "Information",
-  "Fortsetzen": "Resume",
-"profil": {
-    "title": "Success",
-    "infoData": "Your details have been saved successfully.",
-    "infoEmail": "Your email settings have been saved successfully.",
-    "error": "Error",
-    "errorDataEmail": "Please fill in all fields.",
-    "errorEmail": "Your email settings could not be saved.",
-    "languageError": "Please select a language.",
-    "languageSaved": "Your selected language is now available",
-    "buyCancel": "Purchase was cancelled.",
-    "welcomeBack": "Welcome back",
-    "defaultProfileName": "My Profile",
-    "coinsCount": "{{count}} Coins",
-    "coinsCountLoading": "… Coins",
-    "sectionSettings": "SETTINGS & DATA",
-    "sectionTopUp": "TOP UP BALANCE",
-    "defaultAddressDesc": "Save address & name",
-    "defaultEmailDesc": "SMTP settings for direct sending",
-    "coinsVerwalten": "Manage coins",
-    "coinsText": "Get new coins by watching a video or via instant top-up",
-    "experienceTitle": "Career & Skills",
-    "experienceDesc": "Currently {{count}} entries added",
-    "experienceDesc_one": "Currently 1 entry added",
-    "modalDataSubtitle": "This information is used in the cover letter",
-    "modalEmailTitle": "Email Dispatch",
-    "modalEmailSubtitle": "Sender details for automated applications",
-    "modalLangTitle": "Select Language",
-    "modalLangSubtitle": "Choose your preferred language",
-    "modalCoinsTitle": "Top Up Coins",
-    "modalCoinsSubtitle": "Use coins to create applications",
-    "packTitle": "+40 Coins Package",
-    "packBadge": "POPULAR",
-    "packDesc": "Instant activation without ads",
-    "adTitle": "+4 free Coins",
-    "adDesc": "Watch a short video ad",
-    "cvModalTitle": "Career & CV",
-    "cvModalSubtitle": "Manage entries or scan",
-    "scanTitle": "Scan CV",
-    "scanBadge": "OCR",
-    "scanDesc": "Select PDF or image – import data automatically",
-    "sectionExperience": "Career ({{count}})",
-    "btnAdd": "Add",
-    "emptyExperience": "No entries added yet.",
-    "stationBadge": "Entry #{{index}}",
-    "labelRole": "Position / Role",
-    "placeholderRole": "e.g. Software Developer",
-    "labelCompany": "Company",
-    "placeholderCompany": "e.g. Daimler AG",
-    "labelPeriod": "Period",
-    "placeholderPeriod": "08/2020 – Present",
-    "labelTasks": "Responsibilities & Achievements (bullet points)",
-    "placeholderTasks": "• Development of React Native apps\nMigration to Go microservices",
-    "btnSaveCv": "Apply & Close"
-  },
-  "uploadFirst": {
-    "stepBadge": "STEP 2 OF 2",
-    "title": "Resume & Attachments",
-    "subtitle": "Upload your application documents (resume, certificates, references) as PDF or image.",
-    "uploadHint": "The first file is automatically your main document (resume).",
-    "encryptionNotice": "All documents are end-to-end encrypted and stored exclusively locally on your device.",
-    "filesReady": "{{count}} files ready",
-    "filesReady_one": "1 file ready",
-    "reselect": "Reselect",
-    "mainDoc": "Main document",
-    "attachment": "Attachment {{index}}",
-    "saving": "Encrypting & saving...",
-    "saveAndStart": "Save & Start",
-    "skipLater": "Add later",
-    "selectFilesTitle": "Select files"
-  },
-  "closing": "Sincerely,",
+  "Fortsetzen": "Continue",
+  "Optionen": "Options",
+  "Starten": "Start",
+  "Zurück": "Back",
+  "QUALITÄT": "QUALITY",
+  "Schnell": "Very Good",
+  "Medium": "Best",
+  "Sehr schnell": "Good",
   "employmentOptions": {
-    "vollzeit": "Full-Time",
-    "teilzeit": "Part-Time",
-    "minijob": "Mini-Job"
+    "vollzeit": "Full-time",
+    "teilzeit": "Part-time",
+    "minijob": "Mini-job"
   },
   "applicationOptions": {
-    "initiativ": "Unsolicited",
-    "regulär": "Standard",
+    "initiativ": "Speculative",
+    "regulär": "Regular",
     "praktikum": "Internship"
   },
   "anredeOptions": {
@@ -145,50 +81,174 @@
   "salutation": {
     "herr": "Dear Mr. ",
     "frau": "Dear Ms. ",
-    "default": "Dear Hiring Manager,"
+    "default": "Dear Sir or Madam,"
   },
   "applicationOptions2": {
-    "initiativ": "Unsolicited application as ",
+    "initiativ": "Speculative application as ",
     "regulär": "Application as ",
     "praktikum": "Internship application as ",
     "default": "Application as "
   },
   "employmentChoice": {
-    "fulltime": "for a full-time position",
-    "parttime": "for a part-time position",
-    "minijob": "on a mini-job basis",
+    "fulltime": "for a full‑time position",
+    "parttime": "for a part‑time position",
+    "minijob": "on a mini‑job basis",
     "default": ""
   },
-  "enterText": "Type your text here...",
+  "uploadFirst": {
+    "stepBadge": "STEP 2 OF 2",
+    "title": "Resume & Attachments",
+    "subtitle": "Upload your application documents (resume, certificates, diplomas) as PDF or image.",
+    "uploadHint": "The first file is automatically your main document (resume).",
+    "encryptionNotice": "All documents are end‑to‑end encrypted and stored locally on your device only.",
+    "filesReady": "{{count}} files ready",
+    "filesReady_one": "1 file ready",
+    "reselect": "Select Again",
+    "mainDoc": "Main Document",
+    "attachment": "Attachment {{index}}",
+    "saving": "Encrypting & saving...",
+    "saveAndStart": "Save & Start",
+    "skipLater": "Add Later",
+    "selectFilesTitle": "Select Files"
+  },
+  "bewerbung": {
+    "stepBadge": "STEP 1 OF 2",
+    "mainTitle": "Configure Application",
+    "sectionSalutation": "SALUTATION & CONTACT PERSON",
+    "sectionJob": "OCCUPATION OR JOB LINK",
+    "sectionSkills": "SKILLS & EXPERIENCE",
+    "sectionAccordion": "Advanced Settings",
+    "labelEmployment": "EMPLOYMENT TYPE",
+    "labelAppType": "APPLICATION TYPE",
+    "labelFont": "PDF FONT",
+    "labelLanguage": "COVER LETTER LANGUAGE",
+    "labelQuality": "Generation Quality",
+    "quality": {
+      "best": "Best Quality",
+      "medium": "High Quality",
+      "light": "Standard"
+    },
+    "options": "Options",
+    "btnStart": "Start",
+    "btnBack": "Back",
+    "skillsSelectedCount": "{{count}} skills selected",
+    "skillsSelectedCount_one": "1 skill selected",
+    "placeholderSalutation": "Contact person's last name (e.g., Schmidt)",
+    "placeholderJob": "Enter job title or paste a link...",
+    "placeholderSkills": "e.g., 3 years React Native, team lead...",
+    "placeholderFont": "Choose Font",
+    "btnAnalyze": "Analyze",
+    "btnGenerate": "Generate Cover Letter",
+    "creatingApplication": "Creating Application",
+    "btnCancel": "Cancel",
+    "infoModalMessage": "Simply copy the link of a job posting (Indeed, StepStone, Bundesagentur für Arbeit, etc.) into the job field – we will automatically extract the requirements!\n\nAlternatively, just enter your job title.",
+    "extractingTitle": "Analyzing Job Posting...",
+    "extractingSubtitle": "Extracting keywords & tasks from the posting",
+    "extractSuccessTitle": "Success!",
+    "extractSuccessMsg": "Job posting successfully analyzed.",
+    "extractHintTitle": "Note",
+    "extractDefaultError": "Could not extract any data.",
+    "invalidLinkTitle": "Invalid Link",
+    "invalidLinkMsg": "Please paste a complete job posting link.",
+    "timeoutTitle": "Timeout",
+    "timeoutMsg": "Job posting took too long to load. Please check the URL.",
+    "savedTitle": "Saved",
+    "jobSavedMsg": "Job title saved for suggestions.",
+    "skillSavedMsg": "Skill saved for suggestions.",
+    "networkError": "Network error while generating the text.",
+    "salutationDearAll": "Dear Sir or Madam,",
+    "salutationDearMr": "Dear Mr. {{name}},",
+    "salutationDearMrs": "Dear Ms. {{name}},",
+    "subjectCoverLetterFor": "Application as ",
+    "subjectCoverLetter": "Application as ",
+    "errorTitle": "Error",
+    "errorLoadJob": "Failed to load job posting.",
+    "fontDownloadErrorTitle": "Error",
+    "robotoNoticeTitle": "Font Required",
+    "robotoNoticeMsg": "The \"Roboto\" font is needed for this language to display all characters correctly in the PDF. Download now?",
+    "robotoMissingTitle": "Missing Font",
+    "robotoMissingMsg": "For the selected language you must first download the \"Roboto\" font. Without it the document cannot be created.",
+    "robotoChengeFont": "Incorrect Font",
+    "robotChangeFontMsg": "Please use a font other than Helvetica; it is not supported for your language.",
+    "fonts": {
+      "helvetica": "Helvetica (Modern & Clean)",
+      "helveticaOblique": "Helvetica Oblique",
+      "timesRoman": "Times Roman (Classic Serif)",
+      "timesRomanItalic": "Times Roman Italic",
+      "courier": "Courier (Monospace)",
+      "courierOblique": "Courier Oblique"
+    }
+  },
+  "companySearchModal": {
+    "badgeManual": "VERIFY ADDRESS",
+    "badgeAuto": "AUTO‑SEARCH",
+    "titleManual": "Company Data",
+    "titleAuto": "Find Company",
+    "searchPlaceholder": "Enter company name or location...",
+    "promptTypeSuggestions": "Type to see suggestions",
+    "searching": "Searching for locations...",
+    "noResults": "No results found",
+    "btnManual": "Enter Manually",
+    "namePlaceholder": "Company Name",
+    "streetPlaceholder": "Street & House Number",
+    "cityPlaceholder": "ZIP & City",
+    "btnContinue": "Apply",
+    "btnBackToSearch": "Back to Search",
+    "errorTitle": "Error",
+    "saveErrorMsg": "Your data could not be saved.",
+    "btnOk": "OK"
+  },
+  "first": {
+    "badge": "FIRST SETUP",
+    "heading": "Set Up Profile",
+    "subtitle": "Enter your contact details so cover letters and documents can be personalized automatically.",
+    "theDrop": "All data remains encrypted and stored locally on your device – safe and private. You can change it at any time.",
+    "insertSampleData": "Insert Sample Data",
+    "labelName": "FULL NAME",
+    "placeholderName": "e.g., Max Mustermann",
+    "labelStreet": "STREET & HOUSE NUMBER",
+    "placeholderStreet": "e.g., Musterstraße 12",
+    "labelCity": "ZIP & CITY",
+    "placeholderCity": "e.g., 10115 Berlin",
+    "labelLanguage": "LANGUAGE",
+    "privacyNotice": "Your data is stored locally and securely encrypted on this device only.",
+    "saving": "Saving...",
+    "saveBtn": "Save Profile & Continue",
+    "error": "Please fill in all fields",
+    "errorMissingFieldsTitle": "Incomplete Information",
+    "errorMissingFieldsMsg": "Please fill in your name, street, and city.",
+    "dbInitError": "Database could not be initialized.",
+    "encryptionError": "Data could not be securely encrypted."
+  },
+  "enterText": "Enter your text here...",
   "saveCoverLetter": "Save Cover Letter",
   "merge": "Merge",
   "viewApplication": "View Application",
-  "viewApplicationDescription": "Review your application portfolio to catch any mistakes before downloading or sending.",
-  "downloadDescription": "Save the application portfolio as a PDF on your device and submit it to your desired job.",
+  "viewApplicationDescription": "Review your application folder to catch any errors before downloading or sending.",
+  "downloadDescription": "Save the application folder as a PDF on your device and send it to your desired position.",
   "sendEmail": "Send via Email",
-  "sendEmailDescription": "Send your application portfolio directly by email. The message body is generated automatically and can be customized before sending. ✉️",
-
+  "sendEmailDescription": "Send your application folder directly via email. The message text is generated automatically but can be edited before sending. ✉️",
   "terms": {
     "title": "Terms and Conditions",
     "section1": {
-      "heading": "1. Scope of Application",
-      "content": "These Terms and Conditions govern the use of the application tool. The tool generates applications using artificial intelligence (AI) provided by third-party services."
+      "heading": "1. Scope",
+      "content": "These terms apply to the use of the application tool. The tool creates applications using artificial intelligence (AI) provided by external third‑party services."
     },
     "section2": {
       "heading": "2. Data Protection and Security",
-      "content": "All personal data is stored locally on your device and secured with AES-256 encryption."
+      "content": "All personal data is stored locally and secured with AES‑256 encryption."
     },
     "section3": {
-      "heading": "3. Disclaimer of Liability",
-      "content": "The provider accepts no liability for the accuracy, completeness, or suitability of the generated applications."
+      "heading": "3. Disclaimer",
+      "content": "The provider assumes no liability for the accuracy or completeness of the generated applications."
     },
     "section4": {
-      "heading": "4. Terms of Use",
-      "content": "Use of the tool is non-exclusive and non-transferable. Modification, redistribution, or resale is strictly prohibited."
+      "heading": "4. Usage Rights",
+      "content": "The tool's use is non‑exclusive and non‑transferable. Modifications or resale are prohibited."
     },
     "section5": {
-      "heading": "5. Governing Law",
-      "content": "The laws of the Federal Republic of Germany shall apply."
+      "heading": "5. Final Provisions",
+      "content": "German law applies."
     },
     "email": {
       "placeholder": "Email",
@@ -200,9 +260,9 @@
     "message": {
       "placeholder": "Message"
     },
-    "messageText": "Dear Hiring Team,\n\nI hereby submit my application for the position of {{jobTitle}} at {{companyName}}.\n\nBest regards,\n{{applicantName}}"
+    "messageText": "Dear Sir or Madam,\n\nI hereby apply for the position of {{jobTitle}} at {{companyName}}.\n\nSincerely,\n{{applicantName}}"
   },
-
+  "closing": "Sincerely",
   "emailSent": {
     "success": "Email sent successfully!",
     "error": "Error sending email. Please try again."
@@ -221,56 +281,53 @@
       "placeholder": "Password"
     }
   },
-
   "faq": {
     "heading": "Frequently Asked Questions",
     "entry1": {
-      "subheading": "How is my data stored?",
-      "paragraph": "Your data is safe with us. All your information is stored exclusively locally on your phone in an SQLite database and secured using strong 256-bit AES encryption. This ensures that no one but you has access to it. We value data privacy and deliberately refrain from saving or sharing your data on external servers.\n\nWhen using the email service, your email address, password, and mail server configuration are protected using the same strong encryption before data processing. This guarantees your sensitive details remain protected at all times. Your privacy is our top priority — you stay in full control of your data."
+      "subheading": "How are my data stored?",
+      "paragraph": "Your data is safe with us. All your information is stored exclusively locally on your phone in an SQLite database and protected with strong 256‑bit AES encryption. This ensures that only you have access to it. We place great emphasis on privacy and deliberately avoid storing or sharing your data on external servers.\n\nIf you use the email service, your email address, password, and mail server are also protected with the same strong encryption before processing. Your sensitive information remains as protected as possible at all times. Your privacy is our top priority – you retain full control over your data."
     },
     "entry2": {
       "subheading": "How does the email server work?",
-      "paragraph": "With our email service, you can easily send your completed application portfolio directly to your chosen company — all you need is their recipient address. The subject line as well as a pre-formulated message body are created for you automatically, keeping the process fast and convenient.\n\nYour data is transferred using secure 2048-bit encryption to our server, which decrypts the portfolio and forwards it directly to the recipient. No logs are kept and no data is persistently stored — information remains temporarily cached in memory and is deleted immediately after delivery.\n\nWe are actively working on a fully local version of this feature to give you even greater autonomy over your data in future releases. This service is completely optional and free to use."
+      "paragraph": "With our email service you can send your application folder directly to the email address of your desired company – you only need the appropriate contact address. The subject line and a template for the email text are generated automatically, making the sending quick and straightforward.\n\nYour data is transferred to our server with secure 2048‑bit encryption, where the application folder is decrypted and forwarded directly to the recipient. No logs are created and data is not stored permanently – the information stays only temporarily in the cache and is deleted immediately after forwarding.\n\nWe are already working on a fully local version of this service, so you will have even more control over your data in the future. The service is completely free and optional – you decide whether to use it."
     },
     "entry3": {
-      "subheading": "Creating and Reusing Applications",
-      "paragraph": "You can either create a brand-new cover letter or reuse an existing one. For around 1 cent per generation, you can generate a tailored cover letter customized to your desired role. Alternatively, you can reload an older cover letter, pick a new employer, update the contact person, and edit the body copy as needed. This saves valuable time while keeping you flexible across multiple submissions."
+      "subheading": "Application Creation and Recycling",
+      "paragraph": "You can either create a brand‑new cover letter or reuse an existing one. For about 1 cent per generation you can get a cover letter tailored to the desired position. Alternatively, you can reuse an earlier cover letter, adjust it by selecting the company, redefining the contact person, and editing the text as you wish. This saves time while keeping you flexible to adapt each application as needed."
     }
   },
-
   "privacy": {
     "heading": "Privacy Policy",
     "entry1": {
       "title": "1. General Information",
-      "text": "This Privacy Policy explains how the application tool collects and processes personal information."
+      "text": "This privacy policy explains how the application tool processes personal data."
     },
     "entry2": {
       "title": "2. Data Collection and Processing",
-      "text": "The tool collects only the data strictly necessary to prepare your application documents:\n• Target job title\n• Relevant skills and experience\n• Application type"
+      "text": "The tool only collects data necessary for creating an application:\nDesired position\nRelevant skills\nApplication type"
     },
     "entry3": {
       "title": "3. Storage and Security",
-      "text": "All personal data is saved exclusively on your local device and encrypted with AES-256-bit encryption."
+      "text": "All personal data is stored exclusively on the device and secured with AES‑256‑bit encryption."
     },
     "entry4": {
-      "title": "4. Third-Party Sharing",
-      "text": "No identifiable personal data is disclosed to third parties. Only anonymized prompt data required for content generation is transmitted to AI service providers."
+      "title": "4. Sharing with Third Parties",
+      "text": "No personal data is shared with third parties. Only anonymized data is sent to AI service providers for generating the application."
     },
     "entry5": {
       "title": "5. User Rights",
-      "text": "Users retain the right to review, rectify, and delete all locally saved records at any time."
+      "text": "Users have the right to request information, correction, and deletion of their locally stored data."
     },
     "entry6": {
-      "title": "6. Changes to this Policy",
-      "text": "This privacy statement may be updated periodically. The latest active revision is always accessible directly inside the app."
+      "title": "6. Changes to the Privacy Policy",
+      "text": "This privacy policy may be updated. The current version is always available in the app."
     }
   },
-
   "imprint": {
-    "heading": "Legal Notice",
+    "heading": "Imprint",
     "entry1": {
-      "title": "Information according to § 5 TMG",
-      "text": "Nick Parker\nEduard-Spranger-Straße 7\n71634 Ludwigsburg\nGermany"
+      "title": "Information According to § 5 TMG",
+      "text": "Nick Parker\nEduard‑Spranger‑Straße 7\n71634 Ludwigsburg\nGermany"
     },
     "entry2": {
       "title": "Contact",
@@ -278,46 +335,73 @@
     },
     "entry3": {
       "title": "Disclaimer",
-      "text": "The contents of this app have been created with the utmost care. However, we cannot assume liability for the accuracy, completeness, or up-to-date nature of the content. Use of the app is at your own risk."
+      "text": "The content of this app has been created with the greatest possible care. However, we cannot guarantee the accuracy, completeness, or timeliness of the content. Use the app at your own risk."
     },
     "entry4": {
       "title": "Copyright",
-      "text": "All materials within this app are protected by copyright law. Any reproduction, distribution, or commercial exploitation outside permitted statutory limits requires explicit written permission from the rights holder."
+      "text": "All content of this app is protected by copyright. Use is permitted only for private, non‑commercial purposes. Any further use, especially commercial exploitation, requires explicit permission from the copyright holder."
     }
   },
-
+  "contactForm": {
+    "badge": "DIRECT SEND",
+    "title": "Send Application",
+    "initialMessage": "Please wait, your template is being generated.",
+    "labelRecipient": "RECIPIENT EMAIL",
+    "placeholderRecipient": "personal@company.com",
+    "labelSubject": "SUBJECT",
+    "placeholderSubject": "Enter subject...",
+    "labelMessage": "COVER LETTER",
+    "placeholderMessage": "Dear Sir or Madam...",
+    "btnSend": "Send Email Now",
+    "sending": "Sending...",
+    "crawlStarting": "Searching for contacts",
+    "crawlSearching": "Looking up contacts...",
+    "crawlSuccess": "Emails found!",
+    "crawlNoResults": "No contacts found",
+    "crawlError": "Error during search",
+    "smtpError": "SMTP error while sending.",
+    "timeoutError": "Timeout: The mail server did not respond in time.",
+    "recipientRequired": "Please enter the recipient's email address.",
+    "prepareError": "Email could not be prepared.",
+    "noJobIdError": "No job ID received from server.",
+    "smtpFailedTitle": "Sending Error",
+    "smtpFailedMsg": "Username, password, or email server are incorrect. Please check your profile settings.\n\nServer Message: {{error}}",
+    "networkErrorTitle": "Network Error",
+    "connectionFailed": "Connection failed.",
+    "mailSavedMsg": "Email address saved for future suggestions.",
+    "webPreview": "Web Preview"
+  },
   "navigation": {
     "faq": "FAQ",
     "contact": "Contact",
     "agb": "Terms",
     "privacy": "Privacy",
-    "impressum": "Legal Notice"
+    "impressum": "Imprint"
   },
-
   "validation": {
     "salutation": {
       "required": "Please select a salutation",
       "contactRequired": "Please enter a contact person"
     },
     "job": {
-      "required": "Job title is required!"
+      "required": "Job is required!"
     },
     "skill": {
       "required": "Please provide your experience"
     },
     "name": {
       "required": "Please enter your name",
-      "minWords": "Name must consist of at least 2 words!"
+      "minWords": "The name must consist of at least 2 words!"
     },
     "nameCompany": {
       "required": "Please enter the company name"
     },
     "city": {
-      "required": "Please provide the ZIP code and city."
+      "required": "Please provide ZIP code and city."
     },
     "street": {
-      "required": "Please provide the street address and number.",
-      "minWords": "Street address must consist of at least 2 words!"
+      "required": "Please provide street and house number.",
+      "minWords": "The name must consist of at least 2 words!"
     },
     "email": {
       "required": "Please enter an email address",
@@ -325,250 +409,238 @@
     },
     "generating": "Please wait.\nYour application text is being generated."
   },
-
   "alerts": {
     "error": {
       "title": "Error",
-      "attachments": "There was a problem with your attachments. Please re-upload them.",
+      "attachments": "There were problems with your attachments, please re‑upload them.",
       "emailSettings": "Please check your email settings.",
-      "unknown": "An unknown error occurred"
+      "unknown": "Unknown error"
     }
   },
-
   "common": {
+    "error": "Error",
     "ok": "OK",
     "infoBadge": "Information",
-    "understood": "Got it"
+    "understood": "Understood",
+    "cancel": "Cancel",
+    "download": "Download"
   },
-
   "email": {
     "sendButton": "Send",
-    "placeholder": "Email Address"
+    "placeholder": "Email address"
   },
-
   "offlineHeader": "Create Application Locally",
-  "offlineMain": "Build your job application easily, professionally, and entirely on your device",
-
+  "offlineMain": "Create your application easily and professionally, entirely locally on your device",
   "settings": {
     "title": "Settings",
-    "language": "App Language",
+    "language": "Menu Language",
     "theme": "Theme",
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode",
     "languageSaved": "Language saved",
-    "languageChange": "Change language",
-    "apiKey": "Use Custom API Key",
+    "languageChange": "Change Language",
+    "apiKey": "Use Own API",
     "apiKeyKey": "Enter API Key",
     "changeMode": "Enable Dark Mode",
-    "pleaseApi": "Please choose an API provider.",
-    "changeApiText": "Use Custom API Key",
-    "apiText": "Use your OpenAI key for custom cover letter creation.",
-    "apiGoogleText": "Use your API key for Google company and location search.",
-    "languageText": "Change app language (does not affect generated applications)."
+    "pleaseApi": "Please select an API.",
+    "changeApiText": "Use API Key",
+    "apiText": "Use your OpenAI key for custom application letters.",
+    "apiGoogleText": "Use your API key for Google company and address search.",
+    "languageText": "Change the app's UI language (does not affect applications)."
   },
-
   "saveFile": "Save File",
-  "saveFileText": "Save your attachments to include them in upcoming application portfolios.",
+  "saveFileText": "Save the attachments to use later for your application folders.",
   "Continue": "Skip",
-
-  "first": {
-    "badge": "INITIAL SETUP",
-    "heading": "Set up profile",
-    "subtitle": "Enter your contact details so cover letters and documents are automatically personalized.",
-    "theDrop": "All data remains encrypted and stored locally on your device – secure and private. You can change this at any time.",
-    "insertSampleData": "Insert sample data",
-    "labelName": "FULL NAME",
-    "placeholderName": "e.g. John Doe",
-    "labelStreet": "STREET & HOUSE NUMBER",
-    "placeholderStreet": "e.g. 123 Sample Street",
-    "labelCity": "POSTAL CODE & CITY",
-    "placeholderCity": "e.g. 10115 Berlin",
-    "labelLanguage": "LANGUAGE",
-    "privacyNotice": "Your data is stored exclusively locally and securely encrypted on this device.",
-    "saving": "Saving...",
-    "saveBtn": "Save profile & continue",
-    "error": "Please fill in all fields",
-    "errorMissingFieldsTitle": "Incomplete information",
-    "errorMissingFieldsMsg": "Please fill in your name, street, and city.",
-    "dbInitError": "Database could not be initialized.",
-    "encryptionError": "Data could not be securely encrypted."
-  },
-
   "ownName": "Your First and Last Name",
   "ownStreet": "Your Street and House Number",
-  "ownCity": "Your ZIP Code and City",
+  "ownCity": "Your ZIP and City",
   "buy1": "€0.29 (40 Coins)",
   "ad": "Ad (4 Coins)",
-
   "download": {
-    "titleFirma": "Download Company Directory",
-    "messageFirma": "Would you like to download the catalog of approx. 5.3 million registered business names in Germany? (Names only, no addresses)",
-    "titleStreet": "Download Street Directory",
-    "messageStreet": "Would you like to download all street names in Germany?",
-    "titleCity": "Download City Directory",
-    "messageCity": "Would you like to download all German cities including their postal codes?",
-    "titleJob": "Download Job Directory",
-    "messageJob": "Would you like to download over 3,500 standard occupational job titles?",
+    "titleFirma": "Download Company List",
+    "messageFirma": "Do you want to download the directory of about 5.3 million company names in Germany? (No addresses)",
+    "titleStreet": "Download Street List",
+    "messageStreet": "Do you want to download all street names in Germany?",
+    "titleCity": "Download City List",
+    "messageCity": "Do you want to download all cities with their ZIP codes?",
+    "titleJob": "Download Occupation List",
+    "messageJob": "Do you want to download over 3 500 occupation names?",
     "button": "Download"
   },
-
   "success": {
     "title": "Success",
-    "applicationSent": "Your application portfolio was sent successfully"
+    "applicationSent": "Your application folder was sent successfully"
   },
-
+  "changeOld": {
+    "stepBadge": "ADAPT TEMPLATE",
+    "editorHeader": "Subject & Text",
+    "wordCount": "{{count}} words",
+    "wordCount_one": "1 word",
+    "subjectPlaceholder": "Enter subject...",
+    "textPlaceholder": "Enter text here...",
+    "creatingFolder": "Creating application folder{{dots}}",
+    "submitButton": "Generate Folder & Continue"
+  },
   "upload": {
     "title": "Success",
-    "info": "Files saved successfully.",
+    "info": "Files were saved successfully.",
     "error": "Too many files selected. Please select a maximum of 11 files.",
     "headerBlue": "DOCUMENTS & ATTACHMENTS",
     "headerWhite": "Manage Documents",
-    "headerInfo": "Upload your resume and certificates, or adjust the order of your application bundle.",
-    "press": "Press & drag to reorder",
+    "headerInfo": "Upload your resume and certificates or arrange the order of your folder.",
+    "press": "Press and hold & drag to reorder",
     "mainDocument": "Main Document (Resume)",
     "attachment": "Attachment {{index}}",
     "deleteAlertTitle": "Delete Attachment",
-    "deleteAlertMessage": "Are you sure you want to remove \"{{name}}\"?",
+    "deleteAlertMessage": "Do you really want to remove \"{{name}}\"?",
     "deleteAlertCancel": "Cancel",
     "deleteAlertConfirm": "Delete"
   },
-
-
-  "emailDelete": "Email deleted successfully",
-  "deleteTitle": "Delete Entry",
-  "deleteConfirm": "Are you sure you want to delete this entry? This action cannot be undone.",
-  "delete": "Delete",
-  "emailSearch": "Searching emails...",
-
-  "bewerbung": {
-    "stepBadge": "STEP 1 OF 2",
-    "mainTitle": "Configure Application",
-    "sectionSalutation": "SALUTATION & CONTACT PERSON",
-    "sectionJob": "JOB TITLE OR POSTING LINK",
-    "sectionSkills": "SKILLS & EXPERIENCE",
-    "sectionAccordion": "Advanced Options",
-    "labelEmployment": "EMPLOYMENT TYPE",
-    "labelAppType": "APPLICATION TYPE",
-    "labelFont": "PDF FONT",
-    "placeholderSalutation": "Contact person's last name (e.g. Smith)",
-    "placeholderJob": "Paste job title or listing URL...",
-    "placeholderSkills": "e.g. 3 years React Native, team lead...",
-    "placeholderFont": "Choose font",
-    "btnAnalyze": "Analyze",
-    "btnGenerate": "Generate Cover Letter",
-    "creatingApplication": "Creating application...",
-    "btnCancel": "Cancel",
-    "infoModalMessage": "Simply copy and paste the link to a job posting (Indeed, StepStone, Job boards, etc.) into the job field — we will automatically extract the requirements!\n\nAlternatively, entering just your desired job title is also enough.",
-    "extractingTitle": "Analyzing job posting...",
-    "extractingSubtitle": "Extracting keywords and core responsibilities",
-    "extractSuccessTitle": "Success!",
-    "extractSuccessMsg": "Job posting analyzed successfully.",
-    "extractHintTitle": "Notice",
-    "extractDefaultError": "Could not extract listing information.",
-    "invalidLinkTitle": "Invalid Link",
-    "invalidLinkMsg": "Please provide a valid, complete URL to the job advertisement.",
-    "timeoutTitle": "Request Timeout",
-    "timeoutMsg": "The job posting took too long to load. Please check the URL.",
-    "savedTitle": "Saved",
-    "jobSavedMsg": "Job title saved for future autocomplete suggestions.",
-    "skillSavedMsg": "Skill saved for future autocomplete suggestions.",
-    "networkError": "Network error while generating your text.",
-    "salutationDearAll": "Dear Hiring Manager,",
-    "salutationDearMr": "Dear Mr. {{name}},",
-    "salutationDearMrs": "Dear Ms. {{name}},",
-    "subjectCoverLetterFor": "Application as ",
-    "subjectCoverLetter": "Application as ",
-    "errorTitle": "Error",
-    "errorLoadJob": "Could not load job listing data.",
-    "fonts": {
-      "helvetica": "Helvetica (Clean & Modern)",
-      "helveticaOblique": "Helvetica Oblique",
-      "timesRoman": "Times Roman (Classic Serif)",
-      "timesRomanItalic": "Times Roman Italic",
-      "courier": "Courier (Monospace)",
-      "courierOblique": "Courier Oblique"
-    }
+  "profil": {
+    "title": "Success",
+    "infoData": "Your data was saved successfully.",
+    "infoEmail": "Your email settings were saved successfully.",
+    "error": "Error",
+    "errorDataEmail": "Please fill in all fields.",
+    "errorEmail": "Your email settings could not be saved.",
+    "languageError": "Please select a language.",
+    "languageSaved": "Your selected language is now available",
+    "buyCancel": "Purchase was cancelled.",
+    "welcomeBack": "Welcome back",
+    "defaultProfileName": "My Profile",
+    "coinsCount": "{{count}} Coins",
+    "coinsCountLoading": "… Coins",
+    "sectionSettings": "SETTINGS & DATA",
+    "sectionTopUp": "TOP‑UP BALANCE",
+    "defaultAddressDesc": "Enter address & name",
+    "defaultEmailDesc": "SMTP data for direct sending",
+    "coinsVerwalten": "Manage Coins",
+    "coinsText": "Earn new coins via video or instant top‑up",
+    "experienceTitle": "Career & Skills",
+    "experienceDesc": "Currently {{count}} entries saved",
+    "experienceDesc_one": "Currently 1 entry saved",
+    "modalDataSubtitle": "These data are used in the cover letter",
+    "modalEmailTitle": "Email Sending",
+    "modalEmailSubtitle": "Sender data for automatic applications",
+    "modalLangTitle": "Choose Language",
+    "modalLangSubtitle": "Select your preferred language",
+    "modalCoinsTitle": "Top‑up Coins",
+    "modalCoinsSubtitle": "Use coins to create applications",
+    "packTitle": "+40 Coins Package",
+    "packBadge": "POPULAR",
+    "packDesc": "Immediate activation without ads",
+    "adTitle": "+4 Free Coins",
+    "adDesc": "Watch a short ad video",
+    "cvModalTitle": "Career & CV",
+    "cvModalSubtitle": "Manage or scan entries",
+    "scanTitle": "Scan Resume",
+    "scanBadge": "OCR",
+    "scanDesc": "Choose PDF or image – data will be filled automatically",
+    "sectionExperience": "Career ({{count}})",
+    "btnAdd": "Add",
+    "emptyExperience": "No entries yet.",
+    "stationBadge": "Entry #{{index}}",
+    "labelRole": "Position / Role",
+    "placeholderRole": "e.g., IT Specialist",
+    "labelCompany": "Company",
+    "placeholderCompany": "e.g., Daimler AG",
+    "labelPeriod": "Period",
+    "placeholderPeriod": "08/2020 – Present",
+    "labelTasks": "Tasks & Achievements (bullet points)",
+    "placeholderTasks": "• Developed React Native apps\nMigrated to Go microservices",
+    "btnSaveCv": "Apply & Close"
   },
-
+  "emailDelete": "Email successfully deleted",
+  "deleteTitle": "Delete Entry",
+  "deleteConfirm": "Do you really want to delete this entry? This action cannot be undone.",
+  "delete": "Delete",
+  "emailSearch": "Searching for emails.",
   "startApp": {
     "badgeHub": "APPLICATION ASSISTANT",
     "titleMain": "How would you like to start?",
     "badgeRecommended": "RECOMMENDED",
-    "primaryFooter": "Get Started",
-    "resumeSubtitle": "Tap here to continue",
+    "primaryFooter": "Start Now",
+    "resumeSubtitle": "Click here to continue",
     "alertMissingProfileTitle": "Profile Missing",
-    "alertMissingProfileMsg": "Please set up your profile details first.",
+    "alertMissingProfileMsg": "Please create your profile first.",
     "alertIncompleteProfileTitle": "Profile Incomplete",
-    "alertIncompleteProfileMsg": "Please enter your address on the profile screen.",
+    "alertIncompleteProfileMsg": "Please enter your address on the profile page.",
     "alertMissingCvTitle": "Resume Missing",
     "alertMissingCvMsg": "Please upload your resume first.",
     "alertErrorTitle": "Error",
-    "alertDbLoadError": "Error loading local data.",
+    "alertDbLoadError": "Error loading data.",
     "alertDbConnectionError": "Database connection failed."
   },
-
-  "companySearchModal": {
-    "badgeManual": "REVIEW ADDRESS",
-    "badgeAuto": "AUTO SEARCH",
-    "titleManual": "Company Details",
-    "titleAuto": "Find Company",
-    "searchPlaceholder": "Enter company name or location...",
-    "promptTypeSuggestions": "Type to display suggestions",
-    "searching": "Searching locations...",
-    "noResults": "No results found",
-    "btnManual": "Enter Manually",
-    "namePlaceholder": "Company Name",
-    "streetPlaceholder": "Street & House Number",
-    "cityPlaceholder": "ZIP Code & City",
-    "btnContinue": "Apply Details",
-    "btnBackToSearch": "Back to Search",
-    "errorTitle": "Error",
-    "saveErrorMsg": "Your details could not be saved.",
-    "btnOk": "OK"
-  },
-
   "info": {
-    "title": "Information",
-    "subtitle": "Error loading details.",
+    "title": "Info",
+    "subtitle": "Error loading data.",
     "btnOk": "Understood",
-    "language": "Sets the display language of the app interface.\n\nThis will not affect previously generated applications or new cover letter texts. You can change this setting at any time.",
-    "email": "Link your personal email account to dispatch applications right from the app through your own mailbox.\n\nWe recommend using a dedicated email address reserved solely for your job applications.",
-    "personal": "Manage your personal contact info here.\n\nYour entries remain stored strictly locally on your device and are inserted solely into your generated application documents.",
-    "experience": "Record your employment history manually or have it extracted automatically from your resume.\n\nWhen creating an application, you can flexibly choose which milestones and stations to include.",
-    "coins": "Top up your coin balance anytime by watching brief video ads or purchasing coin packs in the store.\n\nYou can spend coins whenever you want to generate new applications.",
-    "choose": "Choose the certificates and supporting documents to append to your application bundle.\n\nYou can add new files, swap existing attachments, or remove documents you no longer need.",
-    "sort": "Arrange your attachments in the desired order. They will be merged into your application portfolio in this exact sequence.\n\nPress and hold an entry to drag it up or down.",
-    "new": "Create a tailored cover letter perfectly aligned with the target job's job requirements.\n\nSimply enter the key details of the company and role — the assistant writes a personalized letter based on your profile.",
-    "old": "Access previously created applications to save both time and effort.\n\nYou can use earlier documents as templates, adapt content for similar job openings, or adjust individual sections on the fly.",
-    "resume": "Pick up right where you left off with your pending application.\n\nYour progress and previously entered details are saved automatically, letting you continue without losing data."
+    "language": "Sets the UI language. \n\nExisting or new applications are not affected. This setting can be changed at any time.",
+    "email": "Link your email account to send applications directly from the app using your own mailbox.\n\nWe recommend using a separate email address solely for applications.",
+    "personal": "Manage your personal data here.\n\nYour details stay locally on your device and are only inserted as content into your final application documents.",
+    "experience": "Enter your professional background manually or let it be extracted automatically from your resume.\n\nWhen creating an application later, you can flexibly choose which entries to include.",
+    "coins": "Top up your balance flexibly by watching short ads or buying additional coins in the shop.\n\nYou can spend your coins anytime to create new applications.",
+    "choose": "Select the documents and proofs that should be attached to your application.\n\nYou can add new attachments, replace existing files, or remove unneeded documents.",
+    "sort": "Arrange your attachments in the desired order. The documents will be attached in exactly this sequence.\n\nPress and hold an entry to move it up or down.",
+    "new": "Create a tailored cover letter that perfectly matches the requirement profile of your desired position.\n\nSimply enter the company's details and the job – the assistant will craft the text precisely based on your profile.",
+    "old": "Access previously created applications to save time and effort.\n\nYou can use earlier documents as a template, adapt content for a similar role, or selectively update sections.",
+    "resume": "Continue your partially completed application exactly where you left off.\n\nYour progress and all previously entered data have been auto‑saved, so you can continue without any data loss.",
+    "languageOption": "Sets the language in which your cover letter is written.\n\nThe app's UI language remains unaffected.",
+    "name": "Enter the last name of the contact person here.\n\nA personal address adds a professional and trustworthy impression to your letter.",
+    "work": "Enter the desired job title or paste a link to the job posting.\n\nClick the Analyze button to extract required core competencies and tasks directly from the advertisement.",
+    "skill": "Select relevant entries from your profile or enter specific skills.\n\nThese qualifications provide a solid basis for the AI to argue in the cover letter.",
+    "sectionSalutation": "Choose how the contact person should be addressed in the letter.\n\nSelect 'Ladies and Gentlemen' if no personal contact is mentioned in the posting.",
+    "options": "Configure the framework of your document.\n\nHere you control employment type, application form, font, and the target language of the cover letter.",
+    "employment": "Define the desired working‑time model.\n\nThe information is seamlessly integrated into the subject line and introductory sentence of the cover letter.",
+    "appType": "Select the type of your application.\n\nDepending on the choice (Regular, Speculative, or Internship) the assistant adapts structure and tone accordingly.",
+    "quality": "Choose the level of detail for text generation.\n\nHigher levels refine wording, sentence structure, and industry‑specific phrasing more precisely.",
+    "font": "Select a font for the final PDF.\n\nAdditional fonts can be downloaded directly and are then available offline.",
+    "preview": "Review your completed application folder before sending.\n\nCheck layout, page breaks, and text flow directly in the integrated PDF preview.",
+    "download": "Export your complete application folder as a PDF.\n\nYou can store the document locally or share it via messenger, mail, or AirDrop.",
+    "companySearch": "Search specifically for the company's name or location.\n\nWhen selected, street, ZIP, and city are automatically filled into the address fields.",
+    "companySearchHint": "Here you will find suitable company and location suggestions.\n\nTap an entry to automatically adopt the address data.",
+    "companyLocation": "Location data from the map search.\n\nClicking a result inserts the address data directly into your document.",
+    "companyName": "Enter the exact company name of the employer.\n\nThe name is used in the address block and in the body of your application letter.",
+    "companyStreet": "Enter the company's street and house number.\n\nEnsure correct spelling for a standards‑compliant address according to DIN 5008.",
+    "companyCity": "Provide the company's ZIP code and city.\n\nThese details complete the recipient block of your application letter.",
+    "manualMode": "Manual entry mode.\n\nUse this mode to input company address and details yourself without map search.",
+    "searchMode": "Automatic location search.\n\nFind company addresses directly via the map database, saving manual typing."
   },
-
   "history": {
     "headerBadge": "HISTORY & TEMPLATES",
     "title": "Previous Applications",
-    "subtitle": "Open completed portfolios or customize existing cover letters for a new employer.",
+    "subtitle": "Open saved folders or adapt existing texts for a new company.",
     "totalCount": "{{count}} applications total",
     "totalCount_one": "1 application total",
-    "emptyTitle": "No Templates Found",
-    "emptySubtitle": "As soon as you create your first application, it will appear here automatically.",
+    "count": "{{count}} applications",
+    "count_one": "1 application",
+    "emptyTitle": "No templates available",
+    "emptySubtitle": "Once you create your first application, it will be saved here automatically.",
     "newApplicationBtn": "Start New Application",
     "defaultJobTitle": "Untitled Application",
-    "pdfAttached": "PDF Attached",
-    "openFolder": "Open Portfolio",
-    "reuseTemplate": "Reuse"
+    "pdfAttached": "PDF attached",
+    "openFolder": "Open Folder",
+    "reuseTemplate": "Reuse",
+    "clearAll": "Clear All",
+    "clearAllTitle": "Delete Entire History",
+    "clearAllMsg": "Are you sure you want to permanently delete all applications from the database?",
+    "clearAllConfirm": "Delete All",
+    "deleteTitle": "Delete Entry",
+    "deleteConfirm": "Do you really want to remove the application for \"{{job}}\" from the history?",
+    "fileNotFoundTitle": "File Not Found",
+    "fileNotFoundMsg": "The PDF application folder is no longer stored."
   },
-
   "editor": {
     "headerTitle": "Text Editor",
     "wordCount": "{{count}} words",
     "wordCount_one": "1 word",
-    "placeholder": "Type your text here...",
-    "creatingFolder": "Generating application portfolio...",
-    "generateButton": "Generate Portfolio & Continue"
+    "placeholder": "Enter text here...",
+    "creatingFolder": "Creating application folder",
+    "generateButton": "Generate Folder & Continue"
   },
   "completed": {
-  "badge": "COMPLETED",
-  "title": "Application Portfolio Ready!",
-  "subtitle": "Your cover letter and attachments have been successfully merged into a single PDF."
-}
+    "badge": "COMPLETED",
+    "title": "Application Folder Ready!",
+    "subtitle": "Your cover letter and attachments have been successfully combined into a complete PDF."
+  }
 }

@@ -15,7 +15,7 @@
   "placeholderEmail": "E-Mail",
   "placeholderPassword": "Passwort",
   "placeholderEmailServer": "Wähle einen E-Mail-Server",
-  "saveAndClose": "Speichern & Schließen",
+  "saveAndClose": "Testen & Speichern",
   "activateAndClose": "Aktivieren",
   "deactivateAndClose": "Deaktivieren",
   "save": "Speichern",
@@ -56,6 +56,13 @@
   "Anlagen": "Anlagen",
   "Info": "Information",
   "Fortsetzen": "Fortsetzen",
+  "Optionen": "Optionen",
+  "Starten": "Starten",
+  "Zurück": "Zurück",
+  "QUALITÄT": "QUALITÄT",
+  "Schnell": "Sehr gut",
+  "Medium": "Am besten",
+  "Sehr schnell": "Gut",
   "employmentOptions": {
     "vollzeit": "Vollzeit",
     "teilzeit": "Teilzeit",
@@ -102,7 +109,7 @@
     "saving": "Wird verschlüsselt & gespeichert...",
     "saveAndStart": "Speichern & Starten",
     "skipLater": "Später hinzufügen",
-    "selectFilesTitle": "Dateien auswählen",
+    "selectFilesTitle": "Dateien auswählen"
   },
   "bewerbung": {
     "stepBadge": "SCHRITT 1 VON 2",
@@ -114,6 +121,7 @@
     "labelEmployment": "ANSTELLUNGSART",
     "labelAppType": "BEWERBUNGSTYP",
     "labelFont": "SCHRIFTART IM PDF",
+    "labelLanguage": "SPRACHE DES ANSCHREIBENS",
     "labelQuality": "Generierungsqualität",
     "quality": {
       "best": "Beste Qualität",
@@ -155,6 +163,13 @@
     "subjectCoverLetter": "Bewerbung als ",
     "errorTitle": "Fehler",
     "errorLoadJob": "Stellenanzeige konnte nicht geladen werden.",
+    "fontDownloadErrorTitle": "Fehler",
+    "robotoNoticeTitle": "Schriftart erforderlich",
+    "robotoNoticeMsg": "Für diese Sprache wird die Schriftart \"Roboto\" benötigt, um alle Zeichen im PDF korrekt darzustellen. Jetzt herunterladen?",
+    "robotoMissingTitle": "Schriftart fehlt",
+    "robotoMissingMsg": "Für die gewählte Sprache muss zuerst die Schriftart \"Roboto\" heruntergeladen werden. Ohne diese Schriftart kann das Dokument nicht erstellt werden.",
+    "robotoChengeFont": "Falsche Schriftart",
+    "robotChangeFontMsg": "Bitte eine andere Schriftart als Helvetica benutzen, diese wird für Ihre Sprache nicht unterstützt.",
     "fonts": {
       "helvetica": "Helvetica (Modern & Klar)",
       "helveticaOblique": "Helvetica Oblique",
@@ -245,7 +260,6 @@
     "message": {
       "placeholder": "Nachricht"
     },
-    
     "messageText": "Sehr geehrte Damen und Herren,\n\nhiermit bewerbe ich mich auf die Stelle als {{jobTitle}} bei {{companyName}}.\n\nMit freundlichen Grüßen,\n{{applicantName}}"
   },
   "closing": "Mit freundlichen Grüßen",
@@ -290,7 +304,7 @@
     },
     "entry2": {
       "title": "2. Erhebung und Verarbeitung von Daten",
-      "text": "Das Tool erhebt nur die Daten, die für die Erstellung einer Bewerbung notwendig sind:\n• Gewünschte Stellenposition\n• Relevante Fähigkeiten (Skills)\n• Art der Bewerbung"
+      "text": "Das Tool erhebt nur die Daten, die für die Erstellung einer Bewerbung notwendig sind:\nGewünschte Stellenposition\nRelevante Fähigkeiten (Skills)\nArt der Bewerbung"
     },
     "entry3": {
       "title": "3. Speicherung und Sicherheit",
@@ -327,6 +341,35 @@
       "title": "Urheberrecht",
       "text": "Alle Inhalte dieser App sind urheberrechtlich geschützt. Die Nutzung ist nur für private und nicht-kommerzielle Zwecke gestattet. Jede weitere Nutzung, insbesondere die kommerzielle Verwertung, bedarf der ausdrücklichen Zustimmung des Urheberrechtsinhabers."
     }
+  },
+  "contactForm": {
+    "badge": "DIREKTER VERSAND",
+    "title": "Bewerbung versenden",
+    "initialMessage": "Bitte warten, Ihre Vorlage wird generiert.",
+    "labelRecipient": "EMPFÄNGER E-MAIL",
+    "placeholderRecipient": "personal@unternehmen.de",
+    "labelSubject": "BETREFF",
+    "placeholderSubject": "Betreff eingeben...",
+    "labelMessage": "BEGLEITSCHREIBEN",
+    "placeholderMessage": "Sehr geehrte Damen und Herren...",
+    "btnSend": "E-Mail jetzt senden",
+    "sending": "Wird gesendet...",
+    "crawlStarting": "Suche nach Kontakten",
+    "crawlSearching": "Suche Kontakte...",
+    "crawlSuccess": "E-Mails gefunden!",
+    "crawlNoResults": "Keine Kontakte gefunden",
+    "crawlError": "Fehler bei der Suche",
+    "smtpError": "SMTP-Fehler beim Versenden.",
+    "timeoutError": "Zeitüberschreitung: Der Mailserver hat nicht rechtzeitig geantwortet.",
+    "recipientRequired": "Bitte trage die Empfänger-E-Mail-Adresse ein.",
+    "prepareError": "E-Mail konnte nicht vorbereitet werden.",
+    "noJobIdError": "Keine Job-ID vom Server erhalten.",
+    "smtpFailedTitle": "Fehler beim Senden",
+    "smtpFailedMsg": "Benutzername, Passwort oder E-Mail-Server stimmen nicht. Bitte überprüfe deine Angaben im Profil.\n\nServer-Meldung: {{error}}",
+    "networkErrorTitle": "Netzwerkfehler",
+    "connectionFailed": "Verbindung fehlgeschlagen.",
+    "mailSavedMsg": "E-Mail-Adresse für spätere Vorschläge gemerkt.",
+    "webPreview": "Web-Vorschau"
   },
   "navigation": {
     "faq": "FAQ",
@@ -378,7 +421,9 @@
     "error": "Fehler",
     "ok": "OK",
     "infoBadge": "Informationen",
-    "understood": "Verstanden"
+    "understood": "Verstanden",
+    "cancel": "Abbrechen",
+    "download": "Herunterladen"
   },
   "email": {
     "sendButton": "Absenden",
@@ -502,7 +547,7 @@
     "labelPeriod": "Zeitraum",
     "placeholderPeriod": "08/2020 – Heute",
     "labelTasks": "Tätigkeiten & Erfolge (Stichpunkte)",
-    "placeholderTasks": "• Entwicklung von React Native Apps\n• Migration auf Go Microservices",
+    "placeholderTasks": "• Entwicklung von React Native Apps\nMigration auf Go Microservices",
     "btnSaveCv": "Übernehmen & Schließen"
   },
   "emailDelete": "E-Mail erfolgreich gelöscht",
@@ -539,21 +584,51 @@
     "sort": "Bringen Sie Ihre Anlagen in die gewünschte Reihenfolge. Die Dokumente werden genau in dieser Abfolge an Ihre Bewerbung angehängt.\n\nHalten Sie einen Eintrag gedrückt, um ihn nach oben oder unten zu verschieben.",
     "new": "Erstellen Sie ein maßgeschneidertes Anschreiben, das exakt auf das Anforderungsprofil Ihrer Wunschstelle abgestimmt ist.\n\nGeben Sie einfach die Eckdaten des Unternehmens und der Stelle ein – der Assistent formuliert den Text passgenau anhand Ihres Profils.",
     "old": "Greifen Sie auf bereits erstellte Bewerbungen zurück, um Zeit und Aufwand zu sparen.\n\nSie können frühere Dokumente als Vorlage verwenden, Inhalte für eine ähnliche Stelle adaptieren oder einzelne Abschnitte flexibel aktualisieren.",
-    "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können."
+    "resume": "Setzen Sie Ihre angefangene Bewerbung nahtlos an der Stelle fort, an der Sie zuletzt aufgehört haben.\n\nIhr Fortschritt und alle bisher erfassten Daten wurden automatisch zwischengespeichert, sodass Sie ohne Datenverlust direkt weiterarbeiten können.",
+    "languageOption": "Legt die Sprache fest, in der Ihr Anschreiben formuliert wird.\n\nDie Benutzeroberfläche der App bleibt davon unberührt.",
+    "name": "Tragen Sie hier den Nachnamen der zuständigen Kontaktperson ein.\n\nEine persönliche Ansprache verleiht Ihrem Anschreiben einen professionellen und verbindlichen Eindruck.",
+    "work": "Geben Sie die angestrebte Berufsbezeichnung ein oder fügen Sie einen Link zur Stellenanzeige ein.\n\nÜber den Analysieren-Button werden geforderte Kernkompetenzen und Aufgaben direkt aus dem Inserat ausgelesen.",
+    "skill": "Wählen Sie relevante Stationen aus Ihrem Profil oder erfassen Sie konkrete Kenntnisse.\n\nDiese Qualifikationen dienen der KI als fundierte Argumentationsbasis im Anschreiben.",
+    "sectionSalutation": "Legen Sie fest, wie die Kontaktperson im Schreiben angesprochen werden soll.\n\nWählen Sie 'Damen und Herren', falls in der Stellenausschreibung kein persönlicher Ansprechpartner genannt ist.",
+    "options": "Konfigurieren Sie die Rahmenbedingungen Ihres Dokuments.\n\nHier steuern Sie Anstellungsart, Bewerbungsform, Schriftbild sowie die Zielsprache des Anschreibens.",
+    "employment": "Definieren Sie das gewünschte Arbeitszeitmodell.\n\nDie Angabe wird harmonisch in den Betreff sowie den Einleitungssatz Ihres Anschreibens eingebunden.",
+    "appType": "Bestimmen Sie die Art Ihrer Bewerbung.\n\nJe nach Auswahl (Regulär, Initiativ oder Praktikum) passt der Assistent den Aufbau und die Tonalität gezielt an.",
+    "quality": "Wählen Sie die Ausführlichkeit der Textgenerierung.\n\nHöhere Stufen feilen noch präziser an Formulierungen, Satzbau und branchenspezifischem Wording.",
+    "font": "Wählen Sie eine Schriftart für das finale PDF.\n\nZusätzliche Schriften können direkt heruntergeladen werden und stehen anschließend offline zur Verfügung.",
+    "preview": "Überprüfen Sie Ihre fertige Bewerbungsmappe vor dem Versand.\n\nKontrollieren Sie Layout, Seitenumbrüche und Textfluss direkt in der integrierten PDF-Vorschau.",
+    "download": "Exportieren Sie Ihre vollständige Bewerbungsmappe als PDF.\n\nSie können das Dokument in Ihren lokalen Dateien ablegen oder über Messenger, Mail und AirDrop teilen.",
+    "companySearch": "Suchen Sie gezielt nach dem Namen oder Standort des Unternehmens.\n\nBei Auswahl werden Straße, Postleitzahl und Ort automatisch in die Adressfelder übernommen.",
+    "companySearchHint": "Hier finden Sie passende Unternehmens- und Standortvorschläge.\n\nTippen Sie auf einen Eintrag, um die Adressdaten automatisch zu übernehmen.",
+    "companyLocation": "Standortdaten aus der Kartensuche.\n\nEin Klick auf das Ergebnis übernimmt die hinterlegten Adressdaten direkt in Ihr Dokument.",
+    "companyName": "Geben Sie die exakte Firmenbezeichnung des Arbeitgebers an.\n\nDer Name wird im Adresskopf sowie im Bezugsbereich Ihres Bewerbungsschreibens verwendet.",
+    "companyStreet": "Tragen Sie Straße und Hausnummer des Unternehmens ein.\n\nAchten Sie auf eine korrekte Schreibweise für eine normgerechte Anschrift nach DIN 5008.",
+    "companyCity": "Erfassen Sie Postleitzahl und Ort des Unternehmensstandorts.\n\nDie Angaben vervollständigen den Empfängerblock Ihres Bewerbungsschreibens.",
+    "manualMode": "Manueller Eingabemodus.\n\nNutzen Sie diesen Modus, um Unternehmensanschrift und Firmendaten eigenständig ohne Kartensuche einzutragen.",
+    "searchMode": "Automatische Standortsuche.\n\nFindet Firmenadressen direkt über die Kartendatenbank und spart manuelle Tipparbeit."
   },
-  "history": {
+ "history": {
     "headerBadge": "HISTORIE & VORLAGEN",
     "title": "Frühere Bewerbungen",
     "subtitle": "Öffne fertige Mappen oder passe bestehende Texte für eine neue Firma an.",
     "totalCount": "{{count}} Bewerbungen insgesamt",
     "totalCount_one": "1 Bewerbung insgesamt",
+    "count": "{{count}} Bewerbungen",
+    "count_one": "1 Bewerbung",
     "emptyTitle": "Keine Vorlagen vorhanden",
     "emptySubtitle": "Sobald du deine erste Bewerbung erstellst, wird sie hier automatisch gespeichert.",
     "newApplicationBtn": "Neue Bewerbung starten",
     "defaultJobTitle": "Unbenannte Bewerbung",
     "pdfAttached": "PDF vorhanden",
     "openFolder": "Mappe öffnen",
-    "reuseTemplate": "Neu verwenden"
+    "reuseTemplate": "Neu verwenden",
+    "clearAll": "Alles löschen",
+    "clearAllTitle": "Gesamten Verlauf löschen",
+    "clearAllMsg": "Möchtest du wirklich alle Bewerbungen unwiderruflich aus der Datenbank entfernen?",
+    "clearAllConfirm": "Alle löschen",
+    "deleteTitle": "Eintrag löschen",
+    "deleteConfirm": "Möchtest du die Bewerbung für \"{{job}}\" wirklich aus der Historie entfernen?",
+    "fileNotFoundTitle": "Datei nicht gefunden",
+    "fileNotFoundMsg": "Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden."
   },
   "editor": {
     "headerTitle": "Text-Editor",

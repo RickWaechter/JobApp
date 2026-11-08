@@ -27,6 +27,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="cover" options={{ headerShown: false, title: 'cover' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         <Stack.Screen name="upload" options={{ headerShown: false }} />
         <Stack.Screen name="first" options={{ headerShown: false }} />

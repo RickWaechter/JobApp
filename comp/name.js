@@ -37,7 +37,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import colors from "../inc/colors.js";
 import "../local/i18n.js";
-import { getKeyboardHeight } from "../inc/keyboardStorage.js";
+import Info, { useInfoModal } from "../comp/info.js";
 
 /* ── 2. Tokens ─────────────────────────────────────────────────────────── */
 const DEBOUNCE_MS = 250;
@@ -128,6 +128,7 @@ const Field = memo(function Field({
   returnKeyType = "next",
   onSubmitEditing,
   blurOnSubmit = false,
+  onPressIcon,
 }) {
   const handleClear = useCallback(() => onChangeText(""), [onChangeText]);
 
@@ -135,12 +136,20 @@ const Field = memo(function Field({
     <View style={styles.fieldWrap}>
       <View style={[styles.inputRow, Boolean(error) && styles.inputRowError]}>
         {Boolean(iconName) && (
-          <MaterialIcons
-            name={iconName}
-            size={20}
-            color={iconColor}
-            style={styles.leadingIcon}
-          />
+          <TouchableOpacity
+            onPress={onPressIcon}
+            disabled={!onPressIcon}
+            activeOpacity={0.7}
+            style={styles.iconHitArea}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <MaterialIcons
+              name={iconName}
+              size={20}
+              color={iconColor}
+              style={styles.leadingIcon}
+            />
+          </TouchableOpacity>
         )}
 
         <TextInput
@@ -185,6 +194,7 @@ const CompanySearchModal = ({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width: winW, height: winH } = useWindowDimensions();
+  const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
 
   /* ── State & Refs ── */
   const [yourName, setYourName] = useState(initialName);
@@ -273,10 +283,9 @@ const CompanySearchModal = ({
   );
 
   const panelHeight = useMemo(() => {
-    const bottomSpace = 260 > 0 ? 260 : insets.bottom;
+    const bottomSpace = kbHeight > 0 ? kbHeight : insets.bottom;
     const free = winH - stageTop - bottomSpace - PANEL.gutter;
     const needed = manualMode ? H_MANUAL : H_SEARCH;
-
     if (free <= needed) {
       return Math.round(Math.max(free, 240));
     }
@@ -420,9 +429,19 @@ const CompanySearchModal = ({
         onPress={() => handleSelect(item)}
         style={styles.suggestionItem}
       >
-        <View style={styles.resultIconWrapper}>
+        <TouchableOpacity
+          style={styles.resultIconWrapper}
+          activeOpacity={0.7}
+          onPress={() =>
+            openInfo(
+              t("info.companyLocation") ||
+                "Gefundener Unternehmensstandort aus der Kartensuche."
+            )
+          }
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+        >
           <MaterialIcons name="location-on" size={20} color={WARM.iconPin} />
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.resultTextContainer}>
           <Text style={styles.suggestionTitle} numberOfLines={1}>
@@ -438,7 +457,7 @@ const CompanySearchModal = ({
         <MaterialIcons name="north-west" size={16} color={WARM.iconArrow} />
       </TouchableOpacity>
     ),
-    [handleSelect]
+    [handleSelect, openInfo, t]
   );
 
   const keyExtractor = useCallback(
@@ -448,222 +467,274 @@ const CompanySearchModal = ({
 
   if (!visible) return null;
 
- return (
-  <View style={[styles.root, style]}>
-    {/* Backdrop */}
-    <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.backdrop} />
-    </TouchableWithoutFeedback>
+  return (
+    <View style={[styles.root, style]}>
+      {/* Backdrop */}
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.backdrop} />
+      </TouchableWithoutFeedback>
 
-    {/* Zentrierter Bereich zwischen Topbar und Tastatur */}
-    <View
-      pointerEvents="box-none"
-      style={[styles.stage, { top: stageTop }]}
-    >
+      {/* Zentrierter Bereich zwischen Topbar und Tastatur */}
       <View
-        style={[
-          styles.panel,
-          {
-            width: panelWidth,
-            height: panelHeight,
-          },
-        ]}
+        pointerEvents="box-none"
+        style={[styles.stage, { top: stageTop }]}
       >
-        {/* ══ ZONE 0 · Kopfzeile ════════════════════════════════════ */}
-        <View style={styles.header}>
-          <View style={styles.headerTitleWrap}>
-            <View style={styles.badgeHub}>
-              <View style={styles.statusDot} />
-              <Text style={styles.badgeHubText}>
+        <View
+          style={[
+            styles.panel,
+            {
+              width: panelWidth,
+              height: panelHeight,
+            },
+          ]}
+        >
+          {/* ══ ZONE 0 · Kopfzeile ════════════════════════════════════ */}
+          <View style={styles.header}>
+            <View style={styles.headerTitleWrap}>
+              <TouchableOpacity
+                style={styles.badgeHub}
+                activeOpacity={0.7}
+                onPress={() =>
+                  openInfo(
+                    manualMode
+                      ? t("info.manualMode") ||
+                          "Manueller Eingabemodus für Adressdaten."
+                      : t("info.searchMode") ||
+                          "Automatische Standortsuche über MapKit."
+                  )
+                }
+              >
+                <View style={styles.statusDot} />
+                <Text style={styles.badgeHubText}>
+                  {manualMode
+                    ? t("companySearchModal.badgeManual")
+                    : t("companySearchModal.badgeAuto")}
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.title} numberOfLines={1}>
                 {manualMode
-                  ? t("companySearchModal.badgeManual")
-                  : t("companySearchModal.badgeAuto")}
+                  ? t("companySearchModal.titleManual")
+                  : t("companySearchModal.titleAuto")}
               </Text>
             </View>
 
-            <Text style={styles.title} numberOfLines={1}>
-              {manualMode
-                ? t("companySearchModal.titleManual")
-                : t("companySearchModal.titleAuto")}
-            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <MaterialIcons name="close" size={18} color={WARM.iconClose} />
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={onClose}
-            style={styles.closeButton}
-            activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <MaterialIcons name="close" size={18} color={WARM.iconClose} />
-          </TouchableOpacity>
-        </View>
+          {/* ══ MODUS A · SUCHE ══════════════════════════════════════ */}
+          <View style={[styles.mode, manualMode && styles.modeHidden]}>
+            <View style={styles.modeHead}>
+              <Field
+                value={query}
+                inputRef={searchRef}
+                iconName="search"
+                onChangeText={onChangeQuery}
+                placeholder={t("companySearchModal.searchPlaceholder")}
+                returnKeyType="search"
+                onSubmitEditing={goManual}
+                onPressIcon={() =>
+                  openInfo(
+                    t("info.companySearch") ||
+                      "Gib den Firmennamen oder Ort ein, um passende Standorte zu finden."
+                  )
+                }
+              />
+            </View>
 
-        {/* ══ MODUS A · SUCHE ══════════════════════════════════════ */}
-        <View style={[styles.mode, manualMode && styles.modeHidden]}>
-          <View style={styles.modeHead}>
-            <Field
-              value={query}
-              inputRef={searchRef}
-              iconName="search"
-              onChangeText={onChangeQuery}
-              placeholder={t("companySearchModal.searchPlaceholder")}
-              returnKeyType="search"
-              onSubmitEditing={goManual}
-            />
-          </View>
+            <View style={styles.modeBody}>
+              <View style={styles.listCard}>
+                {results.length > 0 ? (
+                  <FlatList
+                    data={results}
+                    keyExtractor={keyExtractor}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="none"
+                    showsVerticalScrollIndicator={false}
+                    ItemSeparatorComponent={renderSeparator}
+                    renderItem={renderResultItem}
+                    contentContainerStyle={styles.listContent}
+                  />
+                ) : (
+                  <View style={styles.placeholderBox}>
+                    {searching ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={WARM.iconLeading}
+                      />
+                    ) : (
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() =>
+                          openInfo(
+                            t("info.companySearchHint") ||
+                              "Tippe einen Firmennamen ein oder wechsle zur manuellen Eingabe."
+                          )
+                        }
+                      >
+                        <MaterialIcons
+                          name="travel-explore"
+                          size={32}
+                          color={WARM.iconEmpty}
+                        />
+                      </TouchableOpacity>
+                    )}
+                    <Text style={styles.placeholderText}>
+                      {query.length === 0
+                        ? t("companySearchModal.promptTypeSuggestions")
+                        : searching
+                        ? t("companySearchModal.searching")
+                        : t("companySearchModal.noResults")}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
 
-          <View style={styles.modeBody}>
-            <View style={styles.listCard}>
-              {results.length > 0 ? (
-                <FlatList
-                  data={results}
-                  keyExtractor={keyExtractor}
-                  keyboardShouldPersistTaps="handled"
-                  keyboardDismissMode="none"
-                  showsVerticalScrollIndicator={false}
-                  ItemSeparatorComponent={renderSeparator}
-                  renderItem={renderResultItem}
-                  contentContainerStyle={styles.listContent}
+            <View style={styles.modeFoot}>
+              <TouchableOpacity
+                style={styles.buttonSecondary}
+                onPress={goManual}
+                activeOpacity={0.75}
+              >
+                <MaterialIcons
+                  name="edit-note"
+                  size={22}
+                  color={WARM.iconLeading}
+                  style={styles.buttonIconLeft}
                 />
-              ) : (
-                <View style={styles.placeholderBox}>
-                  {searching ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={WARM.iconLeading}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="travel-explore"
-                      size={32}
-                      color={WARM.iconEmpty}
-                    />
-                  )}
-                  <Text style={styles.placeholderText}>
-                    {query.length === 0
-                      ? t("companySearchModal.promptTypeSuggestions")
-                      : searching
-                      ? t("companySearchModal.searching")
-                      : t("companySearchModal.noResults")}
-                  </Text>
-                </View>
-              )}
+                <Text style={styles.buttonSecondaryText}>
+                  {t("companySearchModal.btnManual")}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.modeFoot}>
-            <TouchableOpacity
-              style={styles.buttonSecondary}
-              onPress={goManual}
-              activeOpacity={0.75}
-            >
-              <MaterialIcons
-                name="edit-note"
-                size={22}
-                color={WARM.iconLeading}
-                style={styles.buttonIconLeft}
-              />
-              <Text style={styles.buttonSecondaryText}>
-                {t("companySearchModal.btnManual")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          {/* ══ MODUS B · MANUELL ════════════════════════════════════ */}
+          <View style={[styles.mode, !manualMode && styles.modeHidden]}>
+            <View style={styles.modeBodyScrollable}>
+              <ScrollView
+                style={styles.formScroll}
+                contentContainerStyle={styles.formContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+              >
+                <Field
+                  inputRef={nameRef}
+                  iconName="business"
+                  value={yourName}
+                  onChangeText={(v) => {
+                    setYourName(v);
+                    if (errors.nameErr)
+                      setErrors((p) => ({ ...p, nameErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.namePlaceholder")}
+                  error={errors.nameErr}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => streetRef.current?.focus()}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyName") ||
+                        "Der offizielle Name des Unternehmens für das Anschreiben."
+                    )
+                  }
+                />
 
-        {/* ══ MODUS B · MANUELL ════════════════════════════════════ */}
-        <View style={[styles.mode, !manualMode && styles.modeHidden]}>
-          <View style={styles.modeBodyScrollable}>
-            <ScrollView
-              style={styles.formScroll}
-              contentContainerStyle={styles.formContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              bounces={false}
-            >
-              <Field
-                inputRef={nameRef}
-                iconName="business"
-                value={yourName}
-                onChangeText={(v) => {
-                  setYourName(v);
-                  if (errors.nameErr)
-                    setErrors((p) => ({ ...p, nameErr: "" }));
-                }}
-                placeholder={t("companySearchModal.namePlaceholder")}
-                error={errors.nameErr}
-                returnKeyType="next"
-                blurOnSubmit={false}
-                onSubmitEditing={() => streetRef.current?.focus()}
-              />
+                <Field
+                  inputRef={streetRef}
+                  iconName="add-road"
+                  value={yourStreet}
+                  onChangeText={(v) => {
+                    setYourStreet(v);
+                    if (errors.streetErr)
+                      setErrors((p) => ({ ...p, streetErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.streetPlaceholder")}
+                  error={errors.streetErr}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => cityRef.current?.focus()}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyStreet") ||
+                        "Straße und Hausnummer des Unternehmens."
+                    )
+                  }
+                />
 
-              <Field
-                inputRef={streetRef}
-                iconName="add-road"
-                value={yourStreet}
-                onChangeText={(v) => {
-                  setYourStreet(v);
-                  if (errors.streetErr)
-                    setErrors((p) => ({ ...p, streetErr: "" }));
-                }}
-                placeholder={t("companySearchModal.streetPlaceholder")}
-                error={errors.streetErr}
-                returnKeyType="next"
-                blurOnSubmit={false}
-                onSubmitEditing={() => cityRef.current?.focus()}
-              />
+                <Field
+                  inputRef={cityRef}
+                  iconName="location-city"
+                  value={yourCity}
+                  onChangeText={(v) => {
+                    setYourCity(v);
+                    if (errors.cityErr)
+                      setErrors((p) => ({ ...p, cityErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.cityPlaceholder")}
+                  error={errors.cityErr}
+                  returnKeyType="done"
+                  onSubmitEditing={validateAndContinue}
+                  blurOnSubmit={false}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyCity") ||
+                        "Postleitzahl und Ort des Unternehmens."
+                    )
+                  }
+                />
+              </ScrollView>
+            </View>
 
-              <Field
-                inputRef={cityRef}
-                iconName="location-city"
-                value={yourCity}
-                onChangeText={(v) => {
-                  setYourCity(v);
-                  if (errors.cityErr)
-                    setErrors((p) => ({ ...p, cityErr: "" }));
-                }}
-                placeholder={t("companySearchModal.cityPlaceholder")}
-                error={errors.cityErr}
-                returnKeyType="done"
-                onSubmitEditing={validateAndContinue}
-                blurOnSubmit={false}
-              />
-            </ScrollView>
-          </View>
+            <View style={styles.modeFoot}>
+              <TouchableOpacity
+                style={styles.buttonPrimary}
+                onPress={validateAndContinue}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.buttonPrimaryText}>
+                  {t("companySearchModal.btnContinue")}
+                </Text>
+                <MaterialIcons
+                  name="arrow-forward"
+                  size={18}
+                  color="#FFFFFF"
+                  style={styles.buttonIconRight}
+                />
+              </TouchableOpacity>
 
-          <View style={styles.modeFoot}>
-            <TouchableOpacity
-              style={styles.buttonPrimary}
-              onPress={validateAndContinue}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonPrimaryText}>
-                {t("companySearchModal.btnContinue")}
-              </Text>
-              <MaterialIcons
-                name="arrow-forward"
-                size={18}
-                color="#FFFFFF"
-                style={styles.buttonIconRight}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.buttonSecondary}
-              onPress={backToSearch}
-              activeOpacity={0.6}
-            >
-              <Text style={styles.buttonSecondaryText}>
-                {t("companySearchModal.btnBackToSearch")}
-              </Text>
-              
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonSecondary}
+                onPress={backToSearch}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.buttonSecondaryText}>
+                  {t("companySearchModal.btnBackToSearch")}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
+
+      <Info
+        visible={infoVisible}
+        onClose={closeInfo}
+        message={infoMessage}
+      />
     </View>
-  </View>
-);
-}
+  );
+};
+
 /* ── 5. Styles ─────────────────────────────────────────────────────────── */
 const styles = StyleSheet.create({
   root: {
@@ -804,8 +875,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     backgroundColor: WARM.errorBg,
   },
+  iconHitArea: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 12,
+  },
   leadingIcon: {
-    marginLeft: 12,
+    marginRight: 0,
   },
   input: {
     flex: 1,
@@ -890,7 +966,7 @@ const styles = StyleSheet.create({
   buttonPrimary: {
     marginBottom: 10,
     width: "100%",
-    height:46,
+    height: 46,
     backgroundColor: WARM.primary,
     borderRadius: 14,
     flexDirection: "row",

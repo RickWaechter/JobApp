@@ -1,4 +1,4 @@
-export const thePrompt = (inputValue, selectedOption2, languageValue, detailedSkillsString) => {
+export const thePrompt = (inputValue,  languageValue, detailedSkillsString) => {
     return `
     Du bist ein erfahrener Bewerbungsschreiber und Experte für professionelle, überzeugende Bewerbungsanschreiben.
 

@@ -20,7 +20,36 @@ export const itemsLang = [
 ];
 // inc/languages.js
 // inc/languages.js
+// Sprachen, die zwingend Roboto für den PDF-Zeichensatz benötigen
+export const ROBOTO_REQUIRED_LANGS = [
+  // Exakte Values aus itemsLang
+  'Ελληνικά',
+  'Türkçe',
+  'العربية',
+  '日本語',
 
+  // Fallbacks für ISO-Codes (falls getI18nCode genutzt wird)
+  'el',
+  'tr',
+  'ar',
+  'ja',
+
+  // Fallbacks für englische/deutsche Schreibweisen
+  'greek',
+  'griechisch',
+  'turkish',
+  'türkisch',
+  'arabic',
+  'arabisch',
+  'japanese',
+  'japanisch',
+];
+
+export const checkFontLanguage = (lang) => {
+  if (!lang) return false;
+  const cleaned = String(lang).trim().toLowerCase();
+  return ROBOTO_REQUIRED_LANGS.some((item) => cleaned === item.toLowerCase());
+};
 export const getLocaleCode = (val) => {
   switch (val) {
     case 'Deutsch':

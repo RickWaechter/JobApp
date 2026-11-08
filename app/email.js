@@ -44,7 +44,7 @@ const ContactForm = () => {
 
   /* ── States ──────────────────────────────────────────── */
   const [formData, setFormData] = useState({
-    message: 'Bitte warten, Ihre Vorlage wird generiert.',
+    message: t('contactForm.initialMessage'),
     subject: '',
   });
   const [triggerGeneratePDF, setTriggerGeneratePDF] = useState(false);
@@ -62,6 +62,7 @@ const ContactForm = () => {
   const [isCrawling, setIsCrawling] = useState(false);
   const [crawlStatusText, setCrawlStatusText] = useState('');
   const [crawlDots, setCrawlDots] = useState('');
+  const [hasSearchedEmails, setHasSearchedEmails] = useState(false);
 
   const lastTimeClick = useRef(0);
 
@@ -202,6 +203,48 @@ XwIDAQAB
   };
 
   /* ── E-Mail versenden (API Call) ─────────────────────── */
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const pollEmailStatus = async (jobId) => {
+    const maxAttempts = 20;
+    const intervalMs = 1500;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await sleep(intervalMs);
+
+      try {
+        const res = await fetch(`https://api.jobapp2.de/emailStatus?jobId=${encodeURIComponent(jobId)}`);
+
+        if (res.status === 404) {
+          throw new Error('JOB_EXPIRED_OR_UNKNOWN');
+        }
+
+        const data = await res.json();
+        console.log(`[POLL ${attempt + 1}/${maxAttempts}] Job-Status:`, data);
+
+        if (data.status === 'sent') {
+          return { success: true };
+        }
+
+        if (data.status === 'error') {
+          return {
+            success: false,
+            code: data.code,
+            error: data.error || t('contactForm.smtpError'),
+          };
+        }
+      } catch (err) {
+        console.log('[POLL Error]:', err);
+      }
+    }
+
+    return {
+      success: false,
+      code: 'TIMEOUT',
+      error: t('contactForm.timeoutError'),
+    };
+  };
+
   const handleSubmit = async () => {
     const now = Date.now();
     if (now - lastTimeClick.current < 1000) return;
@@ -210,31 +253,53 @@ XwIDAQAB
     try {
       if (decEmail.trim().length === 0) {
         Alert.alert(
-          t('validation.email.required') || 'E-Mail erforderlich',
-          'Bitte trage die Empfänger-E-Mail-Adresse ein.',
-          [{ text: 'OK' }]
+          t('validation.email.required'),
+          t('contactForm.recipientRequired'),
+          [{ text: t('common.ok') }]
         );
         return;
       }
 
       setIsLoaded(true);
+
       const response = await fetch('https://api.jobapp2.de/emailNativ', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
+      const responseData = await response.json();
+      console.log('Antwort von /emailNativ:', responseData);
+
+      if (!response.ok) {
+        setIsLoaded(false);
+        Alert.alert(
+          t('common.error'),
+          responseData.detail || responseData.message || t('contactForm.prepareError')
+        );
+        return;
+      }
+
+      const jobId = responseData.jobId;
+      if (!jobId) {
+        setIsLoaded(false);
+        Alert.alert(t('common.error'), t('contactForm.noJobIdError'));
+        return;
+      }
+
+      const pollResult = await pollEmailStatus(jobId);
+
+      if (pollResult.success) {
         if (await EncryptedStorage.getItem('merge')) {
           await EncryptedStorage.removeItem('merge');
         }
 
         Alert.alert(
-          t('success.title') || 'Erfolg',
-          t('emailSent.success') || 'Deine Bewerbung wurde erfolgreich per E-Mail versendet!',
+          t('success.title'),
+          t('emailSent.success'),
           [
             {
-              text: 'OK',
+              text: t('common.ok'),
               onPress: async () => {
                 if (await EncryptedStorage.getItem('result')) {
                   await EncryptedStorage.removeItem('result');
@@ -249,27 +314,31 @@ XwIDAQAB
           ]
         );
       } else {
-        const errorData = await response.json();
-        if (errorData.code === 'SMTP_SEND_FAILED') {
+        setIsLoaded(false);
+
+        if (pollResult.code === 'SMTP_FAILED') {
           Alert.alert(
-            'Fehler beim Senden',
-            'Benutzername, Passwort oder E-Mail-Server stimmen nicht. Bitte überprüfe deine Angaben im Profil.',
-            [{ text: 'OK' }]
+            t('contactForm.smtpFailedTitle'),
+            t('contactForm.smtpFailedMsg', { error: pollResult.error }),
+            [{ text: t('common.ok') }]
           );
         } else {
-          Alert.alert('Fehler', errorData.message || 'E-Mail konnte nicht versendet werden.');
+          Alert.alert(t('common.error'), pollResult.error || t('emailSent.error'));
         }
-        setIsLoaded(false);
       }
     } catch (error) {
       setIsLoaded(false);
-      Alert.alert('Netzwerkfehler', error.message || 'Verbindung fehlgeschlagen.');
+      Alert.alert(
+        t('contactForm.networkErrorTitle'),
+        error.message || t('contactForm.connectionFailed')
+      );
     }
   };
 
   /* ── Mail-Eingabe & Vorschläge ───────────────────────── */
   const handleMail = (value) => {
     setDecEmail(value);
+    setHasSearchedEmails(false);
     if (emails !== null && emails.length > 0) {
       const filtered = emails.filter((mail) =>
         mail.toLowerCase().includes(value.toLowerCase())
@@ -356,7 +425,7 @@ XwIDAQAB
 
       setEmails(emailArray);
       setSaveButtonVisible(false);
-      Alert.alert('Gespeichert', 'E-Mail-Adresse für spätere Vorschläge gemerkt.');
+      Alert.alert(t('bewerbung.savedTitle'), t('contactForm.mailSavedMsg'));
     } catch (e) {
       console.error('Fehler beim Speichern der Mail:', e);
     }
@@ -366,12 +435,12 @@ XwIDAQAB
   const crawTheMails = async () => {
     setIsCrawling(true);
     setCrawlProgress(0);
-    setCrawlStatusText('Suche nach Kontakten');
+    setCrawlStatusText(t('contactForm.crawlStarting'));
 
     try {
       const companyName = await EncryptedStorage.getItem('yourName');
       const results = await crawlEmails(companyName, (status, found) => {
-        setCrawlStatusText(t('emailSearch') || 'Suche Kontakte...');
+        setCrawlStatusText(t('emailSearch') || t('contactForm.crawlSearching'));
         setCrawlProgress((prev) => Math.min(prev + 5, 100));
       });
 
@@ -379,13 +448,15 @@ XwIDAQAB
         setCrawlProgress(100);
         setSuggestions(results);
         setIsFlatListVisible(true);
-        setCrawlStatusText('E-Mails gefunden!');
+        setHasSearchedEmails(true);
+        setCrawlStatusText(t('contactForm.crawlSuccess'));
       } else {
-        setCrawlStatusText('Keine Kontakte gefunden');
+        setHasSearchedEmails(false);
+        setCrawlStatusText(t('contactForm.crawlNoResults'));
       }
     } catch (error) {
       console.error('Crawler Error:', error);
-      setCrawlStatusText('Fehler bei der Suche');
+      setCrawlStatusText(t('contactForm.crawlError'));
     } finally {
       setTimeout(() => {
         setIsCrawling(false);
@@ -426,7 +497,7 @@ ${beruf || ''}.
       const data = newLineComma(response.data.response);
       const subject = (await EncryptedStorage.getItem('subject')) || '';
 
-      const fullMessage = `${data}\n\nMit freundlichen Grüßen\n\n${myName || ''}`;
+      const fullMessage = `${data}\n\n${t('closing')}\n\n${myName || ''}`;
 
       setFormData((prevData) => ({
         ...prevData,
@@ -444,6 +515,7 @@ ${beruf || ''}.
     setDecEmail(suggestion);
     setIsFlatListVisible(false);
     setSaveButtonVisible(false);
+    setHasSearchedEmails(false);
 
     if (emails && !emails.includes(suggestion)) {
       setSaveButtonVisible(true);
@@ -504,10 +576,9 @@ ${beruf || ''}.
           <View style={styles.header}>
             <View style={styles.badgeHub}>
               <View style={styles.statusDot} />
-              <Text style={styles.badgeHubText}>DIREKTER VERSAND</Text>
+              <Text style={styles.badgeHubText}>{t('contactForm.badge')}</Text>
             </View>
-            <Text style={styles.titleMain}>Bewerbung versenden</Text>
-           
+            <Text style={styles.titleMain}>{t('contactForm.title')}</Text>
           </View>
 
           {/* ── Formular-Scrollbereich ── */}
@@ -519,7 +590,7 @@ ${beruf || ''}.
           >
             {/* ── 1. Empfänger-Feld mit Vorschlägen ── */}
             <View style={styles.emailFieldContainer}>
-              <Text style={styles.fieldLabel}>EMPFÄNGER E-MAIL</Text>
+              <Text style={styles.fieldLabel}>{t('contactForm.labelRecipient')}</Text>
 
               <View style={styles.inputWrapper}>
                 <MaterialIcons
@@ -533,13 +604,13 @@ ${beruf || ''}.
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
-                  placeholder={t('email.placeholder') || 'personal@unternehmen.de'}
+                  placeholder={t('contactForm.placeholderRecipient')}
                   placeholderTextColor="rgba(255, 255, 255, 0.35)"
                   value={decEmail}
                   onChangeText={handleMail}
                 />
 
-                {saveButtonVisible && decEmail.trim().length > 0 ? (
+                {saveButtonVisible && decEmail.trim().length > 0 && !hasSearchedEmails ? (
                   <TouchableOpacity
                     onPress={saveButton}
                     style={styles.iconActionBtn}
@@ -547,6 +618,19 @@ ${beruf || ''}.
                     activeOpacity={0.7}
                   >
                     <MaterialIcons name="bookmark-border" size={18} color="#60A5FA" />
+                  </TouchableOpacity>
+                ) : hasSearchedEmails && suggestions.length > 0 ? (
+                  <TouchableOpacity
+                    onPress={() => setIsFlatListVisible((prev) => !prev)}
+                    style={styles.iconActionBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    activeOpacity={0.7}
+                  >
+                    <MaterialIcons
+                      name={isFlatListVisible ? 'expand-less' : 'expand-more'}
+                      size={22}
+                      color="#60A5FA"
+                    />
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -575,7 +659,7 @@ ${beruf || ''}.
                 </View>
               )}
 
-              {/* Suggestions Dropdown (.map statt FlatList zur Vermeidung von VirtualizedList-Errors) */}
+              {/* Suggestions Dropdown */}
               {!isCrawling && isFlatListVisible && suggestions.length > 0 && (
                 <View style={styles.suggestionsCard}>
                   <ScrollView
@@ -592,7 +676,7 @@ ${beruf || ''}.
                           activeOpacity={0.7}
                         >
                           <MaterialIcons
-                            name="history"
+                            name={hasSearchedEmails ? 'alternate-email' : 'history'}
                             size={15}
                             color="rgba(255, 255, 255, 0.4)"
                             style={{ marginRight: 8 }}
@@ -619,7 +703,7 @@ ${beruf || ''}.
 
             {/* ── 2. Betreff ── */}
             <View style={styles.fieldContainer}>
-              <Text style={styles.fieldLabel}>BETREFF</Text>
+              <Text style={styles.fieldLabel}>{t('contactForm.labelSubject')}</Text>
               <View style={styles.inputWrapper}>
                 <MaterialIcons
                   name="title"
@@ -629,7 +713,7 @@ ${beruf || ''}.
                 />
                 <TextInput
                   style={styles.textInput}
-                  placeholder={t('subject.placeholder') || 'Betreff eingeben...'}
+                  placeholder={t('contactForm.placeholderSubject')}
                   placeholderTextColor="rgba(255, 255, 255, 0.35)"
                   value={formData.subject}
                   onChangeText={(value) => handleChange('subject', value)}
@@ -639,13 +723,13 @@ ${beruf || ''}.
 
             {/* ── 3. Nachricht ── */}
             <View style={styles.messageFieldContainer}>
-              <Text style={styles.fieldLabel}>BEGLEITSCHREIBEN</Text>
+              <Text style={styles.fieldLabel}>{t('contactForm.labelMessage')}</Text>
               <TextInput
                 style={styles.messageTextarea}
                 multiline={true}
                 scrollEnabled={true}
                 textAlignVertical="top"
-                placeholder={t('message.placeholder') || 'Sehr geehrte Damen und Herren...'}
+                placeholder={t('contactForm.placeholderMessage')}
                 placeholderTextColor="rgba(255, 255, 255, 0.35)"
                 value={formData.message}
                 onChangeText={(value) => handleChange('message', value)}
@@ -665,7 +749,7 @@ ${beruf || ''}.
                 <View style={styles.loadingRow}>
                   <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
                   <Text style={styles.sendButtonText}>
-                    {t('pleaseWait') || 'Wird gesendet...'}
+                    {t('contactForm.sending')}
                   </Text>
                 </View>
               ) : (
@@ -677,7 +761,7 @@ ${beruf || ''}.
                     style={{ marginRight: 8 }}
                   />
                   <Text style={styles.sendButtonText}>
-                    {t('email.sendButton') || 'E-Mail jetzt senden'}
+                    {t('contactForm.btnSend')}
                   </Text>
                 </View>
               )}
@@ -704,7 +788,7 @@ ${beruf || ''}.
               <View style={styles.modalHeaderTitleWrap}>
                 <MaterialIcons name="language" size={20} color="#60A5FA" />
                 <Text style={styles.modalHeaderTitle} numberOfLines={1}>
-                  Web-Vorschau
+                  {t('contactForm.webPreview')}
                 </Text>
               </View>
               <TouchableOpacity

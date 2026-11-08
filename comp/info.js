@@ -1,13 +1,16 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   Animated, 
   Dimensions, 
-  Pressable 
+  Pressable,
+  ScrollView
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useKeyboardAnimation from '../inc/Keyboard.js';
 
 const { width } = Dimensions.get('window');
 
@@ -48,54 +51,64 @@ export const useInfoModal = () => {
 };
 
 /* ── Info-Modal Komponente ────────────────────────────── */
-export default function Info({ visible, onClose, message = '' }) {
+export default function Info({ visible, onClose, message = '', topOffset }) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+const [mounted, setMounted] = useState(null);
+  const { keyboardHeight, reset } = useKeyboardAnimation(250);
+
+  /* Oberer Bereich (unterhalb der Topbar) */
+  const topSpace = useMemo(() => {
+    return topOffset !== undefined ? topOffset : insets.top + 50;
+  }, [topOffset, insets.top]);
+
+  /* Unterer Bereich (oberhalb der Tastatur oder Safe Area) */
+  const bottomSpace = useMemo(() => {
+    return keyboardHeight > 0 ? keyboardHeight : Math.max(insets.bottom, 16);
+  }, [keyboardHeight, insets.bottom]);
+
+  /* Modal Ein-/Ausblendung */
 
   useEffect(() => {
     if (visible) {
+      setMounted(true);
       Animated.parallel([
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          friction: 8,
-          tension: 45,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
+        Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 45, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
       ]).start();
-    } else {
+    } else if (mounted) {
       Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: width,
-          duration: 220,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+        Animated.timing(slideAnim, { toValue: width, duration: 220, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start(({ finished }) => {
+        if (finished) setMounted(false);   // erst nach der Animation entfernen
+      });
     }
-  }, [visible, slideAnim, fadeAnim]);
-
+  }, [visible]); // ⚠️ kein `reset` mehr in den Deps
+  if (!mounted) return null;               // ⬅️ Kernpunkt
   return (
     <View 
       style={styles.backdropLayer} 
       pointerEvents={visible ? 'auto' : 'none'}
     >
-      {/* Halbtransparenter Dark-Backdrop mit Fade-In */}
+      {/* Dark-Backdrop */}
       <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
-      {/* Zentrierter Wrapper */}
-      <View style={styles.centerContainer} pointerEvents="box-none">
+      {/* Zentrierter Bereich exakt zwischen Topbar und Tastatur */}
+      <View 
+        style={[
+          styles.centerContainer, 
+          { 
+            top: topSpace, 
+            bottom: bottomSpace 
+          }
+        ]} 
+        pointerEvents="box-none"
+      >
         <Animated.View 
           style={[
             styles.modalCard, 
@@ -125,10 +138,15 @@ export default function Info({ visible, onClose, message = '' }) {
             </Pressable>
           </View>
 
-          {/* Text-Inhalt */}
-          <View style={styles.body}>
+          {/* Text-Inhalt mit ScrollView bei geringem Zwischenraum */}
+          <ScrollView 
+            style={styles.scrollArea}
+            contentContainerStyle={styles.body}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
             <Text style={styles.messageText}>{message}</Text>
-          </View>
+          </ScrollView>
 
           {/* Schließen / Bestätigen Button */}
           <Pressable 
@@ -156,7 +174,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(10, 12, 18, 0.82)',
   },
   centerContainer: {
-    flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 22,
@@ -164,6 +184,7 @@ const styles = StyleSheet.create({
   modalCard: {
     position: 'relative',
     width: Math.min(width * 0.88, 380),
+    maxHeight: '100%',
     backgroundColor: '#171B26',
     borderRadius: 24,
     padding: 22,
@@ -190,6 +211,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    flexShrink: 0,
   },
   badgePrimary: {
     flexDirection: 'row',
@@ -226,8 +248,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 16,
   },
+  scrollArea: {
+    maxHeight: 190,
+    marginBottom: 16,
+  },
   body: {
-    marginBottom: 20,
+    paddingVertical: 2,
   },
   messageText: {
     color: 'rgba(255, 255, 255, 0.85)',
@@ -246,6 +272,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 4,
+    flexShrink: 0,
   },
   confirmButtonText: {
     color: '#FFFFFF',

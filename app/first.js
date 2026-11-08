@@ -275,6 +275,7 @@ const StartScreen = () => {
           emailPassword VARCHAR(255),
           emailServer VARCHAR(255),
           skills TEXT,
+          cv TEXT,
           old TEXT DEFAULT '',
           mergePdf TEXT DEFAULT '',
           first BOOLEAN DEFAULT false,

@@ -30,7 +30,7 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { thePrompt } from '../inc/ai.js';
 import axios from 'axios';
 import { InteractionManager } from 'react-native';
-import { getI18nCode, itemsLang } from '../inc/language.js';
+import { checkFontLanguage, getI18nCode, itemsLang } from '../inc/language.js';
 import { sha512 } from 'js-sha512';
 import { useTranslation } from 'react-i18next';
 import DeviceInfo from 'react-native-device-info';
@@ -157,14 +157,16 @@ const SuggestionDropdown = memo(
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
-          const text =
+          const roleText =
             typeof item === 'string'
               ? item
               : isSkill
               ? item?.role ?? item?.text ?? item?.name ?? ''
               : item?.text ?? item?.role ?? item?.name ?? item?.id ?? '';
-          const rawText = text.length > 25 ? text.substring(0, 27) + '...' : text;
-          const itemKey = item?.rowid ?? item?.id ?? text;
+
+          const companyText = typeof item === 'object' && item?.company ? item.company : '';
+
+          const itemKey = item?.rowid ?? item?.id ?? roleText;
           const isSelected = selectedItems.some((s) => {
             const sKey = s?.rowid ?? s?.id ?? (typeof s === 'string' ? s : s?.role ?? s?.text);
             return sKey === itemKey;
@@ -184,12 +186,23 @@ const SuggestionDropdown = memo(
                     color={WARM.iconPin}
                   />
                 </View>
-                <Text
-                  style={[styles.suggestionText, isSkill && isSelected && styles.suggestionTextSelected]}
-                  numberOfLines={1}
-                >
-                  {String(rawText)}
-                </Text>
+
+                <View style={styles.suggestionTextWrap}>
+                  <Text
+                    style={[styles.suggestionText, isSkill && isSelected && styles.suggestionTextSelected]}
+                    numberOfLines={1}
+                  >
+                    {String(roleText)}
+                  </Text>
+                  {isSkill && Boolean(companyText) && (
+                    <View style={styles.companyRow}>
+                      <MaterialIcons name="business" size={12} color={WARM.textDim} style={{ marginRight: 4 }} />
+                      <Text style={styles.suggestionTextSub} numberOfLines={1}>
+                        {String(companyText)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </TouchableOpacity>
 
               {isSkill && onToggleSelect ? (
@@ -274,8 +287,8 @@ const useWebExtractor = ({ onExtractSuccess }) => {
         setIsExtracting(false);
         setWebViewUrl('');
         Alert.alert(
-          t('bewerbung.timeoutTitle') || 'Timeout',
-          t('bewerbung.timeoutMsg') || 'Stellenanzeige hat zu lange geladen. Bitte prüfe die URL.'
+          t('bewerbung.timeoutTitle'),
+          t('bewerbung.timeoutMsg')
         );
       }
     }, 20000);
@@ -304,8 +317,8 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 
       if (!url) {
         Alert.alert(
-          t('bewerbung.invalidLinkTitle') || 'Ungültiger Link',
-          t('bewerbung.invalidLinkMsg') || 'Bitte füge einen vollständigen Link ein.'
+          t('bewerbung.invalidLinkTitle'),
+          t('bewerbung.invalidLinkMsg')
         );
         return;
       }
@@ -333,13 +346,13 @@ const useWebExtractor = ({ onExtractSuccess }) => {
           const cleanTitle = data.title?.split('(')[0]?.trim();
           onExtractSuccess?.(cleanTitle, data.description);
           Alert.alert(
-            t('bewerbung.extractSuccessTitle') || 'Erfolg!',
-            t('bewerbung.extractSuccessMsg') || 'Stellenanzeige wurde analysiert.'
+            t('bewerbung.extractSuccessTitle'),
+            t('bewerbung.extractSuccessMsg')
           );
         } else {
           Alert.alert(
-            t('bewerbung.extractHintTitle') || 'Hinweis',
-            data.message || t('bewerbung.extractDefaultError') || 'Konnte keine Daten extrahieren.'
+            t('bewerbung.extractHintTitle'),
+            data.message || t('bewerbung.extractDefaultError')
           );
         }
       } catch (e) {
@@ -498,9 +511,9 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       { label: 'Merriweather', value: 'Merriweather', fontName: 'Merriweather' },
       { label: 'EB Garamond', value: 'EBGaramond', fontName: 'EBGaramond' },
       { label: 'Tinos', value: 'Tinos', fontName: 'Tinos' },
-      { label: t('bewerbung.fonts.helvetica') || 'Helvetica (Standard)', value: 'Helvetica', fontName: 'Helvetica' },
-      { label: t('bewerbung.fonts.timesRoman') || 'Times Roman (Serif)', value: 'TimesRoman', fontName: 'TimesRoman' },
-      { label: t('bewerbung.fonts.courier') || 'Courier (Monospace)', value: 'Courier', fontName: 'Courier' },
+      { label: t('bewerbung.fonts.helvetica'), value: 'Helvetica', fontName: 'Helvetica' },
+      { label: t('bewerbung.fonts.timesRoman'), value: 'TimesRoman', fontName: 'TimesRoman' },
+      { label: t('bewerbung.fonts.courier'), value: 'Courier', fontName: 'Courier' },
     ],
     [t]
   );
@@ -542,7 +555,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         });
 
         if (isMounted) {
-          setDownloadedFonts((prev) => ({ ...prev, ...alreadyDownloaded }));
+          setDownloadedFonts((prev) => ({ ...prev, Helvetica: true, ...alreadyDownloaded }));
         }
       } catch (err) {
         console.warn('Font-Check Warnung:', err);
@@ -571,15 +584,11 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         }
 
         setDownloadedFonts((prev) => ({ ...prev, [item.value]: true }));
-        Alert.alert(
-          t('bewerbung.fontDownloadSuccessTitle') || 'Erfolg',
-          `Schriftart "${item.label}" wurde heruntergeladen.`
-        );
       } catch (err) {
         console.error('Fehler beim Download der Schriftart:', fontName, err);
         Alert.alert(
-          t('bewerbung.fontDownloadErrorTitle') || 'Fehler',
-          `Schriftart "${item.label}" konnte nicht heruntergeladen werden.`
+          t('bewerbung.fontDownloadErrorTitle'),
+          `${t('bewerbung.fonts.labelPrefix', { defaultValue: 'Schriftart' })} "${item.label}"`
         );
       } finally {
         setDownloadingFonts((prev) => ({ ...prev, [fontName]: false }));
@@ -641,18 +650,18 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
 
   const employmentOptions = useMemo(
     () => [
-      t('employmentOptions.vollzeit') || 'Vollzeit',
-      t('employmentOptions.teilzeit') || 'Teilzeit',
-      t('employmentOptions.minijob') || 'Minijob',
+      t('employmentOptions.vollzeit'),
+      t('employmentOptions.teilzeit'),
+      t('employmentOptions.minijob'),
     ],
     [t]
   );
 
   const applicationOptions = useMemo(
     () => [
-      t('applicationOptions.regulär') || 'Regulär',
-      t('applicationOptions.initiativ') || 'Initiativ',
-      t('applicationOptions.praktikum') || 'Praktikum',
+      t('applicationOptions.regulär'),
+      t('applicationOptions.initiativ'),
+      t('applicationOptions.praktikum'),
     ],
     [t]
   );
@@ -660,18 +669,18 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
   const qualityKeys = ['best', 'medium', 'light'];
   const qualityLabels = useMemo(
     () => ({
-      medium: t('Schnell') || 'Sehr gut',
-      best: t('Medium') || 'Am besten',
-      light: t('Sehr schnell') || 'Gut',
+      best: t('bewerbung.quality.best'),
+      medium: t('bewerbung.quality.medium'),
+      light: t('bewerbung.quality.light'),
     }),
     [t]
   );
 
   const anredeOptions = useMemo(
     () => [
-      t('anredeOptions.herr') || 'Herr',
-      t('anredeOptions.damenUndHerren') || 'Damen und Herren',
-      t('anredeOptions.frau') || 'Frau',
+      t('anredeOptions.herr'),
+      t('anredeOptions.damenUndHerren'),
+      t('anredeOptions.frau'),
     ],
     [t]
   );
@@ -727,7 +736,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
             if (Array.isArray(parsed)) {
               setSkills(parsed);
               setSkillsFiltered(parsed);
-
               const savedSelectedRaw = await EncryptedStorage.getItem('selected_skills');
               if (savedSelectedRaw && active) {
                 const savedIds = JSON.parse(savedSelectedRaw);
@@ -768,14 +776,14 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       .map((item, idx) => {
         if (typeof item === 'string') return `• ${item}`;
         const parts = [];
-        if (item.role) parts.push(`Rolle: ${item.role}`);
-        if (item.company) parts.push(`Unternehmen: ${item.company}`);
-        if (item.period) parts.push(`Zeitraum: ${item.period}`);
-        if (item.tasks) parts.push(`Aufgaben: ${item.tasks}`);
-        return `[Qualifikation/Station ${idx + 1}]\n${parts.join('\n')}`;
+        if (item.role) parts.push(`${t('profil.labelRole')}: ${item.role}`);
+        if (item.company) parts.push(`${t('profil.labelCompany')}: ${item.company}`);
+        if (item.period) parts.push(`${t('profil.labelPeriod')}: ${item.period}`);
+        if (item.tasks) parts.push(`${t('profil.labelTasks')}: ${item.tasks}`);
+        return `[${t('profil.stationBadge', { index: idx + 1 })}]\n${parts.join('\n')}`;
       })
       .join('\n\n');
-  }, [selectedSkills, erfahrung]);
+  }, [selectedSkills, erfahrung, t]);
 
   const handleToggleSkillDropdown = useCallback(() => {
     if (skillBlurTimeout.current) {
@@ -885,20 +893,40 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         return;
       }
 
-      const query = textValue.trim().toLowerCase();
+      const rawQuery = textValue.includes(',')
+        ? textValue.split(',').pop()
+        : textValue;
+      const query = rawQuery.trim().toLowerCase();
+
       if (!query) {
         setSkillsFiltered(skills);
         setShowSkillDropdown(true);
         return;
       }
 
-      const skillsFilter = skills.filter((skill) => {
-        const roleText = typeof skill === 'string' ? skill : skill?.role;
-        return roleText ? roleText.toLowerCase().includes(query) : false;
-      });
+      const getMatchScore = (item) => {
+        const role = (typeof item === 'string' ? item : item?.role || '').toLowerCase();
+        const company = (typeof item === 'object' ? item?.company || '' : '').toLowerCase();
+        const tasks = (typeof item === 'object' ? item?.tasks || '' : '').toLowerCase();
 
+        if (role.startsWith(query)) return 100;
+
+        const wordBoundaryRegex = new RegExp(`\\b${query}`, 'i');
+        if (wordBoundaryRegex.test(role)) return 80;
+
+        if (role.includes(query)) return 60;
+
+        if (company.startsWith(query)) return 40;
+        if (company.includes(query)) return 30;
+        if (tasks.includes(query)) return 20;
+
+        return 0;
+      };
+
+      const sorted = [...skills].sort((a, b) => getMatchScore(b) - getMatchScore(a));
+
+      setSkillsFiltered(sorted);
       setShowSkillDropdown(true);
-      setSkillsFiltered(skillsFilter);
     },
     [skills]
   );
@@ -907,13 +935,13 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     (val) => {
       setSelectedOption3((prev) => (prev === val ? '' : val));
       if (errors.anrede) setErrors((p) => ({ ...p, anrede: '' }));
-      if (val === 'Herr' || val === 'Frau') {
+      if (val === t('anredeOptions.herr') || val === t('anredeOptions.frau')) {
         jobRef2.current?.focus();
       } else {
         jobRef.current?.focus();
       }
     },
-    [errors.anrede]
+    [errors.anrede, t]
   );
 
   const handleSaveJob = useCallback(async () => {
@@ -925,8 +953,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       setSaveJobVisible(false);
       setShowJobDropdown(false);
       Alert.alert(
-        t('bewerbung.savedTitle') || 'Gespeichert',
-        t('bewerbung.jobSavedMsg') || 'Berufsbezeichnung gemerkt.'
+        t('bewerbung.savedTitle'),
+        t('bewerbung.jobSavedMsg')
       );
     } catch (err) {
       console.error(err);
@@ -944,8 +972,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       setSaveSkillVisible(false);
       setShowSkillDropdown(false);
       Alert.alert(
-        t('bewerbung.savedTitle') || 'Gespeichert',
-        t('bewerbung.skillSavedMsg') || 'Kenntnis gemerkt.'
+        t('bewerbung.savedTitle'),
+        t('bewerbung.skillSavedMsg')
       );
     } catch (err) {
       console.error(err);
@@ -965,26 +993,101 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     [dbJobsRef]
   );
 
+  /* Sprachwechsel überwachen & Roboto-Check anstoßen */
+  const handleLanguageChange = useCallback(
+    async (langVal) => {
+      const newLang = typeof langVal === 'function' ? langVal(languageValue) : langVal;
+      setLanguageValue(newLang);
+
+      if (checkFontLanguage(newLang) && fontValue === 'Helvetica') {
+        const isRobotoReady = Boolean(downloadedFonts['Roboto']);
+
+        if (!isRobotoReady) {
+          Alert.alert(
+            t('bewerbung.robotoNoticeTitle'),
+            t('bewerbung.robotoNoticeMsg'),
+            [
+              {
+                text: t('common.cancel'),
+                style: 'cancel',
+              },
+              {
+                text: t('common.download'),
+                onPress: () => {
+                  const robotoItem = fontOptions.find(
+                    (f) => f.value === 'Roboto' || f.fontName === 'Roboto'
+                  );
+                  if (robotoItem) {
+                    handleDownloadFont(robotoItem);
+                    setFontValue('Roboto');
+                  }
+                },
+              },
+            ]
+          );
+        } else {
+          setFontValue('Roboto');
+        }
+      }
+    },
+    [languageValue, fontValue, downloadedFonts, fontOptions, handleDownloadFont, t]
+  );
+
   const handleGeneratePDF = async () => {
+    toggleAccordion(false);
     setShowJobDropdown(false);
     setShowSkillDropdown(false);
 
+    const downloadedCount = Object.values(downloadedFonts).filter(Boolean).length;
+
+    if (checkFontLanguage(languageValue) && (!downloadedFonts['Roboto'] || fontValue === 'Helvetica')) {
+      if (downloadedCount > 1) {
+        Alert.alert(
+          t('bewerbung.robotoChengeFont'),
+          t('bewerbung.robotChangeFontMsg')
+        );
+        setAccordionOpen(true);
+        return;
+      } else {
+        Alert.alert(
+          t('bewerbung.robotoMissingTitle'),
+          t('bewerbung.robotoMissingMsg'),
+          [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+              text: t('common.download'),
+              onPress: () => {
+                const robotoItem = fontOptions.find(
+                  (f) => f.value === 'Roboto' || f.fontName === 'Roboto'
+                );
+                if (robotoItem) {
+                  handleDownloadFont(robotoItem);
+                  setFontValue('Roboto');
+                }
+              },
+            },
+          ]
+        );
+        return;
+      }
+    }
+
     const nextErrors = {};
     const isDamenUndHerrenCheck =
-      selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
+      selectedOption3 === t('anredeOptions.damenUndHerren');
 
     if (!selectedOption3) {
-      nextErrors.anrede = t('validation.salutation.required') || 'Bitte Anrede wählen';
+      nextErrors.anrede = t('validation.salutation.required');
     } else if (!isDamenUndHerrenCheck && !name.trim()) {
-      nextErrors.anrede = t('validation.salutation.contactRequired') || 'Bitte Ansprechpartner eintragen';
+      nextErrors.anrede = t('validation.salutation.contactRequired');
     }
 
     if (!inputValue.trim()) {
-      nextErrors.job = t('validation.job.required') || 'Bitte Beruf eingeben';
+      nextErrors.job = t('validation.job.required');
     }
 
     if (!erfahrung.trim()) {
-      nextErrors.skill = t('validation.skill.required') || 'Bitte Erfahrung angeben';
+      nextErrors.skill = t('validation.skill.required');
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -1005,14 +1108,14 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
 
     try {
       const targetLng = getI18nCode(languageValue) || 'de';
-      const closing = i18n.t('closing', { lng: targetLng, defaultValue: 'Mit freundlichen Grüßen,' });
+      const closing = i18n.t('closing', { lng: targetLng, defaultValue: t('closing') });
 
       let salutationKey = 'default';
       const opt3Lower = (selectedOption3 || '').toLowerCase();
 
       const isDamenUndHerrenSelected =
         opt3Lower.includes('damen') ||
-        selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
+        selectedOption3 === t('anredeOptions.damenUndHerren');
 
       if (isDamenUndHerrenSelected) {
         salutationKey = 'default';
@@ -1026,19 +1129,19 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       if (salutationKey === 'herr') {
         const prefix = i18n.t('salutation.herr', {
           lng: targetLng,
-          defaultValue: 'Sehr geehrter Herr ',
+          defaultValue: t('salutation.herr'),
         });
         anrede = `${prefix}${name.trim()},`;
       } else if (salutationKey === 'frau') {
         const prefix = i18n.t('salutation.frau', {
           lng: targetLng,
-          defaultValue: 'Sehr geehrte Frau ',
+          defaultValue: t('salutation.frau'),
         });
         anrede = `${prefix}${name.trim()},`;
       } else {
         anrede = i18n.t('salutation.default', {
           lng: targetLng,
-          defaultValue: 'Sehr geehrte Damen und Herren,',
+          defaultValue: t('salutation.default'),
         });
       }
 
@@ -1061,7 +1164,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
         lng: targetLng,
         defaultValue: i18n.t('applicationOptions2.default', {
           lng: targetLng,
-          defaultValue: 'Bewerbung als ',
+          defaultValue: t('applicationOptions2.default'),
         }),
       });
 
@@ -1081,7 +1184,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       ]);
 
       const detailedSkillsString = buildSelectedSkillsString();
-
       let prompt1 = thePrompt(inputValue, languageValue, detailedSkillsString);
       if (scrapedDescription?.trim()) {
         prompt1 += `\n\nNutze folgende Anforderungen der Stellenanzeige für passende Keywords:\n"${scrapedDescription}"`;
@@ -1102,7 +1204,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
             { prompt1, key, modelIntens: quality },
             { timeout: 20000 }
           );
-
           const generatedText = response.data?.response;
           if (!generatedText || typeof generatedText !== 'string' || !generatedText.trim()) {
             throw new Error('Ungültige oder leere Server-Antwort');
@@ -1143,16 +1244,14 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       setLoading(false);
       console.error('Error during PDF generation:', error);
       Alert.alert(
-        t('bewerbung.errorTitle') || 'Fehler',
-        error.response?.data?.error ||
-          t('bewerbung.networkError') ||
-          'Netzwerk- oder Übertragungsfehler. Bitte versuche es erneut.'
+        t('bewerbung.errorTitle'),
+        error.response?.data?.error || t('bewerbung.networkError')
       );
     }
   };
 
   const isDamenUndHerren =
-    selectedOption3 === (t('anredeOptions.damenUndHerren') || 'Damen und Herren');
+    selectedOption3 === t('anredeOptions.damenUndHerren');
   const isUrlInput = useMemo(
     () => ['http://', 'https://', 'www.'].some((proto) => inputValue.includes(proto)),
     [inputValue]
@@ -1171,12 +1270,6 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       accessible={false}
     >
       <View style={styles.root}>
-        <Info
-          visible={infoVisible}
-          onClose={closeInfo}
-          message={infoMessage}
-        />
-
         {/* ══ MAIN CARD ══ */}
         <Animated.View
           pointerEvents={accordionOpen ? 'none' : 'auto'}
@@ -1201,8 +1294,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
               <View style={styles.sectionCard}>
                 <CardHeader
                   icon="person"
-                  title={t('bewerbung.sectionSalutation') || 'ANREDE & ANSPRECHPARTNER'}
-                  onInfo={() => openInfo(t('info.sectionSalutation') || 'Anrede & Ansprechpartner')}
+title={t('bewerbung.sectionSalutation')?.slice(0, 25)}
+                  onInfo={() => openInfo(t('info.sectionSalutation'))}
                   rightElement={
                     <TouchableOpacity
                       style={styles.closeButton}
@@ -1232,7 +1325,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                   >
                     <TouchableOpacity
                       onPress={() => {
-                        openInfo(t('info.name') || 'Name');
+                        openInfo(t('info.name'));
                       }}
                       style={styles.infoIconBtn}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -1250,9 +1343,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       editable={!isDamenUndHerren}
                       style={[styles.textInput, isDamenUndHerren && { color: WARM.textDim }]}
                       blurOnSubmit={false}
-                      placeholder={
-                        t('bewerbung.placeholderSalutation') || 'Nachname Ansprechpartner'
-                      }
+                      placeholder={t('bewerbung.placeholderSalutation')}
                       placeholderTextColor={WARM.textDim}
                       value={name}
                       onChangeText={(txt) => setName(txt.charAt(0).toUpperCase() + txt.slice(1))}
@@ -1274,7 +1365,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                   >
                     <TouchableOpacity
                       onPress={() => {
-                        openInfo(t('info.work') || 'Beruf');
+                        openInfo(t('info.work'));
                       }}
                       style={styles.infoIconBtn}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -1289,7 +1380,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                     <TextInput
                       ref={jobRef}
                       style={styles.textInput}
-                      placeholder={t('bewerbung.placeholderJob') || 'Berufsbezeichnung oder Link...'}
+                      placeholder={t('bewerbung.placeholderJob')}
                       placeholderTextColor={WARM.textDim}
                       value={inputValue}
                       blurOnSubmit={false}
@@ -1309,7 +1400,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       >
                         <MaterialIcons name="auto-awesome" size={16} color="#FFFFFF" />
                         <Text style={styles.extractBtnText}>
-                          {t('bewerbung.btnAnalyze') || 'Analysieren'}
+                          {t('bewerbung.btnAnalyze')}
                         </Text>
                       </TouchableOpacity>
                     ) : saveJobVisible && inputValue.length > 0 ? (
@@ -1347,7 +1438,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                   >
                     <TouchableOpacity
                       onPress={() => {
-                        openInfo(t('info.skill') || 'Fähigkeiten');
+                        openInfo(t('info.skill'));
                       }}
                       style={styles.infoIconBtn}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -1364,8 +1455,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       style={styles.textInput}
                       placeholder={
                         selectedSkills.length > 0
-                          ? `${selectedSkills.length} Fähigkeiten gewählt`
-                          : t('bewerbung.placeholderSkills') || 'z.B. 3 Jahre React Native...'
+                          ? t('bewerbung.skillsSelectedCount', { count: selectedSkills.length })
+                          : t('bewerbung.placeholderSkills')
                       }
                       placeholderTextColor={WARM.textDim}
                       value={erfahrung}
@@ -1406,7 +1497,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       onSelect={handleToggleSelectSkill}
                       onToggleSelect={handleToggleSelectSkill}
                       selectedItems={selectedSkills}
-                      theMaxHeight={height * 0.1}
+                      theMaxHeight={height * 0.10}
                       isSkill={true}
                     />
                   )}
@@ -1421,7 +1512,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                   >
                     <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
                     <Text style={styles.settingsButtonText} numberOfLines={1}>
-                      {t('Optionen') || 'Optionen'}
+                      {t('bewerbung.options')}
                     </Text>
                     <MaterialIcons
                       name={accordionOpen ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
@@ -1440,7 +1531,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       <View style={styles.loadingRow}>
                         <ActivityIndicator style={{ marginRight: 2 }} size="small" color="#FFFFFF" />
                         <Text style={[styles.generateBtnText, { fontSize: 13 }]} numberOfLines={1}>
-                          {` Bitte warten`}
+                          {` ${t('pleaseWait')}`}
                         </Text>
                       </View>
                     ) : (
@@ -1451,7 +1542,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                           color="#FFFFFF"
                           style={{ marginRight: 6 }}
                         />
-                        <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
+                        <Text style={styles.generateBtnText}>{t('bewerbung.btnStart')}</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -1478,14 +1569,14 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
               <View style={styles.optionsHeader}>
                 <TouchableOpacity
                   style={styles.headerLeft}
-                  onPress={() => openInfo(t('info.options') || 'Optionen')}
+                  onPress={() => openInfo(t('info.options'))}
                   activeOpacity={0.7}
                   hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                 >
                   <View style={styles.iconBadge}>
                     <MaterialIcons name="tune" size={18} color={WARM.iconLeading} />
                   </View>
-                  <Text style={styles.fieldLabel}>{t('Optionen') || 'OPTIONEN'}</Text>
+                  <Text style={styles.fieldLabel}>{t('bewerbung.options').toUpperCase()}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1508,8 +1599,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 {/* 1. ANSTELLUNGSART */}
                 <FieldLabelWithIcon
                   icon="schedule"
-                  label={t('bewerbung.labelEmployment') || 'ANSTELLUNGSART'}
-                  onPress={() => openInfo(t('info.employment') || 'Anstellungsart')}
+                  label={t('bewerbung.labelEmployment')}
+                  onPress={() => openInfo(t('info.employment'))}
                 />
                 <SegmentedPills
                   options={employmentOptions}
@@ -1521,8 +1612,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 <View style={{ marginTop: 12 }}>
                   <FieldLabelWithIcon
                     icon="category"
-                    label={t('bewerbung.labelAppType') || 'BEWERBUNGSTYP'}
-                    onPress={() => openInfo(t('info.appType') || 'Bewerbungstyp')}
+                    label={t('bewerbung.labelAppType')}
+                    onPress={() => openInfo(t('info.appType'))}
                   />
                   <SegmentedPills
                     options={applicationOptions}
@@ -1535,8 +1626,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 <View style={{ marginTop: 12 }}>
                   <FieldLabelWithIcon
                     icon="speed"
-                    label={t('QUALITÄT') || 'QUALITÄT'}
-                    onPress={() => openInfo(t('info.quality') || 'Qualität')}
+                    label={t('bewerbung.labelQuality').toUpperCase()}
+                    onPress={() => openInfo(t('info.quality'))}
                   />
                   <SegmentedPills
                     options={qualityKeys}
@@ -1550,8 +1641,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 <View style={{ marginTop: 12 }}>
                   <FieldLabelWithIcon
                     icon="font-download"
-                    label={t('bewerbung.labelFont') || 'SCHRIFTART IM PDF'}
-                    onPress={() => openInfo(t('info.font') || 'Schriftart im PDF')}
+                    label={t('bewerbung.labelFont')}
+                    onPress={() => openInfo(t('info.font'))}
                   />
                   <View style={{ zIndex: 3000, marginTop: 4, marginBottom: 8 }}>
                     <DropDownPicker
@@ -1560,7 +1651,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       items={fontOptions}
                       setOpen={setFontPickerOpen}
                       onOpen={() => setLanguagePickerOpen(false)}
-                      placeholder={t('bewerbung.placeholderFont') || 'Schriftart wählen'}
+                      placeholder={t('bewerbung.placeholderFont')}
                       style={styles.dropdown}
                       dropDownContainerStyle={styles.dropdownList}
                       textStyle={{
@@ -1580,8 +1671,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 <View style={{ marginTop: 4 }}>
                   <FieldLabelWithIcon
                     icon="translate"
-                    label={t('bewerbung.labelLanguage') || 'SPRACHE DES ANSCHREIBENS'}
-                    onPress={() => openInfo(t('info.language') || 'Sprache des Anschreibens')}
+                    label={t('bewerbung.labelLanguage')}
+                    onPress={() => openInfo(t('info.languageOption'))}
                   />
                   <View style={{ zIndex: 4000, marginTop: 4, marginBottom: 12 }}>
                     <DropDownPicker
@@ -1589,10 +1680,10 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                       value={languageValue}
                       items={itemsLang}
                       setOpen={setLanguagePickerOpen}
-                      setValue={setLanguageValue}
+                      setValue={handleLanguageChange}
                       onOpen={() => setFontPickerOpen(false)}
-                      placeholder={itemsLang[0].label}
-                      style={styles.dropdown}
+                      placeholder={itemsLang[0]?.label}
+                      style={[styles.dropdown]}
                       dropDownContainerStyle={styles.dropdownList}
                       textStyle={{
                         color: WARM.textMain,
@@ -1615,7 +1706,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 >
                   <MaterialIcons name="arrow-back" size={18} color={WARM.iconLeading} />
                   <Text style={styles.settingsButtonText} numberOfLines={1}>
-                    {t('Zurück') || 'Zurück'}
+                    {t('bewerbung.btnBack')}
                   </Text>
                 </TouchableOpacity>
 
@@ -1629,7 +1720,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                     <View style={styles.loadingRow}>
                       <ActivityIndicator size="small" color="#FFFFFF" />
                       <Text style={[styles.generateBtnText, { marginLeft: 8, fontSize: 13 }]} numberOfLines={1}>
-                        {` Bitte warten`}
+                        {` ${t('pleaseWait')}`}
                       </Text>
                     </View>
                   ) : (
@@ -1640,7 +1731,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                         color="#FFFFFF"
                         style={{ marginRight: 6 }}
                       />
-                      <Text style={styles.generateBtnText}>{t('Starten') || 'Starten'}</Text>
+                      <Text style={styles.generateBtnText}>{t('bewerbung.btnStart')}</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -1663,8 +1754,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 onError={() => {
                   cancelExtraction();
                   Alert.alert(
-                    t('bewerbung.errorTitle') || 'Fehler',
-                    t('bewerbung.errorLoadJob') || 'Stellenanzeige konnte nicht geladen werden.'
+                    t('bewerbung.errorTitle'),
+                    t('bewerbung.errorLoadJob')
                   );
                 }}
                 userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
@@ -1676,20 +1767,25 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
                 <ActivityIndicator size="large" color={WARM.iconLeading} />
               </View>
               <Text style={styles.extractTitle}>
-                {t('bewerbung.extractingTitle') || 'Stellenanzeige wird analysiert...'}
+                {t('bewerbung.extractingTitle')}
               </Text>
               <Text style={styles.extractSubtitle}>
-                {t('bewerbung.extractingSubtitle') || 'Wir extrahieren Keywords & Aufgaben'}
+                {t('bewerbung.extractingSubtitle')}
               </Text>
 
               <TouchableOpacity style={styles.cancelExtractBtn} onPress={cancelExtraction}>
                 <Text style={styles.cancelExtractText}>
-                  {t('bewerbung.btnCancel') || 'Abbrechen'}
+                  {t('bewerbung.btnCancel')}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
+        <Info
+          visible={infoVisible}
+          onClose={closeInfo}
+          message={infoMessage}
+        />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -1949,9 +2045,10 @@ const styles = StyleSheet.create({
   suggestionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 48,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: WARM.surfaceBorderSubtle,
+    paddingVertical: 4,
   },
   suggestionRowSelected: {},
   resultIconWrapper: {
@@ -1971,10 +2068,24 @@ const styles = StyleSheet.create({
     paddingLeft: 14,
     paddingRight: 14,
   },
+  suggestionTextWrap: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   suggestionText: {
     color: WARM.textMain,
     fontSize: 13.5,
     fontWeight: '500',
+  },
+  companyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  suggestionTextSub: {
+    color: WARM.textMuted,
+    fontSize: 11,
+    fontWeight: '400',
   },
   suggestionTextSelected: {
     color: WARM.iconArrow,
@@ -1998,7 +2109,7 @@ const styles = StyleSheet.create({
     backgroundColor: WARM.bg,
     borderColor: WARM.surfaceBorder,
     borderRadius: 14,
-    maxHeight: 280,
+    maxHeight: 220,
   },
 
   /* ── Spezifische Zeile für Schriften mit Download-Button ── */

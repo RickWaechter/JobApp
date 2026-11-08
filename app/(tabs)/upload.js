@@ -1,6 +1,6 @@
 // Home.js / UploadScreen.js
 import MaterialIcons from "@react-native-vector-icons/material-icons";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -106,8 +106,10 @@ const DocumentActionCard = memo(({ title, onIconPress, description, iconName, on
 
 const UploadScreen = () => {
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
+
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [data, setData] = useState([]);
@@ -529,21 +531,6 @@ const UploadScreen = () => {
     });
   };
 
-  const handleInfo = (val) => {
-    switch (val) {
-      case 'choose':
-        setInfoModalVisible(true);
-        setTextInfo(t("info.choose"));
-        break;
-      case 'sort':
-        setInfoModalVisible(true);
-        setTextInfo(t("info.sort"));
-        break;
-      default:
-        break;
-    }
-  };
-
   const activeItem = data.find((item) => item.id === activePdfId);
 
   return (
@@ -563,7 +550,7 @@ const UploadScreen = () => {
         <View style={styles.contentArea}>
           {files.length === 0 ? (
             <>
-              {/* 1. Dashboard Action Cards */}
+              {/* 1. Dashboard Action Cards (Jetzt 3 Buttons) */}
               <Animated.View
                 pointerEvents={isSortActive ? 'none' : 'auto'}
                 style={[styles.cardsWrapper, { transform: [{ translateX: animX }] }]}
@@ -583,6 +570,15 @@ const UploadScreen = () => {
                   title={t('sortAttachments') || 'Anlagen sortieren'}
                   description={t('sortAttachmentsDescription') || 'Reihenfolge ändern, löschen oder Vorschau öffnen.'}
                   onPress={openSortView}
+                />
+
+                <DocumentActionCard
+                  iconName="post-add"
+                  badgeText="Generator"
+                  onIconPress={() => openInfo(t('info.generator') || 'Erstelle einen vollständigen Lebenslauf mit strukturierter Vorlage direkt in der App.')}
+                  title={t('cvGenerator') || 'Lebenslauf erstellen'}
+                  description={t('cvGeneratorDescription') || 'Direkt in der App formatieren, bearbeiten und sichern.'}
+                  onPress={() => navigation.navigate('cover')}
                 />
               </Animated.View>
 
@@ -708,7 +704,6 @@ const UploadScreen = () => {
                                     Vorschau: {item.name}
                                   </Text>
                                   <View style={styles.inlineHeaderActions}>
-                                    {/* Button für Fullscreen Modal */}
                                     <TouchableOpacity
                                       onPress={() => setIsPdfModalOpen(true)}
                                       style={styles.inlinePdfExpandBtn}
@@ -726,14 +721,12 @@ const UploadScreen = () => {
                                   </View>
                                 </View>
 
-                                {/* PDF Bereich mit Klick-Trigger ins Modal */}
                                 <View style={styles.inlinePdfBody}>
                                   <Pdf
                                     source={source}
                                     style={styles.pdf}
                                     onError={(err) => console.error('PDF Error:', err)}
                                   />
-                                  {/* Transparenter Klick-Layer: Klick öffnet das Modal */}
                                   <TouchableOpacity
                                     activeOpacity={0.15}
                                     style={styles.pdfTouchOverlay}
@@ -818,8 +811,6 @@ const UploadScreen = () => {
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="sync" size={18} color="rgba(255,255,255,0.8)" style={{ marginRight: 6 }} />
-            
-                  
                   <Text style={styles.btnSecondaryText}>Alle alten Dateien ersetzen</Text>
                 </TouchableOpacity>
               </View>
@@ -864,7 +855,8 @@ const UploadScreen = () => {
           </View>
         </View>
       </Modal>
- <Info
+
+      <Info
         visible={infoVisible}
         onClose={closeInfo}
         message={infoMessage}
@@ -939,7 +931,7 @@ const styles = StyleSheet.create({
   cardsWrapper: {
     flex: 1,
     justifyContent: 'center',
-    gap: 16,
+    gap: 14,
   },
   actionCard: {
     flexDirection: 'row',
@@ -998,13 +990,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   inlineBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.35)',
     paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     borderRadius: 6,
   },
   inlineBadgeText: {
-    color: '#60A5FA',
+    color: '#93C5FD',
     fontSize: 10.5,
     fontWeight: '700',
   },

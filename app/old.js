@@ -208,7 +208,7 @@ const OldScreen = () => {
     }, [resetAllToDefaults])
   );
 
-  /* ── CompanySearch Modal: Sanfter Slide-In nach Keyboard-Start (wie StartApp) ── */
+  /* ── CompanySearch Modal: Sanfter Slide-In nach Keyboard-Start ── */
   const triggerNameSlideDown = useCallback(() => {
     if (kbFallbackRef.current) {
       clearTimeout(kbFallbackRef.current);
@@ -221,7 +221,7 @@ const OldScreen = () => {
 
     Animated.parallel([
       Animated.timing(nameProgressX, {
-        toValue: 1, // Fährt von 0 (width) auf 1 (0) in die Mitte
+        toValue: 1,
         duration: 400,
         useNativeDriver: true,
       }),
@@ -242,7 +242,7 @@ const OldScreen = () => {
     (entry) => {
       setSelectedEntry(entry);
       setModalVisible(true);
-      nameProgressX.setValue(0); // Startet rechts außerhalb (width)
+      nameProgressX.setValue(0);
       nameProgressY.setValue(1);
       nameOpacity.setValue(0);
 
@@ -279,7 +279,7 @@ const OldScreen = () => {
 
     Animated.parallel([
       Animated.timing(nameProgressY, {
-        toValue: 2, // Schiebt die Card von 1 (Mitte) auf 2 (-height) nach oben raus
+        toValue: 2,
         duration: 380,
         useNativeDriver: true,
       }),
@@ -312,18 +312,15 @@ const OldScreen = () => {
         EncryptedStorage.setItem('result', 'changeOld'),
       ]).catch((err) => console.error('Storage error:', err));
 
-      // 1. ChangeScreenOld sofort einhängen
       setChangeOldScreen(true);
-      animProgress.setValue(0); // startet bei translateX = width
+      animProgress.setValue(0);
       animProgressY.setValue(0);
       animProgressOpacity.setValue(1);
 
-      // 2. Fokus sofort nahtlos übergeben -> Tastatur bleibt ohne Unterbrechung oben
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
 
-      // 3. Name fährt nach links raus (-width * 0.65), ChangeScreenOld fährt von rechts rein (0)
       Animated.parallel([
         Animated.timing(nameProgressX, {
           toValue: 2,
@@ -427,17 +424,18 @@ const OldScreen = () => {
           EncryptedStorage.setItem('merge', pdfTarget),
           EncryptedStorage.setItem('result', resultTarget),
         ]);
-        router.push(routeTarget);
+        router.navigate(routeTarget);
       } catch (e) {
         console.error('Routing / Storage Error:', e);
       }
     } else {
       Alert.alert(
-        'Datei nicht gefunden',
-        'Die PDF-Bewerbungsmappe ist nicht mehr im Speicher vorhanden.'
+        t('history.fileNotFoundTitle'),
+        t('history.fileNotFoundMsg'),
+        [{ text: t('common.ok') }]
       );
     }
-  }, []);
+  }, [t]);
 
   const deleteEntry = useCallback((indexToDelete) => {
     setEntries((prevEntries) => {
@@ -445,12 +443,12 @@ const OldScreen = () => {
       if (!item) return prevEntries;
 
       Alert.alert(
-        'Eintrag löschen',
-        `Möchtest du die Bewerbung für "${item.job}" wirklich aus der Historie entfernen?`,
+        t('history.deleteTitle'),
+        t('history.deleteConfirm', { job: item.job }),
         [
-          { text: 'Abbrechen', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Löschen',
+            text: t('delete'),
             style: 'destructive',
             onPress: async () => {
               try {
@@ -489,19 +487,19 @@ const OldScreen = () => {
       );
       return prevEntries;
     });
-  }, []);
+  }, [t]);
 
   /* ── Gesamten Verlauf leeren ── */
   const clearAllEntries = useCallback(() => {
     if (entries.length === 0) return;
 
     Alert.alert(
-      'Gesamten Verlauf löschen',
-      'Möchtest du wirklich alle Bewerbungen unwiderruflich aus der Datenbank entfernen?',
+      t('history.clearAllTitle'),
+      t('history.clearAllMsg'),
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Alle löschen',
+          text: t('history.clearAllConfirm'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -523,7 +521,7 @@ const OldScreen = () => {
         },
       ]
     );
-  }, [entries.length]);
+  }, [entries.length, t]);
 
   const renderItem = useCallback(
     ({ item, index }) => (
@@ -553,17 +551,17 @@ const OldScreen = () => {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialIcons name="delete-sweep" size={17} color="#EF4444" />
-          <Text style={styles.clearAllBtnText}>Alles löschen</Text>
+          <Text style={styles.clearAllBtnText}>{t('history.clearAll')}</Text>
         </TouchableOpacity>
         <View style={styles.countBadge}>
           <MaterialIcons name="folder-shared" size={15} color="#60A5FA" />
           <Text style={styles.countBadgeText}>
-            {entries.length} {entries.length === 1 ? 'Bewerbung' : 'Bewerbungen'}
+            {t('history.count', { count: entries.length })}
           </Text>
         </View>
       </View>
     );
-  }, [entries.length, clearAllEntries]);
+  }, [entries.length, clearAllEntries, t]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
