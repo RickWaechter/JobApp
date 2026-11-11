@@ -1,3 +1,4 @@
+import axios from 'axios';
 export const thePrompt = (inputValue,  languageValue, detailedSkillsString) => {
     return `
     Du bist ein erfahrener Bewerbungsschreiber und Experte für professionelle, überzeugende Bewerbungsanschreiben.
@@ -52,4 +53,25 @@ Bei widersprüchlichen Anforderungen gilt folgende Reihenfolge:
 
 Erstelle jetzt das fertige Bewerbungsanschreiben.
    `
+}
+
+export const getKeyword = async (id) => {
+  if (!id.description?.trim()) return;
+
+  try {
+    const response = await axios.post('https://api.jobapp2.de/getKeywords', {
+      rote: id.role,
+      description: id.description,
+      modelIntense: "light"
+    });
+    if (response.data?.response) {
+      const keywords = response.data.response;
+      return keywords
+    }
+    
+  } catch (error) {
+    console.error('Fehler beim Senden:', error);
+    Alert.alert('Fehler', 'Konnte nicht gesendet werden.');
+  } finally {
+}
 }

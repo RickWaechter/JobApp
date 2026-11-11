@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import {ExperienceCard} from '../comp/expCard';
+import  {EducationCard} from '../comp/eduCard'; 
 import {
   View,
   Text,
   TextInput,
   Dimensions,
   Platform,
+  useWindowDimensions,
   TouchableOpacity,
   Alert,
   StyleSheet,
@@ -20,9 +23,9 @@ import {
   NestableScrollContainer,
   NestableDraggableFlatList,
 } from 'react-native-draggable-flatlist';
+import {Image} from 'expo-image';
 import { cvView } from '../inc/cvView.js';
 import WebView from 'react-native-webview';
-import DropDownPicker from 'react-native-dropdown-picker';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import {
@@ -31,7 +34,7 @@ import {
   stopCvPolling,
 } from '../inc/cvScan.js';
 import { getDatabaseConnection } from '../inc/db.js';
-
+import EncryptedStorage from 'react-native-encrypted-storage';
 export default function CoverScreen() {
   const { width: winW } = Dimensions.get('window');
   const isDark = useColorScheme() === 'dark';
@@ -41,11 +44,12 @@ export default function CoverScreen() {
   const [showExperience, setShowExperience] = useState(false);
   const [showEducation, setShowEducation] = useState(false);
   const [showSkills, setShowSkills] = useState(false);
-
+const isLoadedRef = useRef(false);
+const lastSavedRef = useRef('');
   const [isScanningCv, setIsScanningCv] = useState(false);
   const dbMainRef = useRef(null);
   const t = (key) => key;
-
+const [saveCvTitle, setSaveCvTitle] = useState('');
   const [activeSection, setActiveSection] = useState('personal');
   const [exitingSection, setExitingSection] = useState(null);
 
@@ -60,12 +64,13 @@ export default function CoverScreen() {
   const [selectedLayout, setSelectedLayout] = useState('Modern');
   const [savedCvName, setSavedCvName] = useState([]);
   const [savedCv, setSavedCv] = useState([]);
-
+const [isFabOpen, setIsFabOpen] = useState(false);
+const fabAnim = useRef(new Animated.Value(0)).current;
   // WebView-, Seitenmodus- und Export-Status
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [isTwoPage, setIsTwoPage] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
+const [showSavedCvsMenu, setShowSavedCvsMenu] = useState(false);
   const theme = {
     bg: isDark ? '#000000' : '#f3f4f6',
     card: isDark ? '#18181b' : '#ffffff',
@@ -100,30 +105,18 @@ export default function CoverScreen() {
   };
 
   const [personal, setPersonal] = useState({
-    name: 'Rick Denis Wächter',
-    title: 'Anwendungsentwickler',
-    email: 'Rickwaechter@mail.de',
-    phone: '0151 / 414 - 00730',
-    location: 'Stuttgart, Deutschland',
-    summary: 'Entwicklung robuster Mobile- und Backend-Lösungen.',
+  
   });
 
   const [experiences, setExperiences] = useState([
     {
-      id: '1',
-      role: 'Mobile App Developer',
-      company: 'TechSolutions GmbH',
-      period: '2023 – Heute',
-      description: '- Entwicklung und Wartung von iOS- und Android-Apps mit React Native.',
+    
     },
   ]);
 
   const [educations, setEducations] = useState([
     {
-      id: '1',
-      degree: 'B.Sc. Informatik',
-      school: 'Universität Stuttgart',
-      period: '2019 – 2023',
+    
     },
   ]);
 
@@ -141,7 +134,82 @@ export default function CoverScreen() {
 
     skills
   );
+// Vor dem return in CoverScreen:
+const handleStartScan = () => {
+  if (isScanningCv) return;
+  startCvScan({
+    isScanningCv,
+    setIsScanningCv,
+    setExperiences,
+    setEducations,
+    setSkills,
+    setPersonal,
+    dbInstance: dbMainRef.current,
+    t,
+  });
+};
+const renderExperienceItem = useCallback(
+  (props) => (
+    <ExperienceCard
+      {...props}
+      theme={theme}
+      onUpdate={updateExperience}
+      onRemove={removeExperience}
+    />
+  ),
+  [theme]
+);
 
+const renderEducationItem = useCallback(
+  (props) => (
+    <EducationCard
+      {...props}
+      theme={theme}
+      onUpdate={updateEducation}
+      onRemove={removeEducation}
+    />
+  ),
+  [theme]
+);
+const toggleFab = () => {
+  const toValue = isFabOpen ? 0 : 1;
+  Animated.spring(fabAnim, {
+    toValue,
+    useNativeDriver: true,
+    tension: 65,
+    friction: 9,
+  }).start();
+  setIsFabOpen(!isFabOpen);
+};  
+useEffect(() => {
+  // Noch nicht fertig geladen? Auf keinen Fall speichern!
+  if (!isLoadedRef.current) return;
+
+  const tempObject = {
+    personal,
+    experiences,
+    educations,
+    skills,
+  };
+
+  const payload = JSON.stringify(tempObject);
+
+  // Verhindert unnötiges Speichern, wenn der Inhalt identisch ist
+  if (payload === lastSavedRef.current) return;
+
+  // Debounce: 400ms warten (vermeidet Schreib-Overhead beim Tippen)
+  const timer = setTimeout(async () => {
+    try {
+      await EncryptedStorage.setItem('tempCv', payload);
+      lastSavedRef.current = payload;
+      console.log('tempCv erfolgreich autosaved');
+    } catch (err) {
+      console.error('Fehler beim Autosave:', err);
+    }
+  }, 400);
+
+  return () => clearTimeout(timer);
+}, [personal, experiences, educations, skills]);
   // PDF erstellen und Share-Dialog öffnen
   const handleSharePdf = async () => {
     try {
@@ -206,29 +274,61 @@ export default function CoverScreen() {
     });
   };
 
-  const persistCvData = async (dataToSave = personal) => {
-    try {
-      const db = await getDatabaseConnection('firstNew.db');
-      const data = {
-        [dataToSave.name || 'Unbenannt']: {
-          personal: dataToSave,
-          experiences,
-          educations,
-          skills,
-        },
-      };
-      const jsonString = JSON.stringify(data);
-      await db.executeSql('UPDATE files SET cv = ?', [jsonString]);
-      Alert.alert('Erfolg', 'Lebenslauf wurde erfolgreich gespeichert.');
-      return true;
-    } catch (error) {
-      console.error('Fehler beim Speichern:', error);
-      Alert.alert('Fehler', 'Der Lebenslauf konnte nicht gespeichert werden.');
-      return false;
-    }
-  };
+const persistCvData = async (titleToUse) => {
+  const chosenKey = titleToUse?.trim() || personal.name?.trim() || 'Unbenannter Stand';
 
-  const saveCv = () => {
+  try {
+    const db = await getDatabaseConnection('firstNew.db');
+
+    // 1. Bereits gespeicherte Stände laden
+    const resSelect = await db.executeSql('SELECT cv FROM files', []);
+    const item = resSelect[0]?.rows?.item(0);
+    let existingData = {};
+
+    if (item?.cv) {
+      try {
+        existingData = JSON.parse(item.cv) || {};
+      } catch {
+        existingData = {};
+      }
+    }
+
+    // 2. Bestehende Stände behalten & neuen Key einfügen/überschreiben
+    const updatedData = {
+      ...existingData,
+      [chosenKey]: {
+        personal,
+        experiences,
+        educations,
+        skills,
+      },
+    };
+
+    // 3. Zurück in SQLite schreiben
+    await db.executeSql('UPDATE files SET cv = ?', [JSON.stringify(updatedData)]);
+
+    // 4. UI-States sofort aktualisieren
+    setSavedCv(updatedData);
+    setSavedCvName(Object.keys(updatedData).map((k) => ({ label: k, value: k })));
+
+    // Eingabefeld leeren und Temp-Storage bereinigen
+    setSaveCvTitle('');
+    if (await EncryptedStorage.getItem('tempCv')) {
+      await EncryptedStorage.removeItem('tempCv');
+    }
+
+    Alert.alert('Erfolg', `Stand „${chosenKey}“ wurde gespeichert.`);
+    setShowSavedCvsMenu(false);
+    toggleFab();
+    return true;
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    Alert.alert('Fehler', 'Der Lebenslauf konnte nicht gespeichert werden.');
+    return false;
+  }
+};
+
+  const saveCv = async () => {
     Alert.alert(
       'Lebenslauf speichern',
       `Möchtest du deinen Lebenslauf als „${personal.name || 'Ohne Namen'}“ sichern?\n\nDeine Daten werden ausschließlich lokal auf deinem Gerät gespeichert.`,
@@ -236,7 +336,14 @@ export default function CoverScreen() {
         { text: 'Abbrechen', style: 'cancel' },
         {
           text: 'Speichern',
-          onPress: () => persistCvData(personal),
+          onPress:async () => {
+            persistCvData(personal);
+            if (await EncryptedStorage.getItem('tempCv'))
+            {
+             await EncryptedStorage.removeItem('tempCv');  
+            }
+             setShowSavedCvsMenu(false);
+            toggleFab();},
         },
       ]
     );
@@ -303,6 +410,7 @@ export default function CoverScreen() {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         resumePollingIfNeeded({
+          
           setIsScanningCv,
           setExperiences,
           setEducations,
@@ -353,308 +461,112 @@ export default function CoverScreen() {
   const removeEducation = (id) => {
     setEducations(educations.filter((edu) => edu.id !== id));
   };
+const deleteSavedCv = (keyToDelete) => {
+    Alert.alert(
+      'Stand löschen',
+      `Möchtest du „${keyToDelete}“ wirklich unwiderruflich löschen?`,
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Löschen',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const db = await getDatabaseConnection('firstNew.db');
+              const resSelect = await db.executeSql('SELECT cv FROM files', []);
+              const item = resSelect[0]?.rows?.item(0);
 
-  useEffect(() => {
-    const get = async () => {
+              let existingData = {};
+              if (item?.cv) {
+                try {
+                  existingData = JSON.parse(item.cv) || {};
+                } catch {
+                  existingData = {};
+                }
+              }
+
+              // Key aus dem Datenobjekt entfernen
+              delete existingData[keyToDelete];
+
+              // In SQLite zurückspeichern
+              await db.executeSql('UPDATE files SET cv = ?', [
+                JSON.stringify(existingData),
+              ]);
+
+              // UI-States aktualisieren
+              setSavedCv(existingData);
+              const keys = Object.keys(existingData);
+              setSavedCvName(keys.map((k) => ({ label: k, value: k })));
+            } catch (err) {
+              console.error('Fehler beim Löschen:', err);
+              Alert.alert('Fehler', 'Der Stand konnte nicht gelöscht werden.');
+            }
+          },
+        },
+      ]
+    );
+  };
+useEffect(() => {
+  const get = async () => {
+    try {
+      // 1. Prüfen, ob temporärer Entwurf existiert
+      const tempCv = await EncryptedStorage.getItem('tempCv');
+      
+      if (tempCv) {
+        const parsed = JSON.parse(tempCv);
+        
+        // State befüllen, falls Daten da sind
+        if (parsed.personal && Object.keys(parsed.personal).length > 0) {
+          setPersonal(parsed.personal);
+        }
+        if (Array.isArray(parsed.experiences) && parsed.experiences.length > 0) {
+          setExperiences(parsed.experiences);
+        }
+        if (Array.isArray(parsed.educations) && parsed.educations.length > 0) {
+          setEducations(parsed.educations);
+        }
+        if (typeof parsed.skills === 'string') {
+          setSkills(parsed.skills);
+        }
+
+        // Stand festhalten, damit der State-Update kein Re-Save triggert
+        lastSavedRef.current = tempCv;
+      }
+
+      // 2. Vorlagen aus SQLite laden (Dropdown)
       const db = await getDatabaseConnection('firstNew.db');
       const resSelect = await db.executeSql('SELECT cv FROM files', []);
-      const item = resSelect[0].rows.item(0);
-      if (!item?.cv) return;
-      const jsonCv = JSON.parse(item.cv);
-      setSavedCv(jsonCv);
-      const a = Object.keys(jsonCv);
-      const b = a.map((key) => ({ label: key, value: key }));
-      setSavedCvName(b);
-    };
-    get();
-  }, []);
+      const item = resSelect[0]?.rows?.item(0);
+      if (item?.cv) {
+        const jsonCv = JSON.parse(item.cv);
+        setSavedCv(jsonCv);
+        const keys = Object.keys(jsonCv);
+        setSavedCvName(keys.map((k) => ({ label: k, value: k })));
 
-  const renderExperienceItem = useCallback(
-    ({ item, drag, isActive, getIndex }) => {
-      const index = getIndex();
-      return (
-        <ScaleDecorator activeScale={1.0}>
-          <View
-            style={[
-              styles.entryCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: isActive ? theme.primary : theme.border,
-              },
-              isActive && styles.entryCardActive,
-            ]}
-          >
-            <View style={styles.entryCardHeader}>
-              <TouchableOpacity
-                onLongPress={drag}
-                delayLongPress={100}
-                style={styles.dragHandle}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.dragGripIconWrap, { backgroundColor: theme.inputBg }]}>
-                  <Text style={[styles.dragGripIcon, { color: theme.primary }]}>☰</Text>
-                </View>
-                <View>
-                  <Text style={[styles.entryCardBadgeText, { color: theme.text }]}>
-                    Position #{index !== undefined ? index + 1 : ''}
-                  </Text>
-                  <Text style={[styles.dragHintText, { color: theme.subtext }]}>
-                    Halten & Ziehen
-                  </Text>
-                </View>
-              </TouchableOpacity>
+      }
+    } catch (e) {
+      console.error('Fehler beim Laden:', e);
+    } finally {
+      // WICHTIG: Erst JETZT das Speichern für zukünftige Änderungen freigeben
+      isLoadedRef.current = true;
+    }
+  };
 
-              <TouchableOpacity
-                onPress={() => removeExperience(item.id)}
-                style={styles.deleteButton}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.deleteButtonText}>✕ Löschen</Text>
-              </TouchableOpacity>
-            </View>
+  get();
+}, []);
 
-            <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Rolle / Jobtitel</Text>
-            <TextInput
-              value={item.role}
-              onChangeText={(t) => updateExperience(item.id, 'role', t)}
-              placeholder="z.B. Mobile App Developer"
-              placeholderTextColor={theme.subtext}
-              style={[
-                styles.input,
-                { backgroundColor: theme.inputBg, color: theme.text },
-              ]}
-            />
-
-            <View style={styles.row}>
-              <View style={[styles.flex1, styles.mr8]}>
-                <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Firma</Text>
-                <TextInput
-                  value={item.company}
-                  onChangeText={(t) => updateExperience(item.id, 'company', t)}
-                  placeholder="Unternehmen"
-                  placeholderTextColor={theme.subtext}
-                  style={[
-                    styles.input,
-                    { backgroundColor: theme.inputBg, color: theme.text },
-                  ]}
-                />
-              </View>
-
-              <View style={styles.periodInputWrap}>
-                <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Zeitraum</Text>
-                <TextInput
-                  value={item.period}
-                  onChangeText={(t) => updateExperience(item.id, 'period', t)}
-                  placeholder="MM/JJ – Heute"
-                  placeholderTextColor={theme.subtext}
-                  style={[
-                    styles.input,
-                    { backgroundColor: theme.inputBg, color: theme.text },
-                  ]}
-                />
-              </View>
-            </View>
-
-            <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Aufgaben & Erfolge</Text>
-            <TextInput
-              value={item.description}
-              onChangeText={(t) => updateExperience(item.id, 'description', t)}
-              placeholder="- Stichpunkte eingeben..."
-              placeholderTextColor={theme.subtext}
-              multiline
-              style={[
-                styles.input,
-                styles.textArea,
-                { backgroundColor: theme.inputBg, color: theme.text },
-              ]}
-            />
-          </View>
-        </ScaleDecorator>
-      );
-    },
-    [theme, experiences]
-  );
-
-  const renderEducationItem = useCallback(
-    ({ item, drag, isActive, getIndex }) => {
-      const index = getIndex();
-      return (
-        <ScaleDecorator activeScale={1.02}>
-          <View
-            style={[
-              styles.entryCard,
-              {
-                backgroundColor: theme.card,
-                borderColor: isActive ? theme.primary : theme.border,
-              },
-              isActive && styles.entryCardActive,
-            ]}
-          >
-            <View style={styles.entryCardHeader}>
-              <TouchableOpacity
-                onLongPress={drag}
-                delayLongPress={100}
-                style={styles.dragHandle}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.dragGripIconWrap, { backgroundColor: theme.inputBg }]}>
-                  <Text style={[styles.dragGripIcon, { color: theme.primary }]}>☰</Text>
-                </View>
-                <View>
-                  <Text style={[styles.entryCardBadgeText, { color: theme.text }]}>
-                    Abschluss #{index !== undefined ? index + 1 : ''}
-                  </Text>
-                  <Text style={[styles.dragHintText, { color: theme.subtext }]}>
-                    Halten & Ziehen
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => removeEducation(item.id)}
-                style={styles.deleteButton}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.deleteButtonText}>✕ Löschen</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Abschluss / Zertifikat</Text>
-            <TextInput
-              value={item.degree}
-              onChangeText={(t) => updateEducation(item.id, 'degree', t)}
-              placeholder="z.B. B.Sc. Informatik"
-              placeholderTextColor={theme.subtext}
-              style={[
-                styles.input,
-                { backgroundColor: theme.inputBg, color: theme.text },
-              ]}
-            />
-
-            <View style={styles.row}>
-              <View style={[styles.flex1, styles.mr8]}>
-                <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Schule / Universität</Text>
-                <TextInput
-                  value={item.school}
-                  onChangeText={(t) => updateEducation(item.id, 'school', t)}
-                  placeholder="Einrichtung"
-                  placeholderTextColor={theme.subtext}
-                  style={[
-                    styles.input,
-                    { backgroundColor: theme.inputBg, color: theme.text },
-                  ]}
-                />
-              </View>
-
-              <View style={styles.periodInputWrap}>
-                <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Zeitraum</Text>
-                <TextInput
-                  value={item.period}
-                  onChangeText={(t) => updateEducation(item.id, 'period', t)}
-                  placeholder="JJJJ – JJJJ"
-                  placeholderTextColor={theme.subtext}
-                  style={[
-                    styles.input,
-                    { backgroundColor: theme.inputBg, color: theme.text },
-                  ]}
-                />
-              </View>
-            </View>
-          </View>
-        </ScaleDecorator>
-      );
-    },
-    [theme, educations]
-  );
-
+ 
+const {width, height} = useWindowDimensions();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
         {/* Header */}
-        <View
-          onLayout={(event) => {
-            setHeaderHeight(event.nativeEvent.layout.height);
-          }}
-          style={[
-            styles.header,
-            {
-              backgroundColor: theme.card,
-              borderBottomColor: theme.border,
-              zIndex: Platform.OS === 'ios' ? 5000 : undefined,
-            },
-          ]}
-        >
-          <View style={styles.headerTopRow}>
-            {/* Oben Links: Neu erstellen */}
-            <TouchableOpacity
-              style={[
-                styles.headerActionBtn,
-                { backgroundColor: theme.inputBg, borderColor: theme.border },
-              ]}
-              onPress={handleCreateNew}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.headerActionBtnText, { color: theme.primary }]}>
-                ✨
-              </Text>
-            </TouchableOpacity>
-
-            {/* Mitte: Vorlagen Dropdown */}
-            <View style={styles.dropdownContainer}>
-              <DropDownPicker
-                open={openDropdown}
-                value={selectedLayout}
-                items={savedCvName}
-                setOpen={setOpenDropdown}
-                setValue={setSelectedLayout}
-                setItems={setSavedCvName}
-                onSelectItem={(item) => handleSelectLayout(item.value)}
-                placeholder="Vorlage"
-                style={[
-                  styles.dropdownPicker,
-                  { backgroundColor: theme.inputBg, borderColor: theme.border },
-                ]}
-                textStyle={[styles.dropdownText, { color: theme.text }]}
-                dropDownContainerStyle={[
-                  styles.dropdownList,
-                  { backgroundColor: theme.card, borderColor: theme.border },
-                ]}
-                arrowIconStyle={{ tintColor: theme.subtext }}
-                tickIconStyle={{ tintColor: theme.primary }}
-                theme={isDark ? 'DARK' : 'LIGHT'}
-              />
-            </View>
+      
 
             {/* Oben Rechts: Speichern Button */}
-            <TouchableOpacity
-              style={[
-                styles.headerActionBtn,
-                { backgroundColor: theme.primary, borderColor: theme.primary },
-              ]}
-              onPress={saveCv}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.headerActionBtnText, { color: '#ffffff' }]}>
-                💾
-              </Text>
-            </TouchableOpacity>
-              {/* Oben Rechts: Speichern Button 
-            <TouchableOpacity
-              style={[
-                styles.headerActionBtn,
-                { backgroundColor: theme.primary, borderColor: theme.primary },
-              ]}
-              onPress={startCvScan}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.headerActionBtnText, { color: '#ffffff' }]}>
-                
-              </Text>
-            </TouchableOpacity>
-            */}
-          </View>
-        </View>
-
+       
+      
+    
         <NestableScrollContainer contentContainerStyle={styles.scrollContent}>
           {activeTab === 'edit' ? (
             <View style={styles.cardsContainer}>
@@ -887,19 +799,297 @@ export default function CoverScreen() {
             </Animated.View>
           )}
         </NestableScrollContainer>
+{/* Floating Action Menu (fährt nach oben aus) */}
+{/* Floating Action Menu (fährt nach oben aus) */}
+<View style={styles.fabContainer} pointerEvents="box-none">
+  {/* 4. Action: HTML / Preview (oben) */}
+  <Animated.View
+    pointerEvents={isFabOpen ? 'auto' : 'none'}
+    style={[
+      styles.fabItem,
+      {
+        opacity: fabAnim,
+        transform: [
+          {
+            translateY: fabAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -70],
+            }),
+          },
+          { scale: fabAnim },
+        ],
+      },
+    ]}
+  ><TouchableOpacity
+      style={[
+        styles.floatingPreviewBtn,
+        { backgroundColor: theme.card, borderColor: theme.border },
+      ]}
+      onPress={() => {
+        setShowSavedCvsMenu(false);
+        toggleFab();
+        setWebViewVisible(true);
+      }}
+      activeOpacity={0.7}
+    >
+      <Text style={styles.floatingPreviewIcon}>📄</Text>
+    </TouchableOpacity>
+  </Animated.View>
 
-        {/* Kreisrunder Papier-Button (60px) unten rechts */}
-        <TouchableOpacity
-          style={[
-            styles.floatingPreviewBtn,
-            { backgroundColor: theme.card, borderColor: theme.border },
-          ]}
-          onPress={() => setWebViewVisible(true)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.floatingPreviewIcon}>📄</Text>
-        </TouchableOpacity>
+  {/* 3. Action: Gespeicherte Lebensläufe / Vorlagen */}
+{/* 3. Action: Gespeicherte Lebensläufe / Vorlagen */}
+  <Animated.View
+    pointerEvents={isFabOpen ? 'auto' : 'none'}
+    style={[
+      styles.fabItem,
+      {
+        opacity: fabAnim,
+        transform: [
+          {
+            translateY: fabAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -140],
+            }),
+          },
+          { scale: fabAnim },
+        ],
+      },
+    ]}
+  >
+    {/* Popout-View links daneben: 50% größer, Titel zentriert & Speichern-Button */}
+ {showSavedCvsMenu && (
+  <View
+    style={[
+      styles.cvListFlyout,
+      {
+        backgroundColor: theme.card,
+        borderColor: theme.border,
+      },
+    ]}
+  >
+    <Text style={[styles.cvListFlyoutTitle, { color: theme.text }]}>
+      Gespeicherte Stände
+    </Text>
 
+    {/* Scrollbare Liste der vorhandenen Stände */}
+ {/* Scrollbare Liste der bisherigen Lebensläufe */}
+        <View style={styles.cvListContentWrap}>
+          {savedCvName && savedCvName.length > 0 ? (
+            savedCvName.map((cvItem) => {
+              console.log("cvItem", cvItem);
+              const isCurrent = personal.name === cvItem.value;
+              return (
+                <View key={cvItem.value} style={styles.cvListItemRow}>
+                  {/* Stand auswählen & laden */}
+                  <TouchableOpacity
+                    style={[
+                      styles.cvListItemBtn,
+                      { backgroundColor: theme.inputBg },
+                      isCurrent && {
+                        borderColor: theme.primary,
+                        borderWidth: 1,
+                      },
+                    ]}
+                    onPress={() => {
+                      handleSelectLayout(cvItem.value);
+                      setShowSavedCvsMenu(false);
+                      toggleFab();
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        styles.cvListItemText,
+                        { color: theme.text },
+                        isCurrent && styles.cvListItemTextBold,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      📄 {cvItem.label}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Stand löschen */}
+                  <TouchableOpacity
+                    style={styles.cvItemDeleteBtn}
+                    onPress={() => deleteSavedCv(cvItem.value)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.cvItemDeleteBtnText}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })
+          ) : (
+            <Text style={[styles.cvListEmptyText, { color: theme.subtext }]}>
+              Keine Stände vorhanden
+            </Text>
+          )}
+        </View>{/* Scrollbare Liste der bisherigen Lebensläufe */}
+  
+
+    {/* Eingabefeld für den neuen Namen */}
+    <TextInput
+      value={saveCvTitle}
+      onChangeText={setSaveCvTitle}
+      placeholder="Name (z.B. Go Backend)"
+      placeholderTextColor={theme.subtext}
+      style={[
+        styles.flyoutInput,
+        { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border },
+      ]}
+    />
+
+    {/* Speichern Button */}
+    <TouchableOpacity
+      style={[styles.cvSaveCurrentBtn, { backgroundColor: theme.primary }]}
+      onPress={() => persistCvData(saveCvTitle)}
+      activeOpacity={0.8}
+    >
+      <Text style={styles.cvSaveCurrentBtnIcon}>💾</Text>
+      <Text style={styles.cvSaveCurrentBtnText}>Speichern</Text>
+    </TouchableOpacity>
+  </View>
+)}
+
+    {/* Runder Trigger-Button */}
+    <TouchableOpacity
+      style={[
+        styles.floatingPreviewBtn,
+        {
+          backgroundColor: showSavedCvsMenu ? theme.primary : theme.card,
+          borderColor: theme.border,
+        },
+      ]}
+      onPress={() => setShowSavedCvsMenu(!showSavedCvsMenu)}
+      activeOpacity={0.7}
+    >
+      <Image
+        style={[
+          styles.image,
+        ]}
+        source="https://img.icons8.com/?size=100&id=DM2tYcMgDzyn&format=png&color=000000"
+        contentFit="cover"
+        transition={1000}
+      />
+    </TouchableOpacity>
+  </Animated.View>
+
+  {/* 2. Action: CV Scan */}
+  <Animated.View
+    pointerEvents={isFabOpen ? 'auto' : 'none'}
+    style={[
+      styles.fabItem,
+      {
+        opacity: fabAnim,
+        transform: [
+          {
+            translateY: fabAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -210],
+            }),
+          },
+          { scale: fabAnim },
+        ],
+      },
+    ]}
+  >
+    <TouchableOpacity
+      style={[
+        styles.floatingPreviewBtn,
+        { backgroundColor: theme.card, borderColor: theme.border },
+      ]}
+      onPress={() => {
+        setShowSavedCvsMenu(false);
+        toggleFab();
+        handleStartScan();
+      }}
+      activeOpacity={0.7}
+    >
+      <Image
+        style={styles.image}
+        source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
+        contentFit="cover"
+        transition={1000}
+      />
+    </TouchableOpacity>
+  </Animated.View>
+
+  {/* 1. Action: Neu / Reset */}
+  <Animated.View
+    pointerEvents={isFabOpen ? 'auto' : 'none'}
+    style={[
+      styles.fabItem,
+      {
+        opacity: fabAnim,
+        transform: [
+          {
+            translateY: fabAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -280],
+            }),
+          },
+          { scale: fabAnim },
+        ],
+      },
+    ]}
+  >
+    <TouchableOpacity
+      style={[
+        styles.floatingPreviewBtn,
+        { backgroundColor: theme.card, borderColor: theme.border },
+      ]}
+      onPress={() => {
+        setShowSavedCvsMenu(false);
+        toggleFab();
+        handleCreateNew();
+      }}
+      activeOpacity={0.7}
+    >
+      <Image
+        style={styles.image}
+        source="https://img.icons8.com/?size=100&id=DanTQOnC4W9c&format=png&color=000000"
+        contentFit="cover"
+        transition={1000}
+      />
+    </TouchableOpacity>
+  </Animated.View>
+
+  {/* Haupt-Menü-Trigger (3 Streifen / Burger-Icon) */}
+  <TouchableOpacity
+    style={[
+      styles.floatingPreviewBtn,
+      styles.mainFabBtn,
+      {
+        backgroundColor: theme.primary,
+        borderColor: theme.border,
+      },
+    ]}
+    onPress={() => {
+      setShowSavedCvsMenu(false);
+      toggleFab();
+    }}
+    activeOpacity={0.8}
+  >
+    <Animated.Text
+      style={[
+        styles.mainFabIcon,
+        {
+          transform: [
+            {
+              rotate: fabAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0deg', '90deg'],
+              }),
+            },
+          ],
+        },
+      ]}
+    >
+      {isFabOpen ? '✕' : '☰'}
+    </Animated.Text>
+  </TouchableOpacity>
+</View>
         {/* Untere Leiste mit den 4 Sektion-Buttons */}
         {activeTab === 'edit' && (
           <View style={styles.bottomNavContainer}>
@@ -962,97 +1152,231 @@ export default function CoverScreen() {
         )}
 
         {/* WebView Modal Overlay mit 1-Pager/2-Pager Toggle & Download/Share */}
-        {webViewVisible && (
-          <View style={styles.overlayBackdrop}>
-            <View style={styles.webviewCard}>
-              <View style={styles.webviewTopBar}>
-                {/* 1-Pager / 2-Pager Umschalter */}
-                <View style={styles.pageToggleContainer}>
-                  <TouchableOpacity
-                    style={[
-                      styles.pageToggleBtn,
-                      !isTwoPage && styles.pageToggleBtnActive,
-                    ]}
-                    onPress={() => setIsTwoPage(false)}
-                    activeOpacity={0.8}
-                  >
-                    <Text
-                      style={[
-                        styles.pageToggleText,
-                        !isTwoPage && styles.pageToggleTextActive,
-                      ]}
-                    >
-                      1-Pager
-                    </Text>
-                  </TouchableOpacity>
+{/* WebView Modal Overlay mit modernem Floating Footer */}
+{/* WebView Modal Overlay mit modernem Floating Footer */}
+{webViewVisible && (
+  <View style={styles.overlayBackdrop}>
+    <View style={styles.webviewCard}>
+      {/* 1. Vorschau nimmt den vollen Viewport ein */}
+      <WebView
+        originWhitelist={['*']}
+        source={{ html: htmlLayout }}
+        style={styles.webview}
+        scalesPageToFit={false}
+        opaque={false}
+      />
 
-                  <TouchableOpacity
-                    style={[
-                      styles.pageToggleBtn,
-                      isTwoPage && styles.pageToggleBtnActive,
-                    ]}
-                    onPress={() => setIsTwoPage(true)}
-                    activeOpacity={0.8}
-                  >
-                    <Text
-                      style={[
-                        styles.pageToggleText,
-                        isTwoPage && styles.pageToggleTextActive,
-                      ]}
-                    >
-                      2-Pager
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+      {/* 2. Schwebende Steuerungsleiste unten */}
+      <View style={styles.webviewFooterWrapper} pointerEvents="box-none">
+        <View
+          style={[
+            styles.webviewFooterBar,
+            {
+              backgroundColor: isDark ? '#1F1A16' : '#ffffff',
+              borderColor: isDark ? 'rgba(255, 220, 190, 0.16)' : '#e5e7eb',
+            },
+          ]}
+        >
+          {/* Schließen Button (Links) */}
+          <TouchableOpacity
+            onPress={() => setWebViewVisible(false)}
+            style={[
+              styles.footerCloseBtn,
+              {
+                backgroundColor: isDark ? 'rgba(255, 240, 225, 0.08)' : '#f3f4f6',
+                borderColor: isDark ? 'rgba(255, 220, 190, 0.12)' : '#e5e7eb',
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.footerCloseBtnText, { color: theme.text }]}>✕</Text>
+          </TouchableOpacity>
 
-                {/* Rechte Aktionsgruppe: Download/Share + Close */}
-                <View style={styles.topBarRightGroup}>
-                  <TouchableOpacity
-                    onPress={handleSharePdf}
-                    style={styles.sharePdfBtn}
-                    disabled={isExporting}
-                    activeOpacity={0.7}
-                  >
-                    {isExporting ? (
-                      <ActivityIndicator size="small" color="#ffffff" />
-                    ) : (
-                      <>
-                        <Text style={styles.sharePdfBtnIcon}>📥</Text>
-                        <Text style={styles.sharePdfBtnText}>PDF</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+          {/* 1-Pager / 2-Pager Segmented Switch (Mitte) */}
+          <View
+            style={[
+              styles.footerToggleContainer,
+              {
+                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.45)' : '#f3f4f6',
+                borderColor: isDark ? 'rgba(255, 220, 190, 0.08)' : '#e5e7eb',
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.footerToggleBtn,
+                !isTwoPage && [styles.footerToggleBtnActive, { backgroundColor: theme.primary }],
+              ]}
+              onPress={() => setIsTwoPage(false)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.footerToggleText,
+                  { color: !isTwoPage ? '#ffffff' : theme.subtext },
+                  !isTwoPage && styles.footerToggleTextActive,
+                ]}
+              >
+                1-Pager
+              </Text>
+            </TouchableOpacity>
 
-                  <TouchableOpacity
-                    onPress={() => setWebViewVisible(false)}
-                    style={styles.closeButton}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.closeButtonText}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <WebView
-                originWhitelist={['*']}
-                source={{ html: htmlLayout }}
-                style={styles.webview}
-                scalesPageToFit={false}
-                opaque={false}
-              />
-            </View>
+            <TouchableOpacity
+              style={[
+                styles.footerToggleBtn,
+                isTwoPage && [styles.footerToggleBtnActive, { backgroundColor: theme.primary }],
+              ]}
+              onPress={() => setIsTwoPage(true)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.footerToggleText,
+                  { color: isTwoPage ? '#ffffff' : theme.subtext },
+                  isTwoPage && styles.footerToggleTextActive,
+                ]}
+              >
+                2-Pager
+              </Text>
+            </TouchableOpacity>
           </View>
-        )}
+
+          {/* PDF Teilen Button (Rechts) */}
+          <TouchableOpacity
+            onPress={handleSharePdf}
+            style={[styles.footerShareBtn, { backgroundColor: theme.primary }]}
+            disabled={isExporting}
+            activeOpacity={0.8}
+          >
+            {isExporting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <>
+                <Text style={styles.footerShareBtnIcon}>📥</Text>
+                <Text style={styles.footerShareBtnText}>PDF</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </View>
+)}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  /* Flyout-Menü links neben dem FAB-Button */
+/* Flyout-Menü links neben dem FAB (50% vergrößert) */
+/* Flyout-Breite leicht anpassen, damit Button und Name sauber Platz haben */
+  cvListFlyout: {
+    position: 'absolute',
+    right: 76,
+    bottom: -20,
+    width: 250,              // Etwas breiter (vorher 215) für den Lösch-Button
+    maxHeight: 350,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: -3, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 16,
+    zIndex: 1000,
+  },
+  cvListItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 3,
+    gap: 6,
+  },
+  cvListItemBtn: {
+    flex: 1,                 // Nimmt den restlichen Platz links ein
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+  },
+  cvItemDeleteBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cvItemDeleteBtnText: {
+    color: '#ef4444',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  flyoutInput: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    fontSize: 13,
+    marginTop: 8,
+  },
+  cvListFlyoutTitle: {
+    fontSize: 16,            // Vorher 10.5 -> 50% größer
+    fontWeight: '800',
+    textAlign: 'center',     // Zentrierter Titel
+    letterSpacing: 0.4,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(150, 150, 150, 0.35)',
+    marginBottom: 8,
+  },
+  cvListContentWrap: {
+    maxHeight: 180,
+  },
+  cvListItemBtn: {
+    paddingVertical: 12,     // Vorher 7
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginVertical: 4,
+    justifyContent: 'center',
+  },
+  cvListItemText: {
+    fontSize: 15,            // Vorher 12.5 -> deutlich lesbarer
+    fontWeight: '500',
+  },
+  cvListItemTextBold: {
+    fontWeight: '700',
+  },
+  cvListEmptyText: {
+    fontSize: 14,
+    paddingVertical: 12,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  /* Speichern-Button darunter */
+  cvSaveCurrentBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  cvSaveCurrentBtnIcon: {
+    fontSize: 16,
+  },
+  cvSaveCurrentBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   container: {
     flex: 1,
   },
   header: {
+    
     paddingHorizontal: 12,
     paddingTop: 12,
     paddingBottom: 10,
@@ -1100,9 +1424,51 @@ const styles = StyleSheet.create({
     zIndex: 7000,
     elevation: 12,
   },
+  /* FAB Container & Items */
+  fabContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 85, // Sitzt direkt über der Footer-Navigationsleiste
+    zIndex: 900,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fabItem: {
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 890,
+  },
+  mainFabBtn: {
+    borderWidth: 0,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  mainFabIcon: {
+    fontSize: 24,
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  floatingPreviewBtn: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
   scrollContent: {
     padding: 16,
     paddingBottom: 120,
+  },
+  image: {
+     width:33,
+    height:33
   },
   cardsContainer: {
     position: 'relative',
@@ -1262,9 +1628,7 @@ const styles = StyleSheet.create({
 
   /* Schwebender Papier-Kreis-Button */
   floatingPreviewBtn: {
-    position: 'absolute',
-    bottom: 90,
-    right: 25,
+   
     width: 60,
     height: 60,
     borderRadius: 50,
@@ -1283,10 +1647,7 @@ const styles = StyleSheet.create({
   },
 
   bottomNavContainer: {
-    position: 'absolute',
-    bottom: 12,
-    left: 14,
-    right: 14,
+    marginVertical: 12,
     zIndex: 100,
   },
   bottomTabBar: {
@@ -1335,17 +1696,198 @@ const styles = StyleSheet.create({
   },
 
   /* WebView Overlay Styles */
+ /* WebView Overlay Styles */
   overlayBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.78)',
+    backgroundColor: 'rgba(18, 13, 10, 0.88)',
     zIndex: 9999,
     elevation: 20,
-    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    paddingTop: Platform.OS === 'ios' ? 44 : 16,
   },
   webviewCard: {
     flex: 1,
     backgroundColor: 'transparent',
-    overflow: 'hidden',
+    position: 'relative',
+  },
+  webview: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+
+  /* Schwebender Dock-Footer */
+  webviewFooterWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16, // Platz für Home-Indicator
+    paddingTop: 8,
+  },
+  webviewFooterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 24,
+    borderWidth: 1.2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.38,
+    shadowRadius: 14,
+    elevation: 16,
+    gap: 8,
+  },
+  footerCloseBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerCloseBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  footerToggleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 3,
+  },
+  footerToggleBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerToggleBtnActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  footerToggleText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+  footerToggleTextActive: {
+    fontWeight: '700',
+  },
+  footerShareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 42,
+    paddingHorizontal: 14,
+    borderRadius: 21,
+    gap: 5,
+    minWidth: 84,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  footerShareBtnIcon: {
+    fontSize: 15,
+  },
+  footerShareBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webviewFooterWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16, // Platz für Home-Indicator
+    paddingTop: 8,
+  },
+  webviewFooterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 24,
+    borderWidth: 1.2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.38,
+    shadowRadius: 14,
+    elevation: 16,
+    gap: 8,
+  },
+  footerCloseBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerCloseBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  footerToggleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 3,
+  },
+  footerToggleBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerToggleBtnActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  footerToggleText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+  footerToggleTextActive: {
+    fontWeight: '700',
+  },
+  footerShareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 42,
+    paddingHorizontal: 14,
+    borderRadius: 21,
+    gap: 5,
+    minWidth: 84,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  footerShareBtnIcon: {
+    fontSize: 15,
+  },
+  footerShareBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
   },
   webviewTopBar: {
     flexDirection: 'row',

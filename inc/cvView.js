@@ -81,21 +81,24 @@ export function cvView(
       page-break-inside: avoid;
       break-inside: avoid;
     }
-  .sheetOnePage {
-    width: 210mm;
-    margin: 0 auto 30px auto;
-    background: #ffffff;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-    page-break-after: always;
-    break-after: page;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
+
+    .sheetOnePage {
+      width: 210mm;
+      min-height: 295.5mm;
+      margin: 0 auto 30px auto;
+      background: #ffffff;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      page-break-after: always;
+      break-after: page;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
     .sheet:last-child {
       margin-bottom: 0;
       page-break-after: auto !important;
@@ -206,6 +209,22 @@ export function cvView(
       padding: ${twoPage ? '24px 45px 16px' : '16px 40px 12px'};
       flex: 1;
       overflow: hidden;
+    }
+
+    /* ABSTÄNDE FÜR DIE EINZELSEITE (ONEPAGE) */
+    .sheetOnePage .page-content .section-heading {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .sheetOnePage .page-content .section-heading:first-child,
+    .sheetOnePage .page-content .section-heading:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Abstand vor jedem folgenden Abschnitt (Profil -> Berufserfahrung -> Ausbildung -> Skills) */
+    .sheetOnePage .page-content * + .section-heading {
+      margin-top: 28px;
     }
 
     .section-heading {

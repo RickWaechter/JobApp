@@ -350,11 +350,74 @@ export const startCvScan = async ({
   if (isScanningCv) return;
 
   try {
-    const response = await scanCv();
-    if (!response) return;
+    // 1. Datei auswählen (noch ohne Ladekreisel)
+    const file = await pickFile();
+    if (!file) return;
 
+    // 2. Ladekreisel starten, sobald die Datei verarbeitet und hochgeladen wird
+    setIsScanningCv?.(true);
+
+    const tempThumbnailPaths = [];
+    let response = null;
+
+    try {
+      const targetImagePaths = [];
+      const isPdf =
+        file.type === 'application/pdf' ||
+        file.name?.toLowerCase().endsWith('.pdf');
+
+      const fileUri = file.fileCopyUri || file.uri;
+
+      if (isPdf) {
+        const page0 = await PdfThumbnail.generate(fileUri, 0, 100);
+        const path0 = await resolveLocalPath(page0.uri);
+        targetImagePaths.push(path0);
+        tempThumbnailPaths.push(path0);
+
+        try {
+          const page1 = await PdfThumbnail.generate(fileUri, 1, 100);
+          const path1 = await resolveLocalPath(page1.uri);
+          targetImagePaths.push(path1);
+          tempThumbnailPaths.push(path1);
+        } catch {
+          // Einseitiges PDF
+        }
+      } else {
+        const singlePath = await resolveLocalPath(fileUri);
+        targetImagePaths.push(singlePath);
+      }
+
+      const formData = new FormData();
+      targetImagePaths.forEach((imagePath, index) => {
+        const uri = Platform.OS === 'android' ? `file://${imagePath}` : imagePath;
+        formData.append('file', {
+          uri,
+          type: 'image/jpeg',
+          name: `document_page_${index + 1}.jpg`,
+        });
+      });
+
+      const res = await axios.post(SCAN_API_URL, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000,
+      });
+
+      response = res.data || null;
+    } finally {
+      if (tempThumbnailPaths.length > 0) {
+        await Promise.all(
+          tempThumbnailPaths.map((p) => RNFS.unlink(p).catch(() => {}))
+        );
+      }
+    }
+
+    if (!response) {
+      setIsScanningCv?.(false);
+      return;
+    }
+
+    // Fall A: Asynchroner Hintergrund-Job mit Polling
     if (response.jobId) {
-      setIsScanningCv?.(true);
       await EncryptedStorage.setItem(PENDING_JOB_KEY, response.jobId);
       await resumePollingIfNeeded({
         setIsScanningCv,
@@ -369,7 +432,7 @@ export const startCvScan = async ({
       return;
     }
 
-    // Direkte synchrone Antwort der OCR API
+    // Fall B: Synchrone Antwort der OCR API
     await applyAllScannedData({
       data: response,
       setExperiences,
@@ -379,10 +442,12 @@ export const startCvScan = async ({
       dbInstance,
     });
 
+    setIsScanningCv?.(false);
     onSuccess?.(response);
     Alert.alert('Erfolg', 'Lebenslauf wurde vollständig importiert!');
   } catch (error) {
     console.error('[OCR] Scan Start fehlgeschlagen:', error);
     setIsScanningCv?.(false);
+    Alert.alert('Fehler', 'Scan konnte nicht gestartet werden.');
   }
 };
