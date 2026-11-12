@@ -526,133 +526,157 @@ const animateMenuTo = useCallback(
       }, [animationMenu, syncMenuBox])
     );
 
-    const saveExperiences = async () => {
-      if (!dbMainRef.current) {
-        console.warn('Datenbankverbindung ist nicht bereit oder geschlossen.');
-        return;
-      }
+const saveExperiences = async () => {
+  try {
+    const key = await EncryptedStorage.getItem('key');
+    const deviceId = await DeviceInfo.getUniqueId();
+    const db =
+      dbMainRef.current ||
+      (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+    dbMainRef.current = db;
 
-      try {
-        const key = await EncryptedStorage.getItem('key');
-        const deviceId = await DeviceInfo.getUniqueId();
-        const string = JSON.stringify(experiences);
-        const encString = await encryp(string, key);
+    const jsonString = JSON.stringify(experiences);
+    const valueToStore = key ? await encryp(jsonString, key) : jsonString;
 
-        if (!dbMainRef.current) return;
-
-        await dbMainRef.current.executeSql(
-          `UPDATE files SET skills = ? WHERE ident = ?`,
-          [encString, deviceId]
-        );
-
-        console.log('Experiences saved successfully');
-        setModalCvVisible(false);
-      } catch (error) {
-        console.error('Fehler beim Speichern der Erfahrungen:', error);
-      }
-    };
-
-    /* ── Hilfsfunktion: Neue CV-Stationen direkt in SQLite + State sichern ── */
-    const appendAndSaveExperiencesToDb = useCallback(async (workExperience) => {
-      const newExperiences = (workExperience || [])
-        .filter((exp) => exp.company)
-        .map((exp) => ({
-          id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-          company: exp.company,
-          role: exp.position,
-          period: exp.period,
-          tasks: Array.isArray(exp.tasks) ? exp.tasks.join('\n') : (exp.tasks || ''),
-        }));
-
-      if (newExperiences.length === 0) return 0;
-
-      try {
-        const key = await EncryptedStorage.getItem('key');
-        const deviceId = await DeviceInfo.getUniqueId();
-        const db =
-          dbMainRef.current ||
-          (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
-
-        // Aktuellen Stand aus der DB lesen, damit nichts überschrieben wird
-        let existingList = [];
-        const [results] = await db.executeSql(
-          'SELECT skills FROM files WHERE ident = ?',
-          [deviceId]
-        );
-        const rows = results?.rows?.raw?.() || [];
-        if (rows[0]?.skills && key) {
-          try {
-            const dec = await decryp(rows[0].skills, key);
-            if (dec && dec.trim().length > 0) {
-              existingList = JSON.parse(dec);
-            }
-          } catch (e) {
-            console.warn('Konnte bestehende Skills nicht entschlüsseln:', e);
-          }
-        }
-
-        const merged = [...existingList, ...newExperiences];
-        setExperiences(merged);
-
-        if (key && deviceId) {
-          const encString = await encryp(JSON.stringify(merged), key);
-          await db.executeSql(
-            'UPDATE files SET skills = ? WHERE ident = ?',
-            [encString, deviceId]
-          );
-        }
-      } catch (err) {
-        console.error('Fehler beim Speichern des Hintergrund-Scans in SQLite:', err);
-      }
-
-      return newExperiences.length;
-    }, []);
-
-    /* ── Pollt den Go-Endpoint /scan-cv-status?jobId=... ── */
-    const pollCvStatus = useCallback(
-      async (jobId) => {
-        if (!jobId) return;
-            const pending = await EncryptedStorage.getItem('pending_cv_job_id');
-
-        try {
-          const res = await axios.get(
-            `https://api.jobapp2.de/scan-cv-status?jobId=${encodeURIComponent(jobId)}`
-          );
-          const { status, data, error } = res.data || {};
-
-          if (status === 'done') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            pollTimerRef.current = null;
-            if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-            setIsScanningCv(false);
-
-            const addedCount = await appendAndSaveExperiencesToDb(data?.work_experience);
-            Alert.alert(
-              t('profil.title'),
-              `Lebenslauf erfolgreich analysiert (${addedCount} Stationen hinzugefügt).`
-            );
-          } else if (status === 'error' || status === 'not_found') {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            pollTimerRef.current = null;
-            if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-            setIsScanningCv(false);
-            Alert.alert(t('profil.error'), error || 'Scan fehlgeschlagen.');
-          }
-          // Bei status === 'processing' (oder 'praocessing') läuft das Intervall einfach weiter
-        } catch (err) {
-          // 404 vom Backend -> Job abgelaufen oder existiert nicht mehr
-          if (err?.response?.status === 404) {
-            if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-            pollTimerRef.current = null;
-            if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-            setIsScanningCv(false);
-          }
-          console.log('Warte auf Hintergrund-Scan...', err?.message);
-        }
-      },
-      [appendAndSaveExperiencesToDb, t]
+    const [updateRes] = await db.executeSql(
+      'UPDATE files SET skills = ? WHERE ident = ?',
+      [valueToStore, deviceId]
     );
 
+    if (updateRes.rowsAffected === 0) {
+      await db.executeSql(
+        'INSERT INTO files (ident, skills) VALUES (?, ?)',
+        [deviceId, valueToStore]
+      );
+    }
+
+    setModalCvVisible(false);
+  } catch (error) {
+    console.error('Fehler beim Speichern der Erfahrungen:', error);
+    Alert.alert(t('profil.error'), 'Erfahrungen konnten nicht gespeichert werden.');
+  }
+};
+
+/* ── Hilfsfunktion: Neue CV-Stationen direkt in SQLite + State sichern ── */
+const appendAndSaveExperiencesToDb = useCallback(async (workExperience) => {
+  const newExperiences = (workExperience || [])
+    .filter((exp) => exp && (exp.company || exp.position || exp.role))
+    .map((exp) => ({
+      id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+      company: exp.company || '',
+      role: exp.position || exp.role || '',
+      period: exp.period || '',
+      tasks: Array.isArray(exp.tasks)
+        ? exp.tasks.join('\n')
+        : exp.tasks || exp.description || '',
+    }));
+
+  if (newExperiences.length === 0) return 0;
+
+  try {
+    const key = await EncryptedStorage.getItem('key');
+    const deviceId = await DeviceInfo.getUniqueId();
+    const db =
+      dbMainRef.current ||
+      (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+    dbMainRef.current = db;
+
+    // 1. Bestehende Einträge aus SQLite lesen
+    let existingList = [];
+    const [results] = await db.executeSql(
+      'SELECT skills FROM files WHERE ident = ?',
+      [deviceId]
+    );
+    const rows = results?.rows?.raw?.() || [];
+
+    if (rows[0]?.skills) {
+      try {
+        const rawSkills = key ? await decryp(rows[0].skills, key) : rows[0].skills;
+        if (rawSkills && rawSkills.trim().length > 0) {
+          existingList = JSON.parse(rawSkills);
+        }
+      } catch (e) {
+        console.warn('Konnte bestehende Skills nicht entschlüsseln:', e);
+      }
+    }
+
+    const merged = [...existingList, ...newExperiences];
+    setExperiences(merged);
+
+    // 2. In SQLite speichern (UPDATE mit INSERT-Fallback, falls Zeile fehlt)
+    if (deviceId) {
+      const jsonString = JSON.stringify(merged);
+      const valueToStore = key ? await encryp(jsonString, key) : jsonString;
+
+      const [updateRes] = await db.executeSql(
+        'UPDATE files SET skills = ? WHERE ident = ?',
+        [valueToStore, deviceId]
+      );
+
+      if (updateRes.rowsAffected === 0) {
+        await db.executeSql(
+          'INSERT INTO files (ident, skills) VALUES (?, ?)',
+          [deviceId, valueToStore]
+        );
+      }
+    }
+  } catch (err) {
+    console.error('Fehler beim Speichern des Hintergrund-Scans in SQLite:', err);
+  }
+
+  return newExperiences.length;
+}, []);
+
+/* ── Pollt den Go-Endpoint /scan-cv-status?jobId=... ── */
+const pollCvStatus = useCallback(
+  async (jobId) => {
+    if (!jobId) return;
+    const pending = await EncryptedStorage.getItem('pending_cv_job_id');
+
+    try {
+      const res = await axios.get(
+        `https://api.jobapp2.de/scan-cv-status?jobId=${encodeURIComponent(jobId)}`
+      );
+      const { status, data, error } = res.data || {};
+
+      if (status === 'done') {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+        setIsScanningCv(false);
+
+        const rawList =
+          data?.work_experience ||
+          data?.experiences ||
+          (Array.isArray(data) ? data : []);
+
+        const addedCount = await appendAndSaveExperiencesToDb(rawList);
+        Alert.alert(
+          t('profil.title'),
+          `Lebenslauf erfolgreich analysiert (${addedCount} Stationen hinzugefügt).`
+        );
+      } else if (status === 'error' || status === 'not_found') {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+        setIsScanningCv(false);
+        Alert.alert(t('profil.error'), error || 'Scan fehlgeschlagen.');
+      }
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+        setIsScanningCv(false);
+      }
+      console.log('Warte auf Hintergrund-Scan...', err?.message);
+    }
+  },
+  [appendAndSaveExperiencesToDb, t]
+);
+  
+
+ 
     /* ── Startet oder nimmt das Polling für eine gespeicherte jobId wieder auf ── */
     const resumePollingIfNeeded = useCallback(async () => {
       const savedJobId = await EncryptedStorage.getItem('pending_cv_job_id');

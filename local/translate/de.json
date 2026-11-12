@@ -642,5 +642,10 @@
     "badge": "FERTIGGESTELLT",
     "title": "Bewerbungsmappe bereit!",
     "subtitle": "Dein Anschreiben und deine Anlagen wurden erfolgreich zu einer vollständigen PDF zusammengefügt."
+  },
+  "cvGenerator": "Lebenslauf erstellen",
+  "cvGeneratorDescription": "Strukturiert gestalten, bearbeiten und als PDF speichern.",
+  "info": {
+    "generator": "Erstelle einen professionellen Lebenslauf direkt in der App. Du kannst Daten manuell eintragen oder per Scan importieren, Aufgabenpunkte mit KI formulieren lassen, verschiedene Stände lokal sichern und dein fertiges Dokument als 1-Seiter oder mehrseitiges PDF exportieren."
   }
 }

@@ -14,6 +14,7 @@ export const ExperienceCard = memo(function ExperienceCard({
   const index = getIndex();
 const [loading, setLoading] = useState(false);
 const handleSend = async (item) => {
+  if (!item.role) return;
   console.log('Sending:', item);
   setLoading(true);
   const keywords = await getKeyword(item);

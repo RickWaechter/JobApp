@@ -585,6 +585,18 @@ export default function CoverScreen() {
                       ]}
                     />
 
+                     <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Adresse</Text>
+
+                    <TextInput
+                      value={personal.location}
+                      onChangeText={(t) => setPersonal({ ...personal, location: t })}
+                      placeholder="Stadt, Land"
+                      placeholderTextColor={theme.subtext}
+                      style={[
+                        styles.input,
+                        { backgroundColor: theme.inputBg, color: theme.text },
+                      ]}
+                    />
                     <View style={styles.row}>
                       <View style={[styles.flex1, styles.mr8]}>
                         <Text style={[styles.fieldLabel, { color: theme.subtext }]}>E-Mail</Text>
@@ -618,17 +630,7 @@ export default function CoverScreen() {
                       </View>
                     </View>
 
-                    <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Wohnort</Text>
-                    <TextInput
-                      value={personal.location}
-                      onChangeText={(t) => setPersonal({ ...personal, location: t })}
-                      placeholder="Stadt, Land"
-                      placeholderTextColor={theme.subtext}
-                      style={[
-                        styles.input,
-                        { backgroundColor: theme.inputBg, color: theme.text },
-                      ]}
-                    />
+                   
 
                     <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Kurzprofil</Text>
                     <TextInput
@@ -822,6 +824,33 @@ export default function CoverScreen() {
           >
             {/* Column-Container */}
             <View style={styles.menuColumnContainer}>
+               <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                    borderBottomWidth: 1,
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  setShowSavedCvsMenu(false);
+                  toggleFab();
+                  handleCreateNew();
+                }}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                  <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=IoyS7mvkv16Q&format=png&color=000000"
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Neuer Lebenslauf
+                </Text>
+              </TouchableOpacity>
+
               {/* Row 1: Vorschau */}
               <TouchableOpacity
                 style={[
@@ -839,13 +868,40 @@ export default function CoverScreen() {
                 }}
               >
                 <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
-                  <Text style={styles.menuRowEmoji}>📄</Text>
+                 <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=qsNHsXUgyhhh&format=png&color=000000"
+                    contentFit="contain"
+                  />
                 </View>
                 <Text style={[styles.menuRowText, { color: theme.text }]}>
                   Vorschau
                 </Text>
               </TouchableOpacity>
-
+  <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                    
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  console.log("pressed")
+                }}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                 <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=WqrGC2CwYB9K&format=png&color=000000"
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Als PDF Speichern
+                </Text>
+              </TouchableOpacity>
               {/* Row 2: Gespeicherte Stände */}
               <TouchableOpacity
                 style={[
@@ -861,8 +917,7 @@ export default function CoverScreen() {
                 <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
                   <Image
                     style={styles.menuRowIcon}
-                    source="https://img.icons8.com/?size=100&id=DM2tYcMgDzyn&format=png&color=000000"
-                    tintColor={theme.text}
+                    source="https://img.icons8.com/?size=100&id=rHyB4w7zHzl2&format=png&color=000000"
                     contentFit="contain"
                   />
                 </View>
@@ -964,64 +1019,44 @@ export default function CoverScreen() {
                 </View>
               )}
 
-              {/* Row 3: Lebenslauf scannen */}
-              <TouchableOpacity
-                style={[
-                  styles.menuRow,
-                  {
-                 
-                    borderColor: theme.border,
-                  },
-                ]}
-                activeOpacity={0.75}
-                onPress={() => {
-                  setShowSavedCvsMenu(false);
-                  toggleFab();
-                  handleStartScan();
-                }}
-              >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
-                  <Image
-                    style={styles.menuRowIcon}
-                    source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
-                    tintColor={theme.text}
-                    contentFit="contain"
-                  />
-                </View>
-                <Text style={[styles.menuRowText, { color: theme.text }]}>
-                  Lebenslauf scannen
-                </Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+  style={[
+    styles.menuRow,
+    {
+      borderBottomWidth: 0,
+      borderColor: theme.border,
+      opacity: isScanningCv ? 0.75 : 1,
+    },
+  ]}
+  disabled={isScanningCv}
+  activeOpacity={0.75}
+  onPress={() => {
+    setShowSavedCvsMenu(false);
+    toggleFab();
+    handleStartScan();
+  }}
+>
+  <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+    {isScanningCv ? (
+      <ActivityIndicator
+        size="small"
+        color={isDark ? '#60a5fa' : theme.primary}
+      />
+    ) : (
+      <Image
+        style={styles.menuRowIcon}
+        source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
+        contentFit="contain"
+      />
+    )}
+  </View>
+  <Text style={[styles.menuRowText, { color: theme.text }]}>
+    {isScanningCv ? 'Lebenslauf wird gescannt…' : 'Lebenslauf scannen'}
+  </Text>
+</TouchableOpacity>
 
               {/* Row 4: Neuer Lebenslauf */}
-              <TouchableOpacity
-                style={[
-                  styles.menuRow,
-                  {
-                    borderBottomWidth: 0,
-                    borderColor: theme.border,
-                  },
-                ]}
-                activeOpacity={0.75}
-                onPress={() => {
-                  setShowSavedCvsMenu(false);
-                  toggleFab();
-                  handleCreateNew();
-                }}
-              >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
-                  <Image
-                    style={styles.menuRowIcon}
-                    source="https://img.icons8.com/?size=100&id=DanTQOnC4W9c&format=png&color=000000"
-                    tintColor={theme.text}
-                    contentFit="contain"
-                  />
-                </View>
-                <Text style={[styles.menuRowText, { color: theme.text }]}>
-                  Neuer Lebenslauf
-                </Text>
-              </TouchableOpacity>
-            </View>
+                         </View>
           </BlurView>
         </Animated.View>
 
@@ -1208,7 +1243,7 @@ export default function CoverScreen() {
                           isTwoPage && styles.footerToggleTextActive,
                         ]}
                       >
-                        2-Pager
+                        Multi-Pager
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -1291,8 +1326,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuRowIcon: {
-    width: 22,
-    height: 22,
+    width: 32,
+    height: 32,
   },
   menuRowEmoji: {
     fontSize: 18,

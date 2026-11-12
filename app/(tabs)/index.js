@@ -811,7 +811,7 @@ export default function StartApp() {
     try {
       const entries = await getOld();
       router.push({
-        pathname: "/first",
+        pathname: "/old",
         params: { items: JSON.stringify(entries) },
       });
     } catch (error) {

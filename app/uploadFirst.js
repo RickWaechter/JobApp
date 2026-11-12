@@ -1,9 +1,9 @@
 // UploadFirstScreen.js / Home.js
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import * as DocumentPicker from 'expo-document-picker';
-import { useRouter } from 'expo-router';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import DocumentActionCard from "../comp/actionCard.js";
 import {
   ActivityIndicator,
   Alert,
@@ -21,7 +21,7 @@ import RNFS from 'react-native-fs';
 import * as Keychain from 'react-native-keychain';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SQLite from 'react-native-sqlite-storage';
-
+import { useNavigation, router } from 'expo-router';
 import colors from '../inc/colors.js';
 import {
   decryp,
@@ -35,7 +35,6 @@ SQLite.enablePromise(true);
 
 const { width, height } = Dimensions.get('window');
 const DB_NAME = 'firstNew.db';
-
 const orderedKeys = [
   'lebenslauf',
   'add1', 'add2', 'add3', 'add4', 'add5',
@@ -74,12 +73,12 @@ const UploadActionCard = memo(({ title, description, iconName, onPress }) => (
 
 const UploadScreen = () => {
   const { t } = useTranslation();
-  const router = useRouter();
 
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+const navigation = useNavigation();
 
   /* ── Document Picker ─────────────────────────────────── */
   const handleFileChange = async () => {
@@ -195,6 +194,20 @@ const UploadScreen = () => {
     router.dismissTo('(tabs)');
   };
 
+  const toCv = () => {
+    navigation.reset({
+    index: 1,
+    routes: [
+      {
+        name: '(tabs)',
+        state: {
+          routes: [{ name: 'upload' }],
+        },
+      },
+      { name: 'cover' },
+    ],
+  });
+  }
 return (
   <SafeAreaView style={styles.safeArea}>
     <View style={styles.container}>
@@ -217,7 +230,14 @@ return (
             description={t('uploadFirst.uploadHint')}
             onPress={handleFileChange}
           />
-
+  <DocumentActionCard
+                  iconName="post-add"
+                  onIconPress={() => openInfo(t('info.generator') || 'Erstelle einen vollständigen Lebenslauf mit strukturierter Vorlage direkt in der App.')}
+                  title={t('cvGenerator') || 'Lebenslauf erstellen'}
+                  description={t('cvGeneratorDescription') || 'Direkt in der App formatieren, bearbeiten und sichern.'}
+                 onPress={() => {toCv()
+}}
+                />
           <View style={styles.infoBox}>
             <MaterialIcons
               name="lock-outline"

@@ -21,6 +21,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DocumentActionCard from "../../comp/actionCard.js";
 import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import RNFS from 'react-native-fs';
@@ -56,53 +57,7 @@ const orderedKeys = [
 ];
 
 /* ── Wiederverwendbare Dashboard Card ───────────────────── */
-const DocumentActionCard = memo(({ title, onIconPress, description, iconName, onPress, isPrimary = false, badgeText }) => (
-  <Pressable
-    onPress={onPress}
-    style={({ pressed }) => [
-      styles.actionCard,
-      isPrimary && styles.primaryActionCard,
-      pressed && styles.cardPressed,
-    ]}
-  >
-    <View style={[styles.iconContainer, isPrimary && styles.primaryIconContainer]}>
-      <Pressable
-        onPress={(e) => {
-          e?.stopPropagation?.();
-          onIconPress?.();
-        }}
-      >
-        <MaterialIcons
-          name={iconName}
-          size={22}
-          color={isPrimary ? '#FFFFFF' : '#60A5FA'}
-        />
-      </Pressable>
-    </View>
 
-    <View style={styles.cardTextContainer}>
-      <View style={styles.cardTitleRow}>
-        <Text style={[styles.cardTitle, isPrimary && styles.primaryCardTitle]} numberOfLines={1}>
-          {title}
-        </Text>
-        {Boolean(badgeText) && (
-          <View style={styles.inlineBadge}>
-            <Text style={styles.inlineBadgeText}>{badgeText}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.cardDescription} numberOfLines={2}>
-        {description}
-      </Text>
-    </View>
-
-    <MaterialIcons
-      name="chevron-right"
-      size={22}
-      color={isPrimary ? 'rgba(255,255,255,0.7)' : 'rgba(255, 255, 255, 0.3)'}
-    />
-  </Pressable>
-));
 
 const UploadScreen = () => {
   const { t } = useTranslation();
@@ -574,7 +529,6 @@ const UploadScreen = () => {
 
                 <DocumentActionCard
                   iconName="post-add"
-                  badgeText="Generator"
                   onIconPress={() => openInfo(t('info.generator') || 'Erstelle einen vollständigen Lebenslauf mit strukturierter Vorlage direkt in der App.')}
                   title={t('cvGenerator') || 'Lebenslauf erstellen'}
                   description={t('cvGeneratorDescription') || 'Direkt in der App formatieren, bearbeiten und sichern.'}

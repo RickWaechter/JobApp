@@ -69,7 +69,7 @@
       "@config-plugins/react-native-blob-util",
       "@config-plugins/react-native-pdf",
       "expo-router",
-          "expo-localization",
+      "expo-localization",
       [
         "expo-splash-screen",
         {
@@ -101,7 +101,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4a90e857-63f2-4387-9e38-6c48da7d319c"
+        "projectId": "d2b3dec6-9ee9-444b-8f1a-e1f30d13fc01"
       }
     },
     "runtimeVersion": "1.0.0",
