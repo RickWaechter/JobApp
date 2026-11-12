@@ -573,6 +573,8 @@
   },
   "info": {
     "title": "Info",
+    "generator": "Erstelle einen professionellen Lebenslauf direkt in der App. Du kannst Daten manuell eintragen oder per Scan importieren, Aufgabenpunkte mit KI formulieren lassen, verschiedene Stände lokal sichern und dein fertiges Dokument als 1-Seiter oder mehrseitiges PDF exportieren.",
+    
     "subtitle": "Fehler beim Laden der Daten.",
     "btnOk": "Verstanden",
     "language": "Legt die Sprache der Benutzeroberfläche fest.\n\nWeder bestehende Bewerbungen noch neue Anschreiben sind davon betroffen. Diese Einstellung lässt sich jederzeit anpassen.",
@@ -645,7 +647,5 @@
   },
   "cvGenerator": "Lebenslauf erstellen",
   "cvGeneratorDescription": "Strukturiert gestalten, bearbeiten und als PDF speichern.",
-  "info": {
-    "generator": "Erstelle einen professionellen Lebenslauf direkt in der App. Du kannst Daten manuell eintragen oder per Scan importieren, Aufgabenpunkte mit KI formulieren lassen, verschiedene Stände lokal sichern und dein fertiges Dokument als 1-Seiter oder mehrseitiges PDF exportieren."
-  }
+
 }

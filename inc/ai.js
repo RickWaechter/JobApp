@@ -64,7 +64,7 @@ export const getKeyword = async (id) => {
     const response = await axios.post('https://api.jobapp2.de/getKeywords', {
       role: id.role,
       description: id.description ? id.description : "",
-      modelIntens: "light",
+      modelIntens: "medium",
     });
     if (response.data?.response) {
         console.log('Keywords:', response.data.response);

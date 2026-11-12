@@ -42,6 +42,7 @@
   import '../../local/i18n.js';
   import { enc } from 'react-native-crypto-js';
   import Info from '../../comp/info.js';
+import { startCvScan, resumePollingIfNeeded, stopCvPolling } from '../../inc/cvScan.js';
 
   if (
     Platform.OS === 'android' &&
@@ -197,104 +198,73 @@
       </View>
     )
   );
-  const ModalInputEmail = memo(({ icon, placeholder, value, onChangeText, secureTextEntry = false }) => (
-    <View style={styles.inputContainer}>
-      <MaterialIcons name={icon} size={20} color="rgba(255,255,255,0.4)" style={styles.inputIcon} />
-      <TextInput
-        style={styles.textInputField}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor="rgba(255,255,255,0.35)"
-        secureTextEntry={secureTextEntry}
-        
-          autoCorrect={false}
-          spellCheck={false}
-          autoComplete="off"
-          textContentType="none"
-          importantForAutofill="no"
-          autoCapitalize="none"
-          smartInsertDelete={false}
 
-      />
-
-      {Boolean(value?.length) && (
-        <TouchableOpacity
-          onPress={() => onChangeText('')}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <MaterialIcons name="cancel" size={18} color="rgba(255,255,255,0.35)" />
-        </TouchableOpacity>
-      )}
-    </View>
-  ));
+      
   const ProfilScreen = () => {
-    const { t, i18n } = useTranslation();
-    const navigation = useNavigation();
-    const DB_MAIN_NAME = 'firstNew.db';
-    const [textInfo, setTextInfo] = useState('fdfdsfds');
-    const [isScanningCv, setIsScanningCv] = useState(false); // <-- NEU: Zeigt Lade-Status im Modal & Menü
-    const pollTimerRef = useRef(null);                       // <-- NEU: Hält den Polling-Intervall-Timer
-    const menuTranslateXRef = useRef(0);
-    /* ── State: Profil & Daten ───────────────────────────── */
-    const [myName, setMyName] = useState('');
-    const [myStreet, setMyStreet] = useState('');
-    const [myCity, setMyCity] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [emailServerValue, setEmailServerValue] = useState('smtp.mail.de');
-    const [openServerDropdown, setOpenServerDropdown] = useState(false);
-    const [infoModalVisible, setInfoModalVisible] = useState(false);
-    const [emailText, setEmailText] = useState('');
-    /* ── State: Coins & Ads ──────────────────────────────── */
-    const [coins, setCoins] = useState(0);
-    const [loaded, setLoaded] = useState(false);
-    const [source, setSource] = useState(false);
-    const [adLoadedState, setAdLoadedState] = useState(false);
-    const adLoaded = useRef(false);
-    const insets = useSafeAreaInsets();
-    const dbMainRef = useRef(null);
-    const animationMenu = useRef(new Animated.Value(0)).current;
+  const { t, i18n } = useTranslation();
+  const navigation = useNavigation();
+  const DB_MAIN_NAME = 'firstNew.db';
+  const [textInfo, setTextInfo] = useState('fdfdsfds');
+  const [isScanningCv, setIsScanningCv] = useState(false);
+  const pollTimerRef = useRef(null);
+  const menuTranslateXRef = useRef(0);
+  const [myName, setMyName] = useState('');
+  const [myStreet, setMyStreet] = useState('');
+  const [myCity, setMyCity] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailServerValue, setEmailServerValue] = useState('smtp.mail.de');
+  const [openServerDropdown, setOpenServerDropdown] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [emailText, setEmailText] = useState('');
+  const [coins, setCoins] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const [source, setSource] = useState(false);
+  const [adLoadedState, setAdLoadedState] = useState(false);
+  const adLoaded = useRef(false);
+  const insets = useSafeAreaInsets();
+  const dbMainRef = useRef(null);
+  const animationMenu = useRef(new Animated.Value(0)).current;
   const [isTesting, setIsTesting] = useState(false);
-    /* ── State: Modals ───────────────────────────────────── */
-    const [isModalDataVisible, setModalDataVisible] = useState(false);
-    const [isModalEmailVisible, setModalEmailVisible] = useState(false);
-    const [isModalLangVisible, setModalLangVisible] = useState(false);
-    const [isModalPayVisible, setModalPayVisible] = useState(false);
-    const [isSendExpanded, setIsSendExpanded] = useState(false); // <-- NEU: Zustand für Aufklappen
-    const [isModalCvVisible, setModalCvVisible] = useState(false);
-    const [experiences, setExperiences] = useState([
-      {
-        id: '1',
-        role: 'Anwendungsentwickler',
-        company: 'Musterfirma GmbH',
-        period: '02/2024 – Heute',
-        tasks: '• Entwicklung mobiler Komponenten\n• Anbindung der REST-Schnittstellen in Go',
-      },
-    ]);
-  /* ── State: Eigene ID & Coins Senden ─────────────────── */
-    const [myUserId, setMyUserId] = useState('');
-    const [copiedId, setCopiedId] = useState(false);
-    const [receiverId, setReceiverId] = useState('');
-    const [sendCoinsAmount, setSendCoinsAmount] = useState('');
-    const [isSendingCoins, setIsSendingCoins] = useState(false);
+  const [isModalDataVisible, setModalDataVisible] = useState(false);
+  const [isModalEmailVisible, setModalEmailVisible] = useState(false);
+  const [isModalLangVisible, setModalLangVisible] = useState(false);
+  const [isModalPayVisible, setModalPayVisible] = useState(false);
+  const [isSendExpanded, setIsSendExpanded] = useState(false);
+  const [isModalCvVisible, setModalCvVisible] = useState(false);
+  const [experiences, setExperiences] = useState([
+    {
+      id: '1',
+      role: 'Anwendungsentwickler',
+      company: 'Musterfirma GmbH',
+      period: '02/2024 – Heute',
+      tasks: '• Entwicklung mobiler Komponenten\n• Anbindung der REST-Schnittstellen in Go',
+    },
+  ]);
+  const [myUserId, setMyUserId] = useState('');
+  const [copiedId, setCopiedId] = useState(false);
+  const [receiverId, setReceiverId] = useState('');
+  const [sendCoinsAmount, setSendCoinsAmount] = useState('');
+  const [isSendingCoins, setIsSendingCoins] = useState(false);
+
   const toggleSendExpanded = () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setIsSendExpanded((prev) => !prev);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsSendExpanded((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const loadMyId = async () => {
+      try {
+        const deviceId = await DeviceInfo.getUniqueId();
+        const key = sha512(deviceId);
+        setMyUserId(key);
+      } catch (err) {
+        console.error('Fehler beim Laden der ID:', err);
+      }
     };
-    // Eigene ID einmalig beim Start generieren / laden
-    useEffect(() => {
-      const loadMyId = async () => {
-        try {
-          const deviceId = await DeviceInfo.getUniqueId();
-          const key = sha512(deviceId);
-          setMyUserId(key);
-        } catch (err) {
-          console.error('Fehler beim Laden der ID:', err);
-        }
-      };
-      loadMyId();
-    }, []);
+    loadMyId();
+  }, []);
+
   const handleTestConnection = async () => {
     if (!email.trim() || !password.trim() || !emailServerValue) {
       Alert.alert(
@@ -307,14 +277,10 @@
     setIsTesting(true);
 
     try {
-      // Falls du die Felder vorab wie bei emailNativ verschlüsselst, 
-      // hier die verschlüsselten Strings einsetzen. 
-      // Andernfalls direkt im Body mitsenden:
       const payload = {
         email: email.trim(),
         emailPassword: password.trim(),
         emailServer: emailServerValue,
-        // key: encryptedAESKey, // optional falls verschlüsselt
       };
 
       const response = await fetch('https://api.jobapp2.de/emailTest', {
@@ -343,831 +309,819 @@
     }
   };
 
-    // Eigene ID in die Zwischenablage kopieren
-    const handleCopyId = () => {
-      if (!myUserId) return;
-      try {
-        Clipboard.setString(myUserId);
-        // Falls expo-clipboard: Clipboard.setStringAsync(myUserId);
-        setCopiedId(true);
-        setTimeout(() => setCopiedId(false), 2000);
-      } catch (err) {
-        console.error('Kopieren fehlgeschlagen:', err);
+  const handleCopyId = () => {
+    if (!myUserId) return;
+    try {
+      Clipboard.setString(myUserId);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    } catch (err) {
+      console.error('Kopieren fehlgeschlagen:', err);
+    }
+  };
+
+  const handleSendCoins = async () => {
+    Keyboard.dismiss();
+    const cleanReceiver = receiverId.trim();
+    const amountNum = parseInt(sendCoinsAmount, 10);
+
+    if (!cleanReceiver) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib die Empfänger-ID ein.');
+      return;
+    }
+
+    if (cleanReceiver === myUserId) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Du kannst dir nicht selbst Coins senden.');
+      return;
+    }
+
+    if (isNaN(amountNum) || amountNum <= 0) {
+      Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib eine gültige Anzahl an Coins ein.');
+      return;
+    }
+
+    const currentCoins = Number(coins) || 0;
+    if (amountNum > currentCoins) {
+      Alert.alert(t('profil.error') || 'Fehler', `Du hast nur ${currentCoins} Coins zur Verfügung.`);
+      return;
+    }
+
+    setIsSendingCoins(true);
+    try {
+      const res = await axios.post('https://api.jobapp2.de/sendCoins', {
+        senderKey: myUserId,
+        receiverKey: cleanReceiver,
+        coins: amountNum,
+      });
+
+      if (res.data?.success || res.status === 200) {
+        setCoins((prev) => Math.max(0, (Number(prev) || 0) - amountNum));
+        setReceiverId('');
+        setSendCoinsAmount('');
+        Alert.alert(t('profil.title') || 'Erfolg', `${amountNum} Coins wurden erfolgreich übertragen.`);
+      } else {
+        Alert.alert(t('profil.error') || 'Fehler', res.data?.message || 'Übertragung fehlgeschlagen.');
       }
-    };
+    } catch (err) {
+      console.error('Fehler beim Senden der Coins:', err);
+      Alert.alert(
+        t('profil.error') || 'Fehler',
+        err?.response?.data?.error || 'Netzwerkfehler beim Übertragen der Coins.'
+      );
+    } finally {
+      setIsSendingCoins(false);
+    }
+  };
 
-    // Coins an anderen Nutzer übermitteln
-    const handleSendCoins = async () => {
-      Keyboard.dismiss();
-      const cleanReceiver = receiverId.trim();
-      const amountNum = parseInt(sendCoinsAmount, 10);
-
-      if (!cleanReceiver) {
-        Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib die Empfänger-ID ein.');
-        return;
-      }
-
-      if (cleanReceiver === myUserId) {
-        Alert.alert(t('profil.error') || 'Fehler', 'Du kannst dir nicht selbst Coins senden.');
-        return;
-      }
-
-      if (isNaN(amountNum) || amountNum <= 0) {
-        Alert.alert(t('profil.error') || 'Fehler', 'Bitte gib eine gültige Anzahl an Coins ein.');
-        return;
-      }
-
-      const currentCoins = Number(coins) || 0;
-      if (amountNum > currentCoins) {
-        Alert.alert(t('profil.error') || 'Fehler', `Du hast nur ${currentCoins} Coins zur Verfügung.`);
-        return;
-      }
-
-      setIsSendingCoins(true);
-      try {
-        // Go-Backend Endpoint anpassen falls nötig (z.B. /sendCoins oder /transferCoins)
-        const res = await axios.post('https://api.jobapp2.de/sendCoins', {
-          senderKey: myUserId,
-          receiverKey: cleanReceiver,
-          coins: amountNum,
-        });
-
-        if (res.data?.success || res.status === 200) {
-          setCoins((prev) => Math.max(0, (Number(prev) || 0) - amountNum));
-          setReceiverId('');
-          setSendCoinsAmount('');
-          Alert.alert(t('profil.title') || 'Erfolg', `${amountNum} Coins wurden erfolgreich übertragen.`);
-        } else {
-          Alert.alert(t('profil.error') || 'Fehler', res.data?.message || 'Übertragung fehlgeschlagen.');
-        }
-      } catch (err) {
-        console.error('Fehler beim Senden der Coins:', err);
-        Alert.alert(
-          t('profil.error') || 'Fehler',
-          err?.response?.data?.error || 'Netzwerkfehler beim Übertragen der Coins.'
-        );
-      } finally {
-        setIsSendingCoins(false);
-      }
-    };
-    /* ══════════════════════════════════════════════════════
-      Geometrie des Menüs = Geometrie der "exact"-Modals
-      (1: Persönliche Daten · 2: E-Mail · 3: Sprache)
-    ══════════════════════════════════════════════════════ */
-    const menuRef = useRef(null);
-    const [menuBox, setMenuBox] = useState({
-      x: SCREEN_PADDING_H,
-      y: insets.top + CONTENT_TOP_PAD,
-      w: CONTENT_W,
-      h: 0,
-    });
-
-    /* Menü-Rechteck in Fenster-Koordinaten messen.
-      WICHTIG: nur messen, solange translateX === 0 ist. */
-const syncMenuBox = useCallback(() => {
-  // Wenn das Menü ausgefahren ist (translateX !== 0), NIEMALS messen!
-  if (menuTranslateXRef.current !== 0) return;
-
-  menuRef.current?.measureInWindow?.((x, y, w, h) => {
-    // Falls das Menü noch im Transform hängt oder x ungültig ist -> verwerfen
-    if (!w || !h || x < 0) return;
-
-    // x ist horizontal immer fest am Padding ausgerichtet
-    const safeX = Math.max(SCREEN_PADDING_H, x);
-
-    setMenuBox((prev) =>
-      Math.abs(prev.x - safeX) < 0.5 &&
-      Math.abs(prev.y - y) < 0.5 &&
-      Math.abs(prev.w - w) < 0.5 &&
-      Math.abs(prev.h - h) < 0.5
-        ? prev
-        : { x: safeX, y, w, h }
-    );
+  const menuRef = useRef(null);
+  const [menuBox, setMenuBox] = useState({
+    x: SCREEN_PADDING_H,
+    y: insets.top + CONTENT_TOP_PAD,
+    w: CONTENT_W,
+    h: 0,
   });
-}, []);
-const animateMenuTo = useCallback(
-  (toValue) => {
-    menuTranslateXRef.current = toValue;
-    Animated.timing(animationMenu, {
-      toValue,
-      duration: MENU_ANIM_MS,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished && toValue === 0) {
-        menuTranslateXRef.current = 0;
-        syncMenuBox();
-      }
+
+  const syncMenuBox = useCallback(() => {
+    if (menuTranslateXRef.current !== 0) return;
+
+    menuRef.current?.measureInWindow?.((x, y, w, h) => {
+      if (!w || !h || x < 0) return;
+
+      const safeX = Math.max(SCREEN_PADDING_H, x);
+
+      setMenuBox((prev) =>
+        Math.abs(prev.x - safeX) < 0.5 &&
+        Math.abs(prev.y - y) < 0.5 &&
+        Math.abs(prev.w - w) < 0.5 &&
+        Math.abs(prev.h - h) < 0.5
+          ? prev
+          : { x: safeX, y, w, h }
+      );
     });
-  },
-  [animationMenu, syncMenuBox]
-);
-    /* Generisch: Menü fährt links raus, Sheet fährt von rechts ins GLEICHE Rechteck */
-    const openExactModal = useCallback(
-      (setVisible) => {
-        syncMenuBox();            // frische Maße, solange Menü noch bei 0 steht
-        setVisible(true);
-        animateMenuTo(MENU_OUT_X);
-      },
-      [animateMenuTo, syncMenuBox]
-    );
+  }, []);
 
-    /* Generisch: Sheet fährt rechts raus, Menü kommt zurück */
-    const closeExactModal = useCallback(
-      (setVisible) => {
-        Keyboard.dismiss();
+  const animateMenuTo = useCallback(
+    (toValue) => {
+      menuTranslateXRef.current = toValue;
+      Animated.timing(animationMenu, {
+        toValue,
+        duration: MENU_ANIM_MS,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished && toValue === 0) {
+          menuTranslateXRef.current = 0;
+          syncMenuBox();
+        }
+      });
+    },
+    [animationMenu, syncMenuBox]
+  );
 
-        setVisible(false);
-        animateMenuTo(0);
-      },
-      [animateMenuTo]
-    );
+  const openExactModal = useCallback(
+    (setVisible) => {
+      syncMenuBox();
+      setVisible(true);
+      animateMenuTo(MENU_OUT_X);
+    },
+    [animateMenuTo, syncMenuBox]
+  );
 
-    /* Benannte Wrapper – ALLE Schließ-Pfade müssen hierüber laufen */
-    const openDataModal = useCallback(
-      () => openExactModal(setModalDataVisible),
-      [openExactModal]
-    );
-    const closeDataModal = useCallback(
-      () => closeExactModal(setModalDataVisible),
-      [closeExactModal]
-    );
+  const closeExactModal = useCallback(
+    (setVisible) => {
+      Keyboard.dismiss();
+      setVisible(false);
+      animateMenuTo(0);
+    },
+    [animateMenuTo]
+  );
 
-    const openEmailModal = useCallback(
-      () => openExactModal(setModalEmailVisible),
-      [openExactModal]
-    );
-    const closeEmailModal = useCallback(
-      () => closeExactModal(setModalEmailVisible),
-      [closeExactModal]
-    );
+  const openDataModal = useCallback(
+    () => openExactModal(setModalDataVisible),
+    [openExactModal]
+  );
+  const closeDataModal = useCallback(
+    () => closeExactModal(setModalDataVisible),
+    [closeExactModal]
+  );
 
-    const openLangModal = useCallback(
-      () => openExactModal(setModalLangVisible),
-      [openExactModal]
-    );
-    const closeLangModal = useCallback(
-      () => closeExactModal(setModalLangVisible),
-      [closeExactModal]
-    );
+  const openEmailModal = useCallback(
+    () => openExactModal(setModalEmailVisible),
+    [openExactModal]
+  );
+  const closeEmailModal = useCallback(
+    () => closeExactModal(setModalEmailVisible),
+    [closeExactModal]
+  );
 
-    /* Messen nach Mount (Layout steht) + Reset beim Verlassen */
-    useEffect(() => {
-      const id = setTimeout(syncMenuBox, 0);
-      return () => clearTimeout(id);
-    }, [syncMenuBox]);
+  const openLangModal = useCallback(
+    () => openExactModal(setModalLangVisible),
+    [openExactModal]
+  );
+  const closeLangModal = useCallback(
+    () => closeExactModal(setModalLangVisible),
+    [closeExactModal]
+  );
 
-    useFocusEffect(
-      useCallback(() => {
-        syncMenuBox();
-        return () => {
-          animationMenu.setValue(0);
-        };
-      }, [animationMenu, syncMenuBox])
-    );
+  useEffect(() => {
+    const id = setTimeout(syncMenuBox, 0);
+    return () => clearTimeout(id);
+  }, [syncMenuBox]);
 
-const saveExperiences = async () => {
-  try {
-    const key = await EncryptedStorage.getItem('key');
-    const deviceId = await DeviceInfo.getUniqueId();
-    const db =
-      dbMainRef.current ||
-      (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
-    dbMainRef.current = db;
+  useFocusEffect(
+    useCallback(() => {
+      syncMenuBox();
+      return () => {
+        animationMenu.setValue(0);
+      };
+    }, [animationMenu, syncMenuBox])
+  );
 
-    const jsonString = JSON.stringify(experiences);
-    const valueToStore = key ? await encryp(jsonString, key) : jsonString;
+  /* ═══════════════════════════════════════════════════════════════════════
+     ✅ FIX 1 + FIX 2 HELPERS
+     ═══════════════════════════════════════════════════════════════════════ */
 
+  /* FIX 2: Sicherer UPSERT — UPDATE, bei 0 Zeilen INSERT mit ALLEN Spalten
+     (verhindert stilles Scheitern auf frischen Installs) */
+  const upsertSkillsInDb = useCallback(async (db, deviceId, valueToStore) => {
     const [updateRes] = await db.executeSql(
       'UPDATE files SET skills = ? WHERE ident = ?',
       [valueToStore, deviceId]
     );
 
-    if (updateRes.rowsAffected === 0) {
+    if (updateRes.rowsAffected > 0) return true;
+
+    try {
       await db.executeSql(
-        'INSERT INTO files (ident, skills) VALUES (?, ?)',
+        `INSERT INTO files
+           (ident, skills, name, street, city, email, emailPassword, emailServer)
+         VALUES (?, ?, '', '', '', '', '', '')`,
         [deviceId, valueToStore]
+      );
+      return true;
+    } catch (insertErr) {
+      console.error('[upsertSkillsInDb] INSERT fehlgeschlagen:', insertErr);
+      throw insertErr;
+    }
+  }, []);
+
+  /* FIX 1: Erfahrungen aus SQLite in den State laden */
+  const reloadExperiencesFromDb = useCallback(async () => {
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db =
+        dbMainRef.current ||
+        (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+      dbMainRef.current = db;
+
+      const [results] = await db.executeSql(
+        'SELECT skills FROM files WHERE ident = ?',
+        [deviceId]
+      );
+
+      const raw = results?.rows?.raw()?.[0]?.skills;
+      if (!raw) return;
+
+      const decrypted = key ? await decryp(raw, key) : raw;
+      if (!decrypted || !decrypted.trim()) return;
+
+      const parsed = JSON.parse(decrypted);
+      if (Array.isArray(parsed)) {
+        setExperiences(parsed);
+      }
+    } catch (err) {
+      console.error('[reloadExperiencesFromDb] Fehler:', err);
+    }
+  }, []);
+
+  /* ✅ FIX 1b: Bei jedem Screen-Fokus aus DB neu laden
+     → deckt Rückkehr vom CV-Generator / nach Scan / nach App-Resume ab */
+  useFocusEffect(
+    useCallback(() => {
+      reloadExperiencesFromDb();
+      return () => {};
+    }, [reloadExperiencesFromDb])
+  );
+
+  /* ── Speichern: Erfahrungen (FIX 2: nutzt upsertSkillsInDb) ── */
+  const saveExperiences = async () => {
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db =
+        dbMainRef.current ||
+        (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+      dbMainRef.current = db;
+
+      const jsonString = JSON.stringify(experiences);
+      const valueToStore = key ? await encryp(jsonString, key) : jsonString;
+
+      await upsertSkillsInDb(db, deviceId, valueToStore);
+
+      setModalCvVisible(false);
+    } catch (error) {
+      console.error('Fehler beim Speichern der Erfahrungen:', error);
+      Alert.alert(
+        t('profil.error'),
+        'Erfahrungen konnten nicht gespeichert werden: ' +
+          (error?.message || 'Unbekannter Fehler')
+      );
+    }
+  };
+
+  /* ── Hilfsfunktion: CV-Stationen in SQLite + State sichern ── */
+  const appendAndSaveExperiencesToDb = useCallback(async (workExperience) => {
+    const newExperiences = (workExperience || [])
+      .filter((exp) => exp && (exp.company || exp.position || exp.role))
+      .map((exp) => ({
+        id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
+        company: exp.company || '',
+        role: exp.position || exp.role || '',
+        period: exp.period || '',
+        tasks: Array.isArray(exp.tasks)
+          ? exp.tasks.join('\n')
+          : exp.tasks || exp.description || '',
+      }));
+
+    if (newExperiences.length === 0) return 0;
+
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db =
+        dbMainRef.current ||
+        (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
+      dbMainRef.current = db;
+
+      let existingList = [];
+      const [results] = await db.executeSql(
+        'SELECT skills FROM files WHERE ident = ?',
+        [deviceId]
+      );
+      const rows = results?.rows?.raw?.() || [];
+
+      if (rows[0]?.skills) {
+        try {
+          const rawSkills = key ? await decryp(rows[0].skills, key) : rows[0].skills;
+          if (rawSkills && rawSkills.trim().length > 0) {
+            existingList = JSON.parse(rawSkills);
+          }
+        } catch (e) {
+          console.warn('Konnte bestehende Skills nicht entschlüsseln:', e);
+        }
+      }
+
+      const merged = [...existingList, ...newExperiences];
+      setExperiences(merged);
+
+      if (deviceId) {
+        const jsonString = JSON.stringify(merged);
+        const valueToStore = key ? await encryp(jsonString, key) : jsonString;
+        await upsertSkillsInDb(db, deviceId, valueToStore);
+      }
+    } catch (err) {
+      console.error('Fehler beim Speichern des Hintergrund-Scans in SQLite:', err);
+      Alert.alert(
+        t('profil.error'),
+        'Speichern fehlgeschlagen: ' + (err?.message || 'Unbekannter Fehler')
       );
     }
 
-    setModalCvVisible(false);
-  } catch (error) {
-    console.error('Fehler beim Speichern der Erfahrungen:', error);
-    Alert.alert(t('profil.error'), 'Erfahrungen konnten nicht gespeichert werden.');
-  }
-};
+    return newExperiences.length;
+  }, [upsertSkillsInDb]);
 
-/* ── Hilfsfunktion: Neue CV-Stationen direkt in SQLite + State sichern ── */
-const appendAndSaveExperiencesToDb = useCallback(async (workExperience) => {
-  const newExperiences = (workExperience || [])
-    .filter((exp) => exp && (exp.company || exp.position || exp.role))
-    .map((exp) => ({
-      id: `${Date.now()}${Math.random().toString(36).substring(2, 9)}`,
-      company: exp.company || '',
-      role: exp.position || exp.role || '',
-      period: exp.period || '',
-      tasks: Array.isArray(exp.tasks)
-        ? exp.tasks.join('\n')
-        : exp.tasks || exp.description || '',
-    }));
+  /* ── Pollt /scan-cv-status ── */
+  const pollCvStatus = useCallback(
+    async (jobId) => {
+      if (!jobId) return;
+      const pending = await EncryptedStorage.getItem('pending_cv_job_id');
 
-  if (newExperiences.length === 0) return 0;
-
-  try {
-    const key = await EncryptedStorage.getItem('key');
-    const deviceId = await DeviceInfo.getUniqueId();
-    const db =
-      dbMainRef.current ||
-      (await SQLite.openDatabase({ name: DB_MAIN_NAME, location: 'default' }));
-    dbMainRef.current = db;
-
-    // 1. Bestehende Einträge aus SQLite lesen
-    let existingList = [];
-    const [results] = await db.executeSql(
-      'SELECT skills FROM files WHERE ident = ?',
-      [deviceId]
-    );
-    const rows = results?.rows?.raw?.() || [];
-
-    if (rows[0]?.skills) {
       try {
-        const rawSkills = key ? await decryp(rows[0].skills, key) : rows[0].skills;
-        if (rawSkills && rawSkills.trim().length > 0) {
-          existingList = JSON.parse(rawSkills);
+        const res = await axios.get(
+          `https://api.jobapp2.de/scan-cv-status?jobId=${encodeURIComponent(jobId)}`
+        );
+        const { status, data, error } = res.data || {};
+
+        if (status === 'done') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+
+          const rawList =
+            data?.work_experience ||
+            data?.experiences ||
+            (Array.isArray(data) ? data : []);
+
+          const addedCount = await appendAndSaveExperiencesToDb(rawList);
+          Alert.alert(
+            t('profil.title'),
+            `Lebenslauf erfolgreich analysiert (${addedCount} Stationen hinzugefügt).`
+          );
+        } else if (status === 'error' || status === 'not_found') {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+          Alert.alert(t('profil.error'), error || 'Scan fehlgeschlagen.');
         }
-      } catch (e) {
-        console.warn('Konnte bestehende Skills nicht entschlüsseln:', e);
+      } catch (err) {
+        if (err?.response?.status === 404) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
+          setIsScanningCv(false);
+        }
       }
+    },
+    [appendAndSaveExperiencesToDb, t]
+  );
+
+  const resumePollingIfNeeded = useCallback(async () => {
+    const savedJobId = await EncryptedStorage.getItem('pending_cv_job_id');
+    if (!savedJobId) return;
+
+    setIsScanningCv(true);
+    await pollCvStatus(savedJobId);
+
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    pollTimerRef.current = setInterval(() => {
+      pollCvStatus(savedJobId);
+    }, 3000);
+  }, [pollCvStatus]);
+
+  useEffect(() => {
+    resumePollingIfNeeded();
+
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        resumePollingIfNeeded();
+        // FIX 1c: Nach Resume aus DB nachladen
+        reloadExperiencesFromDb();
+      }
+    });
+
+    return () => {
+      sub.remove();
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, [resumePollingIfNeeded, reloadExperiencesFromDb]);
+
+  const handleScan = () => {
+    if (isScanningCv) return;
+    startCvScan({
+      isScanningCv,
+      setIsScanningCv,
+      setExperiences,
+      setEducations: () => {},
+      setSkills: () => {},
+      setPersonal: () => {},
+      dbInstance: dbMainRef.current,
+      t,
+    });
+  };
+
+  const handleAddExperience = () => {
+    setExperiences((prev) => [
+      { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
+      ...prev,
+    ]);
+  };
+
+  const handleUpdateExperience = (id, field, value) => {
+    setExperiences((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleDeleteExperience = (id) => {
+    setExperiences((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const { requestPurchase, finishTransaction } = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      setCoins((prev) => (Number(prev) || 0) + 40);
+      setLoaded(false);
+      const isValid = await putCoinsIAP(purchase.productId);
+      if (isValid) {
+        await finishTransaction({ purchase, isConsumable: true });
+      }
+    },
+    onPurchaseError: (error) => {
+      console.error('Purchase failed:', error);
+      Alert.alert(t('profil.error'), t('profil.buyCancel'));
+      setLoaded(false);
+    },
+  });
+
+  const putCoinsIAP = async (productId) => {
+    try {
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = sha512(deviceId);
+      await axios.post('https://api.jobapp2.de/putCoinsIAP', {
+        username: key,
+        productId: productId,
+      });
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Übermitteln des IAP:', error);
+      return false;
     }
+  };
 
-    const merged = [...existingList, ...newExperiences];
-    setExperiences(merged);
+  const handlePurchase = async (productId) => {
+    setLoaded(true);
+    try {
+      await requestPurchase({
+        request: { ios: { sku: productId } },
+      });
+    } catch (error) {
+      console.error('Purchase request failed:', error);
+      setLoaded(false);
+    }
+  };
 
-    // 2. In SQLite speichern (UPDATE mit INSERT-Fallback, falls Zeile fehlt)
-    if (deviceId) {
-      const jsonString = JSON.stringify(merged);
-      const valueToStore = key ? await encryp(jsonString, key) : jsonString;
+  /* ✅ FIX 1a: Init-Reihenfolge korrigiert – Skills direkt nach DB-Open laden */
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        dbMainRef.current = await SQLite.openDatabase({
+          name: DB_MAIN_NAME,
+          location: 'default',
+        });
+        console.log('Datenbank erfolgreich geöffnet');
+        await reloadExperiencesFromDb();
+      } catch (error) {
+        console.error('Fehler beim Öffnen der DB:', error);
+      }
+    };
+
+    initDB();
+  }, [reloadExperiencesFromDb]);
+
+  useEffect(() => {
+    const putCoins = async (amount) => {
+      try {
+        const deviceId = await DeviceInfo.getUniqueId();
+        const key = sha512(deviceId);
+        await axios.post('https://api.jobapp2.de/putCoins', {
+          username: key,
+          coins: amount,
+        });
+
+        setCoins((prev) => (Number(prev) || 0) + amount);
+      } catch (error) {
+        console.error('Fehler beim Gutschreiben der Coins:', error);
+      }
+    };
+
+    const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      adLoaded.current = true;
+      if (adLoadedState) {
+        rewarded.show();
+        setAdLoadedState(false);
+        adLoaded.current = false;
+      }
+    });
+
+    const unsubscribeEarned = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      () => {
+        putCoins(4);
+        setLoaded(false);
+      }
+    );
+
+    rewarded.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+    };
+  }, [source, adLoadedState]);
+
+  const showRewarded = () => {
+    setLoaded(true);
+    if (!adLoaded.current) {
+      setSource(!source);
+      rewarded.load();
+      setAdLoadedState(true);
+      return;
+    }
+    rewarded.show();
+    adLoaded.current = false;
+  };
+
+  const fetchCoins = async () => {
+    try {
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = sha512(deviceId);
+      const response = await axios.post('https://api.jobapp2.de/getCoins', { key });
+      setCoins(response.data?.response ?? 0);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Coins:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCoins();
+    }, [])
+  );
+
+  /* ❌ ALTER loadFileData-useEffect wurde KOMPLETT ENTFERNT
+     (Race Condition – wird durch reloadExperiencesFromDb in initDB + useFocusEffect ersetzt) */
+
+  const loadLocalData = async () => {
+    try {
+      const key = await EncryptedStorage.getItem('key');
+      if (!key) return;
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db = await SQLite.openDatabase({
+        name: 'firstNew.db',
+        location: 'default',
+      });
+
+      const result = await runQuery(
+        db,
+        'SELECT * FROM files WHERE ident = ?',
+        [deviceId]
+      ).catch(() => null);
+
+      if (result?.rows?.length > 0) {
+        const row = result.rows.raw()[0];
+
+        const safeDecrypt = async (val) => {
+          if (!val) return null;
+          try {
+            return await decryp(val, key);
+          } catch {
+            return null;
+          }
+        };
+
+        const decName = await safeDecrypt(row.name);
+        const decStreet = await safeDecrypt(row.street);
+        const decCity = await safeDecrypt(row.city);
+        const decEmail = await safeDecrypt(row.email);
+        const decPassword = await safeDecrypt(row.emailPassword);
+        const decServer = await safeDecrypt(row.emailServer);
+
+        if (decName) setMyName(decName);
+        if (decStreet) setMyStreet(decStreet);
+        if (decCity) setMyCity(decCity);
+        if (decEmail) setEmailText(decEmail);
+        if (decEmail) setEmail(decEmail.split('@')[0]);
+        if (decPassword) setPassword(decPassword);
+        if (decServer) setEmailServerValue(decServer);
+      } else {
+        const [n, s, c, em, pw, srv] = await Promise.all([
+          EncryptedStorage.getItem('name'),
+          EncryptedStorage.getItem('street'),
+          EncryptedStorage.getItem('city'),
+          EncryptedStorage.getItem('email'),
+          EncryptedStorage.getItem('emailPassword'),
+          EncryptedStorage.getItem('emailServer'),
+        ]);
+
+        if (n) setMyName(n);
+        if (s) setMyStreet(s);
+        if (c) setMyCity(c);
+        if (em) setEmail(em);
+        if (pw) setPassword(pw);
+        if (srv) setEmailServerValue(srv);
+      }
+    } catch (err) {
+      console.error('Fehler beim Laden lokaler Daten:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadLocalData();
+  }, []);
+
+  useEffect(() => {
+    console.log('experience', experiences);
+  }, [experiences]);
+
+  /* ✅ FIX 2: Persönliche Daten – INSERT-Fallback */
+  const handleSavePersonalData = async () => {
+    try {
+      if (!myName?.trim() || !myCity?.trim() || !myStreet?.trim()) {
+        Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
+        return;
+      }
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = await EncryptedStorage.getItem('key');
+
+      const trimmedName = myName.trim();
+      const trimmedStreet = myStreet.trim();
+      const trimmedCity = myCity.trim();
+
+      await EncryptedStorage.setItem('name', trimmedName);
+      await EncryptedStorage.setItem('street', trimmedStreet);
+      await EncryptedStorage.setItem('city', trimmedCity);
+
+      const encName = await encryp(trimmedName, key);
+      const encCity = await encryp(trimmedCity, key);
+      const encStreet = await encryp(trimmedStreet, key);
+
+      const db = await SQLite.openDatabase({
+        name: 'firstNew.db',
+        location: 'default',
+      });
 
       const [updateRes] = await db.executeSql(
-        'UPDATE files SET skills = ? WHERE ident = ?',
-        [valueToStore, deviceId]
+        'UPDATE files SET name = ?, city = ?, street = ? WHERE ident = ?',
+        [encName, encCity, encStreet, deviceId]
       );
 
       if (updateRes.rowsAffected === 0) {
         await db.executeSql(
-          'INSERT INTO files (ident, skills) VALUES (?, ?)',
-          [deviceId, valueToStore]
+          `INSERT INTO files
+             (ident, name, street, city, email, emailPassword, emailServer, skills)
+           VALUES (?, ?, ?, ?, '', '', '', '')`,
+          [deviceId, encName, encStreet, encCity]
         );
       }
-    }
-  } catch (err) {
-    console.error('Fehler beim Speichern des Hintergrund-Scans in SQLite:', err);
-  }
 
-  return newExperiences.length;
-}, []);
-
-/* ── Pollt den Go-Endpoint /scan-cv-status?jobId=... ── */
-const pollCvStatus = useCallback(
-  async (jobId) => {
-    if (!jobId) return;
-    const pending = await EncryptedStorage.getItem('pending_cv_job_id');
-
-    try {
-      const res = await axios.get(
-        `https://api.jobapp2.de/scan-cv-status?jobId=${encodeURIComponent(jobId)}`
-      );
-      const { status, data, error } = res.data || {};
-
-      if (status === 'done') {
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-        pollTimerRef.current = null;
-        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-        setIsScanningCv(false);
-
-        const rawList =
-          data?.work_experience ||
-          data?.experiences ||
-          (Array.isArray(data) ? data : []);
-
-        const addedCount = await appendAndSaveExperiencesToDb(rawList);
-        Alert.alert(
-          t('profil.title'),
-          `Lebenslauf erfolgreich analysiert (${addedCount} Stationen hinzugefügt).`
-        );
-      } else if (status === 'error' || status === 'not_found') {
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-        pollTimerRef.current = null;
-        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-        setIsScanningCv(false);
-        Alert.alert(t('profil.error'), error || 'Scan fehlgeschlagen.');
-      }
-    } catch (err) {
-      if (err?.response?.status === 404) {
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-        pollTimerRef.current = null;
-        if (pending) await EncryptedStorage.removeItem('pending_cv_job_id');
-        setIsScanningCv(false);
-      }
-      console.log('Warte auf Hintergrund-Scan...', err?.message);
-    }
-  },
-  [appendAndSaveExperiencesToDb, t]
-);
-  
-
- 
-    /* ── Startet oder nimmt das Polling für eine gespeicherte jobId wieder auf ── */
-    const resumePollingIfNeeded = useCallback(async () => {
-      const savedJobId = await EncryptedStorage.getItem('pending_cv_job_id');
-      if (!savedJobId) return;
-
-      setIsScanningCv(true);
-      // Sofort einmal prüfen (wichtig wenn der User aus dem Hintergrund zurückkommt!)
-      await pollCvStatus(savedJobId);
-
-      // Falls noch nicht fertig, alle 3 Sekunden weiterfragen
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      pollTimerRef.current = setInterval(() => {
-        pollCvStatus(savedJobId);
-      }, 3000);
-    }, [pollCvStatus]);
-
-    /* ── AppState Listener: Prüft sofort den Status, wenn die App wieder geöffnet wird ── */
-    useEffect(() => {
-      resumePollingIfNeeded();
-
-      const sub = AppState.addEventListener('change', (nextState) => {
-        if (nextState === 'active') {
-          resumePollingIfNeeded();
-        }
-      });
-
-      return () => {
-        sub.remove();
-        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      };
-    }, [resumePollingIfNeeded]);
-
-    /* ── Neuer handleScan: Startet Upload, speichert jobId und pollt im Hintergrund ── */
-    const handleScan = async () => {
-      if (isScanningCv) return;
-
-      try {
-        const response = await scanCv();
-        if (!response) return; // User hat DocumentPicker abgebrochen
-
-        // Fall A: Dein neuer Go-Server liefert { status: "processing", jobId: "..." }
-        if (response.jobId) {
-          setIsScanningCv(true);
-          await EncryptedStorage.setItem('pending_cv_job_id', response.jobId);
-          await resumePollingIfNeeded();
-          return;
-        }
-
-        // Fall B: Fallback, falls direkt work_experience zurückkam
-        if (response.work_experience) {
-          await appendAndSaveExperiencesToDb(response.work_experience);
-        }
-      } catch (error) {
-        console.error('Failed to start CV scan:', error);
-        setIsScanningCv(false);
-      }
-    };
-    const handleAddExperience = () => {
-      setExperiences((prev) => [
-      
-        { id: Date.now().toString(), role: '', company: '', period: '', tasks: '' },
-        ...prev,
+      Alert.alert(t('profil.title'), t('profil.infoData'), [
+        { text: 'OK', onPress: closeDataModal },
       ]);
-    };
+    } catch (error) {
+      console.error('Fehler beim Speichern der Stammdaten:', error);
+      Alert.alert(t('profil.error'), 'Fehler beim Speichern');
+    }
+  };
 
-    const handleUpdateExperience = (id, field, value) => {
-      setExperiences((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
-      );
-    };
-
-    const handleDeleteExperience = (id) => {
-      setExperiences((prev) => prev.filter((item) => item.id !== id));
-    };
-
-    /* ── In-App Purchases (IAP) ──────────────────────────── */
-    const { requestPurchase, finishTransaction } = useIAP({
-      onPurchaseSuccess: async (purchase) => {
-        setCoins((prev) => (Number(prev) || 0) + 40);
-        setLoaded(false);
-        const isValid = await putCoinsIAP(purchase.productId);
-        if (isValid) {
-          await finishTransaction({ purchase, isConsumable: true });
-        }
-      },
-      onPurchaseError: (error) => {
-        console.error('Purchase failed:', error);
-        Alert.alert(t('profil.error'), t('profil.buyCancel'));
-        setLoaded(false);
-      },
-    });
-
-    const putCoinsIAP = async (productId) => {
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
-        const key = sha512(deviceId);
-        await axios.post('https://api.jobapp2.de/putCoinsIAP', {
-          username: key,
-          productId: productId,
-        });
-        return true;
-      } catch (error) {
-        console.error('Fehler beim Übermitteln des IAP:', error);
-        return false;
-      }
-    };
-
-    const handlePurchase = async (productId) => {
-      setLoaded(true);
-      try {
-        await requestPurchase({
-          request: {
-            ios: { sku: productId },
-          },
-        });
-      } catch (error) {
-        console.error('Purchase request failed:', error);
-        setLoaded(false);
-      }
-    };
-
-    useEffect(() => {
-      const initDB = async () => {
-        try {
-          dbMainRef.current = await SQLite.openDatabase({
-            name: DB_MAIN_NAME,
-            location: 'default',
-          });
-          console.log('Datenbank erfolgreich geöffnet');
-        } catch (error) {
-          console.error('Fehler beim Öffnen der DB:', error);
-        }
-      };
-
-      initDB();
-    }, []);
-  // ── Test: Lebenslauf direkt mit OvisOCR3 analysieren ──
-
-    /* ── Rewarded Ads ────────────────────────────────────── */
-    useEffect(() => {
-      const putCoins = async (amount) => {
-        try {
-          const deviceId = await DeviceInfo.getUniqueId();
-          const key = sha512(deviceId);
-          await axios.post('https://api.jobapp2.de/putCoins', {
-            username: key,
-            coins: amount,
-          });
-
-          setCoins((prev) => (Number(prev) || 0) + amount);
-        } catch (error) {
-          console.error('Fehler beim Gutschreiben der Coins:', error);
-        }
-      };
-
-      const unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
-        adLoaded.current = true;
-        if (adLoadedState) {
-          rewarded.show();
-          setAdLoadedState(false);
-          adLoaded.current = false;
-        }
-      });
-
-      const unsubscribeEarned = rewarded.addAdEventListener(
-        RewardedAdEventType.EARNED_REWARD,
-        () => {
-          putCoins(4);
-          setLoaded(false);
-        }
-      );
-
-      rewarded.load();
-
-      return () => {
-        unsubscribeLoaded();
-        unsubscribeEarned();
-      };
-    }, [source, adLoadedState]);
-
-    const showRewarded = () => {
-      setLoaded(true);
-      if (!adLoaded.current) {
-        setSource(!source);
-        rewarded.load();
-        setAdLoadedState(true);
+  /* ✅ FIX 2: E-Mail Konfiguration – INSERT-Fallback */
+  const handleSaveEmailConfig = async () => {
+    try {
+      if (!emailServerValue || !email?.trim() || !password?.trim()) {
+        Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
         return;
       }
-      rewarded.show();
-      adLoaded.current = false;
-    };
-
-    /* ── Coins Laden ─────────────────────────────────────── */
-    const fetchCoins = async () => {
-      try {
-        const deviceId = await DeviceInfo.getUniqueId();
-        const key = sha512(deviceId);
-        const response = await axios.post('https://api.jobapp2.de/getCoins', { key });
-        setCoins(response.data?.response ?? 0);
-      } catch (error) {
-        console.error('Fehler beim Abrufen der Coins:', error);
+      setIsTesting(true);
+      let newProvider = '';
+      for (let i = 0; i < EMAIL_SERVERS_SHORT.length; i++) {
+        if (EMAIL_SERVERS_SHORT[i].value === emailServerValue) {
+          newProvider = EMAIL_SERVERS_SHORT[i].label;
+          break;
+        }
       }
-    };
 
-    useFocusEffect(
-      useCallback(() => {
-        fetchCoins();
-      }, [])
-    );
+      const trimmedPw = password.trim();
+      const trimmedEmail = email.trim() + (newProvider || '');
 
-    useEffect(() => {
-      let isMounted = true;
+      const testResponse = await fetch('https://api.jobapp2.de/emailTest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          emailPassword: trimmedPw,
+          emailServer: emailServerValue,
+        }),
+      });
 
-      const loadFileData = async () => {
-        const key = await EncryptedStorage.getItem('key');
-        const deviceId = await DeviceInfo.getUniqueId();
-        if (!dbMainRef.current || !deviceId) return;
+      const resData = await testResponse.json();
 
-        try {
-          const [results] = await dbMainRef.current.executeSql(
-            'SELECT skills FROM files WHERE ident = ?',
-            [deviceId]
-          );
-
-          const data = results?.rows?.raw() || [];
-
-          if (isMounted) {
-            console.log('Geladene Daten:', data);
-            const decSkills = await decryp(data[0]?.skills, key);
-            console.log('Entschlüsselte Daten:', decSkills);
-            if (!decSkills || decSkills.trim().length === 0) return;
-            const jsonSkills = JSON.parse(decSkills);
-            setExperiences(jsonSkills);
-          }
-        } catch (err) {
-          console.error('SQL Fehler:', err);
-        }
-      };
-
-      loadFileData();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [dbMainRef.current]);
-
-    /* ── Daten initial aus DB / Storage synchronisieren ──── */
-    const loadLocalData = async () => {
-      try {
-        const key = await EncryptedStorage.getItem('key');
-        if (!key) return;
-
-        const deviceId = await DeviceInfo.getUniqueId();
-        const db = await SQLite.openDatabase({
-          name: 'firstNew.db',
-          location: 'default',
-        });
-
-        const result = await runQuery(
-          db,
-          'SELECT * FROM files WHERE ident = ?',
-          [deviceId]
-        ).catch(() => null);
-
-        if (result?.rows?.length > 0) {
-          const row = result.rows.raw()[0];
-
-          const safeDecrypt = async (val) => {
-            if (!val) return null;
-            try {
-              return await decryp(val, key);
-            } catch {
-              return null;
-            }
-          };
-
-          const decName = await safeDecrypt(row.name);
-          const decStreet = await safeDecrypt(row.street);
-          const decCity = await safeDecrypt(row.city);
-          const decEmail = await safeDecrypt(row.email);
-          const decPassword = await safeDecrypt(row.emailPassword);
-          const decServer = await safeDecrypt(row.emailServer);
-
-          if (decName) setMyName(decName);
-          if (decStreet) setMyStreet(decStreet);
-          if (decCity) setMyCity(decCity);
-          if (decEmail) setEmailText(decEmail);
-          if (decEmail) setEmail(decEmail.split('@')[0]);
-          if (decPassword) setPassword(decPassword);
-          if (decServer) setEmailServerValue(decServer);
-        } else {
-          const [n, s, c, em, pw, srv] = await Promise.all([
-            EncryptedStorage.getItem('name'),
-            EncryptedStorage.getItem('street'),
-            EncryptedStorage.getItem('city'),
-            EncryptedStorage.getItem('email'),
-            EncryptedStorage.getItem('emailPassword'),
-            EncryptedStorage.getItem('emailServer'),
-          ]);
-
-          if (n) setMyName(n);
-          if (s) setMyStreet(s);
-          if (c) setMyCity(c);
-          if (em) setEmail(em);
-          if (pw) setPassword(pw);
-          if (srv) setEmailServerValue(srv);
-        }
-      } catch (err) {
-        console.error('Fehler beim Laden lokaler Daten:', err);
-      }
-    };
-
-    useEffect(() => {
-      loadLocalData();
-    }, []);
-
-    useEffect(() => {
-      console.log('experience', experiences);
-    }, [experiences]);
-
-    /* ── Speichern: Persönliche Daten ────────────────────── */
-    const handleSavePersonalData = async () => {
-      try {
-        if (!myName?.trim() || !myCity?.trim() || !myStreet?.trim()) {
-          Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
-          return;
-        }
-
-        const deviceId = await DeviceInfo.getUniqueId();
-        const key = await EncryptedStorage.getItem('key');
-
-        const trimmedName = myName.trim();
-        const trimmedStreet = myStreet.trim();
-        const trimmedCity = myCity.trim();
-
-        await EncryptedStorage.setItem('name', trimmedName);
-        await EncryptedStorage.setItem('street', trimmedStreet);
-        await EncryptedStorage.setItem('city', trimmedCity);
-
-        const encName = await encryp(trimmedName, key);
-        const encCity = await encryp(trimmedCity, key);
-        const encStreet = await encryp(trimmedStreet, key);
-
-        const db = await SQLite.openDatabase({
-          name: 'firstNew.db',
-          location: 'default',
-        });
-        await db.executeSql(
-          'UPDATE files SET name = ?, city = ?, street = ? WHERE ident = ?',
-          [encName, encCity, encStreet, deviceId]
-        );
-
-        Alert.alert(t('profil.title'), t('profil.infoData'), [
-          { text: 'OK', onPress: closeDataModal }, // <-- Menü kommt zurück
-        ]);
-      } catch (error) {
-        console.error('Fehler beim Speichern der Stammdaten:', error);
-        Alert.alert(t('profil.error'), 'Fehler beim Speichern');
-      }
-    };
-  /* ── Speichern & Testen: E-Mail Konfiguration ─────────── */
-    const handleSaveEmailConfig = async () => {
-      try {
-        if (!emailServerValue || !email?.trim() || !password?.trim()) {
-          Alert.alert(t('profil.error'), t('profil.errorDataEmail'));
-          return;
-        }
-        setIsTesting(true); 
-        let newEmail = '';
-        let newProvider = '';
-        for (let i = 0; i < EMAIL_SERVERS_SHORT.length; i++) {
-          if (EMAIL_SERVERS_SHORT[i].value === emailServerValue) {
-            newEmail = EMAIL_SERVERS_SHORT[i].value;
-            newProvider = EMAIL_SERVERS_SHORT[i].label;
-            break;
-          }
-        }
-
-        const trimmedPw = password.trim();
-        const trimmedEmail = email.trim() + (newProvider || '');
-
-        console.log('--- [EMAIL TEST & SAVE] ---');
-        console.log('E-Mail:', trimmedEmail);
-        console.log('Server:', emailServerValue);
-
-        // 1. Loading-Status aktivieren (falls im State vorhanden)
-        if (typeof setIsTesting === 'function') setIsTesting(true);
-
-        // 2. SMTP-Verbindung zuerst beim Backend prüfen
-        const testResponse = await fetch('https://api.jobapp2.de/emailTest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: trimmedEmail,
-            emailPassword: trimmedPw,
-            emailServer: emailServerValue,
-          }),
-        });
-
-        const resData = await testResponse.json();
-        console.log('[EMAIL TEST RESULT]:', resData);
-
-        // 3. Wenn die Zugangsdaten falsch sind -> Abbrechen, NICHT speichern
-        if (!testResponse.ok || resData.code !== 'OK') {
-          if (typeof setIsTesting === 'function') setIsTesting(false);
-          Alert.alert(
-            'Verbindung fehlgeschlagen',
-            'Benutzername, Passwort oder der Server stimmen nicht. Bitte überprüfe deine Angaben.',
-            
-          );
-          return;
-        }
-
-        // 4. Test war erfolgreich -> Jetzt in Storage und SQLite sichern
-        const deviceId = await DeviceInfo.getUniqueId();
-        const key = await EncryptedStorage.getItem('key');
-
-        await EncryptedStorage.setItem('email', trimmedEmail);
-        await EncryptedStorage.setItem('emailPassword', trimmedPw);
-        await EncryptedStorage.setItem('emailServer', emailServerValue);
-
-        const encEmail = await encryp(trimmedEmail, key);
-        const encPw = await encryp(trimmedPw, key);
-        const encServer = await encryp(emailServerValue, key);
-
-        const db = await SQLite.openDatabase({
-          name: 'firstNew.db',
-          location: 'default',
-        });
-        await db.executeSql(
-          'UPDATE files SET email = ?, emailPassword = ?, emailServer = ? WHERE ident = ?',
-          [encEmail, encPw, encServer, deviceId]
-        );
-
-        if (typeof setIsTesting === 'function') setIsTesting(false);
-
-        // 5. Erfolgsmeldung & Modal schließen
-        Alert.alert(t('profil.title'), t('profil.infoEmail'), [
-          { text: 'OK', onPress: closeEmailModal },
-        ]);
-      } catch (error) {
-        if (typeof setIsTesting === 'function') setIsTesting(false);
-        console.error('Fehler beim Prüfen/Speichern der Maildaten:', error);
+      if (!testResponse.ok || resData.code !== 'OK') {
+        setIsTesting(false);
         Alert.alert(
-          t('profil.error'),
-          error.message || 'Fehler beim Verbindungsaufbau oder Speichern.'
+          'Verbindung fehlgeschlagen',
+          'Benutzername, Passwort oder der Server stimmen nicht. Bitte überprüfe deine Angaben.'
+        );
+        return;
+      }
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const key = await EncryptedStorage.getItem('key');
+
+      await EncryptedStorage.setItem('email', trimmedEmail);
+      await EncryptedStorage.setItem('emailPassword', trimmedPw);
+      await EncryptedStorage.setItem('emailServer', emailServerValue);
+
+      const encEmail = await encryp(trimmedEmail, key);
+      const encPw = await encryp(trimmedPw, key);
+      const encServer = await encryp(emailServerValue, key);
+
+      const db = await SQLite.openDatabase({
+        name: 'firstNew.db',
+        location: 'default',
+      });
+
+      const [updateRes] = await db.executeSql(
+        'UPDATE files SET email = ?, emailPassword = ?, emailServer = ? WHERE ident = ?',
+        [encEmail, encPw, encServer, deviceId]
+      );
+
+      if (updateRes.rowsAffected === 0) {
+        await db.executeSql(
+          `INSERT INTO files
+             (ident, email, emailPassword, emailServer, name, street, city, skills)
+           VALUES (?, ?, ?, ?, '', '', '', '')`,
+          [deviceId, encEmail, encPw, encServer]
         );
       }
-    };
 
-    /* ── Speichern: Sprache ──────────────────────────────── */
-    const handleChangeLanguage = async (langCode) => {
-      try {
-        await i18n.changeLanguage(langCode);
-        await EncryptedStorage.setItem('lang', langCode);
-        closeLangModal(); // <-- Menü kommt zurück
-      } catch (err) {
-        console.error('Sprachwechsel fehlgeschlagen:', err);
-      }
-    };
+      setIsTesting(false);
 
+      Alert.alert(t('profil.title'), t('profil.infoEmail'), [
+        { text: 'OK', onPress: closeEmailModal },
+      ]);
+    } catch (error) {
+      setIsTesting(false);
+      console.error('Fehler beim Prüfen/Speichern der Maildaten:', error);
+      Alert.alert(
+        t('profil.error'),
+        error.message || 'Fehler beim Verbindungsaufbau oder Speichern.'
+      );
+    }
+  };
 
+  const handleChangeLanguage = async (langCode) => {
+    try {
+      await i18n.changeLanguage(langCode);
+      await EncryptedStorage.setItem('lang', langCode);
+      closeLangModal();
+    } catch (err) {
+      console.error('Sprachwechsel fehlgeschlagen:', err);
+    }
+  };
 
-    const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
+  const currentLangObj = itemsLang.find((l) => l.value === i18n.language) || itemsLang[0];
 
-    const handleInfo = (val) => {
-      switch (val) {
-        case 'lang':
-          setInfoModalVisible(true);
-          setTextInfo(t('info.language'));
-          break;
-        case 'email':
-          setInfoModalVisible(true);
-          setTextInfo(t('info.email'));
-          break;
-        case 'personal':
-          setInfoModalVisible(true);
-          setTextInfo(t('info.personal'));
-          break;
-        case 'experience':
-          setInfoModalVisible(true);
-          setTextInfo(t('info.experience'));
-          break;
-        case 'coins':
-          setInfoModalVisible(true);
-          setTextInfo(t('info.coins'));
-          break;
-        default:
-          break;
-      }
-    };
+  const handleInfo = (val) => {
+    switch (val) {
+      case 'lang':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.language'));
+        break;
+      case 'email':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.email'));
+        break;
+      case 'personal':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.personal'));
+        break;
+      case 'experience':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.experience'));
+        break;
+      case 'coins':
+        setInfoModalVisible(true);
+        setTextInfo(t('info.coins'));
+        break;
+      default:
+        break;
+    }
+  };
+
+  
 
     return (
       <View style={[styles.container, { paddingTop: insets.top + CONTENT_TOP_PAD }]}>

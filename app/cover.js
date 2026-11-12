@@ -15,6 +15,8 @@ import {
   StyleSheet,
   useColorScheme,
   AppState,
+  LayoutAnimation, // <--- NEU
+  UIManager,       // <--- NEU
   Animated,
   ActivityIndicator,
 } from 'react-native';
@@ -124,7 +126,23 @@ export default function CoverScreen() {
     educations,
     skills
   );
-
+const toggleSavedCvsMenu = () => {
+  LayoutAnimation.configureNext({
+    duration: 240,
+    create: {
+      type: LayoutAnimation.Types.easeInEaseOut,
+      property: LayoutAnimation.Properties.opacity,
+    },
+    update: {
+      type: LayoutAnimation.Types.easeInEaseOut,
+    },
+    delete: {
+      type: LayoutAnimation.Types.easeInEaseOut,
+      property: LayoutAnimation.Properties.opacity,
+    },
+  });
+  setShowSavedCvsMenu((prev) => !prev);
+};
   const handleStartScan = () => {
     if (isScanningCv) return;
     startCvScan({
@@ -839,7 +857,7 @@ export default function CoverScreen() {
                   handleCreateNew();
                 }}
               >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                <View style={[styles.menuRowIconBox ]}>
                   <Image
                     style={styles.menuRowIcon}
                     source="https://img.icons8.com/?size=100&id=IoyS7mvkv16Q&format=png&color=000000"
@@ -867,7 +885,7 @@ export default function CoverScreen() {
                   setWebViewVisible(true);
                 }}
               >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                <View style={[styles.menuRowIconBox ]}>
                  <Image
                     style={styles.menuRowIcon}
                     source="https://img.icons8.com/?size=100&id=qsNHsXUgyhhh&format=png&color=000000"
@@ -891,7 +909,7 @@ export default function CoverScreen() {
                   console.log("pressed")
                 }}
               >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                <View style={[styles.menuRowIconBox ]}>
                  <Image
                     style={styles.menuRowIcon}
                     source="https://img.icons8.com/?size=100&id=WqrGC2CwYB9K&format=png&color=000000"
@@ -903,33 +921,73 @@ export default function CoverScreen() {
                 </Text>
               </TouchableOpacity>
               {/* Row 2: Gespeicherte Stände */}
-              <TouchableOpacity
-                style={[
-                  styles.menuRow,
-                  {
-                  
-                    borderColor: theme.border,
-                  },
-                ]}
-                activeOpacity={0.75}
-                onPress={() => setShowSavedCvsMenu(!showSavedCvsMenu)}
-              >
-                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
-                  <Image
-                    style={styles.menuRowIcon}
-                    source="https://img.icons8.com/?size=100&id=rHyB4w7zHzl2&format=png&color=000000"
-                    contentFit="contain"
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.menuRowText,
-                    { color: showSavedCvsMenu ? '#ffffff' : theme.text },
-                  ]}
-                >
-                  Gespeicherte Stände
-                </Text>
-              </TouchableOpacity>
+              
+
+            <TouchableOpacity
+  style={[
+    styles.menuRow,
+    {
+      borderBottomWidth: 0,
+      borderColor: theme.border,
+      opacity: isScanningCv ? 0.75 : 1,
+    },
+  ]}
+  disabled={isScanningCv}
+  activeOpacity={0.75}
+  onPress={() => {
+    setShowSavedCvsMenu(false);
+    toggleFab();
+    handleStartScan();
+  }}
+>
+  <View style={[styles.menuRowIconBox ]}>
+    {isScanningCv ? (
+      <ActivityIndicator
+        size="small"
+        color={isDark ? '#60a5fa' : theme.primary}
+      />
+    ) : (
+      <Image
+        style={styles.menuRowIcon}
+        source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
+        contentFit="contain"
+      />
+    )}
+  </View>
+  <Text style={[styles.menuRowText, { color: theme.text }]}>
+    {isScanningCv ? 'Lebenslauf wird gescannt…' : 'Lebenslauf scannen'}
+  </Text>
+</TouchableOpacity>
+<TouchableOpacity
+  style={[
+    styles.menuRow,
+    {
+      borderColor: theme.border,
+    },
+  ]}
+  activeOpacity={0.75}
+  onPress={toggleSavedCvsMenu} // <--- HIER geändert
+>
+  <View style={[styles.menuRowIconBox]}>
+    <Image
+      style={styles.menuRowIcon}
+      source="https://img.icons8.com/?size=100&id=rHyB4w7zHzl2&format=png&color=000000"
+      contentFit="contain"
+    />
+  </View>
+  <Text
+    style={[
+      styles.menuRowText,
+      { color: showSavedCvsMenu ? theme.primary : theme.text }, // Kleiner Fix: im Light-Mode war #ffffff auf hellem Blur kaum lesbar
+    ]}
+  >
+    Gespeicherte Stände
+  </Text>
+  {/* Optional: kleiner Pfeil rechts als visueller Indikator */}
+  <Text style={{ color: theme.subtext, fontSize: 12, fontWeight: '700' }}>
+    {showSavedCvsMenu ? '▲' : '▼'}
+  </Text>
+</TouchableOpacity>
 
               {/* Aufklappbare Liste direkt im Column-Container */}
               {showSavedCvsMenu && (
@@ -1018,43 +1076,6 @@ export default function CoverScreen() {
                   </TouchableOpacity>
                 </View>
               )}
-
-            <TouchableOpacity
-  style={[
-    styles.menuRow,
-    {
-      borderBottomWidth: 0,
-      borderColor: theme.border,
-      opacity: isScanningCv ? 0.75 : 1,
-    },
-  ]}
-  disabled={isScanningCv}
-  activeOpacity={0.75}
-  onPress={() => {
-    setShowSavedCvsMenu(false);
-    toggleFab();
-    handleStartScan();
-  }}
->
-  <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
-    {isScanningCv ? (
-      <ActivityIndicator
-        size="small"
-        color={isDark ? '#60a5fa' : theme.primary}
-      />
-    ) : (
-      <Image
-        style={styles.menuRowIcon}
-        source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
-        contentFit="contain"
-      />
-    )}
-  </View>
-  <Text style={[styles.menuRowText, { color: theme.text }]}>
-    {isScanningCv ? 'Lebenslauf wird gescannt…' : 'Lebenslauf scannen'}
-  </Text>
-</TouchableOpacity>
-
               {/* Row 4: Neuer Lebenslauf */}
                          </View>
           </BlurView>
@@ -1665,6 +1686,7 @@ const styles = StyleSheet.create({
 
   bottomNavContainer: {
     marginVertical: 12,
+    paddingHorizontal: 12,
     zIndex: 100,
   },
   bottomTabBar: {
