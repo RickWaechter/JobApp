@@ -224,7 +224,7 @@ export function cvView(
 
     /* Abstand vor jedem folgenden Abschnitt (Profil -> Berufserfahrung -> Ausbildung -> Skills) */
     .sheetOnePage .page-content * + .section-heading {
-      margin-top: 28px;
+      margin-top: 30px;
     }
 
     .section-heading {
@@ -283,7 +283,7 @@ export function cvView(
 
     .entry {
       position: relative;
-      padding-bottom: ${twoPage ? '16px' : '10px'};
+      padding-bottom: ${twoPage ? '16px' : '20px'};
     }
 
     .entry:last-child {

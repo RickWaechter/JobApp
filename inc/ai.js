@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Alert } from 'react-native';
 export const thePrompt = (inputValue,  languageValue, detailedSkillsString) => {
     return `
     Du bist ein erfahrener Bewerbungsschreiber und Experte für professionelle, überzeugende Bewerbungsanschreiben.
@@ -56,15 +57,17 @@ Erstelle jetzt das fertige Bewerbungsanschreiben.
 }
 
 export const getKeyword = async (id) => {
-  if (!id.description?.trim()) return;
+
 
   try {
+    console.log('Sending:', id);
     const response = await axios.post('https://api.jobapp2.de/getKeywords', {
       rote: id.role,
-      description: id.description,
+      description: id.description ? id.description : "Aus Jobtitel/Rolle entnehmen",
       modelIntense: "light"
     });
     if (response.data?.response) {
+        console.log('Keywords:', response.data.response);
       const keywords = response.data.response;
       return keywords
     }

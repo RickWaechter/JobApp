@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import {ExperienceCard} from '../comp/expCard';
-import  {EducationCard} from '../comp/eduCard'; 
+import { ExperienceCard } from '../comp/expCard';
+import { EducationCard } from '../comp/eduCard';
+import { BlurView } from 'expo-blur';
 import {
   View,
   Text,
@@ -9,6 +10,7 @@ import {
   Platform,
   useWindowDimensions,
   TouchableOpacity,
+  Pressable,
   Alert,
   StyleSheet,
   useColorScheme,
@@ -23,7 +25,7 @@ import {
   NestableScrollContainer,
   NestableDraggableFlatList,
 } from 'react-native-draggable-flatlist';
-import {Image} from 'expo-image';
+import { Image } from 'expo-image';
 import { cvView } from '../inc/cvView.js';
 import WebView from 'react-native-webview';
 import * as Print from 'expo-print';
@@ -35,6 +37,7 @@ import {
 } from '../inc/cvScan.js';
 import { getDatabaseConnection } from '../inc/db.js';
 import EncryptedStorage from 'react-native-encrypted-storage';
+
 export default function CoverScreen() {
   const { width: winW } = Dimensions.get('window');
   const isDark = useColorScheme() === 'dark';
@@ -44,12 +47,12 @@ export default function CoverScreen() {
   const [showExperience, setShowExperience] = useState(false);
   const [showEducation, setShowEducation] = useState(false);
   const [showSkills, setShowSkills] = useState(false);
-const isLoadedRef = useRef(false);
-const lastSavedRef = useRef('');
+  const isLoadedRef = useRef(false);
+  const lastSavedRef = useRef('');
   const [isScanningCv, setIsScanningCv] = useState(false);
   const dbMainRef = useRef(null);
   const t = (key) => key;
-const [saveCvTitle, setSaveCvTitle] = useState('');
+  const [saveCvTitle, setSaveCvTitle] = useState('');
   const [activeSection, setActiveSection] = useState('personal');
   const [exitingSection, setExitingSection] = useState(null);
 
@@ -64,13 +67,15 @@ const [saveCvTitle, setSaveCvTitle] = useState('');
   const [selectedLayout, setSelectedLayout] = useState('Modern');
   const [savedCvName, setSavedCvName] = useState([]);
   const [savedCv, setSavedCv] = useState([]);
-const [isFabOpen, setIsFabOpen] = useState(false);
-const fabAnim = useRef(new Animated.Value(0)).current;
+  const [isFabOpen, setIsFabOpen] = useState(false);
+  const fabAnim = useRef(new Animated.Value(0)).current;
+
   // WebView-, Seitenmodus- und Export-Status
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [isTwoPage, setIsTwoPage] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-const [showSavedCvsMenu, setShowSavedCvsMenu] = useState(false);
+  const [showSavedCvsMenu, setShowSavedCvsMenu] = useState(false);
+
   const theme = {
     bg: isDark ? '#000000' : '#f3f4f6',
     card: isDark ? '#18181b' : '#ffffff',
@@ -104,22 +109,9 @@ const [showSavedCvsMenu, setShowSavedCvsMenu] = useState(false);
     skills: setShowSkills,
   };
 
-  const [personal, setPersonal] = useState({
-  
-  });
-
-  const [experiences, setExperiences] = useState([
-    {
-    
-    },
-  ]);
-
-  const [educations, setEducations] = useState([
-    {
-    
-    },
-  ]);
-
+  const [personal, setPersonal] = useState({});
+  const [experiences, setExperiences] = useState([{}]);
+  const [educations, setEducations] = useState([{}]);
   const [skills, setSkills] = useState(
     'React Native, TypeScript, JavaScript, Git, REST APIs'
   );
@@ -127,97 +119,94 @@ const [showSavedCvsMenu, setShowSavedCvsMenu] = useState(false);
   // Dynamisches HTML abhängig von 1-Pager / 2-Pager
   const htmlLayout = cvView(
     isTwoPage,
-  
     personal,
     experiences,
     educations,
-
     skills
   );
-// Vor dem return in CoverScreen:
-const handleStartScan = () => {
-  if (isScanningCv) return;
-  startCvScan({
-    isScanningCv,
-    setIsScanningCv,
-    setExperiences,
-    setEducations,
-    setSkills,
-    setPersonal,
-    dbInstance: dbMainRef.current,
-    t,
-  });
-};
-const renderExperienceItem = useCallback(
-  (props) => (
-    <ExperienceCard
-      {...props}
-      theme={theme}
-      onUpdate={updateExperience}
-      onRemove={removeExperience}
-    />
-  ),
-  [theme]
-);
 
-const renderEducationItem = useCallback(
-  (props) => (
-    <EducationCard
-      {...props}
-      theme={theme}
-      onUpdate={updateEducation}
-      onRemove={removeEducation}
-    />
-  ),
-  [theme]
-);
-const toggleFab = () => {
-  const toValue = isFabOpen ? 0 : 1;
-  Animated.spring(fabAnim, {
-    toValue,
-    useNativeDriver: true,
-    tension: 65,
-    friction: 9,
-  }).start();
-  setIsFabOpen(!isFabOpen);
-};  
-useEffect(() => {
-  // Noch nicht fertig geladen? Auf keinen Fall speichern!
-  if (!isLoadedRef.current) return;
-
-  const tempObject = {
-    personal,
-    experiences,
-    educations,
-    skills,
+  const handleStartScan = () => {
+    if (isScanningCv) return;
+    startCvScan({
+      isScanningCv,
+      setIsScanningCv,
+      setExperiences,
+      setEducations,
+      setSkills,
+      setPersonal,
+      dbInstance: dbMainRef.current,
+      t,
+    });
   };
 
-  const payload = JSON.stringify(tempObject);
+  const renderExperienceItem = useCallback(
+    (props) => (
+      <ExperienceCard
+        {...props}
+        theme={theme}
+        onUpdate={updateExperience}
+        onRemove={removeExperience}
+      />
+    ),
+    [theme]
+  );
 
-  // Verhindert unnötiges Speichern, wenn der Inhalt identisch ist
-  if (payload === lastSavedRef.current) return;
+  const renderEducationItem = useCallback(
+    (props) => (
+      <EducationCard
+        {...props}
+        theme={theme}
+        onUpdate={updateEducation}
+        onRemove={removeEducation}
+      />
+    ),
+    [theme]
+  );
 
-  // Debounce: 400ms warten (vermeidet Schreib-Overhead beim Tippen)
-  const timer = setTimeout(async () => {
-    try {
-      await EncryptedStorage.setItem('tempCv', payload);
-      lastSavedRef.current = payload;
-      console.log('tempCv erfolgreich autosaved');
-    } catch (err) {
-      console.error('Fehler beim Autosave:', err);
-    }
-  }, 400);
+  const toggleFab = () => {
+    const toValue = isFabOpen ? 0 : 1;
+    Animated.spring(fabAnim, {
+      toValue,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 9,
+    }).start();
+    setIsFabOpen(!isFabOpen);
+  };
 
-  return () => clearTimeout(timer);
-}, [personal, experiences, educations, skills]);
-  // PDF erstellen und Share-Dialog öffnen
+  useEffect(() => {
+    if (!isLoadedRef.current) return;
+
+    const tempObject = {
+      personal,
+      experiences,
+      educations,
+      skills,
+    };
+
+    const payload = JSON.stringify(tempObject);
+    if (payload === lastSavedRef.current) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await EncryptedStorage.setItem('tempCv', payload);
+        lastSavedRef.current = payload;
+        console.log('tempCv erfolgreich autosaved');
+      } catch (err) {
+        console.error('Fehler beim Autosave:', err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [personal, experiences, educations, skills]);
+
   const handleSharePdf = async () => {
     try {
       setIsExporting(true);
       const { uri } = await Print.printToFileAsync({
         html: htmlLayout,
-        width: 595,  // DIN A4 Breite in Points (72 dpi)
-        height: 842, // DIN A4 Höhe in Points (72 dpi)
+        width: 595,
+        height: 842,
       });
 
       if (await Sharing.isAvailableAsync()) {
@@ -274,59 +263,55 @@ useEffect(() => {
     });
   };
 
-const persistCvData = async (titleToUse) => {
-  const chosenKey = titleToUse?.trim() || personal.name?.trim() || 'Unbenannter Stand';
+  const persistCvData = async (titleToUse) => {
+    const rawTitle = typeof titleToUse === 'string' ? titleToUse.trim() : '';
+    const chosenKey = rawTitle || personal.name?.trim() || 'Unbenannter Stand';
 
-  try {
-    const db = await getDatabaseConnection('firstNew.db');
+    try {
+      const db = await getDatabaseConnection('firstNew.db');
 
-    // 1. Bereits gespeicherte Stände laden
-    const resSelect = await db.executeSql('SELECT cv FROM files', []);
-    const item = resSelect[0]?.rows?.item(0);
-    let existingData = {};
+      const resSelect = await db.executeSql('SELECT cv FROM files', []);
+      const item = resSelect[0]?.rows?.item(0);
+      let existingData = {};
 
-    if (item?.cv) {
-      try {
-        existingData = JSON.parse(item.cv) || {};
-      } catch {
-        existingData = {};
+      if (item?.cv) {
+        try {
+          existingData = JSON.parse(item.cv) || {};
+        } catch {
+          existingData = {};
+        }
       }
+
+      const updatedData = {
+        ...existingData,
+        [chosenKey]: {
+          personal,
+          experiences,
+          educations,
+          skills,
+        },
+      };
+
+      await db.executeSql('UPDATE files SET cv = ?', [JSON.stringify(updatedData)]);
+
+      setSavedCv(updatedData);
+      setSavedCvName(Object.keys(updatedData).map((k) => ({ label: k, value: k })));
+
+      setSaveCvTitle('');
+      if (await EncryptedStorage.getItem('tempCv')) {
+        await EncryptedStorage.removeItem('tempCv');
+      }
+
+      Alert.alert('Erfolg', `Stand „${chosenKey}“ wurde gespeichert.`);
+      setShowSavedCvsMenu(false);
+      if (isFabOpen) toggleFab();
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      Alert.alert('Fehler', 'Der Lebenslauf konnte nicht gespeichert werden.');
+      return false;
     }
-
-    // 2. Bestehende Stände behalten & neuen Key einfügen/überschreiben
-    const updatedData = {
-      ...existingData,
-      [chosenKey]: {
-        personal,
-        experiences,
-        educations,
-        skills,
-      },
-    };
-
-    // 3. Zurück in SQLite schreiben
-    await db.executeSql('UPDATE files SET cv = ?', [JSON.stringify(updatedData)]);
-
-    // 4. UI-States sofort aktualisieren
-    setSavedCv(updatedData);
-    setSavedCvName(Object.keys(updatedData).map((k) => ({ label: k, value: k })));
-
-    // Eingabefeld leeren und Temp-Storage bereinigen
-    setSaveCvTitle('');
-    if (await EncryptedStorage.getItem('tempCv')) {
-      await EncryptedStorage.removeItem('tempCv');
-    }
-
-    Alert.alert('Erfolg', `Stand „${chosenKey}“ wurde gespeichert.`);
-    setShowSavedCvsMenu(false);
-    toggleFab();
-    return true;
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    Alert.alert('Fehler', 'Der Lebenslauf konnte nicht gespeichert werden.');
-    return false;
-  }
-};
+  };
 
   const saveCv = async () => {
     Alert.alert(
@@ -336,14 +321,14 @@ const persistCvData = async (titleToUse) => {
         { text: 'Abbrechen', style: 'cancel' },
         {
           text: 'Speichern',
-          onPress:async () => {
-            persistCvData(personal);
-            if (await EncryptedStorage.getItem('tempCv'))
-            {
-             await EncryptedStorage.removeItem('tempCv');  
+          onPress: async () => {
+            await persistCvData(personal.name);
+            if (await EncryptedStorage.getItem('tempCv')) {
+              await EncryptedStorage.removeItem('tempCv');
             }
-             setShowSavedCvsMenu(false);
-            toggleFab();},
+            setShowSavedCvsMenu(false);
+            if (isFabOpen) toggleFab();
+          },
         },
       ]
     );
@@ -378,7 +363,7 @@ const persistCvData = async (titleToUse) => {
         {
           text: 'Speichern & Neu',
           onPress: async () => {
-            const success = await persistCvData(personal);
+            const success = await persistCvData(personal.name);
             if (success) {
               resetFormToEmpty();
             }
@@ -410,7 +395,6 @@ const persistCvData = async (titleToUse) => {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         resumePollingIfNeeded({
-          
           setIsScanningCv,
           setExperiences,
           setEducations,
@@ -461,7 +445,8 @@ const persistCvData = async (titleToUse) => {
   const removeEducation = (id) => {
     setEducations(educations.filter((edu) => edu.id !== id));
   };
-const deleteSavedCv = (keyToDelete) => {
+
+  const deleteSavedCv = (keyToDelete) => {
     Alert.alert(
       'Stand löschen',
       `Möchtest du „${keyToDelete}“ wirklich unwiderruflich löschen?`,
@@ -485,15 +470,12 @@ const deleteSavedCv = (keyToDelete) => {
                 }
               }
 
-              // Key aus dem Datenobjekt entfernen
               delete existingData[keyToDelete];
 
-              // In SQLite zurückspeichern
               await db.executeSql('UPDATE files SET cv = ?', [
                 JSON.stringify(existingData),
               ]);
 
-              // UI-States aktualisieren
               setSavedCv(existingData);
               const keys = Object.keys(existingData);
               setSavedCvName(keys.map((k) => ({ label: k, value: k })));
@@ -506,67 +488,55 @@ const deleteSavedCv = (keyToDelete) => {
       ]
     );
   };
-useEffect(() => {
-  const get = async () => {
-    try {
-      // 1. Prüfen, ob temporärer Entwurf existiert
-      const tempCv = await EncryptedStorage.getItem('tempCv');
-      
-      if (tempCv) {
-        const parsed = JSON.parse(tempCv);
-        
-        // State befüllen, falls Daten da sind
-        if (parsed.personal && Object.keys(parsed.personal).length > 0) {
-          setPersonal(parsed.personal);
-        }
-        if (Array.isArray(parsed.experiences) && parsed.experiences.length > 0) {
-          setExperiences(parsed.experiences);
-        }
-        if (Array.isArray(parsed.educations) && parsed.educations.length > 0) {
-          setEducations(parsed.educations);
-        }
-        if (typeof parsed.skills === 'string') {
-          setSkills(parsed.skills);
+
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const tempCv = await EncryptedStorage.getItem('tempCv');
+
+        if (tempCv) {
+          const parsed = JSON.parse(tempCv);
+
+          if (parsed.personal && Object.keys(parsed.personal).length > 0) {
+            setPersonal(parsed.personal);
+          }
+          if (Array.isArray(parsed.experiences) && parsed.experiences.length > 0) {
+            setExperiences(parsed.experiences);
+          }
+          if (Array.isArray(parsed.educations) && parsed.educations.length > 0) {
+            setEducations(parsed.educations);
+          }
+          if (typeof parsed.skills === 'string') {
+            setSkills(parsed.skills);
+          }
+
+          lastSavedRef.current = tempCv;
         }
 
-        // Stand festhalten, damit der State-Update kein Re-Save triggert
-        lastSavedRef.current = tempCv;
+        const db = await getDatabaseConnection('firstNew.db');
+        const resSelect = await db.executeSql('SELECT cv FROM files', []);
+        const item = resSelect[0]?.rows?.item(0);
+        if (item?.cv) {
+          const jsonCv = JSON.parse(item.cv);
+          setSavedCv(jsonCv);
+          const keys = Object.keys(jsonCv);
+          setSavedCvName(keys.map((k) => ({ label: k, value: k })));
+        }
+      } catch (e) {
+        console.error('Fehler beim Laden:', e);
+      } finally {
+        isLoadedRef.current = true;
       }
+    };
 
-      // 2. Vorlagen aus SQLite laden (Dropdown)
-      const db = await getDatabaseConnection('firstNew.db');
-      const resSelect = await db.executeSql('SELECT cv FROM files', []);
-      const item = resSelect[0]?.rows?.item(0);
-      if (item?.cv) {
-        const jsonCv = JSON.parse(item.cv);
-        setSavedCv(jsonCv);
-        const keys = Object.keys(jsonCv);
-        setSavedCvName(keys.map((k) => ({ label: k, value: k })));
+    get();
+  }, []);
 
-      }
-    } catch (e) {
-      console.error('Fehler beim Laden:', e);
-    } finally {
-      // WICHTIG: Erst JETZT das Speichern für zukünftige Änderungen freigeben
-      isLoadedRef.current = true;
-    }
-  };
+  const { width, height } = useWindowDimensions();
 
-  get();
-}, []);
-
- 
-const {width, height} = useWindowDimensions();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
-        {/* Header */}
-      
-
-            {/* Oben Rechts: Speichern Button */}
-       
-      
-    
         <NestableScrollContainer contentContainerStyle={styles.scrollContent}>
           {activeTab === 'edit' ? (
             <View style={styles.cardsContainer}>
@@ -799,297 +769,299 @@ const {width, height} = useWindowDimensions();
             </Animated.View>
           )}
         </NestableScrollContainer>
-{/* Floating Action Menu (fährt nach oben aus) */}
-{/* Floating Action Menu (fährt nach oben aus) */}
-<View style={styles.fabContainer} pointerEvents="box-none">
-  {/* 4. Action: HTML / Preview (oben) */}
-  <Animated.View
-    pointerEvents={isFabOpen ? 'auto' : 'none'}
-    style={[
-      styles.fabItem,
-      {
-        opacity: fabAnim,
-        transform: [
-          {
-            translateY: fabAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -70],
-            }),
-          },
-          { scale: fabAnim },
-        ],
-      },
-    ]}
-  ><TouchableOpacity
-      style={[
-        styles.floatingPreviewBtn,
-        { backgroundColor: theme.card, borderColor: theme.border },
-      ]}
-      onPress={() => {
-        setShowSavedCvsMenu(false);
-        toggleFab();
-        setWebViewVisible(true);
-      }}
-      activeOpacity={0.7}
-    >
-      <Text style={styles.floatingPreviewIcon}>📄</Text>
-    </TouchableOpacity>
-  </Animated.View>
 
-  {/* 3. Action: Gespeicherte Lebensläufe / Vorlagen */}
-{/* 3. Action: Gespeicherte Lebensläufe / Vorlagen */}
-  <Animated.View
-    pointerEvents={isFabOpen ? 'auto' : 'none'}
-    style={[
-      styles.fabItem,
-      {
-        opacity: fabAnim,
-        transform: [
-          {
-            translateY: fabAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -140],
-            }),
-          },
-          { scale: fabAnim },
-        ],
-      },
-    ]}
-  >
-    {/* Popout-View links daneben: 50% größer, Titel zentriert & Speichern-Button */}
- {showSavedCvsMenu && (
-  <View
-    style={[
-      styles.cvListFlyout,
-      {
-        backgroundColor: theme.card,
-        borderColor: theme.border,
-      },
-    ]}
-  >
-    <Text style={[styles.cvListFlyoutTitle, { color: theme.text }]}>
-      Gespeicherte Stände
-    </Text>
+        {/* Unsichtbarer Tap-Bereich außerhalb zum Schließen (ohne Hintergrund-Blur) */}
+        {isFabOpen && (
+          <Pressable
+            style={styles.outsideDismissOverlay}
+            onPress={() => {
+              setShowSavedCvsMenu(false);
+              toggleFab();
+            }}
+          />
+        )}
 
-    {/* Scrollbare Liste der vorhandenen Stände */}
- {/* Scrollbare Liste der bisherigen Lebensläufe */}
-        <View style={styles.cvListContentWrap}>
-          {savedCvName && savedCvName.length > 0 ? (
-            savedCvName.map((cvItem) => {
-              console.log("cvItem", cvItem);
-              const isCurrent = personal.name === cvItem.value;
-              return (
-                <View key={cvItem.value} style={styles.cvListItemRow}>
-                  {/* Stand auswählen & laden */}
-                  <TouchableOpacity
+        {/* Animierter Menü-Container: BlurView liegt NUR um die Menüpunkte */}
+        <Animated.View
+          pointerEvents={isFabOpen ? 'auto' : 'none'}
+          style={[
+            styles.menuAnimatedWrapper,
+            {
+              opacity: fabAnim,
+              transform: [
+                {
+                  translateX: fabAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [95, 0],
+                  }),
+                },
+                {
+                  translateY: fabAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [130, 0],
+                  }),
+                },
+                { scale: fabAnim },
+              ],
+            },
+          ]}
+        >
+          <BlurView
+            intensity={65}
+            tint={isDark ? 'dark' : 'light'}
+            experimentalBlurMethod="dimezisBlurView"
+            style={[
+              styles.menuBlurBox,
+              {
+                borderColor: theme.border,
+                backgroundColor: isDark
+                  ? 'rgba(24, 24, 27, 0.62)'
+                  : 'rgba(255, 255, 255, 0.72)',
+              },
+            ]}
+          >
+            {/* Column-Container */}
+            <View style={styles.menuColumnContainer}>
+              {/* Row 1: Vorschau */}
+              <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                    
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  setShowSavedCvsMenu(false);
+                  toggleFab();
+                  setWebViewVisible(true);
+                }}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                  <Text style={styles.menuRowEmoji}>📄</Text>
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Vorschau
+                </Text>
+              </TouchableOpacity>
+
+              {/* Row 2: Gespeicherte Stände */}
+              <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                  
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => setShowSavedCvsMenu(!showSavedCvsMenu)}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                  <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=DM2tYcMgDzyn&format=png&color=000000"
+                    tintColor={theme.text}
+                    contentFit="contain"
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.menuRowText,
+                    { color: showSavedCvsMenu ? '#ffffff' : theme.text },
+                  ]}
+                >
+                  Gespeicherte Stände
+                </Text>
+              </TouchableOpacity>
+
+              {/* Aufklappbare Liste direkt im Column-Container */}
+              {showSavedCvsMenu && (
+                <View
+                  style={[
+                    styles.savedCvAccordion,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(24, 24, 27, 0.85)'
+                        : 'rgba(249, 250, 251, 0.9)',
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  {savedCvName && savedCvName.length > 0 ? (
+                    savedCvName.map((cvItem) => {
+                      const isCurrent = personal.name === cvItem.value;
+                      return (
+                        <View key={cvItem.value} style={styles.cvListItemRow}>
+                          <TouchableOpacity
+                            style={[
+                              styles.cvListItemBtn,
+                              { backgroundColor: theme.inputBg },
+                              isCurrent && {
+                                borderColor: theme.primary,
+                                borderWidth: 1,
+                              },
+                            ]}
+                            onPress={() => {
+                              handleSelectLayout(cvItem.value);
+                              setShowSavedCvsMenu(false);
+                              toggleFab();
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              style={[
+                                styles.cvListItemText,
+                                { color: theme.text },
+                                isCurrent && styles.cvListItemTextBold,
+                              ]}
+                              numberOfLines={1}
+                            >
+                              📄 {cvItem.label}
+                            </Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={styles.cvItemDeleteBtn}
+                            onPress={() => deleteSavedCv(cvItem.value)}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.cvItemDeleteBtnText}>✕</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })
+                  ) : (
+                    <Text style={[styles.cvListEmptyText, { color: theme.subtext }]}>
+                      Keine Stände vorhanden
+                    </Text>
+                  )}
+
+                  <TextInput
+                    value={saveCvTitle}
+                    onChangeText={setSaveCvTitle}
+                    placeholder="Name (z.B. Go Backend)"
+                    placeholderTextColor={theme.subtext}
                     style={[
-                      styles.cvListItemBtn,
-                      { backgroundColor: theme.inputBg },
-                      isCurrent && {
-                        borderColor: theme.primary,
-                        borderWidth: 1,
+                      styles.flyoutInput,
+                      {
+                        backgroundColor: theme.inputBg,
+                        color: theme.text,
+                        borderColor: theme.border,
                       },
                     ]}
-                    onPress={() => {
-                      handleSelectLayout(cvItem.value);
-                      setShowSavedCvsMenu(false);
-                      toggleFab();
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.cvListItemText,
-                        { color: theme.text },
-                        isCurrent && styles.cvListItemTextBold,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      📄 {cvItem.label}
-                    </Text>
-                  </TouchableOpacity>
+                  />
 
-                  {/* Stand löschen */}
                   <TouchableOpacity
-                    style={styles.cvItemDeleteBtn}
-                    onPress={() => deleteSavedCv(cvItem.value)}
-                    activeOpacity={0.7}
+                    style={[styles.cvSaveCurrentBtn, { backgroundColor: theme.primary }]}
+                    onPress={() => persistCvData(saveCvTitle)}
+                    activeOpacity={0.8}
                   >
-                    <Text style={styles.cvItemDeleteBtnText}>✕</Text>
+                    <Text style={styles.cvSaveCurrentBtnIcon}>💾</Text>
+                    <Text style={styles.cvSaveCurrentBtnText}>Stand speichern</Text>
                   </TouchableOpacity>
                 </View>
-              );
-            })
-          ) : (
-            <Text style={[styles.cvListEmptyText, { color: theme.subtext }]}>
-              Keine Stände vorhanden
-            </Text>
-          )}
-        </View>{/* Scrollbare Liste der bisherigen Lebensläufe */}
-  
+              )}
 
-    {/* Eingabefeld für den neuen Namen */}
-    <TextInput
-      value={saveCvTitle}
-      onChangeText={setSaveCvTitle}
-      placeholder="Name (z.B. Go Backend)"
-      placeholderTextColor={theme.subtext}
-      style={[
-        styles.flyoutInput,
-        { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border },
-      ]}
-    />
+              {/* Row 3: Lebenslauf scannen */}
+              <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                 
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  setShowSavedCvsMenu(false);
+                  toggleFab();
+                  handleStartScan();
+                }}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                  <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
+                    tintColor={theme.text}
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Lebenslauf scannen
+                </Text>
+              </TouchableOpacity>
 
-    {/* Speichern Button */}
-    <TouchableOpacity
-      style={[styles.cvSaveCurrentBtn, { backgroundColor: theme.primary }]}
-      onPress={() => persistCvData(saveCvTitle)}
-      activeOpacity={0.8}
-    >
-      <Text style={styles.cvSaveCurrentBtnIcon}>💾</Text>
-      <Text style={styles.cvSaveCurrentBtnText}>Speichern</Text>
-    </TouchableOpacity>
-  </View>
-)}
+              {/* Row 4: Neuer Lebenslauf */}
+              <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                    borderBottomWidth: 0,
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  setShowSavedCvsMenu(false);
+                  toggleFab();
+                  handleCreateNew();
+                }}
+              >
+                <View style={[styles.menuRowIconBox, { backgroundColor: theme.inputBg }]}>
+                  <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=DanTQOnC4W9c&format=png&color=000000"
+                    tintColor={theme.text}
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Neuer Lebenslauf
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+        </Animated.View>
 
-    {/* Runder Trigger-Button */}
-    <TouchableOpacity
-      style={[
-        styles.floatingPreviewBtn,
-        {
-          backgroundColor: showSavedCvsMenu ? theme.primary : theme.card,
-          borderColor: theme.border,
-        },
-      ]}
-      onPress={() => setShowSavedCvsMenu(!showSavedCvsMenu)}
-      activeOpacity={0.7}
-    >
-      <Image
-        style={[
-          styles.image,
-        ]}
-        source="https://img.icons8.com/?size=100&id=DM2tYcMgDzyn&format=png&color=000000"
-        contentFit="cover"
-        transition={1000}
-      />
-    </TouchableOpacity>
-  </Animated.View>
+        {/* Haupt-Menü-Trigger */}
+        <View style={styles.fabTriggerContainer} pointerEvents="box-none">
+          <TouchableOpacity
+            style={[
+              styles.floatingPreviewBtn,
+              styles.mainFabBtn,
+              {
+                backgroundColor: theme.primary,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => {
+              setShowSavedCvsMenu(false);
+              toggleFab();
+            }}
+            activeOpacity={0.8}
+          >
+            <Animated.Text
+              style={[
+                styles.mainFabIcon,
+                {
+                  transform: [
+                    {
+                      rotate: fabAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '90deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              {isFabOpen ? '✕' : '☰'}
+            </Animated.Text>
+          </TouchableOpacity>
+        </View>
 
-  {/* 2. Action: CV Scan */}
-  <Animated.View
-    pointerEvents={isFabOpen ? 'auto' : 'none'}
-    style={[
-      styles.fabItem,
-      {
-        opacity: fabAnim,
-        transform: [
-          {
-            translateY: fabAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -210],
-            }),
-          },
-          { scale: fabAnim },
-        ],
-      },
-    ]}
-  >
-    <TouchableOpacity
-      style={[
-        styles.floatingPreviewBtn,
-        { backgroundColor: theme.card, borderColor: theme.border },
-      ]}
-      onPress={() => {
-        setShowSavedCvsMenu(false);
-        toggleFab();
-        handleStartScan();
-      }}
-      activeOpacity={0.7}
-    >
-      <Image
-        style={styles.image}
-        source="https://img.icons8.com/?size=100&id=zceGtdSd7VGT&format=png&color=000000"
-        contentFit="cover"
-        transition={1000}
-      />
-    </TouchableOpacity>
-  </Animated.View>
-
-  {/* 1. Action: Neu / Reset */}
-  <Animated.View
-    pointerEvents={isFabOpen ? 'auto' : 'none'}
-    style={[
-      styles.fabItem,
-      {
-        opacity: fabAnim,
-        transform: [
-          {
-            translateY: fabAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -280],
-            }),
-          },
-          { scale: fabAnim },
-        ],
-      },
-    ]}
-  >
-    <TouchableOpacity
-      style={[
-        styles.floatingPreviewBtn,
-        { backgroundColor: theme.card, borderColor: theme.border },
-      ]}
-      onPress={() => {
-        setShowSavedCvsMenu(false);
-        toggleFab();
-        handleCreateNew();
-      }}
-      activeOpacity={0.7}
-    >
-      <Image
-        style={styles.image}
-        source="https://img.icons8.com/?size=100&id=DanTQOnC4W9c&format=png&color=000000"
-        contentFit="cover"
-        transition={1000}
-      />
-    </TouchableOpacity>
-  </Animated.View>
-
-  {/* Haupt-Menü-Trigger (3 Streifen / Burger-Icon) */}
-  <TouchableOpacity
-    style={[
-      styles.floatingPreviewBtn,
-      styles.mainFabBtn,
-      {
-        backgroundColor: theme.primary,
-        borderColor: theme.border,
-      },
-    ]}
-    onPress={() => {
-      setShowSavedCvsMenu(false);
-      toggleFab();
-    }}
-    activeOpacity={0.8}
-  >
-    <Animated.Text
-      style={[
-        styles.mainFabIcon,
-        {
-          transform: [
-            {
-              rotate: fabAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0deg', '90deg'],
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      {isFabOpen ? '✕' : '☰'}
-    </Animated.Text>
-  </TouchableOpacity>
-</View>
         {/* Untere Leiste mit den 4 Sektion-Buttons */}
         {activeTab === 'edit' && (
           <View style={styles.bottomNavContainer}>
@@ -1151,142 +1123,203 @@ const {width, height} = useWindowDimensions();
           </View>
         )}
 
-        {/* WebView Modal Overlay mit 1-Pager/2-Pager Toggle & Download/Share */}
-{/* WebView Modal Overlay mit modernem Floating Footer */}
-{/* WebView Modal Overlay mit modernem Floating Footer */}
-{webViewVisible && (
-  <View style={styles.overlayBackdrop}>
-    <View style={styles.webviewCard}>
-      {/* 1. Vorschau nimmt den vollen Viewport ein */}
-      <WebView
-        originWhitelist={['*']}
-        source={{ html: htmlLayout }}
-        style={styles.webview}
-        scalesPageToFit={false}
-        opaque={false}
-      />
+        {/* WebView Modal Overlay mit modernem Floating Footer */}
+        {webViewVisible && (
+          <View style={styles.overlayBackdrop}>
+            <View style={styles.webviewCard}>
+              <WebView
+                originWhitelist={['*']}
+                source={{ html: htmlLayout }}
+                style={styles.webview}
+                scalesPageToFit={false}
+                opaque={false}
+              />
 
-      {/* 2. Schwebende Steuerungsleiste unten */}
-      <View style={styles.webviewFooterWrapper} pointerEvents="box-none">
-        <View
-          style={[
-            styles.webviewFooterBar,
-            {
-              backgroundColor: isDark ? '#1F1A16' : '#ffffff',
-              borderColor: isDark ? 'rgba(255, 220, 190, 0.16)' : '#e5e7eb',
-            },
-          ]}
-        >
-          {/* Schließen Button (Links) */}
-          <TouchableOpacity
-            onPress={() => setWebViewVisible(false)}
-            style={[
-              styles.footerCloseBtn,
-              {
-                backgroundColor: isDark ? 'rgba(255, 240, 225, 0.08)' : '#f3f4f6',
-                borderColor: isDark ? 'rgba(255, 220, 190, 0.12)' : '#e5e7eb',
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.footerCloseBtnText, { color: theme.text }]}>✕</Text>
-          </TouchableOpacity>
+              <View style={styles.webviewFooterWrapper} pointerEvents="box-none">
+                <View
+                  style={[
+                    styles.webviewFooterBar,
+                    {
+                      backgroundColor: isDark ? '#1F1A16' : '#ffffff',
+                      borderColor: isDark ? 'rgba(255, 220, 190, 0.16)' : '#e5e7eb',
+                    },
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={() => setWebViewVisible(false)}
+                    style={[
+                      styles.footerCloseBtn,
+                      {
+                        backgroundColor: isDark ? 'rgba(255, 240, 225, 0.08)' : '#f3f4f6',
+                        borderColor: isDark ? 'rgba(255, 220, 190, 0.12)' : '#e5e7eb',
+                      },
+                    ]}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.footerCloseBtnText, { color: theme.text }]}>✕</Text>
+                  </TouchableOpacity>
 
-          {/* 1-Pager / 2-Pager Segmented Switch (Mitte) */}
-          <View
-            style={[
-              styles.footerToggleContainer,
-              {
-                backgroundColor: isDark ? 'rgba(0, 0, 0, 0.45)' : '#f3f4f6',
-                borderColor: isDark ? 'rgba(255, 220, 190, 0.08)' : '#e5e7eb',
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={[
-                styles.footerToggleBtn,
-                !isTwoPage && [styles.footerToggleBtnActive, { backgroundColor: theme.primary }],
-              ]}
-              onPress={() => setIsTwoPage(false)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.footerToggleText,
-                  { color: !isTwoPage ? '#ffffff' : theme.subtext },
-                  !isTwoPage && styles.footerToggleTextActive,
-                ]}
-              >
-                1-Pager
-              </Text>
-            </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.footerToggleContainer,
+                      {
+                        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.45)' : '#f3f4f6',
+                        borderColor: isDark ? 'rgba(255, 220, 190, 0.08)' : '#e5e7eb',
+                      },
+                    ]}
+                  >
+                    <TouchableOpacity
+                      style={[
+                        styles.footerToggleBtn,
+                        !isTwoPage && [
+                          styles.footerToggleBtnActive,
+                          { backgroundColor: theme.primary },
+                        ],
+                      ]}
+                      onPress={() => setIsTwoPage(false)}
+                      activeOpacity={0.8}
+                    >
+                      <Text
+                        style={[
+                          styles.footerToggleText,
+                          { color: !isTwoPage ? '#ffffff' : theme.subtext },
+                          !isTwoPage && styles.footerToggleTextActive,
+                        ]}
+                      >
+                        1-Pager
+                      </Text>
+                    </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.footerToggleBtn,
-                isTwoPage && [styles.footerToggleBtnActive, { backgroundColor: theme.primary }],
-              ]}
-              onPress={() => setIsTwoPage(true)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.footerToggleText,
-                  { color: isTwoPage ? '#ffffff' : theme.subtext },
-                  isTwoPage && styles.footerToggleTextActive,
-                ]}
-              >
-                2-Pager
-              </Text>
-            </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.footerToggleBtn,
+                        isTwoPage && [
+                          styles.footerToggleBtnActive,
+                          { backgroundColor: theme.primary },
+                        ],
+                      ]}
+                      onPress={() => setIsTwoPage(true)}
+                      activeOpacity={0.8}
+                    >
+                      <Text
+                        style={[
+                          styles.footerToggleText,
+                          { color: isTwoPage ? '#ffffff' : theme.subtext },
+                          isTwoPage && styles.footerToggleTextActive,
+                        ]}
+                      >
+                        2-Pager
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={handleSharePdf}
+                    style={[styles.footerShareBtn, { backgroundColor: theme.primary }]}
+                    disabled={isExporting}
+                    activeOpacity={0.8}
+                  >
+                    {isExporting ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                      <>
+                        <Text style={styles.footerShareBtnIcon}>📥</Text>
+                        <Text style={styles.footerShareBtnText}>PDF</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
           </View>
-
-          {/* PDF Teilen Button (Rechts) */}
-          <TouchableOpacity
-            onPress={handleSharePdf}
-            style={[styles.footerShareBtn, { backgroundColor: theme.primary }]}
-            disabled={isExporting}
-            activeOpacity={0.8}
-          >
-            {isExporting ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              <>
-                <Text style={styles.footerShareBtnIcon}>📥</Text>
-                <Text style={styles.footerShareBtnText}>PDF</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  </View>
-)}
+        )}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  /* Flyout-Menü links neben dem FAB-Button */
-/* Flyout-Menü links neben dem FAB (50% vergrößert) */
-/* Flyout-Breite leicht anpassen, damit Button und Name sauber Platz haben */
-  cvListFlyout: {
-    position: 'absolute',
-    right: 76,
-    bottom: -20,
-    width: 250,              // Etwas breiter (vorher 215) für den Lösch-Button
-    maxHeight: 350,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: -3, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 16,
-    zIndex: 1000,
+  /* Transparenter Tap-Fänger außerhalb des Menüs (ohne Blur) */
+  outsideDismissOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    zIndex: 890,
   },
+
+  /* Animierter Wrapper für die Menü-Box */
+  menuAnimatedWrapper: {
+    position: 'absolute',
+    right: 20,
+    bottom: 158,
+    width: 270,
+    zIndex: 920,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+  },
+
+  /* BlurView liegt nur direkt um die Menüpunkte */
+  menuBlurBox: {
+    borderRadius: 22,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+
+  /* Column-Container für die einzelnen Rows */
+  menuColumnContainer: {
+    flexDirection: 'column',
+  },
+
+  /* Einzelner Row-Container (Icon + Text) */
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    gap: 12,
+  },
+  menuRowIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuRowIcon: {
+    width: 22,
+    height: 22,
+  },
+  menuRowEmoji: {
+    fontSize: 18,
+  },
+  menuRowText: {
+    fontSize: 15,
+    fontWeight: '700',
+    flex: 1,
+  },
+
+  /* Aufklappbarer Bereich unter "Gespeicherte Stände" */
+  savedCvAccordion: {
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 6,
+  },
+
+  /* Haupt-Trigger unten rechts */
+  fabTriggerContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 85,
+    zIndex: 950,
+    elevation: 20,
+  },
+
   cvListItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1294,7 +1327,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cvListItemBtn: {
-    flex: 1,                 // Nimmt den restlichen Platz links ein
+    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 12,
@@ -1321,28 +1354,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 8,
   },
-  cvListFlyoutTitle: {
-    fontSize: 16,            // Vorher 10.5 -> 50% größer
-    fontWeight: '800',
-    textAlign: 'center',     // Zentrierter Titel
-    letterSpacing: 0.4,
-    paddingBottom: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(150, 150, 150, 0.35)',
-    marginBottom: 8,
-  },
-  cvListContentWrap: {
-    maxHeight: 180,
-  },
-  cvListItemBtn: {
-    paddingVertical: 12,     // Vorher 7
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginVertical: 4,
-    justifyContent: 'center',
-  },
   cvListItemText: {
-    fontSize: 15,            // Vorher 12.5 -> deutlich lesbarer
+    fontSize: 15,
     fontWeight: '500',
   },
   cvListItemTextBold: {
@@ -1354,7 +1367,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  /* Speichern-Button darunter */
   cvSaveCurrentBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1372,11 +1384,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+
   container: {
     flex: 1,
   },
   header: {
-    
     paddingHorizontal: 12,
     paddingTop: 12,
     paddingBottom: 10,
@@ -1424,20 +1436,6 @@ const styles = StyleSheet.create({
     zIndex: 7000,
     elevation: 12,
   },
-  /* FAB Container & Items */
-  fabContainer: {
-    position: 'absolute',
-    right: 20,
-    bottom: 85, // Sitzt direkt über der Footer-Navigationsleiste
-    zIndex: 900,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fabItem: {
-    position: 'absolute',
-    bottom: 0,
-    zIndex: 890,
-  },
   mainFabBtn: {
     borderWidth: 0,
     shadowOpacity: 0.35,
@@ -1450,25 +1448,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   floatingPreviewBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 50,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 110,
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
   },
+  floatingPreviewIcon: {
+    fontSize: 22,
+  },
   scrollContent: {
     padding: 16,
     paddingBottom: 120,
   },
   image: {
-     width:33,
-    height:33
+    width: 33,
+    height: 33,
   },
   cardsContainer: {
     position: 'relative',
@@ -1626,26 +1628,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  /* Schwebender Papier-Kreis-Button */
-  floatingPreviewBtn: {
-   
-    width: 60,
-    height: 60,
-    borderRadius: 50,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 110,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-  },
-  floatingPreviewIcon: {
-    fontSize: 22,
-  },
-
   bottomNavContainer: {
     marginVertical: 12,
     zIndex: 100,
@@ -1696,7 +1678,6 @@ const styles = StyleSheet.create({
   },
 
   /* WebView Overlay Styles */
- /* WebView Overlay Styles */
   overlayBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(18, 13, 10, 0.88)',
@@ -1721,94 +1702,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 16, // Platz für Home-Indicator
-    paddingTop: 8,
-  },
-  webviewFooterBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 24,
-    borderWidth: 1.2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.38,
-    shadowRadius: 14,
-    elevation: 16,
-    gap: 8,
-  },
-  footerCloseBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerCloseBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  footerToggleContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 3,
-  },
-  footerToggleBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footerToggleBtnActive: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  footerToggleText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-  },
-  footerToggleTextActive: {
-    fontWeight: '700',
-  },
-  footerShareBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 42,
-    paddingHorizontal: 14,
-    borderRadius: 21,
-    gap: 5,
-    minWidth: 84,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  footerShareBtnIcon: {
-    fontSize: 15,
-  },
-  footerShareBtnText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  webviewFooterWrapper: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 16, // Platz für Home-Indicator
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16,
     paddingTop: 8,
   },
   webviewFooterBar: {
@@ -1955,8 +1849,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
   },
-  webview: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

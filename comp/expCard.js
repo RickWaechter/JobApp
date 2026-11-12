@@ -155,7 +155,7 @@ const handleSend = async (item) => {
         { backgroundColor: theme.primary || '#007AFF' },
       ]}
       onPress={() => handleSend(item)}
-      disabled={loading || !item.description?.trim()}
+      disabled={loading}
       activeOpacity={0.7}
     >
       {loading ? (
