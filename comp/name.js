@@ -2,7 +2,7 @@
 - CompanySearchModal.js
 - ───────────────────────────────────────────────────────────────────────
 -  1. Imports
--  2. Tokens
+-  2. Tokens & Keyboard-Cache
 -  3. Subkomponenten (Field)
 -  4. Hauptkomponente (Layout ohne interne Animationen)
 -  5. Styles
@@ -40,9 +40,20 @@ import colors from "../inc/colors.js";
 import "../local/i18n.js";
 import Info, { useInfoModal } from "../comp/info.js";
 
-/* ── 2. Tokens ─────────────────────────────────────────────────────────── */
+/* ── 2. Tokens & Keyboard-Cache ────────────────────────────────────────── */
 const DEBOUNCE_MS = 250;
 const DOUBLE_TAP_GUARD_MS = 1000;
+
+const KB_HEIGHT_KEY = "cached_kb_height";
+let cachedKbHeight = null;
+
+// Einmalig beim Laden des Moduls vorab aus dem Storage in den RAM holen
+EncryptedStorage.getItem(KB_HEIGHT_KEY)
+  .then((val) => {
+    const parsed = Number(val);
+    if (parsed > 0) cachedKbHeight = parsed;
+  })
+  .catch(() => {});
 
 const M = {
   panelPadH: 20,
@@ -155,6 +166,8 @@ const Field = memo(function Field({
 
         <TextInput
           ref={inputRef}
+          autoCapitalize="none"
+          spellCheck={false}
           style={[styles.input, Boolean(iconName) && styles.inputWithIcon]}
           placeholder={placeholder}
           placeholderTextColor={WARM.textDim}
@@ -206,7 +219,10 @@ const CompanySearchModal = ({
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [manualMode, setManualMode] = useState(manual);
-  const [kbHeight, setKbHeight] = useState(0);
+  const [kbHeight, setKbHeight] = useState(() => {
+    if (cachedKbHeight) return cachedKbHeight;
+    return Platform.OS === "ios" ? (insets.bottom > 0 ? 291 : 216) : 280;
+  });
   const [errors, setErrors] = useState({
     nameErr: "",
     streetErr: "",
@@ -224,33 +240,55 @@ const CompanySearchModal = ({
 
   manualModeRef.current = manualMode;
 
-  /* ── Tastatur-Tracking ── */
-  useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+  /* ── Event Handler: Query ── */
+  const onChangeQuery = useCallback((text) => {
+    setQuery(text);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-    const onShow = (e) => {
-      const h = e?.endCoordinates?.height ?? 0;
-      if (h > 0) setKbHeight(h);
-    };
+    if (text.trim().length === 0) {
+      setResults([]);
+      setSearching(false);
+      return;
+    }
 
-    const onHide = () => {
-      setKbHeight(0);
-    };
-
-    const sub1 = Keyboard.addListener(showEvent, onShow);
-    const sub2 = Keyboard.addListener(hideEvent, onHide);
-
-    return () => {
-      sub1.remove();
-      sub2.remove();
-    };
+    setSearching(true);
+    debounceTimer.current = setTimeout(() => search(text), DEBOUNCE_MS);
   }, []);
 
-  /* ── Auto-Focus beim Einblenden ── */
-/* ── Auto-Focus & Auto-Search beim Einblenden ── */
+  /* ── Tastatur-Tracking mit 2-Stufen-Cache (RAM + EncryptedStorage) ── */
+  useEffect(() => {
+    if (!cachedKbHeight) {
+      EncryptedStorage.getItem(KB_HEIGHT_KEY)
+        .then((val) => {
+          const parsed = Number(val);
+          if (parsed > 0) {
+            cachedKbHeight = parsed;
+            setKbHeight((prev) => (prev === parsed ? prev : parsed));
+          }
+        })
+        .catch(() => {});
+    }
+
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+
+    const onShow = (e) => {
+      const h = Math.round(e?.endCoordinates?.height ?? 0);
+              console.log("duration", e.duration);
+        console.log("endCoordinates", e.endCoordinates);
+      if (h > 0 && h !== cachedKbHeight) {
+
+        cachedKbHeight = h;
+        setKbHeight(h);
+        EncryptedStorage.setItem(KB_HEIGHT_KEY, String(h)).catch(() => {});
+      }
+    };
+
+    const sub = Keyboard.addListener(showEvent, onShow);
+    return () => sub.remove();
+  }, []);
+
+  /* ── Auto-Focus & Auto-Search beim Einblenden ── */
   useEffect(() => {
     if (visible) {
       const hasFullAddress = Boolean(
@@ -258,33 +296,35 @@ const CompanySearchModal = ({
       );
 
       if (hasFullAddress) {
-        // Alle Daten da -> direkt in Modus B (Manuell) anzeigen
         setYourCity(initialCity);
         setYourStreet(initialStreet);
         setYourName(initialName);
         setManualMode(true);
 
-        focusTimer.current = setTimeout(() => {
+        requestAnimationFrame(() => {
           nameRef.current?.focus();
-        }, 260);
+        });
       } else {
-        // Daten unvollständig -> in Modus A (Suche) wechseln & MapKit-Suche sofort starten
         setManualMode(false);
-        const searchTerm = searchGmbh(initialName);
-        
-        onChangeQuery(searchTerm);
 
-        focusTimer.current = setTimeout(() => {
+        // Sofort fokussieren -> Tastatur & Modal fahren synchron ein
           searchRef.current?.focus();
-        }, 260);
+
+        // MapKit-Suche erst nach der Slide-Animation starten (kein Re-Render im Flug)
+        const searchTerm = searchGmbh(initialName);
+        if (searchTerm) {
+          focusTimer.current = setTimeout(() => {
+            onChangeQuery(searchTerm);
+          }, 350);
+        }
       }
-    } else {
     }
 
     return () => {
       if (focusTimer.current) clearTimeout(focusTimer.current);
     };
   }, [visible, initialCity, initialStreet, initialName, onChangeQuery]);
+
   /* ── MapKit Search Listener ── */
   useEffect(() => {
     const listener = addSearchListener((items) => {
@@ -315,20 +355,6 @@ const CompanySearchModal = ({
   }, [winH, stageTop, kbHeight, insets.bottom, manualMode]);
 
   /* ── Event Handler ── */
-  const onChangeQuery = useCallback((text) => {
-    setQuery(text);
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-
-    if (text.trim().length === 0) {
-      setResults([]);
-      setSearching(false);
-      return;
-    }
-
-    setSearching(true);
-    debounceTimer.current = setTimeout(() => search(text), DEBOUNCE_MS);
-  }, []);
-
   const handleSelect = useCallback(async (item) => {
     try {
       const info = await fetchPlace(item.identifier).catch(() => null);

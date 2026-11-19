@@ -100,12 +100,11 @@ const { mode, setMode } = useTheme();
   const animOverlayWrapperY = useRef(new Animated.Value(0)).current;
   const animBackdropOpacity = useRef(new Animated.Value(0)).current;
 
-  const animBewerbungX = useRef(new Animated.Value(0)).current;
   const animBewerbungOpacity = useRef(new Animated.Value(0)).current;
 
   const animChangeScreenX = useRef(new Animated.Value(0)).current;
   const animChangeScreenOpacity = useRef(new Animated.Value(0)).current;
-
+const animChangeScreenY = useRef(new Animated.Value(0)).current; // NEU
   const animChangeOldOpacity = useRef(new Animated.Value(0)).current;
 
   const kbListenerRef = useRef(null);
@@ -130,17 +129,17 @@ const { mode, setMode } = useTheme();
     Animated.parallel([
       Animated.timing(animNameModalX, {
         toValue: 1,
-        duration: 400,
+        duration: 323.3,
         useNativeDriver: true,
       }),
       Animated.timing(animNameModalOpacity, {
         toValue: 1,
-        duration: 500,
+        duration: 383.3,
         useNativeDriver: true,
       }),
       Animated.timing(animHomeOpacity, {
         toValue: 0,
-        duration: 380,
+        duration: 383,
         useNativeDriver: true,
       }),
     ]).start();
@@ -153,12 +152,8 @@ const { mode, setMode } = useTheme();
     animNameModalY.setValue(1);
     animNameModalOpacity.setValue(0);
 
-    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    kbListenerRef.current = Keyboard.addListener(showEvent, triggerNameSlideDown);
 
-    kbFallbackRef.current = setTimeout(() => {
       triggerNameSlideDown();
-    }, 240);
   }, [animNameModalX, animNameModalY, animNameModalOpacity, triggerNameSlideDown]);
 
   const closeName = useCallback(() => {
@@ -201,7 +196,7 @@ const { mode, setMode } = useTheme();
   /* ── Overlay Dismiss ── */
   const closeAllOverlays = useCallback(() => {
     Keyboard.dismiss();
-
+console.log("closeAllOverlays")
     Animated.parallel([
       Animated.timing(animOverlayWrapperY, {
         toValue: 1,
@@ -215,7 +210,7 @@ const { mode, setMode } = useTheme();
       }),
       Animated.timing(animHomeOpacity, {
         toValue: 1,
-        duration: 380,
+        duration: 280,
         useNativeDriver: true,
       }),
     ]).start(() => {
@@ -229,10 +224,10 @@ const { mode, setMode } = useTheme();
       animOverlayWrapperY.setValue(0);
       animBackdropOpacity.setValue(0);
 
-      animBewerbungX.setValue(0);
       animBewerbungOpacity.setValue(0);
 
       animChangeScreenX.setValue(0);
+      animChangeScreenY.setValue(0); // NEU
       animChangeScreenOpacity.setValue(0);
 
       animChangeOldOpacity.setValue(0);
@@ -246,7 +241,7 @@ const { mode, setMode } = useTheme();
     animBackdropOpacity,
     animHomeOpacity,
     animOverlayWrapperX,
-    animBewerbungX,
+    
     animBewerbungOpacity,
     animChangeScreenX,
     animChangeScreenOpacity,
@@ -266,12 +261,13 @@ const { mode, setMode } = useTheme();
     animOverlayWrapperX.setValue(0);
     animOverlayWrapperY.setValue(0);
 
-    animBewerbungX.setValue(0);
+  
+    
     animBewerbungOpacity.setValue(0);
     animChangeScreenX.setValue(0);
+    animChangeScreenY.setValue(0); // NEU
     animChangeScreenOpacity.setValue(0);
 
-      bewerbungRef.current?.focusName?.();
 
     Animated.parallel([
       Animated.timing(animOverlayWrapperX, {
@@ -294,7 +290,7 @@ const { mode, setMode } = useTheme();
     animOverlayWrapperX,
     animOverlayWrapperY,
     animBackdropOpacity,
-    animBewerbungX,
+   
     animBewerbungOpacity,
     animChangeScreenX,
     animChangeScreenOpacity,
@@ -311,6 +307,8 @@ const { mode, setMode } = useTheme();
     animOverlayWrapperX.setValue(0);
     animOverlayWrapperY.setValue(0);
     animBackdropOpacity.setValue(0);
+    animChangeScreenX.setValue(0); // Empfohlen
+animChangeScreenY.setValue(0); // NEU
     animChangeScreenOpacity.setValue(0);
     changeScreenRef.current?.focus?.();
 
@@ -389,16 +387,78 @@ const { mode, setMode } = useTheme();
     animHomeOpacity,
   ]);
 
-  const navigateToChange = useCallback(() => {
-    changeScreenRef.current?.focus?.();
-    setScreenChange(true);
 
+
+
+const closeChange = useCallback(() => {
+    Keyboard.dismiss();
+
+    // Fall 1: ChangeScreen wurde direkt geöffnet (ohne Bewerbung darunter) -> komplettes Overlay schließen
+    if (!screenApp) {
+      closeAllOverlays();
+      return;
+    }
+    console.log("closeCange")
+    // Fall 2: ChangeScreen liegt über Bewerbung -> nach oben (Y) wegfahren & Bewerbung wieder zentrieren
     Animated.parallel([
-      Animated.timing(animBewerbungX, {
+      Animated.timing(animChangeScreenY, {
+        toValue: 1,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animChangeScreenOpacity, {
         toValue: 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    Animated.timing(animHomeOpacity, {
+        toValue: 1,
         duration: 380,
         useNativeDriver: true,
       }),
+    ]).start(() => {
+      
+      setScreen(false);
+      setScreenApp(false);
+      setScreenChange(false);
+      setChangeOldScreen(false);
+      setShowCompanySearch(false);
+    
+      
+    });
+  }, [
+    screenApp,
+    closeAllOverlays,
+    animChangeScreenY,
+    animChangeScreenOpacity,
+    
+    animChangeScreenX,
+  ]);
+
+
+
+
+
+
+
+
+
+  const navigateToChange = useCallback(() => {
+    changeScreenRef.current?.focus?.();
+
+    setScreenApp(false);
+    setChangeOldScreen(false);
+    setScreenChange(true);
+    setScreen(true);
+
+    changeScreenRef.current?.disableScroll?.();
+
+    animChangeScreenX.setValue(0); // Empfohlen
+animChangeScreenY.setValue(0); // NEU
+    animChangeScreenOpacity.setValue(0);
+
+    Animated.parallel([
+
       Animated.timing(animChangeScreenX, {
         toValue: 1,
         duration: 380,
@@ -410,17 +470,12 @@ const { mode, setMode } = useTheme();
         useNativeDriver: true,
       }),
     ]).start();
-  }, [animBewerbungX, animChangeScreenX, animChangeScreenOpacity]);
-
+}, [animChangeScreenX, animChangeScreenY, animChangeScreenOpacity]);
   const backToBewerbung = useCallback(() => {
     Keyboard.dismiss();
 
     Animated.parallel([
-      Animated.timing(animBewerbungX, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }),
+      
       Animated.timing(animChangeScreenX, {
         toValue: 0,
         duration: 350,
@@ -434,7 +489,7 @@ const { mode, setMode } = useTheme();
     ]).start(() => {
       setScreenChange(false);
     });
-  }, [animBewerbungX, animChangeScreenX, animChangeScreenOpacity]);
+  }, [animChangeScreenX, animChangeScreenOpacity]);
 
   /* ── Firmenauswahl Übergang zu Bewerbung ── */
   const handleCompanySaved = useCallback(
@@ -454,13 +509,13 @@ const { mode, setMode } = useTheme();
       animOverlayWrapperY.setValue(0);
       animBackdropOpacity.setValue(1);
 
-      animBewerbungX.setValue(0);
+     
       animBewerbungOpacity.setValue(0);
       animChangeScreenX.setValue(0);
       animChangeScreenOpacity.setValue(0);
 
       requestAnimationFrame(() => {
-        bewerbungRef.current?.focusName?.();
+        bewerbungRef.current?.focusJob?.();
       });
 
       Animated.parallel([
@@ -499,7 +554,7 @@ const { mode, setMode } = useTheme();
       animOverlayWrapperX,
       animOverlayWrapperY,
       animBackdropOpacity,
-      animBewerbungX,
+     
       animBewerbungOpacity,
       animChangeScreenX,
       animChangeScreenOpacity,
@@ -807,6 +862,7 @@ const { mode, setMode } = useTheme();
         <View style={styles.modalOverlay} pointerEvents="box-none">
           <Animated.View
             renderToHardwareTextureAndroid={true}
+            shouldRasterizeIOS={true}
             style={[
               styles.cardAnimatedWrap,
               {
@@ -895,15 +951,7 @@ const { mode, setMode } = useTheme();
                         inputRange: [0, 1],
                         outputRange: [0, 1],
                       }),
-                      transform: [
-                        {
-                          translateX: animBewerbungX.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, -width * 0.35],
-                            extrapolate: "clamp",
-                          }),
-                        },
-                      ],
+                      
                     },
                   ]}
                   pointerEvents={screenApp && !screenChange ? "auto" : "none"}
@@ -918,6 +966,7 @@ const { mode, setMode } = useTheme();
                 </Animated.View>
 
                 {/* Step 2: ChangeScreen */}
+{/* Step 2: ChangeScreen */}
                 <Animated.View
                   style={[
                     StyleSheet.absoluteFillObject,
@@ -934,6 +983,13 @@ const { mode, setMode } = useTheme();
                             extrapolate: "clamp",
                           }),
                         },
+                        {
+                          translateY: animChangeScreenY.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -height],
+                            extrapolate: "clamp",
+                          }),
+                        },
                       ],
                     },
                   ]}
@@ -941,7 +997,7 @@ const { mode, setMode } = useTheme();
                 >
                   <ChangeScreen
                     visible={screenChange}
-                    onClose={closeAllOverlays}
+                    onClose={closeChange}
                     ref={changeScreenRef}
                   />
                 </Animated.View>
@@ -986,7 +1042,7 @@ const { mode, setMode } = useTheme();
 const createStyles = (colors) => ({
   container: {
     flex: 1,
-    backgroundColor: colors.bg || "#0F1117",
+    backgroundColor:  "#0F1117",
   },
   contentWrapper: {
     flex: 1,
@@ -994,6 +1050,7 @@ const createStyles = (colors) => ({
     justifyContent: "space-between",
     paddingTop: 24,
     paddingBottom: 28,
+    backgroundColor:colors.bg
   },
   header: {
     marginTop: 8,

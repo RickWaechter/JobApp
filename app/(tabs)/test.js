@@ -331,7 +331,7 @@
     setBewerbungVisible(true);
 
   setTimeout(() => {
-      bewerbungsRef.current?.focusName();
+      bewerbungsRef.current?.focusSkill();
     }, 50);
     Animated.parallel([
       Animated.timing(nameAnim, {
@@ -370,7 +370,7 @@
     setJob(cachedDetails?.jobTitel || item.stellenangebotsTitel || '');
     setDescription(cachedDetails?.beschreibung || '');
 
-    nameAnim.setValue(-width);
+    nameAnim.setValue(width);
     nameAnimY.setValue(0);
     backdropAnim.setValue(0);
     setNameVisible(true);
@@ -466,6 +466,10 @@
     };
 
     const closeChangeScreen = () => {
+       backdropAnim.stopAnimation();
+    bewerbungAnim.stopAnimation();
+    bewerbungAnimY.stopAnimation();
+
       Animated.timing(changeAnim, {
         toValue: width,
         duration: 300,

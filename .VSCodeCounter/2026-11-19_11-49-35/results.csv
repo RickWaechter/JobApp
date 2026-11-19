@@ -1,0 +1,147 @@
+"filename", "language", "XML", "TypeScript JSX", "JSON", "JavaScript", "Go", "Ruby", "TypeScript", "JSON with Comments", "PostCSS", "Markdown", "Swift", "Kotlin", "Groovy", "JavaScript JSX", "MS SQL", "comment", "blank", "total"
+"/home/rick/JobApp/App.js", "JavaScript", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 10
+"/home/rick/JobApp/Gemfile", "Ruby", 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 17
+"/home/rick/JobApp/README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 20, 51
+"/home/rick/JobApp/__tests__/App.test.tsx", "TypeScript JSX", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 14
+"/home/rick/JobApp/api/cryp.js", "JavaScript", 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 18, 63
+"/home/rick/JobApp/api/dbJob.js", "JavaScript", 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 20
+"/home/rick/JobApp/api/first.js", "JavaScript", 0, 0, 0, 377, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 457
+"/home/rick/JobApp/api/jobapp.go", "Go", 0, 0, 0, 0, 691, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 136, 843
+"/home/rick/JobApp/api/jobapp.js", "JavaScript", 0, 0, 0, 374, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 454
+"/home/rick/JobApp/api/package.json", "JSON", 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 36
+"/home/rick/JobApp/app.config.js", "JavaScript", 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"/home/rick/JobApp/app.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 1, 113
+"/home/rick/JobApp/app/(tabs)/_layout.tsx", "TypeScript JSX", 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 96
+"/home/rick/JobApp/app/(tabs)/index.js", "JavaScript", 0, 0, 0, 1114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 86, 1215
+"/home/rick/JobApp/app/(tabs)/profil.js", "JavaScript", 0, 0, 0, 713, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 53, 776
+"/home/rick/JobApp/app/(tabs)/test.js", "JavaScript", 0, 0, 0, 992, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 90, 1107
+"/home/rick/JobApp/app/(tabs)/upload.js", "JavaScript", 0, 0, 0, 1212, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 103, 1335
+"/home/rick/JobApp/app/_layout.tsx", "TypeScript JSX", 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 70
+"/home/rick/JobApp/app/application.js", "JavaScript", 0, 0, 0, 2101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 171, 2289
+"/home/rick/JobApp/app/change.js", "JavaScript", 0, 0, 0, 338, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 30, 374
+"/home/rick/JobApp/app/changeOld.js", "JavaScript", 0, 0, 0, 352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 30, 388
+"/home/rick/JobApp/app/collect.js", "JavaScript", 0, 0, 0, 489, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 41, 543
+"/home/rick/JobApp/app/cover.js", "JavaScript", 0, 0, 0, 1882, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 144, 2043
+"/home/rick/JobApp/app/email.js", "JavaScript", 0, 0, 0, 985, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 88, 1091
+"/home/rick/JobApp/app/first.js", "JavaScript", 0, 0, 0, 733, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 49, 796
+"/home/rick/JobApp/app/modal.tsx", "TypeScript JSX", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 30
+"/home/rick/JobApp/app/nameOld.js", "JavaScript", 0, 0, 0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20, 425
+"/home/rick/JobApp/app/old.js", "JavaScript", 0, 0, 0, 921, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 66, 996
+"/home/rick/JobApp/app/uploadFirst.js", "JavaScript", 0, 0, 0, 552, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 34, 597
+"/home/rick/JobApp/app/webview.js", "JavaScript", 0, 0, 0, 180, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 9, 195
+"/home/rick/JobApp/assets/images/background.svg", "XML", 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 11
+"/home/rick/JobApp/babel.config.js", "JavaScript", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10
+"/home/rick/JobApp/backup/cvView.js", "JavaScript", 0, 0, 0, 826, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 53, 889
+"/home/rick/JobApp/backup/ocrui.js", "JavaScript", 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 125
+"/home/rick/JobApp/comp/actionCard.js", "JavaScript", 0, 0, 0, 520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 26, 556
+"/home/rick/JobApp/comp/clearButton.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 4, 29
+"/home/rick/JobApp/comp/documentPicker.js", "JavaScript", 0, 0, 0, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 18, 230
+"/home/rick/JobApp/comp/eduCard.js", "JavaScript", 0, 0, 0, 212, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 219
+"/home/rick/JobApp/comp/expCard.js", "JavaScript", 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 306
+"/home/rick/JobApp/comp/floatWebview.js", "JavaScript", 0, 0, 0, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 217
+"/home/rick/JobApp/comp/info.js", "JavaScript", 0, 0, 0, 266, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 16, 287
+"/home/rick/JobApp/comp/jobSearch.js", "JavaScript", 0, 0, 0, 165, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 175
+"/home/rick/JobApp/comp/jobWebView.js", "JavaScript", 0, 0, 0, 220, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 240
+"/home/rick/JobApp/comp/keyboardDummy.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 6, 11, 71
+"/home/rick/JobApp/comp/keyboardHeight.js", "JavaScript", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 29
+"/home/rick/JobApp/comp/name.js", "JavaScript", 0, 0, 0, 927, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 86, 1041
+"/home/rick/JobApp/comp/profilModals.js", "JavaScript", 0, 0, 0, 1021, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 37, 1065
+"/home/rick/JobApp/comp/sorter.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 0, 0, 8, 79
+"/home/rick/JobApp/comp/themeContext.js", "JavaScript", 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 11, 71
+"/home/rick/JobApp/comp/themeStyles.js", "JavaScript", 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/home/rick/JobApp/components/external-link.tsx", "TypeScript JSX", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 26
+"/home/rick/JobApp/components/haptic-tab.tsx", "TypeScript JSX", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 19
+"/home/rick/JobApp/components/hello-wave.tsx", "TypeScript JSX", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 20
+"/home/rick/JobApp/components/parallax-scroll-view.tsx", "TypeScript JSX", 0, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 80
+"/home/rick/JobApp/components/themed-text.tsx", "TypeScript JSX", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 61
+"/home/rick/JobApp/components/themed-view.tsx", "TypeScript JSX", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/home/rick/JobApp/components/ui/collapsible.tsx", "TypeScript JSX", 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 46
+"/home/rick/JobApp/components/ui/icon-symbol.ios.tsx", "TypeScript JSX", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 33
+"/home/rick/JobApp/components/ui/icon-symbol.tsx", "TypeScript JSX", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 5, 42
+"/home/rick/JobApp/constants/theme.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 8, 5, 54
+"/home/rick/JobApp/eas.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 1, 28
+"/home/rick/JobApp/eslint.config.js", "JavaScript", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 11
+"/home/rick/JobApp/hooks/use-color-scheme.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"/home/rick/JobApp/hooks/use-color-scheme.web.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 22
+"/home/rick/JobApp/hooks/use-theme-color.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 22
+"/home/rick/JobApp/inc/CutLine.js", "JavaScript", 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 20
+"/home/rick/JobApp/inc/CutTheLine.js", "JavaScript", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7
+"/home/rick/JobApp/inc/Keyboard.js", "JavaScript", 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11, 43
+"/home/rick/JobApp/inc/ai.js", "JavaScript", 0, 0, 0, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 80
+"/home/rick/JobApp/inc/animation.js", "JavaScript", 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 66
+"/home/rick/JobApp/inc/ba.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/home/rick/JobApp/inc/colors.js", "JavaScript", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 17
+"/home/rick/JobApp/inc/craw.js", "JavaScript", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 21, 107
+"/home/rick/JobApp/inc/cryp.js", "JavaScript", 0, 0, 0, 115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 21, 151
+"/home/rick/JobApp/inc/crypNew.js", "JavaScript", 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 12, 96
+"/home/rick/JobApp/inc/cv.js", "JavaScript", 0, 0, 0, 519, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22, 543
+"/home/rick/JobApp/inc/cvScan.js", "JavaScript", 0, 0, 0, 547, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 84, 651
+"/home/rick/JobApp/inc/cvView.js", "JavaScript", 0, 0, 0, 755, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 45, 809
+"/home/rick/JobApp/inc/date.js", "JavaScript", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 15
+"/home/rick/JobApp/inc/db.js", "JavaScript", 0, 0, 0, 250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 61, 320
+"/home/rick/JobApp/inc/documentPickerAi.js", "JavaScript", 0, 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 17, 136
+"/home/rick/JobApp/inc/downloader.js", "JavaScript", 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 14, 93
+"/home/rick/JobApp/inc/font.js", "JavaScript", 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 7, 50
+"/home/rick/JobApp/inc/generate.js", "JavaScript", 0, 0, 0, 263, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 42, 311
+"/home/rick/JobApp/inc/header.js", "JavaScript", 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 135
+"/home/rick/JobApp/inc/keyboardStorage.js", "JavaScript", 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 15, 81
+"/home/rick/JobApp/inc/language.js", "JavaScript", 0, 0, 0, 173, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 6, 189
+"/home/rick/JobApp/inc/ocr.js", "JavaScript", 0, 0, 0, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 25, 166
+"/home/rick/JobApp/inc/palette.js", "JavaScript", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 29
+"/home/rick/JobApp/inc/pan.js", "JavaScript", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 3, 39
+"/home/rick/JobApp/inc/popup.js", "JavaScript", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11, 97
+"/home/rick/JobApp/inc/popupDownload.js", "JavaScript", 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 92
+"/home/rick/JobApp/inc/profilService.js", "JavaScript", 0, 0, 0, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 37, 249
+"/home/rick/JobApp/inc/raminfo.js", "JavaScript", 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 55
+"/home/rick/JobApp/inc/scrapper.js", "JavaScript", 0, 0, 0, 635, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 1, 717
+"/home/rick/JobApp/inc/string.js", "JavaScript", 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 2, 48
+"/home/rick/JobApp/inc/style.js", "JavaScript", 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"/home/rick/JobApp/inc/themeColor.js", "JavaScript", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 31
+"/home/rick/JobApp/index.js", "JavaScript", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 10
+"/home/rick/JobApp/jest.config.js", "JavaScript", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/home/rick/JobApp/local/First.js", "JavaScript", 0, 0, 0, 556, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 81, 644
+"/home/rick/JobApp/local/i18n.js", "JavaScript", 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 61
+"/home/rick/JobApp/local/translate/ar.json", "JSON", 0, 0, 544, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 571
+"/home/rick/JobApp/local/translate/bks.json", "JSON", 0, 0, 510, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 535
+"/home/rick/JobApp/local/translate/de.json", "JSON", 0, 0, 649, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 651
+"/home/rick/JobApp/local/translate/el.json", "JSON", 0, 0, 646, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 646
+"/home/rick/JobApp/local/translate/en.json", "JSON", 0, 0, 646, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 646
+"/home/rick/JobApp/local/translate/es.json", "JSON", 0, 0, 545, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 571
+"/home/rick/JobApp/local/translate/fa.json", "JSON", 0, 0, 473, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 499
+"/home/rick/JobApp/local/translate/fr.json", "JSON", 0, 0, 544, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 568
+"/home/rick/JobApp/local/translate/i18n.js", "JavaScript", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 51
+"/home/rick/JobApp/local/translate/it.json", "JSON", 0, 0, 544, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 570
+"/home/rick/JobApp/local/translate/jp.json", "JSON", 0, 0, 640, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 649
+"/home/rick/JobApp/local/translate/new.json", "JSON", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5
+"/home/rick/JobApp/local/translate/nl.json", "JSON", 0, 0, 544, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 571
+"/home/rick/JobApp/local/translate/pl.json", "JSON", 0, 0, 545, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 572
+"/home/rick/JobApp/local/translate/ro.json", "JSON", 0, 0, 545, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 571
+"/home/rick/JobApp/local/translate/ru.json", "JSON", 0, 0, 545, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 571
+"/home/rick/JobApp/local/translate/tr.json", "JSON", 0, 0, 571, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 572
+"/home/rick/JobApp/local/translate/ua.json", "JSON", 0, 0, 545, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 571
+"/home/rick/JobApp/metro.config.js", "JavaScript", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"/home/rick/JobApp/modules/expo-mapkit/android/build.gradle", "Groovy", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 0, 4, 5, 44
+"/home/rick/JobApp/modules/expo-mapkit/android/src/main/AndroidManifest.xml", "XML", 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3
+"/home/rick/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitModule.kt", "Kotlin", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 16, 8, 51
+"/home/rick/JobApp/modules/expo-mapkit/android/src/main/java/expo/modules/mapkit/ExpoMapkitView.kt", "Kotlin", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 5, 31
+"/home/rick/JobApp/modules/expo-mapkit/expo-module.config.json", "JSON", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/home/rick/JobApp/modules/expo-mapkit/index.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 6
+"/home/rick/JobApp/modules/expo-mapkit/ios/ExpoMapkit.podspec", "Ruby", 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 24
+"/home/rick/JobApp/modules/expo-mapkit/ios/ExpoMapkitModule.swift", "Swift", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 214, 0, 0, 0, 0, 7, 53, 274
+"/home/rick/JobApp/modules/expo-mapkit/ios/ExpoMapkitView.swift", "Swift", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 2, 7, 39
+"/home/rick/JobApp/modules/expo-mapkit/package.json", "JSON", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13
+"/home/rick/JobApp/modules/expo-mapkit/src/ExpoMapkit.types.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/home/rick/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 13
+"/home/rick/JobApp/modules/expo-mapkit/src/ExpoMapkitModule.web.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/home/rick/JobApp/modules/expo-mapkit/src/ExpoMapkitView.tsx", "TypeScript JSX", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/home/rick/JobApp/modules/expo-mapkit/src/ExpoMapkitView.web.tsx", "TypeScript JSX", 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/home/rick/JobApp/modules/expo-mapkit/src/index.js", "JavaScript", 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 27
+"/home/rick/JobApp/nav/navigator.js", "JavaScript", 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 28, 181
+"/home/rick/JobApp/package-lock.json", "JSON", 0, 0, 16588, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16589
+"/home/rick/JobApp/package.json", "JSON", 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 128
+"/home/rick/JobApp/scripts/reset-project.js", "JavaScript", 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 14, 113
+"/home/rick/JobApp/stryker.config.json", "JSON", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16
+"/home/rick/JobApp/tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18
+"/home/rick/JobApp/www/city.db", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12619, 0, 2057, 14676
+"/home/rick/JobApp/www/street.db", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 116283, 0, 11010, 127293
+"Total", "-", 11, 496, 25824, 24443, 691, 29, 110, 156, 0, 31, 244, 48, 35, 150, 128902, 756, 15876, 197802
