@@ -8,47 +8,71 @@ import RNFS from 'react-native-fs';
 
 const DB_NAME = 'firstNew.db';
 
+const dbInstances = new Map();
+const dbPromises = new Map();
+
 export const getDatabaseConnection = async (dbName = DB_NAME) => {
-  if (Platform.OS === 'ios') {
-    const localDbDir = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
-    
-    // 1. Ordner sicherstellen
-    if (!(await RNFS.exists(localDbDir))) {
-      await RNFS.mkdir(localDbDir);
-    }
-
-    const mainDb = `${localDbDir}/${dbName}`;
-    const walFile = `${localDbDir}/${dbName}-wal`;
-    const shmFile = `${localDbDir}/${dbName}-shm`;
-
-    const mainExists = await RNFS.exists(mainDb);
-
-    // 2. Wenn Hauptdatei fehlt ODER 0 Byte groß ist -> Verwaiste WAL/SHM entfernen!
-    if (!mainExists) {
-      if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
-      if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
-    } else {
-      const stat = await RNFS.stat(mainDb);
-      if (stat.size === 0) {
-        await RNFS.unlink(mainDb);
-        if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
-        if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
-      }
-    }
+  if (dbInstances.has(dbName)) {
+    return dbInstances.get(dbName);
   }
 
-  // 3. Timeout-Absicherung gegen Hänger
-  const openPromise = SQLite.openDatabase({
-    name: dbName,
-    location: 'default',
+  if (dbPromises.has(dbName)) {
+    return dbPromises.get(dbName);
+  }
+
+  const initPromise = (async () => {
+    if (Platform.OS === 'ios') {
+      const localDbDir = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
+
+      // 1. Ordner sicherstellen
+      if (!(await RNFS.exists(localDbDir))) {
+        await RNFS.mkdir(localDbDir);
+      }
+
+      const mainDb = `${localDbDir}/${dbName}`;
+      const walFile = `${localDbDir}/${dbName}-wal`;
+      const shmFile = `${localDbDir}/${dbName}-shm`;
+
+      const mainExists = await RNFS.exists(mainDb);
+
+      // 2. Wenn Hauptdatei fehlt ODER 0 Byte groß ist -> Verwaiste WAL/SHM entfernen
+      if (!mainExists) {
+        if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
+        if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
+      } else {
+        const stat = await RNFS.stat(mainDb);
+        if (stat.size === 0) {
+          await RNFS.unlink(mainDb);
+          if (await RNFS.exists(walFile)) await RNFS.unlink(walFile);
+          if (await RNFS.exists(shmFile)) await RNFS.unlink(shmFile);
+        }
+      }
+    }
+
+    // 3. Timeout-Absicherung gegen Hänger
+    const openPromise = SQLite.openDatabase({
+      name: dbName,
+      location: 'default',
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT_OPEN_DB')), 4000)
+    );
+
+    const db = await Promise.race([openPromise, timeoutPromise]);
+    dbInstances.set(dbName, db);
+    return db;
+  })().catch((err) => {
+    dbPromises.delete(dbName);
+    throw err;
   });
 
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('TIMEOUT_OPEN_DB')), 4000)
-  );
-
-  return await Promise.race([openPromise, timeoutPromise]);
+  dbPromises.set(dbName, initPromise);
+  return initPromise;
 };
+
+// Kurzer Alias für deine Screens
+export const getDb = getDatabaseConnection;
 export const selectDb = async () => {
     const deviceId = await DeviceInfo.getUniqueId();
     try {
@@ -193,3 +217,104 @@ export const runQuery = (db, query, params = []) => {
     
     }
   };
+
+  export   const getOld = async () => {
+    try {
+      const key = await EncryptedStorage.getItem("key");
+      if (!key || typeof key !== "string" || key.trim() === "") {
+        console.warn("getOld: Kein gültiger Encryption-Key gefunden.");
+        return [];
+      }
+
+      const deviceId = await DeviceInfo.getUniqueId();
+      const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
+
+      const result = await runQuery(
+        db,
+        "SELECT old, mergePdf FROM files WHERE ident = ?;",
+        [deviceId]
+      );
+
+      const rows = result?.rows?.raw() ?? [];
+      if (rows.length === 0 || !rows[0].old) return [];
+
+      const rawOld = rows[0].old;
+      if (!rawOld || typeof rawOld !== "string") return [];
+
+      const encData = await decryp(rawOld, key);
+      let decMerge = "";
+      if (rows[0].mergePdf && typeof rows[0].mergePdf === "string") {
+        decMerge = await decryp(rows[0].mergePdf, key);
+      }
+
+      if (!encData) return [];
+
+      const oldFull = encData.split("&").filter(Boolean);
+      const oldArray = decMerge ? decMerge.split(",") : [];
+
+      const newEntries = [];
+      for (let i = oldFull.length - 1; i >= 0; i--) {
+        const parts = oldFull[i].split("#");
+        if (parts.length >= 3) {
+          newEntries.push({
+            job: parts[0],
+            date: parts[1] || "",
+            myType: `${parts[2] || ""} / ${parts[3] || ""}`,
+            subject: parts[4] || "Kein Betreff",
+            text: parts[5] || "",
+            link: oldArray[i] || "",
+          });
+        }
+      }
+      return newEntries;
+    } catch (error) {
+      console.error("getOld Error:", error);
+      return [];
+    }
+  };
+
+  let dbQueue = Promise.resolve();
+
+export const withDbLock = (task) => {
+  const next = dbQueue.then(() => task());
+  dbQueue = next.catch(() => {});
+  return next;
+};
+
+/**
+ * Aktualisiert beliebige Spalten in `files` für `ident` oder legt die Zeile neu an.
+ * `fields` z. B.: { name: encName, city: encCity, street: encStreet }
+ */
+export const upsertFilesRow = async (db, deviceId, fields) => {
+  const keys = Object.keys(fields);
+  const values = Object.values(fields);
+
+  const setClause = keys.map((k) => `${k} = ?`).join(', ');
+  const [updateRes] = await db.executeSql(
+    `UPDATE files SET ${setClause} WHERE ident = ?`,
+    [...values, deviceId]
+  );
+
+  if (updateRes.rowsAffected > 0) return true;
+
+  const baseDefaults = {
+    name: '',
+    street: '',
+    city: '',
+    email: '',
+    emailPassword: '',
+    emailServer: '',
+    skills: '',
+    ...fields,
+  };
+
+  const insertCols = ['ident', ...Object.keys(baseDefaults)];
+  const insertVals = [deviceId, ...Object.values(baseDefaults)];
+  const placeholders = insertCols.map(() => '?').join(', ');
+
+  await db.executeSql(
+    `INSERT INTO files (${insertCols.join(', ')}) VALUES (${placeholders})`,
+    insertVals
+  );
+  return true;
+};

@@ -10,6 +10,7 @@
 
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { addSearchListener, fetchPlace, search } from "expo-mapkit";
+import { searchGmbh } from "../inc/string.js";
 import React, {
   memo,
   useCallback,
@@ -190,6 +191,7 @@ const CompanySearchModal = ({
   initialStreet = "",
   initialCity = "",
   style,
+  manual = false,
 }) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -203,7 +205,7 @@ const CompanySearchModal = ({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [manualMode, setManualMode] = useState(false);
+  const [manualMode, setManualMode] = useState(manual);
   const [kbHeight, setKbHeight] = useState(0);
   const [errors, setErrors] = useState({
     nameErr: "",
@@ -248,21 +250,41 @@ const CompanySearchModal = ({
   }, []);
 
   /* ── Auto-Focus beim Einblenden ── */
+/* ── Auto-Focus & Auto-Search beim Einblenden ── */
   useEffect(() => {
     if (visible) {
-      focusTimer.current = setTimeout(() => {
-        if (manualModeRef.current) nameRef.current?.focus();
-        else searchRef.current?.focus();
-      }, 260);
+      const hasFullAddress = Boolean(
+        initialCity?.trim() && initialStreet?.trim() && initialName?.trim()
+      );
+
+      if (hasFullAddress) {
+        // Alle Daten da -> direkt in Modus B (Manuell) anzeigen
+        setYourCity(initialCity);
+        setYourStreet(initialStreet);
+        setYourName(initialName);
+        setManualMode(true);
+
+        focusTimer.current = setTimeout(() => {
+          nameRef.current?.focus();
+        }, 260);
+      } else {
+        // Daten unvollständig -> in Modus A (Suche) wechseln & MapKit-Suche sofort starten
+        setManualMode(false);
+        const searchTerm = searchGmbh(initialName);
+        
+        onChangeQuery(searchTerm);
+
+        focusTimer.current = setTimeout(() => {
+          searchRef.current?.focus();
+        }, 260);
+      }
     } else {
-      Keyboard.dismiss();
     }
 
     return () => {
       if (focusTimer.current) clearTimeout(focusTimer.current);
     };
-  }, [visible]);
-
+  }, [visible, initialCity, initialStreet, initialName, onChangeQuery]);
   /* ── MapKit Search Listener ── */
   useEffect(() => {
     const listener = addSearchListener((items) => {

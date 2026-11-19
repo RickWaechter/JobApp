@@ -638,7 +638,6 @@ const OldScreen = () => {
               visible={modalVisible}
               onClose={closeModal}
               onSaved={handleCompanySaved}
-              initialName={selectedEntry?.job || ''}
             />
           </Animated.View>
         </View>

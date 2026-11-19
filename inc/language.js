@@ -18,6 +18,24 @@ export const itemsLang = [
   { label: '🇮🇷 فارسی / دری', value: 'فارسی / دری' },
   { label: '🇯🇵 日本語', value: '日本語' },
 ];
+export const itemsLangFlag = [
+  { label: 'Deutsch', value: 'de', flag: '🇩🇪' },
+  { label: 'English', value: 'en', flag: '🇬🇧' },
+  { label: 'Ελληνικά', value: 'el', flag: '🇬🇷' },
+  { label: 'Türkçe', value: 'tr', flag: '🇹🇷' },
+  { label: 'العربية', value: 'ar', flag: '🇸🇦' },
+  { label: 'Français', value: 'fr', flag: '🇫🇷' },
+  { label: 'Italiano', value: 'it', flag: '🇮🇹' },
+  { label: 'Español', value: 'es', flag: '🇪🇸' },
+  { label: 'Nederlands', value: 'nl', flag: '🇳🇱' },
+  { label: 'Polski', value: 'pl', flag: '🇵🇱' },
+  { label: 'Română', value: 'ro', flag: '🇷🇴' },
+  { label: 'Русский', value: 'ru', flag: '🇷🇺' },
+  { label: 'Українська', value: 'uk', flag: '🇺🇦' },
+  { label: 'Bosanski / Hrvatski / Srpski', value: 'bks', flag: '🇭🇷' },
+  { label: 'فارسی / دری', value: 'fa', flag: '🇮🇷' },
+  { label: '日本語', value: 'jp', flag: '🇯🇵' },
+];
 // inc/languages.js
 // inc/languages.js
 // Sprachen, die zwingend Roboto für den PDF-Zeichensatz benötigen

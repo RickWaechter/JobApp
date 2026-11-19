@@ -4,6 +4,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from "react-native-safe-area-context";
+import {font} from '../../inc/style';
 import {
   ActivityIndicator,
   Alert,
@@ -21,6 +23,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../../comp/themeContext';
+import { useThemedStyles } from '../../comp/themeStyles';
 import DocumentActionCard from "../../comp/actionCard.js";
 import DeviceInfo from 'react-native-device-info';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -64,7 +68,8 @@ const UploadScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
-
+const { mode, setMode } = useTheme();
+  const styles = useThemedStyles(createStyles);
   /* ── States ──────────────────────────────────────────── */
   const [files, setFiles] = useState([]);
   const [data, setData] = useState([]);
@@ -263,6 +268,7 @@ const UploadScreen = () => {
 
       const processedFiles = await Promise.all(
         results.assets.map(async (file) => {
+          console.log('file', file);
           try {
             const originalFilePath = decodeURI(file.uri);
             const filePath = `${documentsDir}/${file.name}`;
@@ -489,7 +495,8 @@ const UploadScreen = () => {
   const activeItem = data.find((item) => item.id === activePdfId);
 
   return (
-    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
+
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -498,9 +505,10 @@ const UploadScreen = () => {
             <Text style={styles.badgeHubText}>{t('upload.headerBlue')}</Text>
           </View>
           <Text style={styles.titleMain}>{t('upload.headerWhite')}</Text>
+          <View style={styles.headerDivider} />
           <Text style={styles.subtitleMain}>{t('upload.headerInfo')}</Text>
         </View>
-
+      
         {/* ── Hauptbereich ── */}
         <View style={styles.contentArea}>
           {files.length === 0 ? (
@@ -516,8 +524,9 @@ const UploadScreen = () => {
                   iconName="upload-file"
                   title={t('uploadFiles') || 'Dateien auswählen'}
                   description={t('selectFilesToUpload') || 'PDFs oder Bilder von deinem Gerät auswählen.'}
-                  onPress={handleFileChange}
+                  onPress={() => setMode(("dark" == mode) ? "light" : "dark")}
                 />
+                  
 
                 <DocumentActionCard
                   iconName="reorder"
@@ -815,15 +824,15 @@ const UploadScreen = () => {
         onClose={closeInfo}
         message={infoMessage}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 /* ── Styles ─────────────────────────────────────────────── */
-const styles = StyleSheet.create({
+const createStyles = (colors) =>({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background || '#0F1117',
+    backgroundColor: colors.bg || '#0F1117',
   },
   container: {
     flex: 1,
@@ -840,8 +849,8 @@ const styles = StyleSheet.create({
   badgeHub: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    alignSelf: 'center',
+    backgroundColor: colors.badge,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 20,
@@ -849,30 +858,44 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 8,
   },
+  headerDivider: {
+  width: width / 1.2,
+  height: 1,
+  borderRadius: 2,
+  backgroundColor: colors.badgeDogt || '#355675',
+  alignSelf: 'center',
+  marginTop: 10,
+  marginBottom: 6,
+},
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#3B82F6',
+    backgroundColor:colors.badgeDot,
     marginRight: 6,
   },
   badgeHubText: {
-    color: '#60A5FA',
-    fontSize: 10,
+    color: colors.badgeText,
+    fontSize: font.badgeText,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
   titleMain: {
-    color: '#FFFFFF',
-    fontSize: 26,
+    color: colors.titleMain,
+    fontSize: font.sizeHeadline,
     fontWeight: '800',
     letterSpacing: -0.4,
+    alignSelf: 'center',
+    
+
   },
   subtitleMain: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 13,
+    color: colors.subTitleMain,
+    alignSelf: 'center',
+    fontSize: font.sizeSubline,
     marginTop: 4,
     lineHeight: 18,
+    textAlign: 'center',
   },
 
   /* ── Gemeinsamer Inhaltsbereich ── */
@@ -885,16 +908,16 @@ const styles = StyleSheet.create({
   cardsWrapper: {
     flex: 1,
     justifyContent: 'center',
-    gap: 14,
+    gap: 19,
   },
   actionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#171B26',
+    backgroundColor: '#727b94',
     borderRadius: 22,
     padding: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(243, 19, 19, 0.08)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -902,9 +925,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   primaryActionCard: {
-    backgroundColor: 'rgba(59, 130, 246, 0.14)',
-    borderColor: 'rgba(59, 130, 246, 0.4)',
-    shadowColor: '#3B82F6',
+    backgroundColor: 'rgba(34, 50, 75, 0.14)',
+    borderColor: 'rgba(46, 48, 51, 0.4)',
+    shadowColor: '#111824',
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 5,

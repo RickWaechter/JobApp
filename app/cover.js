@@ -2,6 +2,15 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { ExperienceCard } from '../comp/expCard';
 import { EducationCard } from '../comp/eduCard';
 import { BlurView } from 'expo-blur';
+import * as Keychain from 'react-native-keychain';
+
+import {
+  decryp,
+  decryptBase,
+  encryp,
+  encryptBase64,
+  genIv,
+} from '../inc/cryp.js';
 import {
   View,
   Text,
@@ -16,7 +25,6 @@ import {
   useColorScheme,
   AppState,
   LayoutAnimation, // <--- NEU
-  UIManager,       // <--- NEU
   Animated,
   ActivityIndicator,
 } from 'react-native';
@@ -30,6 +38,7 @@ import {
 import { Image } from 'expo-image';
 import { cvView } from '../inc/cvView.js';
 import WebView from 'react-native-webview';
+import RNFS from 'react-native-fs';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import {
@@ -39,6 +48,7 @@ import {
 } from '../inc/cvScan.js';
 import { getDatabaseConnection } from '../inc/db.js';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import DeviceInfo from 'react-native-device-info';
 
 export default function CoverScreen() {
   const { width: winW } = Dimensions.get('window');
@@ -146,6 +156,7 @@ const toggleSavedCvsMenu = () => {
   const handleStartScan = () => {
     if (isScanningCv) return;
     startCvScan({
+      where: 'cover',
       isScanningCv,
       setIsScanningCv,
       setExperiences,
@@ -217,7 +228,94 @@ const toggleSavedCvsMenu = () => {
 
     return () => clearTimeout(timer);
   }, [personal, experiences, educations, skills]);
+const handleSaveBase64 = async () => {
+  console.log('1. [START] handleSaveBase64 gestartet');
+  try {
+    setIsExporting(true);
 
+    // Schritt 1: Keychain prüfen 
+      const deviceId = await DeviceInfo.getUniqueId();
+    console.log('2. [KEYCHAIN] Lade Credentials...');
+    const credentials = await Keychain.getGenericPassword();
+    console.log('2a. [KEYCHAIN] Credentials vorhanden?:', !!credentials);
+    if (!credentials) {
+      throw new Error('Keine Keychain Credentials gefunden!');
+    }
+    const myKey = credentials.password;
+    console.log('2b. [KEYCHAIN] myKey Länge:', myKey?.length);
+
+    // Schritt 2: PDF generieren
+    console.log('3. [PRINT] Generiere PDF mit htmlLayout Länge:', htmlLayout?.length);
+    const { uri, base64 } = await Print.printToFileAsync({
+      html: htmlLayout,
+      width: 595,
+      height: 842,
+      base64: true,
+    });
+    console.log('3a. [PRINT] Generierte URI:', uri);
+    console.log('3b. [PRINT] Base64 Länge:', base64?.length);
+
+    if (!base64) {
+      throw new Error('Base64-String konnte nicht generiert werden.');
+    }
+
+    // Schritt 3: Pfade bauen
+    const documentsDir = RNFS.LibraryDirectoryPath;
+    const originalFilePath = decodeURI(uri);
+    const fileName = originalFilePath.split('/').pop() || '';
+    const filePath = `${documentsDir}/${fileName}`;
+    
+    console.log('4. [PFADE] documentsDir:', documentsDir);
+    console.log('4a. [PFADE] fileName:', fileName);
+    console.log('4b. [PFADE] Ziel filePath:', filePath);
+
+    // Schritt 4: Slicing & Encryption
+    const base641 = base64.slice(0, 16);
+    const base642 = base64.slice(16);
+    console.log('5. [SLICE] base641:', base641);
+    console.log('5a. [SLICE] base642 Länge:', base642.length);
+
+    const iv = await genIv();
+    console.log('6. [CRYPTO] IV generiert:', iv);
+
+    const encrypted = await encryptBase64(base641, iv, myKey);
+    console.log('6a. [CRYPTO] encrypted Ergebnis:', encrypted);
+
+    const theFilePath = await encryp(fileName, myKey);
+    console.log('6b. [CRYPTO] theFilePath (für DB):', theFilePath);
+
+    // Schritt 5: Dateien schreiben
+    if (encrypted) {
+      console.log('7. [RNFS] Schreibe Teil 1 nach:', filePath);
+      await RNFS.writeFile(filePath, encrypted, 'base64');
+      
+      console.log('7a. [RNFS] Schreibe Teil 2 nach:', `${filePath}_1`);
+      await RNFS.writeFile(`${filePath}_1`, base642, 'base64');
+      console.log('7b. [RNFS] Beide Dateien erfolgreich geschrieben!');
+    } else {
+      console.warn('7. [WARN] encrypted war leer/false, nichts geschrieben!');
+    }
+
+    // Schritt 6: SQLite Update
+    console.log('8. [DB] Öffne firstNew.db...');
+    const db = await getDatabaseConnection('firstNew.db');
+    console.log('8a. [DB] Führe UPDATE aus für deviceId:', deviceId);
+    const [result] = await db.executeSql(
+      'UPDATE files SET lebenslauf = ? WHERE ident = ?',
+      [theFilePath, deviceId]
+    );
+    console.log('8b. [DB] Update fertig. Betroffene Zeilen (rowsAffected):', result?.rowsAffected);
+
+    console.log('9. [ENDE] Alles erfolgreich abgeschlossen!');
+  } catch (error) {
+    console.error('❌ [FEHLER] in handleSaveBase64:', error);
+    Alert.alert('Fehler', 'PDF konnte nicht als Base64 erstellt werden.');
+    return null;
+  } finally {
+    setIsExporting(false);
+    console.log('10. [FINALLY] isExporting auf false gesetzt');
+  }
+};
   const handleSharePdf = async () => {
     try {
       setIsExporting(true);
@@ -331,27 +429,6 @@ const toggleSavedCvsMenu = () => {
     }
   };
 
-  const saveCv = async () => {
-    Alert.alert(
-      'Lebenslauf speichern',
-      `Möchtest du deinen Lebenslauf als „${personal.name || 'Ohne Namen'}“ sichern?\n\nDeine Daten werden ausschließlich lokal auf deinem Gerät gespeichert.`,
-      [
-        { text: 'Abbrechen', style: 'cancel' },
-        {
-          text: 'Speichern',
-          onPress: async () => {
-            await persistCvData(personal.name);
-            if (await EncryptedStorage.getItem('tempCv')) {
-              await EncryptedStorage.removeItem('tempCv');
-            }
-            setShowSavedCvsMenu(false);
-            if (isFabOpen) toggleFab();
-          },
-        },
-      ]
-    );
-  };
-
   const resetFormToEmpty = () => {
     setPersonal({
       name: '',
@@ -401,7 +478,10 @@ const toggleSavedCvsMenu = () => {
 
   useEffect(() => {
     resumePollingIfNeeded({
+    where : 'cover',
+      
       setIsScanningCv,
+
       setExperiences,
       setEducations,
       setSkills,
@@ -413,6 +493,7 @@ const toggleSavedCvsMenu = () => {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         resumePollingIfNeeded({
+          where :'cover',
           setIsScanningCv,
           setExperiences,
           setEducations,
@@ -868,6 +949,32 @@ const toggleSavedCvsMenu = () => {
                   Neuer Lebenslauf
                 </Text>
               </TouchableOpacity>
+                <TouchableOpacity
+                style={[
+                  styles.menuRow,
+                  {
+                    borderBottomWidth: 1,
+                    borderColor: theme.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+                onPress={() => {
+                  setShowSavedCvsMenu(false);
+                  toggleFab();
+                 handleSaveBase64();
+                }}
+              >
+                <View style={[styles.menuRowIconBox ]}>
+                  <Image
+                    style={styles.menuRowIcon}
+                    source="https://img.icons8.com/?size=100&id=IoyS7mvkv16Q&format=png&color=000000"
+                    contentFit="contain"
+                  />
+                </View>
+                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                  Als Lebenslauf Speichern
+                </Text>
+              </TouchableOpacity>
 
               {/* Row 1: Vorschau */}
               <TouchableOpacity
@@ -906,7 +1013,7 @@ const toggleSavedCvsMenu = () => {
                 ]}
                 activeOpacity={0.75}
                 onPress={() => {
-                  console.log("pressed")
+                handleSharePdf();
                 }}
               >
                 <View style={[styles.menuRowIconBox ]}>

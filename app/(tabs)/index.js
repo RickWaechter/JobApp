@@ -23,17 +23,16 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import RNFS from "react-native-fs";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SQLite from "react-native-sqlite-storage";
-
+import {PrimaryActionCard, SecondaryActionCard} from "../../comp/actionCard";
 import KeyboardDummy from "../../comp/keyboardDummy.jsx";
 import Info, { useInfoModal } from "../../comp/info.js";
 import CompanySearchModal from "../../comp/name.js";
-import colors from "../../inc/colors.js";
-import { decryp } from "../../inc/cryp.js";
-import { runQuery } from "../../inc/db.js";
+import { runQuery, getOld } from "../../inc/db.js";
 import Bewerbung from "../application.js";
 import ChangeScreen from "../change.js";
 import ChangeScreenOld from "../changeOld.js";
-
+import { useTheme } from '../../comp/themeContext';
+import { useThemedStyles } from '../../comp/themeStyles';
 const { width, height } = Dimensions.get("window");
 const DB_NAME = "firstNew.db";
 const EASING_FLOW = Easing.bezier(0.25, 0.1, 0.25, 1);
@@ -49,109 +48,11 @@ const ROUTE_MAP = {
   email: "/email",
 };
 
-/* ── Hero Card (Hauptaktion) ────────────────────────────── */
-const PrimaryActionCard = memo(
-  ({ title, description, badgeText, footerText, onPress, onIconPress, disabled }) => (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.primaryCard,
-        pressed && !disabled && styles.cardPressed,
-        disabled && { opacity: 0.8 },
-      ]}
-    >
-      <View style={styles.primaryGlowEffect} />
-
-      <View style={styles.primaryTopRow}>
-        <View style={styles.primaryIconContainer}>
-          <Pressable
-            disabled={disabled}
-            onPress={(e) => {
-              e?.stopPropagation?.();
-              onIconPress?.();
-            }}
-            hitSlop={10}
-            style={({ pressed }) => pressed && !disabled && { opacity: 0.7 }}
-          >
-            <MaterialIcons name="auto-awesome" size={24} color="#FFFFFF" />
-          </Pressable>
-        </View>
-        <View style={styles.badgePrimary}>
-          <Text style={styles.badgePrimaryText}>{badgeText}</Text>
-        </View>
-      </View>
-
-      <View style={styles.cardContent}>
-        <Text style={styles.primaryCardTitle}>{title}</Text>
-        <Text style={styles.primaryCardDescription} numberOfLines={2}>
-          {description}
-        </Text>
-      </View>
-
-      <View style={styles.primaryFooter}>
-        <Text style={styles.primaryFooterText}>{footerText}</Text>
-        <View style={styles.arrowCircle}>
-          <MaterialIcons name="arrow-forward" size={16} color="#FFFFFF" />
-        </View>
-      </View>
-    </Pressable>
-  )
-);
-
-/* ── Secondary Card (Bewerbung recyclen) ────────────────── */
-const SecondaryActionCard = memo(
-  ({ title, description, onPress, onIconPress, isLoading, disabled }) => (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled || isLoading}
-      style={({ pressed }) => [
-        styles.secondaryCard,
-        pressed && !disabled && styles.cardPressed,
-        (isLoading || disabled) && { opacity: 0.7 },
-      ]}
-    >
-      <View style={styles.secondaryIconContainer}>
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Pressable
-            disabled={disabled}
-            onPress={(e) => {
-              e?.stopPropagation?.();
-              onIconPress?.();
-            }}
-            hitSlop={10}
-            style={({ pressed }) => pressed && !disabled && { opacity: 0.7 }}
-          >
-            <MaterialIcons
-              name="history"
-              size={24}
-              color="rgba(255, 255, 255, 0.8)"
-            />
-          </Pressable>
-        )}
-      </View>
-
-      <View style={styles.secondaryTextWrap}>
-        <Text style={styles.secondaryCardTitle}>{title}</Text>
-        <Text style={styles.secondaryCardDescription} numberOfLines={2}>
-          {description}
-        </Text>
-      </View>
-
-      <MaterialIcons
-        name="chevron-right"
-        size={22}
-        color="rgba(255, 255, 255, 0.25)"
-      />
-    </Pressable>
-  )
-);
 
 export default function StartApp() {
   const { t } = useTranslation();
-
+const { mode, setMode } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [isLoadingOld, setIsLoadingOld] = useState(false);
   const [showCompanySearch, setShowCompanySearch] = useState(false);
@@ -370,9 +271,7 @@ export default function StartApp() {
     animChangeScreenX.setValue(0);
     animChangeScreenOpacity.setValue(0);
 
-    setTimeout(() => {
       bewerbungRef.current?.focusName?.();
-    }, 25);
 
     Animated.parallel([
       Animated.timing(animOverlayWrapperX, {
@@ -703,60 +602,7 @@ export default function StartApp() {
   }, [isButtonVisible, animResumeBanner]);
 
   /* ── Alte Bewerbungen Abrufen ── */
-  const getOld = async () => {
-    try {
-      const key = await EncryptedStorage.getItem("key");
-      if (!key || typeof key !== "string" || key.trim() === "") {
-        console.warn("getOld: Kein gültiger Encryption-Key gefunden.");
-        return [];
-      }
 
-      const deviceId = await DeviceInfo.getUniqueId();
-      const db = await SQLite.openDatabase({ name: DB_NAME, location: "default" });
-
-      const result = await runQuery(
-        db,
-        "SELECT old, mergePdf FROM files WHERE ident = ?;",
-        [deviceId]
-      );
-
-      const rows = result?.rows?.raw() ?? [];
-      if (rows.length === 0 || !rows[0].old) return [];
-
-      const rawOld = rows[0].old;
-      if (!rawOld || typeof rawOld !== "string") return [];
-
-      const encData = await decryp(rawOld, key);
-      let decMerge = "";
-      if (rows[0].mergePdf && typeof rows[0].mergePdf === "string") {
-        decMerge = await decryp(rows[0].mergePdf, key);
-      }
-
-      if (!encData) return [];
-
-      const oldFull = encData.split("&").filter(Boolean);
-      const oldArray = decMerge ? decMerge.split(",") : [];
-
-      const newEntries = [];
-      for (let i = oldFull.length - 1; i >= 0; i--) {
-        const parts = oldFull[i].split("#");
-        if (parts.length >= 3) {
-          newEntries.push({
-            job: parts[0],
-            date: parts[1] || "",
-            myType: `${parts[2] || ""} / ${parts[3] || ""}`,
-            subject: parts[4] || "Kein Betreff",
-            text: parts[5] || "",
-            link: oldArray[i] || "",
-          });
-        }
-      }
-      return newEntries;
-    } catch (error) {
-      console.error("getOld Error:", error);
-      return [];
-    }
-  };
 
   const handleNewApplication = async () => {
     if (!acquireLock()) return;
@@ -1137,10 +983,10 @@ export default function StartApp() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => ({
   container: {
     flex: 1,
-    backgroundColor: colors.background || "#0F1117",
+    backgroundColor: colors.bg || "#0F1117",
   },
   contentWrapper: {
     flex: 1,
@@ -1152,27 +998,27 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 8,
   },
-  badgeHub: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+ badgeHub: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: colors.badge,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    marginBottom: 10,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 8,
   },
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#3B82F6",
+    backgroundColor: colors.badgeDot,
     marginRight: 6,
   },
   badgeHubText: {
-    color: "rgba(255, 255, 255, 0.65)",
+    color: colors.badgeText,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 0.8,
@@ -1189,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   primaryCard: {
     position: "relative",
-    backgroundColor: "#171B26",
+    backgroundColor: colors.actionCard,
     borderRadius: 24,
     padding: 22,
     borderWidth: 1,
@@ -1279,7 +1125,7 @@ const styles = StyleSheet.create({
   secondaryCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    backgroundColor: colors.actionCard,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,

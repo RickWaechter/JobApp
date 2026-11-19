@@ -1,0 +1,130 @@
+Date : 2026-11-19 11:22:15
+Directory : /home/rick/JobApp
+Total : 75 files,  9199 codes, -85 comments, 466 blanks, all 9580 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JavaScript         |         42 |      8,766 |         92 |        580 |      9,438 |
+| JSON               |         18 |        727 |          0 |        -24 |        703 |
+| TypeScript JSX     |          2 |         43 |         -2 |          1 |         42 |
+| Dotenv             |          1 |         -1 |         -9 |         -2 |        -12 |
+| JSON with Comments |          1 |         -2 |          0 |          0 |         -2 |
+| Properties         |          2 |        -21 |        -37 |        -16 |        -74 |
+| Batch              |          1 |        -41 |        -32 |        -22 |        -95 |
+| Ruby               |          1 |        -46 |         -3 |        -12 |        -61 |
+| XML                |          4 |        -73 |        -23 |         -3 |        -99 |
+| Groovy             |          3 |       -153 |        -71 |        -36 |       -260 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                          | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                             |         75 |      9,199 |        -85 |        466 |      9,580 |
+| . (Files)                                                                     |          3 |        105 |          0 |          0 |        105 |
+| android                                                                       |         10 |       -288 |       -163 |        -77 |       -528 |
+| android (Files)                                                               |          4 |       -108 |        -70 |        -48 |       -226 |
+| android/app                                                                   |          5 |       -173 |        -93 |        -28 |       -294 |
+| android/app (Files)                                                           |          1 |       -100 |        -70 |        -25 |       -195 |
+| android/app/src                                                               |          4 |        -73 |        -23 |         -3 |        -99 |
+| android/app/src/main                                                          |          4 |        -73 |        -23 |         -3 |        -99 |
+| android/app/src/main (Files)                                                  |          1 |        -39 |          0 |          0 |        -39 |
+| android/app/src/main/res                                                      |          3 |        -34 |        -23 |         -3 |        -60 |
+| android/app/src/main/res/drawable                                             |          1 |        -12 |        -23 |         -3 |        -38 |
+| android/app/src/main/res/values                                               |          2 |        -22 |          0 |          0 |        -22 |
+| android/gradle                                                                |          1 |         -7 |          0 |         -1 |         -8 |
+| android/gradle/wrapper                                                        |          1 |         -7 |          0 |         -1 |         -8 |
+| app                                                                           |         16 |      3,875 |         -2 |        247 |      4,120 |
+| app (Files)                                                                   |         11 |      2,142 |          1 |        114 |      2,257 |
+| app/(tabs)                                                                    |          5 |      1,733 |         -3 |        133 |      1,863 |
+| backup                                                                        |          1 |        826 |         10 |         53 |        889 |
+| comp                                                                          |         11 |      1,745 |         37 |         94 |      1,876 |
+| inc                                                                           |         16 |      2,363 |         45 |        187 |      2,595 |
+| ios                                                                           |          2 |        -47 |        -12 |        -14 |        -73 |
+| local                                                                         |         16 |        620 |          0 |        -24 |        596 |
+| local/translate                                                               |         16 |        620 |          0 |        -24 |        596 |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                      | language           | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| /home/rick/JobApp/android/app/build.gradle                                    | Groovy             |       -100 |        -70 |        -25 |       -195 |
+| /home/rick/JobApp/android/app/src/main/AndroidManifest.xml                    | XML                |        -39 |          0 |          0 |        -39 |
+| /home/rick/JobApp/android/app/src/main/res/drawable/rn_edit_text_material.xml | XML                |        -12 |        -23 |         -3 |        -38 |
+| /home/rick/JobApp/android/app/src/main/res/values/strings.xml                 | XML                |         -8 |          0 |          0 |         -8 |
+| /home/rick/JobApp/android/app/src/main/res/values/styles.xml                  | XML                |        -14 |          0 |          0 |        -14 |
+| /home/rick/JobApp/android/build.gradle                                        | Groovy             |        -20 |         -1 |         -4 |        -25 |
+| /home/rick/JobApp/android/gradle.properties                                   | Properties         |        -14 |        -37 |        -15 |        -66 |
+| /home/rick/JobApp/android/gradle/wrapper/gradle-wrapper.properties            | Properties         |         -7 |          0 |         -1 |         -8 |
+| /home/rick/JobApp/android/gradlew.bat                                         | Batch              |        -41 |        -32 |        -22 |        -95 |
+| /home/rick/JobApp/android/settings.gradle                                     | Groovy             |        -33 |          0 |         -7 |        -40 |
+| /home/rick/JobApp/app.json                                                    | JSON with Comments |         -2 |          0 |          0 |         -2 |
+| /home/rick/JobApp/app/(tabs)/_layout.tsx                                      | TypeScript JSX     |         22 |         -3 |          0 |         19 |
+| /home/rick/JobApp/app/(tabs)/index.js                                         | JavaScript         |         28 |         -2 |         -1 |         25 |
+| /home/rick/JobApp/app/(tabs)/profil.js                                        | JavaScript         |        505 |        -24 |         28 |        509 |
+| /home/rick/JobApp/app/(tabs)/test.js                                          | JavaScript         |        992 |         25 |         90 |      1,107 |
+| /home/rick/JobApp/app/(tabs)/upload.js                                        | JavaScript         |        186 |          1 |         16 |        203 |
+| /home/rick/JobApp/app/_layout.tsx                                             | TypeScript JSX     |         21 |          1 |          1 |         23 |
+| /home/rick/JobApp/app/application.js                                          | JavaScript         |        475 |         -3 |         29 |        501 |
+| /home/rick/JobApp/app/change.js                                               | JavaScript         |       -228 |         -6 |        -33 |       -267 |
+| /home/rick/JobApp/app/changeOld.js                                            | JavaScript         |       -249 |         -5 |        -37 |       -291 |
+| /home/rick/JobApp/app/collect.js                                              | JavaScript         |         33 |          0 |          2 |         35 |
+| /home/rick/JobApp/app/cover.js                                                | JavaScript         |      1,882 |         17 |        144 |      2,043 |
+| /home/rick/JobApp/app/email.js                                                | JavaScript         |         80 |         -5 |         12 |         87 |
+| /home/rick/JobApp/app/first.js                                                | JavaScript         |        105 |          5 |         -1 |        109 |
+| /home/rick/JobApp/app/nameOld.js                                              | JavaScript         |         -1 |          0 |          0 |         -1 |
+| /home/rick/JobApp/app/old.js                                                  | JavaScript         |          1 |         -3 |          0 |         -2 |
+| /home/rick/JobApp/app/uploadFirst.js                                          | JavaScript         |         23 |          0 |         -3 |         20 |
+| /home/rick/JobApp/backup/cvView.js                                            | JavaScript         |        826 |         10 |         53 |        889 |
+| /home/rick/JobApp/comp/actionCard.js                                          | JavaScript         |        417 |          8 |         21 |        446 |
+| /home/rick/JobApp/comp/documentPicker.js                                      | JavaScript         |         15 |          4 |          3 |         22 |
+| /home/rick/JobApp/comp/eduCard.js                                             | JavaScript         |        212 |          0 |          7 |        219 |
+| /home/rick/JobApp/comp/expCard.js                                             | JavaScript         |        297 |          1 |          8 |        306 |
+| /home/rick/JobApp/comp/floatWebview.js                                        | JavaScript         |        205 |          5 |          7 |        217 |
+| /home/rick/JobApp/comp/info.js                                                | JavaScript         |         53 |          5 |          6 |         64 |
+| /home/rick/JobApp/comp/jobSearch.js                                           | JavaScript         |        165 |          1 |          9 |        175 |
+| /home/rick/JobApp/comp/jobWebView.js                                          | JavaScript         |        220 |          5 |         15 |        240 |
+| /home/rick/JobApp/comp/name.js                                                | JavaScript         |         93 |          3 |          4 |        100 |
+| /home/rick/JobApp/comp/themeContext.js                                        | JavaScript         |         55 |          5 |         11 |         71 |
+| /home/rick/JobApp/comp/themeStyles.js                                         | JavaScript         |         13 |          0 |          3 |         16 |
+| /home/rick/JobApp/inc/ai.js                                                   | JavaScript         |         76 |          0 |          4 |         80 |
+| /home/rick/JobApp/inc/colors.js                                               | JavaScript         |          0 |          0 |          1 |          1 |
+| /home/rick/JobApp/inc/cryp.js                                                 | JavaScript         |         13 |          0 |          0 |         13 |
+| /home/rick/JobApp/inc/cv.js                                                   | JavaScript         |        519 |          2 |         22 |        543 |
+| /home/rick/JobApp/inc/cvScan.js                                               | JavaScript         |        408 |         17 |         58 |        483 |
+| /home/rick/JobApp/inc/cvView.js                                               | JavaScript         |        755 |          9 |         45 |        809 |
+| /home/rick/JobApp/inc/db.js                                                   | JavaScript         |         79 |          3 |         16 |         98 |
+| /home/rick/JobApp/inc/downloadDb.js                                           | JavaScript         |        -50 |         -3 |         -8 |        -61 |
+| /home/rick/JobApp/inc/downloader.js                                           | JavaScript         |       -102 |        -23 |        -10 |       -135 |
+| /home/rick/JobApp/inc/font.js                                                 | JavaScript         |         29 |         14 |          7 |         50 |
+| /home/rick/JobApp/inc/generate.js                                             | JavaScript         |        263 |          6 |         42 |        311 |
+| /home/rick/JobApp/inc/language.js                                             | JavaScript         |        155 |         10 |          6 |        171 |
+| /home/rick/JobApp/inc/scrapper.js                                             | JavaScript         |        161 |          0 |          0 |        161 |
+| /home/rick/JobApp/inc/string.js                                               | JavaScript         |         28 |          2 |          2 |         32 |
+| /home/rick/JobApp/inc/style.js                                                | JavaScript         |          7 |          0 |          1 |          8 |
+| /home/rick/JobApp/inc/themeColor.js                                           | JavaScript         |         22 |          8 |          1 |         31 |
+| /home/rick/JobApp/ios/.xcode.env                                              | Dotenv             |         -1 |         -9 |         -2 |        -12 |
+| /home/rick/JobApp/ios/Podfile                                                 | Ruby               |        -46 |         -3 |        -12 |        -61 |
+| /home/rick/JobApp/local/translate/ar.json                                     | JSON               |         35 |          0 |          0 |         35 |
+| /home/rick/JobApp/local/translate/bks.json                                    | JSON               |          1 |          0 |         -1 |          0 |
+| /home/rick/JobApp/local/translate/de.json                                     | JSON               |         81 |          0 |          1 |         82 |
+| /home/rick/JobApp/local/translate/el.json                                     | JSON               |         78 |          0 |          0 |         78 |
+| /home/rick/JobApp/local/translate/en.json                                     | JSON               |        132 |          0 |        -26 |        106 |
+| /home/rick/JobApp/local/translate/es.json                                     | JSON               |         36 |          0 |         -1 |         35 |
+| /home/rick/JobApp/local/translate/fa.json                                     | JSON               |          1 |          0 |         -1 |          0 |
+| /home/rick/JobApp/local/translate/fr.json                                     | JSON               |         35 |          0 |         -1 |         34 |
+| /home/rick/JobApp/local/translate/it.json                                     | JSON               |         35 |          0 |          0 |         35 |
+| /home/rick/JobApp/local/translate/jp.json                                     | JSON               |          4 |          0 |          3 |          7 |
+| /home/rick/JobApp/local/translate/nl.json                                     | JSON               |         35 |          0 |          1 |         36 |
+| /home/rick/JobApp/local/translate/pl.json                                     | JSON               |         36 |          0 |          1 |         37 |
+| /home/rick/JobApp/local/translate/ro.json                                     | JSON               |         36 |          0 |          0 |         36 |
+| /home/rick/JobApp/local/translate/ru.json                                     | JSON               |         36 |          0 |          0 |         36 |
+| /home/rick/JobApp/local/translate/tr.json                                     | JSON               |          3 |          0 |          1 |          4 |
+| /home/rick/JobApp/local/translate/ua.json                                     | JSON               |         36 |          0 |         -1 |         35 |
+| /home/rick/JobApp/package-lock.json                                           | JSON               |        100 |          0 |          0 |        100 |
+| /home/rick/JobApp/package.json                                                | JSON               |          7 |          0 |          0 |          7 |
+| Total                                                                         |                    |      9,199 |        -85 |        466 |      9,580 |
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

@@ -11,6 +11,7 @@ const colors = {
   card3: "rgba(7, 20, 83, 1)",   
   card4: "rgb(22, 7, 88)",  
   textColor: "rgb(232, 225, 247)",
+  
 };
 
 export default colors;

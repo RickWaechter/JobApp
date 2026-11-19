@@ -380,7 +380,7 @@ const useWebExtractor = ({ onExtractSuccess }) => {
 };
 
 /* ── Hauptkomponente ────────────────────────────────────── */
-const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, onClose }, ref) => {
+const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, onClose, initialJob, initialName, initialDescription }, ref) => {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width: winW } = useWindowDimensions();
@@ -518,7 +518,8 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     [t]
   );
 
-  /* Prüfen, welche Schriften bereits lokal vorhanden sind */
+  /* Prüfen, welche Schriften bereits
+   lokal vorhanden sind */
   useEffect(() => {
     let isMounted = true;
 
@@ -569,6 +570,15 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
     };
   }, [fontOptions]);
 
+  useEffect(() => {
+    if (initialJob) {
+      setInputValue(initialJob);
+    }
+    if (initialDescription) {
+      setScrapedDescription(initialDescription);
+      console.log("initialDescription", initialDescription)
+    }
+  }, [initialJob, initialDescription]);
   /* Font-Download ausführen */
   const handleDownloadFont = useCallback(
     async (item) => {
@@ -1188,7 +1198,7 @@ const Bewerbung = forwardRef(({ visibleApp, changeScreen, isNextStep = false, on
       if (scrapedDescription?.trim()) {
         prompt1 += `\n\nNutze folgende Anforderungen der Stellenanzeige für passende Keywords:\n"${scrapedDescription}"`;
       }
-
+      console.log('prompt1:', prompt1);
       const deviceId = await DeviceInfo.getUniqueId();
       const key = sha512(deviceId);
       const quality = selectedQuality;
@@ -1796,6 +1806,7 @@ const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
+    overflow: 'hidden',
   },
   stage: {
     position: 'absolute',

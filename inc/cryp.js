@@ -136,3 +136,16 @@ export const decryptBase = async (combinedString, encryptionKey) => {
     return null;
   }
 };
+export const toBase64 = (str) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  for (
+    let block = 0, charCode, i = 0, map = chars;
+    str.charAt(i | 0) || ((map = '='), i % 1);
+    output += map.charAt(63 & (block >> (8 - (i % 1) * 8)))
+  ) {
+    charCode = str.charCodeAt((i += 3 / 4));
+    block = (block << 8) | charCode;
+  }
+  return output;
+};

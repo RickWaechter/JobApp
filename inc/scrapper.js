@@ -554,3 +554,164 @@ true;
   })();
   true;
 `;
+export const getAgentEmail = `
+  (function() {
+    if (window.__baInitialized) return;
+    window.__baInitialized = true;
+
+    const style = document.createElement('style');
+    style.innerHTML = \`
+      header, footer, nav, .ba-header, .ba-footer { display: none !important; }
+      body { padding-top: 8px !important; }
+    \`;
+    document.head.appendChild(style);
+
+    window.__baSent = false;
+    window.__baCaptchaReported = false;
+    window.__baScrolled = false;
+    window.__baCookieAccepted = false;
+
+    function findInRoot(root, selector) {
+      if (!root) return null;
+      const direct = root.querySelector(selector);
+      if (direct) return direct;
+      const all = root.querySelectorAll('*');
+      for (const el of all) {
+        if (el.shadowRoot) {
+          const found = findInRoot(el.shadowRoot, selector);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    function getTextInRoot(root) {
+      if (!root) return '';
+      let text = root.innerText || root.textContent || '';
+      const all = root.querySelectorAll('*');
+      for (const el of all) {
+        if (el.shadowRoot) {
+          text += ' ' + getTextInRoot(el.shadowRoot);
+        }
+      }
+      return text;
+    }
+
+    function isCaptchaVisible(container) {
+      const root = container || document.body;
+      if (!root) return false;
+
+      // 1. Sichtbares Captcha-Eingabefeld oder Captcha-Bild prüfen
+      const captchaEl = findInRoot(
+        root,
+        'input[type="text"], input:not([type="hidden"]), img[src*="captcha" i], img[alt*="captcha" i], img[alt*="sicherheit" i], [id*="captcha" i], [class*="captcha" i], jb-captcha, ba-captcha'
+      );
+      if (captchaEl) {
+        const rect = captchaEl.getBoundingClientRect ? captchaEl.getBoundingClientRect() : null;
+        if (!rect || (rect.width > 0 && rect.height > 0)) {
+          return true;
+        }
+      }
+
+      // 2. Typische Captcha-Hinweistexte im Kontaktbereich prüfen
+      if (container) {
+        const txt = getTextInRoot(container);
+        if (/sicherheitsabfrage|zeichenfolge|sicherheitscode|captcha|bitte geben sie die/i.test(txt)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    function sendEmail(email) {
+      if (window.__baSent || !email) return;
+      window.__baSent = true;
+      if (window.__baObserver) {
+        window.__baObserver.disconnect();
+      }
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'EMAIL_FOUND',
+        email: email
+      }));
+    }
+
+    function acceptCookiesInRoot(root) {
+      if (!root || window.__baCookieAccepted) return;
+
+      const buttons = root.querySelectorAll('button, a[role="button"]');
+      for (const btn of buttons) {
+        const label = (btn.innerText || btn.textContent || '').trim();
+        if (/alle akzeptieren|auswahl bestätigen|zustimmen/i.test(label)) {
+          window.__baCookieAccepted = true;
+          btn.click();
+          setTimeout(() => {
+            window.__baScrolled = false;
+            checkForContactAndScroll();
+          }, 300);
+          return;
+        }
+      }
+
+      const allElements = root.querySelectorAll('*');
+      for (const el of allElements) {
+        if (el.shadowRoot) {
+          acceptCookiesInRoot(el.shadowRoot);
+          if (window.__baCookieAccepted) return;
+        }
+      }
+    }
+
+    function checkForContactAndScroll() {
+      if (window.__baSent) return;
+
+      if (!window.__baCookieAccepted) {
+        acceptCookiesInRoot(document);
+      }
+
+      const container = document.getElementById('jobdetails-kontaktdaten-container');
+
+      if (container && !window.__baScrolled) {
+        window.__baScrolled = true;
+        const y = container.getBoundingClientRect().top + window.scrollY - 16;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+      }
+
+      const scope = container || document;
+      const mailLink = findInRoot(scope, 'a[href^="mailto:"]');
+      if (mailLink) {
+        const email = mailLink.getAttribute('href').replace('mailto:', '').split('?')[0].trim();
+        if (email) {
+          sendEmail(email);
+          return;
+        }
+      }
+
+      if (container) {
+        const textMatch = getTextInRoot(container).match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/);
+        if (textMatch && textMatch[0]) {
+          sendEmail(textMatch[0].trim());
+          return;
+        }
+
+        // Nur melden, wenn wirklich ein Captcha sichtbar ist
+        if (!window.__baCaptchaReported && isCaptchaVisible(container)) {
+          window.__baCaptchaReported = true;
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'CAPTCHA_REQUIRED'
+          }));
+        }
+      }
+    }
+
+    window.__baCheckNow = checkForContactAndScroll;
+    checkForContactAndScroll();
+
+    window.__baObserver = new MutationObserver(() => checkForContactAndScroll());
+    if (document.body) {
+      window.__baObserver.observe(document.body, { childList: true, subtree: true });
+    }
+      
+  })();
+  true;
+`;

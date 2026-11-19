@@ -1,13 +1,13 @@
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { BackHandler, Keyboard, Platform } from 'react-native';
+import { useMemo } from 'react';
+import { BackHandler } from 'react-native';
 import 'react-native-reanimated';
-import { saveKeyboardHeight } from '../inc/keyboardStorage';
-import "../local/i18n"; // ← nur hier
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import { ThemeProvider, useTheme } from '../comp/themeContext';
+import '../local/i18n'; // ← nur hier
+
 // Polyfill für alte Bibliotheken (verhindert den Crash bei BackHandler.removeEventListener)
 if (BackHandler && !(BackHandler as any).removeEventListener) {
   (BackHandler as any).removeEventListener = () => {};
@@ -17,15 +17,28 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutNav() {
+  const { colors, isDark } = useTheme();
 
-  
+  const navTheme = useMemo(() => {
+    const base = isDark ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        background: colors.bg,
+      },
+    };
+  }, [colors, isDark]);
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <ThemeProvider value={navTheme}>
+      <Stack
+        screenOptions={{
+          // Verhindert weißes Aufblitzen beim Screen-Wechsel
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="cover" options={{ headerShown: false, title: 'cover' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
@@ -41,8 +54,17 @@ export default function RootLayout() {
         <Stack.Screen name="email" options={{ headerShown: false }} />
         <Stack.Screen name="change" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <ThemeProvider>
+        <RootLayoutNav />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,30 +1,29 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
-import { Keyboard, Platform, Dimensions } from 'react-native';
+import { Keyboard, Platform } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
-import '../../local/i18n'; // ← nur hier
+import '../../local/i18n';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { saveKeyboardHeight } from '../../inc/keyboardStorage';
 
-// Außerhalb platzieren, damit es nur einmal beim App-Start konfiguriert wird
 SplashScreen.setOptions({
   duration: 1000,
   fade: true,
 });
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const TAB_YELLOW = '#ecbc38'; // entspricht hsl(44, 88%, 61%)
+const TAB_BG = '#082b5a';
+const TAB_YELLOW_INTERACTIVE = '#ecbc389a';
 
+export default function TabLayout() {
   useEffect(() => {
-    // iOS nutzt 'keyboardWillShow' für flüssiges Mitgehen, Android 'keyboardDidShow'
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidChangeFrame';
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidChangeFrame';
 
     const showSubscription = Keyboard.addListener(showEvent, (e) => {
       const height = e.endCoordinates.height;
-      console.log(`Keyboard height detected: ${height}`);
       if (height > 0) {
         saveKeyboardHeight(height);
       }
@@ -38,10 +37,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2e7b88ff',
+        tabBarActiveTintColor: TAB_YELLOW,
+        tabBarInactiveTintColor: TAB_YELLOW_INTERACTIVE,
+       tabBarStyle: {
+      backgroundColor: TAB_BG,
+      borderTopWidth: 0,      // Entfernt die Linie auf iOS & Android
+      borderTopColor: 'transparent',
+      elevation: 0,           // Entfernt den oberen Schatten/Strich auf Android
+      shadowOpacity: 0,       // Entfernt den oberen Schatten auf iOSn
+        height:52,
+      paddingBottom:10
+    },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
+        headerStyle: { backgroundColor: TAB_BG },
         headerShown: false,
         tabBarButton: HapticTab,
-        // Verhindert auf Android das Hochdrücken der Tab Bar durch die Tastatur
         tabBarHideOnKeyboard: Platform.OS === 'android',
       }}
     >
@@ -72,7 +82,15 @@ export default function TabLayout() {
           ),
         }}
       />
-       
+      <Tabs.Screen
+        name="test"
+        options={{
+          title: 'Test',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="arrow.up.circle.fill" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
