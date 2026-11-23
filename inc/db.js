@@ -19,7 +19,7 @@ export const getDatabaseConnection = async (dbName = DB_NAME) => {
   if (dbPromises.has(dbName)) {
     return dbPromises.get(dbName);
   }
-
+let timer;
   const initPromise = (async () => {
     if (Platform.OS === 'ios') {
       const localDbDir = `${RNFS.LibraryDirectoryPath}/LocalDatabase`;
@@ -55,18 +55,23 @@ export const getDatabaseConnection = async (dbName = DB_NAME) => {
       location: 'default',
     });
 
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('TIMEOUT_OPEN_DB')), 4000)
-    );
+const timeoutPromise = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error('TIMEOUT_OPEN_DB')), 4000);
+    });
 
-    const db = await Promise.race([openPromise, timeoutPromise]);
+    let db;
+    try {
+      db = await Promise.race([openPromise, timeoutPromise]);
+    } finally {
+      clearTimeout(timer);
+    }
     dbInstances.set(dbName, db);
     return db;
   })().catch((err) => {
     dbPromises.delete(dbName);
     throw err;
   });
-
+  clearTimeout(timer)
   dbPromises.set(dbName, initPromise);
   return initPromise;
 };

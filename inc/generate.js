@@ -17,7 +17,7 @@ import {
   genIv,
 } from '../inc/cryp.js';
 import { getCurrentDateTime } from '../inc/date.js';
-import { runQuery } from '../inc/db.js';
+import { runQuery, getDatabaseConnection } from '../inc/db.js';
 import { sanitizeForPdf } from '../inc/string.js';
 
 const DB_NAME = 'firstNew.db';
@@ -183,7 +183,7 @@ export const mergeFilesFromDB = async ({ text, router }) => {
   }
 };
 
-export const generate = async ({ text, router }) => {
+export const generate = async ({ text, router, refNumber }) => {
   const myFont = await EncryptedStorage.getItem('font');
 
   try {
@@ -295,12 +295,17 @@ export const generate = async ({ text, router }) => {
     await RNFS.writeFile(outputPath, encrypted, 'base64');
     await RNFS.writeFile(`${outputPath}_1`, Base64Part2, 'base64');
 
-    const db = await SQLite.openDatabase({ name: DB_NAME, location: 'default' });
+    const db =  await getDatabaseConnection()
     const deviceId = await DeviceInfo.getUniqueId();
-    await db.executeSql('UPDATE files SET anschreiben = ? WHERE ident = ?', [
+   const [result] = await db.executeSql(`UPDATE files SET anschreiben = ?,apply = CASE WHEN apply IS NULL OR TRIM(apply) = '' THEN ?
+          ELSE apply || ',' || ?
+        END WHERE ident = ?`, [
       outputPathNew,
+      refNumber,
+      refNumber,
       deviceId,
     ]);
+    console.log('Affected rows:', result.rowsAffected);
 
     await mergeFilesFromDB({ text, router });
   } catch (error) {

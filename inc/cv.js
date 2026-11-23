@@ -439,7 +439,7 @@ export const modernBlue = (
   <!-- SEITE 1: Profil & Berufserfahrung -->
   <div class="sheet">
     <header class="header">
-      <div class="eyebrow">Curriculum Vitae</div>
+      <div class="eyebrow">Lebenslauf</div>
       <h1>${displayName}</h1>
       <div class="job-title">${jobTitle}</div>
       <div class="header-line"></div>
@@ -506,7 +506,7 @@ export const modernBlue = (
 
   <div class="sheet">
     <header class="header">
-      <div class="eyebrow">Curriculum Vitae</div>
+      <div class="eyebrow">CLebenslauf</div>
       <h1>${displayName}</h1>
       <div class="job-title">${jobTitle}</div>
       <div class="header-line"></div>

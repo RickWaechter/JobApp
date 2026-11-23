@@ -222,17 +222,17 @@ const OldScreen = () => {
     Animated.parallel([
       Animated.timing(nameProgressX, {
         toValue: 1,
-        duration: 400,
+        duration: 323,
         useNativeDriver: true,
       }),
       Animated.timing(nameOpacity, {
         toValue: 1,
-        duration: 500,
+        duration: 323,
         useNativeDriver: true,
       }),
       Animated.timing(animViewOpacity, {
         toValue: 0,
-        duration: 500,
+        duration: 323,
         useNativeDriver: true,
       }),
     ]).start();
@@ -260,7 +260,7 @@ const OldScreen = () => {
 
       kbFallbackRef.current = setTimeout(() => {
         triggerNameSlideDown();
-      }, 240);
+      }, 10);
     },
     [nameProgressX, nameProgressY, nameOpacity, triggerNameSlideDown]
   );
@@ -280,17 +280,17 @@ const OldScreen = () => {
     Animated.parallel([
       Animated.timing(nameProgressY, {
         toValue: 2,
-        duration: 380,
+        duration: 323,
         useNativeDriver: true,
       }),
       Animated.timing(nameOpacity, {
         toValue: 0,
-        duration: 320,
+        duration: 323,
         useNativeDriver: true,
       }),
       Animated.timing(animViewOpacity, {
         toValue: 1,
-        duration: 380,
+        duration: 323,
         useNativeDriver: true,
       }),
     ]).start(({ finished }) => {
@@ -324,17 +324,17 @@ const OldScreen = () => {
       Animated.parallel([
         Animated.timing(nameProgressX, {
           toValue: 2,
-          duration: 380,
+          duration: 323,
           useNativeDriver: true,
         }),
         Animated.timing(nameOpacity, {
           toValue: 0,
-          duration: 320,
+          duration: 323,
           useNativeDriver: true,
         }),
         Animated.timing(animProgress, {
           toValue: 1,
-          duration: 380,
+          duration: 323,
           useNativeDriver: true,
         }),
       ]).start(({ finished }) => {

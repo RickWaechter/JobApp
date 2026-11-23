@@ -772,6 +772,7 @@ const Bewerbung = forwardRef(
                         onBlur={() => setTimeout(() => setShowJobDropdown(false), 220)}
                         onChangeText={handleJobChange}
                         autoCorrect={false}
+                        spellCheck={false}
                         returnKeyType="next"
                         onSubmitEditing={() => inputRef.current?.focus()}
                       />
@@ -845,6 +846,7 @@ const Bewerbung = forwardRef(
                         blurOnSubmit={false}
                         autoCorrect={false}
                         returnKeyType="done"
+                        spellCheck={false}
                       />
 
                       <TouchableOpacity

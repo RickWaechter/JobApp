@@ -15,6 +15,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -81,7 +82,7 @@ const { mode, setMode } = useTheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSortActive, setIsSortActive] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-
+const image = {uri: 'https://www1.xup.in/exec/ximg.php?fid=96261766'};
   const innerHeightRef = useRef("");
   const dbRef = useRef(null);
   const animSlide = useRef(new Animated.Value(0)).current;
@@ -495,8 +496,10 @@ const { mode, setMode } = useTheme();
   const activeItem = data.find((item) => item.id === activePdfId);
 
   return (
+      <ImageBackground source={image} resizeMode="cover" style={{flex:1, justifyContent:"center"}}>
 
-    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, marginBottom:52 }]}>
+
       <View style={styles.container}>
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -603,7 +606,7 @@ const { mode, setMode } = useTheme();
                                   <MaterialIcons
                                     name="picture-as-pdf"
                                     size={20}
-                                    color={isExpanded ? '#60A5FA' : (isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)')}
+                                    color={isExpanded ? '#39ad22' : (isActive ? '#579c1e' : 'rgba(18, 172, 43, 0.7)')}
                                     style={{ marginRight: 8 }}
                                   />
                                 )}
@@ -824,7 +827,11 @@ const { mode, setMode } = useTheme();
         onClose={closeInfo}
         message={infoMessage}
       />
+
+
     </SafeAreaView>
+    </ImageBackground>
+
   );
 };
 
@@ -832,7 +839,6 @@ const { mode, setMode } = useTheme();
 const createStyles = (colors) =>({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.bg || '#0F1117',
   },
   container: {
     flex: 1,
@@ -862,7 +868,7 @@ const createStyles = (colors) =>({
   width: width / 1.2,
   height: 1,
   borderRadius: 2,
-  backgroundColor: colors.badgeDogt || '#355675',
+  backgroundColor: colors.badgeDogt || '#787c9e38',
   alignSelf: 'center',
   marginTop: 10,
   marginBottom: 6,

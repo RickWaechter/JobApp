@@ -137,7 +137,7 @@ export const PrimaryActionCard = memo(
               <MaterialIcons
                 name={iconName}
                 size={24}
-                color={colors.textOnPrimary || '#FFFFFF'}
+                color={colors.textOnPrimary || '#742525'}
               />
             </Pressable>
           </View>
@@ -322,7 +322,7 @@ const createStyles = (colors, fontSize) => ({
     elevation: colors.elevation ?? 2,
   },
   primaryActionCard: {
-    backgroundColor: colors.actionCard || 'rgba(59, 130, 246, 0.12)',
+    backgroundColor: colors.actionCard || 'rgba(16, 45, 92, 0.12)',
     borderColor: colors.actionCardBorder || 'rgba(59, 130, 246, 0.35)',
     shadowColor: colors.primary || '#3B82F6',
     shadowOpacity: colors.primaryShadowOpacity ?? 0.15,
@@ -333,13 +333,13 @@ const createStyles = (colors, fontSize) => ({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: colors.iconBg || 'rgba(59, 130, 246, 0.12)',
+    backgroundColor: '#404a8350',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
   },
   primaryIconContainer: {
-    backgroundColor: colors.primary || '#3B82F6',
+    backgroundColor: colors.primary || '#2cbe19bd',
   },
   cardTextContainer: {
     flex: 1,

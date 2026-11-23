@@ -35,21 +35,29 @@ export default function TabLayout() {
   }, []);
 
   return (
-    <Tabs
+   <Tabs
       screenOptions={{
         tabBarActiveTintColor: TAB_YELLOW,
         tabBarInactiveTintColor: TAB_YELLOW_INTERACTIVE,
-       tabBarStyle: {
-      backgroundColor: TAB_BG,
-      borderTopWidth: 0,      // Entfernt die Linie auf iOS & Android
-      borderTopColor: 'transparent',
-      elevation: 0,           // Entfernt den oberen Schatten/Strich auf Android
-      shadowOpacity: 0,       // Entfernt den oberen Schatten auf iOSn
-        height:52,
-      paddingBottom:10
-    },
+        sceneStyle: {
+          backgroundColor: 'transparent',
+        },
+        tabBarBackground: () => null, // Entfernt den nativen iOS Blur-Hintergrund
+        tabBarStyle: {
+          position: 'absolute',        // Lässt den Screen-Inhalt bis ganz nach unten laufen
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: 'transparent',
+          borderTopWidth: 0,
+          borderTopColor: 'transparent',
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 52,
+          paddingBottom: 10,
+        },
         tabBarLabelStyle: { fontSize: 10, fontWeight: 'bold' },
-        headerStyle: { backgroundColor: TAB_BG },
+        headerStyle: { backgroundColor: 'transparent' },
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarHideOnKeyboard: Platform.OS === 'android',
@@ -83,9 +91,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="test"
+        name="jobs"
         options={{
-          title: 'Test',
+          title: 'Jobs',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="arrow.up.circle.fill" color={color} />
           ),

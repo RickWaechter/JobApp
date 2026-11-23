@@ -1,10 +1,9 @@
 // StartApp.js
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import { router, useFocusEffect } from "expo-router";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
   Alert,
   Animated,
   BackHandler,
@@ -23,7 +22,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import RNFS from "react-native-fs";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SQLite from "react-native-sqlite-storage";
-import {PrimaryActionCard, SecondaryActionCard} from "../../comp/actionCard";
+import { PrimaryActionCard, SecondaryActionCard } from "../../comp/actionCard";
 import KeyboardDummy from "../../comp/keyboardDummy.jsx";
 import Info, { useInfoModal } from "../../comp/info.js";
 import CompanySearchModal from "../../comp/name.js";
@@ -31,13 +30,34 @@ import { runQuery, getOld } from "../../inc/db.js";
 import Bewerbung from "../application.js";
 import ChangeScreen from "../change.js";
 import ChangeScreenOld from "../changeOld.js";
-import { useTheme } from '../../comp/themeContext';
-import { useThemedStyles } from '../../comp/themeStyles';
+import { useTheme } from "../../comp/themeContext";
+import { useThemedStyles } from "../../comp/themeStyles";
+
 const { width, height } = Dimensions.get("window");
 const DB_NAME = "firstNew.db";
-const EASING_FLOW = Easing.bezier(0.25, 0.1, 0.25, 1);
 const LOCK_TIME_MS = 1500; // 1.5 Sekunden Klick-Sperre
 
+/* ══════════════════════════════════════════════════════════════════
+   EINHEITLICHES TIMING – identisch zu CompanySearch
+   → Nur hier ändern, dann ändern sich ALLE Animationen gleich
+══════════════════════════════════════════════════════════════════ */
+const ANIM_DURATION = 323;
+const ANIM_EASING = Easing.inOut(Easing.ease); // Standard-Easing von Animated.timing
+
+const tween = (value, toValue) =>
+  Animated.timing(value, {
+    toValue,
+    duration: ANIM_DURATION,
+    easing: ANIM_EASING,
+    useNativeDriver: true,
+  });
+
+// Einheitlicher Ablauf: 1 Frame warten → neu gemountete Views & Refs sind bereit
+const nextFrame = (fn) => requestAnimationFrame(() => fn());
+const afterMount = (fn) =>
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => fn());
+  });
 const ROUTE_MAP = {
   name: "/name",
   nameOld: "/nameOld",
@@ -48,16 +68,15 @@ const ROUTE_MAP = {
   email: "/email",
 };
 
-
 export default function StartApp() {
   const { t } = useTranslation();
-const { mode, setMode } = useTheme();
+  const { mode, setMode } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [isLoadingOld, setIsLoadingOld] = useState(false);
   const [showCompanySearch, setShowCompanySearch] = useState(false);
 
-  /* ── Globaler Klick-Lock (1-2 Sekunden) ── */
+  /* ── Globaler Klick-Lock ── */
   const [isLocked, setIsLocked] = useState(false);
   const lockRef = useRef(false);
 
@@ -79,7 +98,6 @@ const { mode, setMode } = useTheme();
   const [changeOldScreen, setChangeOldScreen] = useState(false);
   const [savedCompany, setSavedCompany] = useState({ name: "", street: "", city: "" });
 
-  const nameAnimationRunning = useRef(false);
   const bewerbungRef = useRef(null);
   const changeScreenRef = useRef(null);
   const changeOldRef = useRef(null);
@@ -103,395 +121,217 @@ const { mode, setMode } = useTheme();
   const animBewerbungOpacity = useRef(new Animated.Value(0)).current;
 
   const animChangeScreenX = useRef(new Animated.Value(0)).current;
+  const animChangeScreenY = useRef(new Animated.Value(0)).current;
   const animChangeScreenOpacity = useRef(new Animated.Value(0)).current;
-const animChangeScreenY = useRef(new Animated.Value(0)).current; // NEU
+
   const animChangeOldOpacity = useRef(new Animated.Value(0)).current;
 
   const kbListenerRef = useRef(null);
   const kbFallbackRef = useRef(null);
 
-  /* ── CompanySearch Slide-In ── */
-  const triggerNameSlideDown = useCallback(() => {
-    if (nameAnimationRunning.current) return;
-
-    nameAnimationRunning.current = true;
-
+  /* ══════════════════════════════════════════════════════════════════
+     HELPER
+  ══════════════════════════════════════════════════════════════════ */
+  const clearKeyboardListeners = useCallback(() => {
     if (kbFallbackRef.current) {
       clearTimeout(kbFallbackRef.current);
       kbFallbackRef.current = null;
     }
-
     if (kbListenerRef.current) {
       kbListenerRef.current.remove();
       kbListenerRef.current = null;
     }
+  }, []);
 
-    Animated.parallel([
-      Animated.timing(animNameModalX, {
-        toValue: 1,
-        duration: 323.3,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animNameModalOpacity, {
-        toValue: 1,
-        duration: 383.3,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animHomeOpacity, {
-        toValue: 0,
-        duration: 383,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [animNameModalX, animNameModalOpacity, animHomeOpacity]);
+  // Animated.Values aus useRef(...).current sind stabil → leere Deps ok
+  const resetOverlayValues = useCallback(() => {
+    animOverlayWrapperX.setValue(0);
+    animOverlayWrapperY.setValue(0);
+    animBackdropOpacity.setValue(0);
+    animBewerbungOpacity.setValue(0);
+    animChangeScreenX.setValue(0);
+    animChangeScreenY.setValue(0);
+    animChangeScreenOpacity.setValue(0);
+    animChangeOldOpacity.setValue(0);
+  }, []);
 
-  const openName = useCallback(() => {
-    nameAnimationRunning.current = false;
-    setShowCompanySearch(true);
+  const resetNameValues = useCallback(() => {
     animNameModalX.setValue(0);
     animNameModalY.setValue(1);
     animNameModalOpacity.setValue(0);
+  }, []);
 
+  const resetAllFlags = useCallback(() => {
+    setScreen(false);
+    setScreenApp(false);
+    setScreenChange(false);
+    setChangeOldScreen(false);
+    setShowCompanySearch(false);
+  }, []);
 
-      triggerNameSlideDown();
-  }, [animNameModalX, animNameModalY, animNameModalOpacity, triggerNameSlideDown]);
+  /* ══════════════════════════════════════════════════════════════════
+     COMPANY SEARCH
+  ══════════════════════════════════════════════════════════════════ */
+  const openName = useCallback(() => {
+    clearKeyboardListeners();
+    resetNameValues();
+    setShowCompanySearch(true);
+
+    nextFrame(() => {
+      Animated.parallel([
+        tween(animNameModalX, 1),
+        tween(animNameModalOpacity, 1),
+        tween(animHomeOpacity, 0),
+      ]).start();
+    });
+  }, [clearKeyboardListeners, resetNameValues]);
 
   const closeName = useCallback(() => {
     Keyboard.dismiss();
-
-    if (kbListenerRef.current) {
-      kbListenerRef.current.remove();
-      kbListenerRef.current = null;
-    }
-    if (kbFallbackRef.current) {
-      clearTimeout(kbFallbackRef.current);
-      kbFallbackRef.current = null;
-    }
+    clearKeyboardListeners();
 
     Animated.parallel([
-      Animated.timing(animNameModalY, {
-        toValue: 2,
-        duration: 380,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animNameModalOpacity, {
-        toValue: 0,
-        duration: 320,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animHomeOpacity, {
-        toValue: 1,
-        duration: 380,
-        useNativeDriver: true,
-      }),
+      tween(animNameModalY, 2),
+      tween(animNameModalOpacity, 0),
+      tween(animHomeOpacity, 1),
     ]).start(({ finished }) => {
-      if (finished) {
-        setShowCompanySearch(false);
-        animNameModalX.setValue(0);
-        animNameModalY.setValue(1);
-      }
+      if (!finished) return;
+      setShowCompanySearch(false);
+      resetNameValues();
     });
-  }, [animNameModalY, animNameModalOpacity, animHomeOpacity, animNameModalX]);
+  }, [clearKeyboardListeners, resetNameValues]);
 
-  /* ── Overlay Dismiss ── */
+  /* ══════════════════════════════════════════════════════════════════
+     OVERLAY SCHLIESSEN
+  ══════════════════════════════════════════════════════════════════ */
   const closeAllOverlays = useCallback(() => {
     Keyboard.dismiss();
-console.log("closeAllOverlays")
+
     Animated.parallel([
-      Animated.timing(animOverlayWrapperY, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animBackdropOpacity, {
-        toValue: 0,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animHomeOpacity, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
+      tween(animOverlayWrapperY, 1),
+      tween(animBackdropOpacity, 0),
+      tween(animHomeOpacity, 1),
     ]).start(() => {
-      setScreen(false);
-      setScreenApp(false);
-      setScreenChange(false);
-      setChangeOldScreen(false);
-      setShowCompanySearch(false);
-
-      animOverlayWrapperX.setValue(0);
-      animOverlayWrapperY.setValue(0);
-      animBackdropOpacity.setValue(0);
-
-      animBewerbungOpacity.setValue(0);
-
-      animChangeScreenX.setValue(0);
-      animChangeScreenY.setValue(0); // NEU
-      animChangeScreenOpacity.setValue(0);
-
-      animChangeOldOpacity.setValue(0);
-
-      animNameModalX.setValue(0);
-      animNameModalY.setValue(1);
-      animNameModalOpacity.setValue(0);
+      resetAllFlags();
+      resetOverlayValues();
+      resetNameValues();
     });
-  }, [
-    animOverlayWrapperY,
-    animBackdropOpacity,
-    animHomeOpacity,
-    animOverlayWrapperX,
-    
-    animBewerbungOpacity,
-    animChangeScreenX,
-    animChangeScreenOpacity,
-    animChangeOldOpacity,
-    animNameModalX,
-    animNameModalY,
-    animNameModalOpacity,
-  ]);
+  }, [resetAllFlags, resetOverlayValues, resetNameValues]);
 
-  /* ── Subscreen Openers ── */
+  /* ══════════════════════════════════════════════════════════════════
+     OVERLAY ÖFFNEN
+     Immer gleicher Ablauf: Reset → State → nextFrame → Animation + Fokus
+     Nur der Wrapper fährt von rechts ein (keine doppelte Bewegung)
+  ══════════════════════════════════════════════════════════════════ */
   const openBewerbung = useCallback(() => {
+    resetOverlayValues();
     setScreenApp(true);
     setScreenChange(false);
     setChangeOldScreen(false);
     setScreen(true);
 
-    animOverlayWrapperX.setValue(0);
-    animOverlayWrapperY.setValue(0);
-
-  
-    
-    animBewerbungOpacity.setValue(0);
-    animChangeScreenX.setValue(0);
-    animChangeScreenY.setValue(0); // NEU
-    animChangeScreenOpacity.setValue(0);
-
-
-    Animated.parallel([
-      Animated.timing(animOverlayWrapperX, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animBewerbungOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animBackdropOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [
-    animOverlayWrapperX,
-    animOverlayWrapperY,
-    animBackdropOpacity,
-   
-    animBewerbungOpacity,
-    animChangeScreenX,
-    animChangeScreenOpacity,
-  ]);
+    nextFrame(() => {
+      Animated.parallel([
+        tween(animOverlayWrapperX, 1),
+        tween(animBewerbungOpacity, 1),
+        tween(animBackdropOpacity, 1),
+      ]).start();
+      bewerbungRef.current?.focusJob?.();
+    });
+  }, [resetOverlayValues]);
 
   const openChange = useCallback(() => {
+    resetOverlayValues();
+    animChangeScreenX.setValue(1); // steht bereits an Position → nur Wrapper bewegt sich
     setScreenApp(false);
     setChangeOldScreen(false);
     setScreenChange(true);
     setScreen(true);
 
-    changeScreenRef.current?.disableScroll?.();
-
-    animOverlayWrapperX.setValue(0);
-    animOverlayWrapperY.setValue(0);
-    animBackdropOpacity.setValue(0);
-    animChangeScreenX.setValue(0); // Empfohlen
-animChangeScreenY.setValue(0); // NEU
-    animChangeScreenOpacity.setValue(0);
-    changeScreenRef.current?.focus?.();
-
-    Animated.parallel([
-      Animated.timing(animBackdropOpacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeScreenX, {
-        toValue: 1,
-        duration: 450,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animOverlayWrapperX, {
-        toValue: 1,
-        duration: 450,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeScreenOpacity, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [
-    animOverlayWrapperX,
-    animOverlayWrapperY,
-    animBackdropOpacity,
-    animChangeScreenX,
-    animChangeScreenOpacity,
-  ]);
+    nextFrame(() => {
+      Animated.parallel([
+        tween(animOverlayWrapperX, 1),
+        tween(animChangeScreenOpacity, 1),
+        tween(animBackdropOpacity, 1),
+      ]).start();
+      changeScreenRef.current?.focus?.();
+    });
+  }, [resetOverlayValues]);
 
   const openChangeOld = useCallback(() => {
+    resetOverlayValues();
     setScreenApp(false);
     setScreenChange(false);
     setChangeOldScreen(true);
     setScreen(true);
 
-    animOverlayWrapperX.setValue(0);
-    animOverlayWrapperY.setValue(0);
-    animBackdropOpacity.setValue(0);
-    animChangeOldOpacity.setValue(0);
-
-    requestAnimationFrame(() => {
+    nextFrame(() => {
+      Animated.parallel([
+        tween(animOverlayWrapperX, 1),
+        tween(animChangeOldOpacity, 1),
+        tween(animBackdropOpacity, 1),
+      ]).start();
       changeOldRef.current?.focus?.();
     });
+  }, [resetOverlayValues]);
+
+  /* ══════════════════════════════════════════════════════════════════
+     BEWERBUNG → CHANGE
+  ══════════════════════════════════════════════════════════════════ */
+  const navigateToChange = useCallback(() => {
+    animChangeScreenX.setValue(0);
+    animChangeScreenY.setValue(0);
+    animChangeScreenOpacity.setValue(0);
+
+    setScreenChange(true);
+    setScreen(true);
+
+    
+      changeScreenRef.current?.focus?.();
+
+
+    nextFrame(() => {
+      Animated.parallel([
+        tween(animChangeScreenX, 1),
+        tween(animChangeScreenOpacity, 1),
+      ]).start();
+    });
+  }, []);
+
+  const backToBewerbung = useCallback(() => {
+    setScreenApp(true); // sonst ist Bewerbung danach nicht mehr bedienbar (pointerEvents)
 
     Animated.parallel([
-      Animated.timing(animHomeOpacity, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animBackdropOpacity, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animOverlayWrapperX, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeOldOpacity, {
-        toValue: 1,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [
-    animOverlayWrapperX,
-    animOverlayWrapperY,
-    animBackdropOpacity,
-    animChangeOldOpacity,
-    animHomeOpacity,
-  ]);
+      tween(animChangeScreenX, 0),
+      tween(animChangeScreenOpacity, 0),
+    ]).start(() => {
+      setScreenChange(false);
+    });
+  }, []);
 
-
-
-
-const closeChange = useCallback(() => {
+  const closeChange = useCallback(() => {
     Keyboard.dismiss();
 
-    // Fall 1: ChangeScreen wurde direkt geöffnet (ohne Bewerbung darunter) -> komplettes Overlay schließen
+    // Fall 1: ChangeScreen ohne Bewerbung darunter → komplettes Overlay schließen
     if (!screenApp) {
       closeAllOverlays();
       return;
     }
-    console.log("closeCange")
-    // Fall 2: ChangeScreen liegt über Bewerbung -> nach oben (Y) wegfahren & Bewerbung wieder zentrieren
+
+    // Fall 2: ChangeScreen liegt über Bewerbung → nach oben wegfahren
     Animated.parallel([
-      Animated.timing(animChangeScreenY, {
-        toValue: 1,
-        duration: 320,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeScreenOpacity, {
-        toValue: 0,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-    Animated.timing(animHomeOpacity, {
-        toValue: 1,
-        duration: 380,
-        useNativeDriver: true,
-      }),
+      tween(animChangeScreenY, 1),
+      tween(animChangeScreenOpacity, 0),
+      tween(animHomeOpacity, 1),
     ]).start(() => {
-      
-      setScreen(false);
-      setScreenApp(false);
-      setScreenChange(false);
-      setChangeOldScreen(false);
-      setShowCompanySearch(false);
-    
-      
+      resetAllFlags();
+      resetOverlayValues();
     });
-  }, [
-    screenApp,
-    closeAllOverlays,
-    animChangeScreenY,
-    animChangeScreenOpacity,
-    
-    animChangeScreenX,
-  ]);
+  }, [screenApp, closeAllOverlays, resetAllFlags, resetOverlayValues]);
 
-
-
-
-
-
-
-
-
-  const navigateToChange = useCallback(() => {
-    changeScreenRef.current?.focus?.();
-
-    setScreenApp(false);
-    setChangeOldScreen(false);
-    setScreenChange(true);
-    setScreen(true);
-
-    changeScreenRef.current?.disableScroll?.();
-
-    animChangeScreenX.setValue(0); // Empfohlen
-animChangeScreenY.setValue(0); // NEU
-    animChangeScreenOpacity.setValue(0);
-
-    Animated.parallel([
-
-      Animated.timing(animChangeScreenX, {
-        toValue: 1,
-        duration: 380,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeScreenOpacity, {
-        toValue: 1,
-        duration: 380,
-        useNativeDriver: true,
-      }),
-    ]).start();
-}, [animChangeScreenX, animChangeScreenY, animChangeScreenOpacity]);
-  const backToBewerbung = useCallback(() => {
-    Keyboard.dismiss();
-
-    Animated.parallel([
-      
-      Animated.timing(animChangeScreenX, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animChangeScreenOpacity, {
-        toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setScreenChange(false);
-    });
-  }, [animChangeScreenX, animChangeScreenOpacity]);
-
-  /* ── Firmenauswahl Übergang zu Bewerbung ── */
+  /* ══════════════════════════════════════════════════════════════════
+     FIRMA GESPEICHERT → BEWERBUNG
+  ══════════════════════════════════════════════════════════════════ */
   const handleCompanySaved = useCallback(
     (name, street, city) => {
       setSavedCompany({ name, street, city });
@@ -500,65 +340,31 @@ animChangeScreenY.setValue(0); // NEU
       );
       setIsButtonVisible(true);
 
-      setScreen(true);
+      resetOverlayValues();
+      animBackdropOpacity.setValue(1);
+
       setScreenApp(true);
       setScreenChange(false);
       setChangeOldScreen(false);
+      setScreen(true);
 
-      animOverlayWrapperX.setValue(0);
-      animOverlayWrapperY.setValue(0);
-      animBackdropOpacity.setValue(1);
+      nextFrame(() => {
+        bewerbungRef.current?.focusSkill?.();
 
-     
-      animBewerbungOpacity.setValue(0);
-      animChangeScreenX.setValue(0);
-      animChangeScreenOpacity.setValue(0);
-
-      requestAnimationFrame(() => {
-        bewerbungRef.current?.focusJob?.();
-      });
-
-      Animated.parallel([
-        Animated.timing(animNameModalX, {
-          toValue: 2,
-          duration: 380,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animNameModalOpacity, {
-          toValue: 0,
-          duration: 320,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animOverlayWrapperX, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animBewerbungOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (finished) {
+        Animated.parallel([
+          
+          tween(animNameModalX, 2),
+          tween(animNameModalOpacity, 0),
+          tween(animOverlayWrapperX, 1),
+          tween(animBewerbungOpacity, 1),
+        ]).start(({ finished }) => {
+          if (!finished) return;
           setShowCompanySearch(false);
-          animNameModalX.setValue(0);
-          animNameModalY.setValue(1);
-        }
+          resetNameValues();
+        });
       });
     },
-    [
-      animNameModalX,
-      animNameModalY,
-      animNameModalOpacity,
-      animOverlayWrapperX,
-      animOverlayWrapperY,
-      animBackdropOpacity,
-     
-      animBewerbungOpacity,
-      animChangeScreenX,
-      animChangeScreenOpacity,
-    ]
+    [resetOverlayValues, resetNameValues]
   );
 
   /* ── Hardware Back-Button ── */
@@ -656,9 +462,9 @@ animChangeScreenY.setValue(0); // NEU
     }
   }, [isButtonVisible, animResumeBanner]);
 
-  /* ── Alte Bewerbungen Abrufen ── */
-
-
+  /* ══════════════════════════════════════════════════════════════════
+     HANDLER
+  ══════════════════════════════════════════════════════════════════ */
   const handleNewApplication = async () => {
     if (!acquireLock()) return;
 
@@ -752,6 +558,9 @@ animChangeScreenY.setValue(0); // NEU
     [acquireLock, openInfo]
   );
 
+  /* ══════════════════════════════════════════════════════════════════
+     RENDER
+  ══════════════════════════════════════════════════════════════════ */
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.contentWrapper, { opacity: animHomeOpacity }]}>
@@ -901,17 +710,7 @@ animChangeScreenY.setValue(0); // NEU
       {/* ══ Multi-Step Overlay (Bewerbung, ChangeScreen, ChangeScreenOld) ══ */}
       {screen && (
         <View style={styles.bewerbungOverlay}>
-          <Animated.View
-            style={[
-              styles.backdrop,
-              {
-                opacity: animBackdropOpacity.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 1],
-                }),
-              },
-            ]}
-          >
+          <Animated.View style={[styles.backdrop, { opacity: animBackdropOpacity }]}>
             <Pressable style={StyleSheet.absoluteFill} onPress={closeAllOverlays} />
           </Animated.View>
 
@@ -946,13 +745,7 @@ animChangeScreenY.setValue(0); // NEU
                 <Animated.View
                   style={[
                     StyleSheet.absoluteFillObject,
-                    {
-                      opacity: animBewerbungOpacity.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 1],
-                      }),
-                      
-                    },
+                    { opacity: animBewerbungOpacity },
                   ]}
                   pointerEvents={screenApp && !screenChange ? "auto" : "none"}
                 >
@@ -966,15 +759,11 @@ animChangeScreenY.setValue(0); // NEU
                 </Animated.View>
 
                 {/* Step 2: ChangeScreen */}
-{/* Step 2: ChangeScreen */}
                 <Animated.View
                   style={[
                     StyleSheet.absoluteFillObject,
                     {
-                      opacity: animChangeScreenOpacity.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 1],
-                      }),
+                      opacity: animChangeScreenOpacity,
                       transform: [
                         {
                           translateX: animChangeScreenX.interpolate({
@@ -1009,12 +798,7 @@ animChangeScreenY.setValue(0); // NEU
               <Animated.View
                 style={[
                   StyleSheet.absoluteFillObject,
-                  {
-                    opacity: animChangeOldOpacity.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 1],
-                    }),
-                  },
+                  { opacity: animChangeOldOpacity },
                 ]}
                 pointerEvents="auto"
               >
@@ -1029,20 +813,21 @@ animChangeScreenY.setValue(0); // NEU
           </Animated.View>
         </View>
       )}
+
       <KeyboardDummy />
-      <Info
-        visible={infoVisible}
-        onClose={closeInfo}
-        message={infoMessage}
-      />
+      <Info visible={infoVisible} onClose={closeInfo} message={infoMessage} />
     </SafeAreaView>
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   STYLES
+══════════════════════════════════════════════════════════════════ */
 const createStyles = (colors) => ({
   container: {
     flex: 1,
-    backgroundColor:  "#0F1117",
+    backgroundColor: "#0F1117",
+    marginBottom:52
   },
   contentWrapper: {
     flex: 1,
@@ -1050,21 +835,21 @@ const createStyles = (colors) => ({
     justifyContent: "space-between",
     paddingTop: 24,
     paddingBottom: 28,
-    backgroundColor:colors.bg
+    backgroundColor: colors.bg,
   },
   header: {
     marginTop: 8,
   },
- badgeHub: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
+  badgeHub: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
     backgroundColor: colors.badge,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: "rgba(255, 255, 255, 0.08)",
     marginBottom: 8,
   },
   statusDot: {

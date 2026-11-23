@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   searchButton: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#0284c7',
+    backgroundColor: '#1E3A8A',
     height: 42,
     borderRadius: 10,
     alignItems: 'center',

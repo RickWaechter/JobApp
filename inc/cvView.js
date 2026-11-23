@@ -582,7 +582,7 @@ export function cvView(
 
   <div id="cv-source">
     <header id="tpl-header-first" class="header">
-      <div class="eyebrow">Curriculum Vitae</div>
+      <div class="eyebrow">Lebenslauf</div>
       <h1>${displayName}</h1>
       <div class="job-title">${jobTitle}</div>
       <div class="header-line"></div>
@@ -772,7 +772,7 @@ export function cvView(
 
   <div class="sheetOnePage">
     <header class="header">
-      <div class="eyebrow">Curriculum Vitae</div>
+      <div class="eyebrow">Lebenslauf</div>
       <h1>${displayName}</h1>
       <div class="job-title">${jobTitle}</div>
       <div class="header-line"></div>

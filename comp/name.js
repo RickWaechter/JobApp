@@ -141,12 +141,20 @@ const Field = memo(function Field({
   onSubmitEditing,
   blurOnSubmit = false,
   onPressIcon,
+  style,
+  inputRowStyle,
 }) {
   const handleClear = useCallback(() => onChangeText(""), [onChangeText]);
 
   return (
-    <View style={styles.fieldWrap}>
-      <View style={[styles.inputRow, Boolean(error) && styles.inputRowError]}>
+    <View style={[styles.fieldWrap, style]}>
+      <View
+        style={[
+          styles.inputRow,
+          inputRowStyle,
+          Boolean(error) && styles.inputRowError,
+        ]}
+      >
         {Boolean(iconName) && (
           <TouchableOpacity
             onPress={onPressIcon}
@@ -291,6 +299,8 @@ const CompanySearchModal = ({
   /* ── Auto-Focus & Auto-Search beim Einblenden ── */
   useEffect(() => {
     if (visible) {
+          nameRef.current?.focus();
+
       const hasFullAddress = Boolean(
         initialCity?.trim() && initialStreet?.trim() && initialName?.trim()
       );
@@ -301,9 +311,7 @@ const CompanySearchModal = ({
         setYourName(initialName);
         setManualMode(true);
 
-        requestAnimationFrame(() => {
-          nameRef.current?.focus();
-        });
+      
       } else {
         setManualMode(false);
 
@@ -675,71 +683,77 @@ const CompanySearchModal = ({
                 showsVerticalScrollIndicator={false}
                 bounces={false}
               >
-                <Field
-                  inputRef={nameRef}
-                  iconName="business"
-                  value={yourName}
-                  onChangeText={(v) => {
-                    setYourName(v);
-                    if (errors.nameErr)
-                      setErrors((p) => ({ ...p, nameErr: "" }));
-                  }}
-                  placeholder={t("companySearchModal.namePlaceholder")}
-                  error={errors.nameErr}
-                  returnKeyType="next"
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => streetRef.current?.focus()}
-                  onPressIcon={() =>
-                    openInfo(
-                      t("info.companyName") ||
-                        "Der offizielle Name des Unternehmens für das Anschreiben."
-                    )
-                  }
-                />
+              <Field
+      style={styles.manualFieldFlex}
+      inputRowStyle={styles.manualInputRowFlex}
+      inputRef={nameRef}
+      iconName="business"
+      value={yourName}
+      onChangeText={(v) => {
+        setYourName(v);
+        if (errors.nameErr)
+          setErrors((p) => ({ ...p, nameErr: "" }));
+      }}
+      placeholder={t("companySearchModal.namePlaceholder")}
+      error={errors.nameErr}
+      returnKeyType="next"
+      blurOnSubmit={false}
+      onSubmitEditing={() => streetRef.current?.focus()}
+      onPressIcon={() =>
+        openInfo(
+          t("info.companyName") ||
+            "Der offizielle Name des Unternehmens für das Anschreiben."
+        )
+      }
+    />
 
-                <Field
-                  inputRef={streetRef}
-                  iconName="add-road"
-                  value={yourStreet}
-                  onChangeText={(v) => {
-                    setYourStreet(v);
-                    if (errors.streetErr)
-                      setErrors((p) => ({ ...p, streetErr: "" }));
-                  }}
-                  placeholder={t("companySearchModal.streetPlaceholder")}
-                  error={errors.streetErr}
-                  returnKeyType="next"
-                  blurOnSubmit={false}
-                  onSubmitEditing={() => cityRef.current?.focus()}
-                  onPressIcon={() =>
-                    openInfo(
-                      t("info.companyStreet") ||
-                        "Straße und Hausnummer des Unternehmens."
-                    )
-                  }
-                />
+    <Field
+      style={styles.manualFieldFlex}
+      inputRowStyle={styles.manualInputRowFlex}
+      inputRef={streetRef}
+      iconName="add-road"
+      value={yourStreet}
+      onChangeText={(v) => {
+        setYourStreet(v);
+        if (errors.streetErr)
+          setErrors((p) => ({ ...p, streetErr: "" }));
+      }}
+      placeholder={t("companySearchModal.streetPlaceholder")}
+      error={errors.streetErr}
+      returnKeyType="next"
+      blurOnSubmit={false}
+      onSubmitEditing={() => cityRef.current?.focus()}
+      onPressIcon={() =>
+        openInfo(
+          t("info.companyStreet") ||
+            "Straße und Hausnummer des Unternehmens."
+        )
+      }
+    />
 
-                <Field
-                  inputRef={cityRef}
-                  iconName="location-city"
-                  value={yourCity}
-                  onChangeText={(v) => {
-                    setYourCity(v);
-                    if (errors.cityErr)
-                      setErrors((p) => ({ ...p, cityErr: "" }));
-                  }}
-                  placeholder={t("companySearchModal.cityPlaceholder")}
-                  error={errors.cityErr}
-                  returnKeyType="done"
-                  onSubmitEditing={validateAndContinue}
-                  blurOnSubmit={false}
-                  onPressIcon={() =>
-                    openInfo(
-                      t("info.companyCity") ||
-                        "Postleitzahl und Ort des Unternehmens."
-                    )
-                  }
-                />
+    <Field
+      style={styles.manualFieldFlex}
+      inputRowStyle={styles.manualInputRowFlex}
+      inputRef={cityRef}
+      iconName="location-city"
+      value={yourCity}
+      onChangeText={(v) => {
+        setYourCity(v);
+        if (errors.cityErr)
+          setErrors((p) => ({ ...p, cityErr: "" }));
+      }}
+      placeholder={t("companySearchModal.cityPlaceholder")}
+      error={errors.cityErr}
+      returnKeyType="done"
+      onSubmitEditing={validateAndContinue}
+      blurOnSubmit={false}
+      onPressIcon={() =>
+        openInfo(
+          t("info.companyCity") ||
+            "Postleitzahl und Ort des Unternehmens."
+        )
+      }
+    />
               </ScrollView>
             </View>
 
@@ -793,6 +807,23 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+  formScroll: {
+  flex: 1,
+},
+formContent: {
+  flexGrow: 1,
+  justifyContent: "space-between",
+  paddingTop: 2,
+  gap: M.fieldGap,
+},
+manualFieldFlex: {
+  flex: 1,
+  minHeight: M.inputH,
+},
+manualInputRowFlex: {
+  flex: 1,
+  height: "100%",
+},
   stage: {
     position: "absolute",
     left: 0,

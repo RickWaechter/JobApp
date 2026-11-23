@@ -280,6 +280,7 @@ const StartScreen = () => {
           mergePdf TEXT DEFAULT '',
           first BOOLEAN DEFAULT false,
           jobs TEXT DEFAULT '',
+          apply TEXT DEFAULT '',
           emails TEXT DEFAULT NULL
         );
       `);

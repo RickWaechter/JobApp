@@ -21,11 +21,11 @@ const JobWebView = ({
   refNr,
   onEmailFound,
   onCaptchaRequired,
+  extractEmail = true,
   onClose,
 }) => {
   const [pageLoading, setPageLoading] = useState(false);
   const [activeUrl, setActiveUrl] = useState('https://www.arbeitsagentur.de/jobsuche/');
-  // Bleibt false, bis im DOM wirklich ein Captcha erkannt wird
   const [captchaVisible, setCaptchaVisible] = useState(false);
 
   const webViewRef = useRef(null);
@@ -37,13 +37,35 @@ const JobWebView = ({
     if (visible && refNr) {
       isClosingRef.current = false;
       currentRefNrRef.current = refNr;
+      const nextUrl = `https://www.arbeitsagentur.de/jobsuche/jobdetail/${refNr}`;
+      const isSameUrl = activeUrl === nextUrl;
 
-      // Beim Laden eines Jobs immer versteckt starten
+      if (!extractEmail) {
+        setCaptchaVisible(true);
+        if (!isSameUrl) {
+          setPageLoading(true);
+        } else {
+          setPageLoading(false);
+        }
+
+        // 1. Erst flüssig einfahren, 2. danach URL laden -> kein Hängen!
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 350,
+          useNativeDriver: true,
+        }).start(() => {
+          if (!isSameUrl) {
+            setActiveUrl(nextUrl);
+          }
+        });
+        return;
+      }
+
+      // extractEmail === true: versteckt starten bis Captcha erkannt wird
       setCaptchaVisible(false);
       slideAnim.setValue(width);
 
-      const nextUrl = `https://www.arbeitsagentur.de/jobsuche/jobdetail/${refNr}`;
-      if (activeUrl !== nextUrl) {
+      if (!isSameUrl) {
         setPageLoading(true);
         setActiveUrl(nextUrl);
       } else {
@@ -63,13 +85,12 @@ const JobWebView = ({
       setCaptchaVisible(false);
       Animated.timing(slideAnim, {
         toValue: width,
-        duration: 300,
+        duration: 280,
         useNativeDriver: true,
       }).start();
     }
-  }, [visible, refNr]);
+  }, [visible, refNr, extractEmail]);
 
-  // Android Hardware-Zurück-Button nur abfangen, wenn das Captcha-Panel eingefahren ist
   useEffect(() => {
     if (!visible || !captchaVisible) return;
     const backSub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -84,13 +105,13 @@ const JobWebView = ({
     onCaptchaRequired?.();
     Animated.timing(slideAnim, {
       toValue: 0,
-      duration: 300,
+      duration: 280,
       useNativeDriver: true,
     }).start();
   };
 
   const handleMessage = (event) => {
-    if (isClosingRef.current || !visible) return;
+    if (!extractEmail || isClosingRef.current || !visible) return;
     try {
       const payload = JSON.parse(event.nativeEvent.data);
       if (payload.type === 'EMAIL_FOUND' && payload.email) {
@@ -100,7 +121,6 @@ const JobWebView = ({
         onEmailFound(targetRef, payload.email);
         onClose();
       } else if (payload.type === 'CAPTCHA_REQUIRED') {
-        // Erst jetzt, weil ein Captcha sichtbar ist, das Animated.View einfahren
         showCaptchaOverlay();
       }
     } catch (e) {
@@ -110,7 +130,6 @@ const JobWebView = ({
 
   return (
     <>
-      {/* Dunkler Backdrop (nur sichtbar, wenn Captcha-Panel eingefahren ist) */}
       <Animated.View
         pointerEvents="none"
         style={[
@@ -118,18 +137,17 @@ const JobWebView = ({
           {
             zIndex: 79,
             backgroundColor: '#000000',
-            opacity: captchaVisible
-              ? slideAnim.interpolate({
+            opacity: 
+              slideAnim.interpolate({
                   inputRange: [0, width],
-                  outputRange: [0.1, 1],
+                  outputRange: [1, 0],
                   extrapolate: 'clamp',
                 })
-              : 0,
+              
           },
         ]}
       />
 
-      {/* Dauerhaft gemountetes WebView-Panel: fährt NUR ein, wenn ein Captcha erkannt wurde */}
       <Animated.View
         pointerEvents={visible && captchaVisible ? 'auto' : 'none'}
         style={[
@@ -142,9 +160,13 @@ const JobWebView = ({
         <SafeAreaView style={webViewStyles.container}>
           <View style={webViewStyles.header}>
             <View style={webViewStyles.headerTextBox}>
-              <Text style={webViewStyles.headerTitle}>Kontaktdaten freischalten</Text>
+              <Text style={webViewStyles.headerTitle}>
+                {extractEmail ? 'Kontaktdaten freischalten' : 'Stellenanzeige'}
+              </Text>
               <Text style={webViewStyles.headerSub}>
-                Löse kurz die Sicherheitsabfrage – die E-Mail wird automatisch übernommen.
+                {extractEmail
+                  ? 'Löse kurz die Sicherheitsabfrage – die E-Mail wird automatisch übernommen.'
+                  : 'Originalansicht der Bundesagentur für Arbeit'}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={webViewStyles.closeBtn} hitSlop={8}>
@@ -156,24 +178,44 @@ const JobWebView = ({
             {pageLoading && captchaVisible && (
               <View style={webViewStyles.loaderOverlay}>
                 <ActivityIndicator size="large" color="#38bdf8" />
-                <Text style={webViewStyles.loaderText}>Lade Kontaktbereich...</Text>
+                <Text style={webViewStyles.loaderText}>
+                  {extractEmail ? 'Lade Kontaktbereich...' : 'Lade Stellenanzeige...'}
+                </Text>
               </View>
             )}
 
-            <WebView
-              source={{ uri: activeUrl }}
-              ref={webViewRef}
-              userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
-              injectedJavaScript={getAgentEmail}
-              onMessage={handleMessage}
-              onLoadStart={() => setPageLoading(true)}
-              onLoadEnd={() => setPageLoading(false)}
-              incognito={false}
-              javaScriptEnabled={true}
-              domStorageEnabled={true}
-              sharedCookiesEnabled={true}
-              thirdPartyCookiesEnabled={true}
-            />
+            {extractEmail ? (
+              <WebView
+                key="webview-extract"
+                source={{ uri: activeUrl }}
+                ref={webViewRef}
+                userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+                injectedJavaScript={getAgentEmail}
+                injectedJavaScriptForMainFrameOnly={true}
+                onMessage={handleMessage}
+                onLoadStart={() => setPageLoading(true)}
+                onLoadEnd={() => setPageLoading(false)}
+                incognito={false}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                sharedCookiesEnabled={true}
+                thirdPartyCookiesEnabled={true}
+              />
+            ) : (
+              <WebView
+                key="webview-browse"
+                source={{ uri: activeUrl }}
+                ref={webViewRef}
+                userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+                onLoadStart={() => setPageLoading(true)}
+                onLoadEnd={() => setPageLoading(false)}
+                incognito={false}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                sharedCookiesEnabled={true}
+                thirdPartyCookiesEnabled={true}
+              />
+            )}
           </View>
         </SafeAreaView>
       </Animated.View>

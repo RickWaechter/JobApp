@@ -2,12 +2,12 @@
 export const lightColors = {
   mode: 'light',
   bg: '#082b5a',
-badge: '#801217',
+badge: '#971d23',
 badgeDot: '#198b3f',
 badgeText: '#f1ecec',
 titleMain: '#fff',
 subTitleMain: '#c2b9b9',
-actionCard: '#14080960',
+actionCard: '#2c020560',
 actionCardBorder: '#4a5e7da6',
 };
 
@@ -19,8 +19,10 @@ badgeDot: '#198b3f',
 badgeText: '#f1ecec',
 titleMain: '#fff',
 subTitleMain: '#c2b9b9',
-actionCard: '#14080960',
+actionCard: '#10102983',
 actionCardBorder: '#4a5e7da6',
+buttonInactive:'##334155',
+buttonSearch:'#1E3A8A'
 };
 /*bg:
 0b3061
