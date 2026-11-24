@@ -1,16 +1,19 @@
 import React, { memo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScaleDecorator } from 'react-native-draggable-flatlist';
+import { useTheme } from './themeContext';
+import { useThemedStyles } from './themeStyles';
 
 export const EducationCard = memo(function EducationCard({
   item,
   drag,
   isActive,
   getIndex,
-  theme,
   onUpdate,
   onRemove,
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const index = getIndex();
 
   return (
@@ -18,10 +21,6 @@ export const EducationCard = memo(function EducationCard({
       <View
         style={[
           styles.entryCard,
-          {
-            backgroundColor: theme.card,
-            borderColor: isActive ? theme.primary : theme.border,
-          },
           isActive && styles.entryCardActive,
         ]}
       >
@@ -33,24 +32,14 @@ export const EducationCard = memo(function EducationCard({
             style={styles.dragHandle}
             activeOpacity={0.7}
           >
-            <View
-              style={[
-                styles.dragGripIconWrap,
-                {
-                  backgroundColor: theme.badgeBg,
-                  borderColor: theme.border,
-                },
-              ]}
-            >
-              <Text style={[styles.dragGripIcon, { color: theme.primary }]}>☰</Text>
+            <View style={styles.dragGripIconWrap}>
+              <Text style={styles.dragGripIcon}>☰</Text>
             </View>
             <View>
-              <Text style={[styles.entryCardBadgeText, { color: theme.text }]}>
+              <Text style={styles.entryCardBadgeText}>
                 Abschluss #{index !== undefined ? index + 1 : ''}
               </Text>
-              <Text style={[styles.dragHintText, { color: theme.subtext }]}>
-                Halten & Ziehen
-              </Text>
+              <Text style={styles.dragHintText}>Halten & Ziehen</Text>
             </View>
           </TouchableOpacity>
 
@@ -64,57 +53,36 @@ export const EducationCard = memo(function EducationCard({
         </View>
 
         {/* Abschluss / Titel */}
-        <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Abschluss / Zertifikat</Text>
+        <Text style={styles.fieldLabel}>Abschluss / Zertifikat</Text>
         <TextInput
           value={item.degree}
           onChangeText={(t) => onUpdate(item.id, 'degree', t)}
           placeholder="z.B. B.Sc. Informatik"
-          placeholderTextColor={theme.subtext}
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.inputBg,
-              color: theme.text,
-              borderColor: theme.border,
-            },
-          ]}
+          placeholderTextColor={colors.textDim}
+          style={styles.input}
         />
 
         {/* Schule & Zeitraum */}
         <View style={styles.row}>
           <View style={[styles.flex1, styles.mr8]}>
-            <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Schule / Universität</Text>
+            <Text style={styles.fieldLabel}>Schule / Universität</Text>
             <TextInput
               value={item.school}
               onChangeText={(t) => onUpdate(item.id, 'school', t)}
               placeholder="Einrichtung"
-              placeholderTextColor={theme.subtext}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.inputBg,
-                  color: theme.text,
-                  borderColor: theme.border,
-                },
-              ]}
+              placeholderTextColor={colors.textDim}
+              style={styles.input}
             />
           </View>
 
           <View style={styles.periodInputWrap}>
-            <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Zeitraum</Text>
+            <Text style={styles.fieldLabel}>Zeitraum</Text>
             <TextInput
               value={item.period}
               onChangeText={(t) => onUpdate(item.id, 'period', t)}
               placeholder="JJJJ – JJJJ"
-              placeholderTextColor={theme.subtext}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.inputBg,
-                  color: theme.text,
-                  borderColor: theme.border,
-                },
-              ]}
+              placeholderTextColor={colors.textDim}
+              style={styles.input}
             />
           </View>
         </View>
@@ -123,19 +91,22 @@ export const EducationCard = memo(function EducationCard({
   );
 });
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => ({
   entryCard: {
     padding: 15,
     borderRadius: 16,
     borderWidth: 1,
     marginBottom: 14,
-    shadowColor: '#000',
+    backgroundColor: colors.actionCard,
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: colors.shadowOpacity ?? 0.25,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: colors.elevation ?? 3,
   },
   entryCardActive: {
+    borderColor: colors.primary,
     shadowOpacity: 0.45,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 8 },
@@ -148,7 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 220, 190, 0.07)',
+    borderBottomColor: colors.divider,
   },
   dragHandle: {
     flexDirection: 'row',
@@ -162,29 +133,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.badgeBg,
+    borderColor: colors.actionCardBorder,
   },
   dragGripIcon: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: colors.accentText,
   },
   entryCardBadgeText: {
     fontSize: 13,
     fontWeight: '700',
+    color: colors.titleMain,
   },
   dragHintText: {
     fontSize: 10,
     fontWeight: '500',
+    color: colors.subTitleMain,
   },
   deleteButton: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    backgroundColor: 'rgba(248, 113, 113, 0.10)',
+    backgroundColor: colors.errorBg,
     borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.40)',
+    borderColor: colors.errorBorder,
   },
   deleteButtonText: {
-    color: '#F87171',
+    color: colors.iconClear,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -195,6 +171,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
+    color: colors.subTitleMain,
   },
   input: {
     paddingHorizontal: 12,
@@ -203,6 +180,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 13.5,
     marginBottom: 8,
+    backgroundColor: colors.inputBg,
+    color: colors.titleMain,
+    borderColor: colors.inputBorder,
   },
   row: {
     flexDirection: 'row',

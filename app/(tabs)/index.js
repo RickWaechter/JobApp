@@ -10,6 +10,7 @@ import {
   Dimensions,
   Easing,
   Keyboard,
+  ImageBackground,
   Platform,
   Pressable,
   StyleSheet,
@@ -562,6 +563,8 @@ export default function StartApp() {
      RENDER
   ══════════════════════════════════════════════════════════════════ */
   return (
+      <ImageBackground source={{uri: 'https://www1.xup.in/exec/ximg.php?fid=96261766'}} resizeMode="cover" style={{flex:1, justifyContent:"center"}}>
+    
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.contentWrapper, { opacity: animHomeOpacity }]}>
         {/* Header */}
@@ -644,7 +647,7 @@ export default function StartApp() {
                       handleOpenInfo("resume");
                     }}
                   >
-                    <MaterialIcons name="play-arrow" size={18} color="#FFFFFF" />
+                    <MaterialIcons name="play-arrow" size={22} color="#FFFFFF" />
                   </Pressable>
                 </View>
                 <View>
@@ -676,6 +679,7 @@ export default function StartApp() {
               styles.cardAnimatedWrap,
               {
                 opacity: animNameModalOpacity,
+                zIndex:100,
                 transform: [
                   {
                     translateX: animNameModalX.interpolate({
@@ -817,6 +821,7 @@ export default function StartApp() {
       <KeyboardDummy />
       <Info visible={infoVisible} onClose={closeInfo} message={infoMessage} />
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -826,8 +831,7 @@ export default function StartApp() {
 const createStyles = (colors) => ({
   container: {
     flex: 1,
-    backgroundColor: "#0F1117",
-    marginBottom:52
+    marginBottom:52,
   },
   contentWrapper: {
     flex: 1,
@@ -835,7 +839,6 @@ const createStyles = (colors) => ({
     justifyContent: "space-between",
     paddingTop: 24,
     paddingBottom: 28,
-    backgroundColor: colors.bg,
   },
   header: {
     marginTop: 8,
@@ -1021,10 +1024,10 @@ const createStyles = (colors) => ({
     gap: 12,
   },
   resumePlayIcon: {
-    width: 32,
-    height: 32,
+    width: 42,
+    height: 42,
     borderRadius: 10,
-    backgroundColor: "#10B981",
+    backgroundColor: "#43b121d0",
     justifyContent: "center",
     alignItems: "center",
   },

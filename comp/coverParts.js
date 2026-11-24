@@ -14,6 +14,8 @@ import {
   View,
 } from 'react-native';
 import WebView from 'react-native-webview';
+import { useTheme } from './themeContext';
+import { useThemedStyles } from './themeStyles';
 
 const ICONS = {
   newCv: 'https://img.icons8.com/?size=100&id=IoyS7mvkv16Q&format=png&color=000000',
@@ -28,8 +30,6 @@ export const CoverFabMenu = memo(
   ({
     isOpen,
     fabAnim,
-    isDark,
-    theme,
     isScanningCv,
     savedCvKeys,
     currentPersonName,
@@ -43,6 +43,8 @@ export const CoverFabMenu = memo(
     onDeleteSavedCv,
     onSaveSnapshot,
   }) => {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(createStyles);
     const [showSavedList, setShowSavedList] = useState(false);
     const [saveTitle, setSaveTitle] = useState('');
 
@@ -95,23 +97,14 @@ export const CoverFabMenu = memo(
         >
           <BlurView
             intensity={65}
-            tint={isDark ? 'dark' : 'light'}
+            tint="dark"
             experimentalBlurMethod="dimezisBlurView"
-            style={[
-              styles.menuBlurBox,
-              {
-                borderColor: theme.border,
-                backgroundColor: isDark
-                  ? 'rgba(24, 24, 27, 0.62)'
-                  : 'rgba(255, 255, 255, 0.72)',
-              },
-            ]}
+            style={styles.menuBlurBox}
           >
             <View style={styles.menuColumnContainer}>
               <MenuRow
                 icon={ICONS.newCv}
                 label="Neuer Lebenslauf"
-                theme={theme}
                 hasBottomBorder
                 onPress={() => {
                   closeAll();
@@ -122,7 +115,6 @@ export const CoverFabMenu = memo(
               <MenuRow
                 icon={ICONS.newCv}
                 label="Als Lebenslauf speichern"
-                theme={theme}
                 hasBottomBorder
                 onPress={() => {
                   closeAll();
@@ -133,7 +125,6 @@ export const CoverFabMenu = memo(
               <MenuRow
                 icon={ICONS.preview}
                 label="Vorschau"
-                theme={theme}
                 onPress={() => {
                   closeAll();
                   onOpenPreview();
@@ -143,7 +134,6 @@ export const CoverFabMenu = memo(
               <MenuRow
                 icon={ICONS.pdf}
                 label="Als PDF speichern"
-                theme={theme}
                 onPress={onSharePdf}
               />
 
@@ -158,15 +148,17 @@ export const CoverFabMenu = memo(
               >
                 <View style={styles.menuRowIconBox}>
                   {isScanningCv ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={isDark ? '#60a5fa' : theme.primary}
-                    />
+                    <ActivityIndicator size="small" color={colors.accentText} />
                   ) : (
-                    <Image style={styles.menuRowIcon} source={ICONS.scan} contentFit="contain" />
+                    <Image
+                      style={styles.menuRowIcon}
+                      source={ICONS.scan}
+                      tintColor={colors.iconLeading}
+                      contentFit="contain"
+                    />
                   )}
                 </View>
-                <Text style={[styles.menuRowText, { color: theme.text }]}>
+                <Text style={styles.menuRowText}>
                   {isScanningCv ? 'Lebenslauf wird gescannt…' : 'Lebenslauf scannen'}
                 </Text>
               </TouchableOpacity>
@@ -177,33 +169,28 @@ export const CoverFabMenu = memo(
                 onPress={toggleSavedList}
               >
                 <View style={styles.menuRowIconBox}>
-                  <Image style={styles.menuRowIcon} source={ICONS.saved} contentFit="contain" />
+                  <Image
+                    style={styles.menuRowIcon}
+                    source={ICONS.saved}
+                    tintColor={colors.iconLeading}
+                    contentFit="contain"
+                  />
                 </View>
                 <Text
                   style={[
                     styles.menuRowText,
-                    { color: showSavedList ? theme.primary : theme.text },
+                    showSavedList && styles.menuRowTextActive,
                   ]}
                 >
                   Gespeicherte Stände
                 </Text>
-                <Text style={{ color: theme.subtext, fontSize: 12, fontWeight: '700' }}>
+                <Text style={styles.accordionChevron}>
                   {showSavedList ? '▲' : '▼'}
                 </Text>
               </TouchableOpacity>
 
               {showSavedList && (
-                <View
-                  style={[
-                    styles.savedCvAccordion,
-                    {
-                      backgroundColor: isDark
-                        ? 'rgba(24, 24, 27, 0.85)'
-                        : 'rgba(249, 250, 251, 0.9)',
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
+                <View style={styles.savedCvAccordion}>
                   {savedCvKeys.length > 0 ? (
                     savedCvKeys.map((key) => {
                       const isCurrent = currentPersonName === key;
@@ -212,8 +199,7 @@ export const CoverFabMenu = memo(
                           <TouchableOpacity
                             style={[
                               styles.cvListItemBtn,
-                              { backgroundColor: theme.inputBg },
-                              isCurrent && { borderColor: theme.primary, borderWidth: 1 },
+                              isCurrent && styles.cvListItemBtnActive,
                             ]}
                             onPress={() => {
                               onSelectSavedCv(key);
@@ -224,7 +210,6 @@ export const CoverFabMenu = memo(
                             <Text
                               style={[
                                 styles.cvListItemText,
-                                { color: theme.text },
                                 isCurrent && styles.cvListItemTextBold,
                               ]}
                               numberOfLines={1}
@@ -244,7 +229,7 @@ export const CoverFabMenu = memo(
                       );
                     })
                   ) : (
-                    <Text style={[styles.cvListEmptyText, { color: theme.subtext }]}>
+                    <Text style={styles.cvListEmptyText}>
                       Keine Stände vorhanden
                     </Text>
                   )}
@@ -253,19 +238,12 @@ export const CoverFabMenu = memo(
                     value={saveTitle}
                     onChangeText={setSaveTitle}
                     placeholder="Name (z.B. Go Backend)"
-                    placeholderTextColor={theme.subtext}
-                    style={[
-                      styles.flyoutInput,
-                      {
-                        backgroundColor: theme.inputBg,
-                        color: theme.text,
-                        borderColor: theme.border,
-                      },
-                    ]}
+                    placeholderTextColor={colors.textDim}
+                    style={styles.flyoutInput}
                   />
 
                   <TouchableOpacity
-                    style={[styles.cvSaveCurrentBtn, { backgroundColor: theme.primary }]}
+                    style={styles.cvSaveCurrentBtn}
                     onPress={handleSaveClick}
                     activeOpacity={0.8}
                   >
@@ -280,7 +258,7 @@ export const CoverFabMenu = memo(
 
         <View style={styles.fabTriggerContainer} pointerEvents="box-none">
           <TouchableOpacity
-            style={[styles.floatingPreviewBtn, { backgroundColor: theme.primary }]}
+            style={styles.floatingPreviewBtn}
             onPress={closeAll}
             activeOpacity={0.8}
           >
@@ -308,35 +286,43 @@ export const CoverFabMenu = memo(
   }
 );
 
-const MenuRow = ({ icon, label, theme, hasBottomBorder = false, onPress }) => (
-  <TouchableOpacity
-    style={[
-      styles.menuRow,
-      hasBottomBorder && { borderBottomWidth: 1, borderColor: theme.border },
-    ]}
-    activeOpacity={0.75}
-    onPress={onPress}
-  >
-    <View style={styles.menuRowIconBox}>
-      <Image style={styles.menuRowIcon} source={icon} contentFit="contain" />
-    </View>
-    <Text style={[styles.menuRowText, { color: theme.text }]}>{label}</Text>
-  </TouchableOpacity>
-);
+const MenuRow = ({ icon, label, hasBottomBorder = false, onPress }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
+  return (
+    <TouchableOpacity
+      style={[styles.menuRow, hasBottomBorder && styles.menuRowBorder]}
+      activeOpacity={0.75}
+      onPress={onPress}
+    >
+      <View style={styles.menuRowIconBox}>
+        <Image
+          style={styles.menuRowIcon}
+          source={icon}
+          tintColor={colors.iconLeading}
+          contentFit="contain"
+        />
+      </View>
+      <Text style={styles.menuRowText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 /* ── Vollbild-WebView-Vorschau Overlay ───────────────────── */
 export const CvPreviewOverlay = memo(
   ({
     visible,
     htmlLayout,
-    isDark,
-    theme,
     isTwoPage,
     setIsTwoPage,
     isExporting,
     onSharePdf,
     onClose,
   }) => {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(createStyles);
+
     if (!visible) return null;
 
     return (
@@ -351,38 +337,16 @@ export const CvPreviewOverlay = memo(
           />
 
           <View style={styles.webviewFooterWrapper} pointerEvents="box-none">
-            <View
-              style={[
-                styles.webviewFooterBar,
-                {
-                  backgroundColor: isDark ? '#1F1A16' : '#ffffff',
-                  borderColor: isDark ? 'rgba(255, 220, 190, 0.16)' : '#e5e7eb',
-                },
-              ]}
-            >
+            <View style={styles.webviewFooterBar}>
               <TouchableOpacity
                 onPress={onClose}
-                style={[
-                  styles.footerCloseBtn,
-                  {
-                    backgroundColor: isDark ? 'rgba(255, 240, 225, 0.08)' : '#f3f4f6',
-                    borderColor: isDark ? 'rgba(255, 220, 190, 0.12)' : '#e5e7eb',
-                  },
-                ]}
+                style={styles.footerCloseBtn}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.footerCloseBtnText, { color: theme.text }]}>✕</Text>
+                <Text style={styles.footerCloseBtnText}>✕</Text>
               </TouchableOpacity>
 
-              <View
-                style={[
-                  styles.footerToggleContainer,
-                  {
-                    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.45)' : '#f3f4f6',
-                    borderColor: isDark ? 'rgba(255, 220, 190, 0.08)' : '#e5e7eb',
-                  },
-                ]}
-              >
+              <View style={styles.footerToggleContainer}>
                 {[
                   { label: '1-Pager', value: false },
                   { label: 'Multi-Pager', value: true },
@@ -393,7 +357,7 @@ export const CvPreviewOverlay = memo(
                       key={opt.label}
                       style={[
                         styles.footerToggleBtn,
-                        active && [styles.footerToggleBtnActive, { backgroundColor: theme.primary }],
+                        active && styles.footerToggleBtnActive,
                       ]}
                       onPress={() => setIsTwoPage(opt.value)}
                       activeOpacity={0.8}
@@ -401,7 +365,6 @@ export const CvPreviewOverlay = memo(
                       <Text
                         style={[
                           styles.footerToggleText,
-                          { color: active ? '#ffffff' : theme.subtext },
                           active && styles.footerToggleTextActive,
                         ]}
                       >
@@ -414,12 +377,12 @@ export const CvPreviewOverlay = memo(
 
               <TouchableOpacity
                 onPress={onSharePdf}
-                style={[styles.footerShareBtn, { backgroundColor: theme.primary }]}
+                style={styles.footerShareBtn}
                 disabled={isExporting}
                 activeOpacity={0.8}
               >
                 {isExporting ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
+                  <ActivityIndicator size="small" color={colors.textOnPrimary} />
                 ) : (
                   <>
                     <Text style={styles.footerShareBtnIcon}>📥</Text>
@@ -435,7 +398,7 @@ export const CvPreviewOverlay = memo(
   }
 );
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => ({
   outsideDismissOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'transparent',
@@ -448,14 +411,16 @@ const styles = StyleSheet.create({
     width: 270,
     zIndex: 920,
     elevation: 16,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 16,
   },
   menuBlurBox: {
     borderRadius: 22,
     borderWidth: 1,
+    borderColor: colors.actionCardBorder,
+    backgroundColor: colors.menuBlurBg,
     overflow: 'hidden',
   },
   menuColumnContainer: {
@@ -468,26 +433,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     gap: 12,
   },
+  menuRowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.divider,
+  },
   menuRowIconBox: {
     width: 36,
     height: 36,
     borderRadius: 10,
+    backgroundColor: colors.iconContainer,
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuRowIcon: {
-    width: 32,
-    height: 32,
+    width: 24,
+    height: 24,
   },
   menuRowText: {
     fontSize: 15,
     fontWeight: '700',
     flex: 1,
+    color: colors.titleMain,
+  },
+  menuRowTextActive: {
+    color: colors.accentText,
+  },
+  accordionChevron: {
+    color: colors.subTitleMain,
+    fontSize: 12,
+    fontWeight: '700',
   },
   savedCvAccordion: {
     padding: 10,
     borderRadius: 14,
     borderWidth: 1,
+    borderColor: colors.actionCardBorder,
+    backgroundColor: colors.accordionBg,
     gap: 6,
   },
   fabTriggerContainer: {
@@ -501,9 +482,10 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 50,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -511,7 +493,7 @@ const styles = StyleSheet.create({
   },
   mainFabIcon: {
     fontSize: 24,
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontWeight: '700',
   },
   cvListItemRow: {
@@ -525,18 +507,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 12,
+    backgroundColor: colors.inputBg,
     justifyContent: 'center',
+  },
+  cvListItemBtnActive: {
+    borderColor: colors.primary,
+    borderWidth: 1,
   },
   cvItemDeleteBtn: {
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: colors.errorBg,
+    borderWidth: 1,
+    borderColor: colors.errorBorder,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cvItemDeleteBtnText: {
-    color: '#ef4444',
+    color: colors.iconClear,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -547,10 +536,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 13,
     marginTop: 8,
+    backgroundColor: colors.inputBg,
+    color: colors.titleMain,
+    borderColor: colors.inputBorder,
   },
   cvListItemText: {
     fontSize: 15,
     fontWeight: '500',
+    color: colors.titleMain,
   },
   cvListItemTextBold: {
     fontWeight: '700',
@@ -560,6 +553,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     textAlign: 'center',
     fontStyle: 'italic',
+    color: colors.subTitleMain,
   },
   cvSaveCurrentBtn: {
     flexDirection: 'row',
@@ -569,18 +563,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
+    backgroundColor: colors.primary,
   },
   cvSaveCurrentBtnIcon: {
     fontSize: 16,
   },
   cvSaveCurrentBtnText: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontSize: 14,
     fontWeight: '700',
   },
   overlayBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(18, 13, 10, 0.88)',
+    backgroundColor: colors.overlayBackdrop,
     zIndex: 9999,
     elevation: 20,
     paddingTop: Platform.OS === 'ios' ? 44 : 16,
@@ -611,7 +606,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 24,
     borderWidth: 1.2,
-    shadowColor: '#000',
+    backgroundColor: colors.previewBarBg,
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.38,
     shadowRadius: 14,
@@ -623,18 +620,23 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 1,
+    backgroundColor: colors.previewCloseBg,
+    borderColor: colors.actionCardBorder,
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerCloseBtnText: {
     fontSize: 16,
     fontWeight: '700',
+    color: colors.titleMain,
   },
   footerToggleContainer: {
     flex: 1,
     flexDirection: 'row',
     borderRadius: 14,
     borderWidth: 1,
+    borderColor: colors.actionCardBorder,
+    backgroundColor: colors.previewToggleBg,
     padding: 3,
   },
   footerToggleBtn: {
@@ -645,7 +647,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footerToggleBtnActive: {
-    shadowColor: '#000',
+    backgroundColor: colors.primary,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3,
@@ -654,9 +657,11 @@ const styles = StyleSheet.create({
   footerToggleText: {
     fontSize: 12.5,
     fontWeight: '600',
+    color: colors.subTitleMain,
   },
   footerToggleTextActive: {
     fontWeight: '700',
+    color: colors.textOnPrimary,
   },
   footerShareBtn: {
     flexDirection: 'row',
@@ -667,7 +672,8 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     gap: 5,
     minWidth: 84,
-    shadowColor: '#000',
+    backgroundColor: colors.primary,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -677,7 +683,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   footerShareBtnText: {
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     fontSize: 13,
     fontWeight: '700',
   },

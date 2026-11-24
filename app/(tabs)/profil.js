@@ -32,7 +32,8 @@ import {
   LanguageModal,
   PersonalDataModal,
 } from '../../comp/profilModals.js';
-import colors from '../../inc/colors.js';
+import { useTheme } from '../../comp/themeContext';
+import { useThemedStyles } from '../../comp/themeStyles';
 import {
   resumePollingIfNeeded as resumeCvScanPolling,
   startCvScan,
@@ -64,7 +65,6 @@ const CONTENT_TOP_PAD = 20;
 const CONTENT_W = width - SCREEN_PADDING_H * 2;
 const MENU_OUT_X = -width;
 const MENU_ANIM_MS = 380;
-const APP_BG = colors.background || '#0F1117';
 
 const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-1715349546414110/1930235080';
 const rewarded = RewardedAd.createForAdRequest(adUnitId, {
@@ -83,6 +83,8 @@ const INFO_KEYS = {
 const ProfilScreen = ({ route }) => {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const where = route?.params?.where || 'profil';
 
   // Profil & Einstellungen
@@ -490,7 +492,7 @@ const ProfilScreen = ({ route }) => {
         <View style={styles.profileHeaderCard}>
           <View style={styles.profileInfoRow}>
             <View style={styles.avatarWrap}>
-              <MaterialIcons name="person" size={26} color="#FFFFFF" />
+              <MaterialIcons name="person" size={26} color={colors.textOnPrimary} />
             </View>
             <View style={styles.nameWrap}>
               <Text style={styles.greetingLabel}>{t('profil.welcomeBack')}</Text>
@@ -505,7 +507,7 @@ const ProfilScreen = ({ route }) => {
             onPress={() => setModalPayVisible(true)}
             style={styles.coinBadge}
           >
-            <MaterialIcons name="monetization-on" size={16} color="#F59E0B" />
+            <MaterialIcons name="monetization-on" size={16} color={colors.coinAccent} />
             <Text style={styles.coinText}>
               {coins !== null ? `${coins} ` : t('profil.coinsCountLoading')}
             </Text>
@@ -574,14 +576,14 @@ const ProfilScreen = ({ route }) => {
             <View style={styles.shopBannerContent}>
               <View style={styles.shopIconContainer}>
                 <TouchableOpacity activeOpacity={0.7} onPress={() => openInfo('coins')}>
-                  <MaterialIcons name="stars" size={24} color="#F59E0B" />
+                  <MaterialIcons name="stars" size={24} color={colors.coinAccent} />
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1, paddingHorizontal: 12 }}>
                 <Text style={styles.shopBannerTitle}>{t('profil.coinsVerwalten')}</Text>
                 <Text style={styles.shopBannerSubtitle}>{t('profil.coinsText')}</Text>
               </View>
-              <MaterialIcons name="arrow-forward-ios" size={14} color="rgba(255,255,255,0.4)" />
+              <MaterialIcons name="arrow-forward-ios" size={14} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
         </View>
@@ -675,80 +677,101 @@ const ProfilScreen = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: APP_BG },
+const createStyles = (colors) => ({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background || colors.bg,
+  },
   scrollContent: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
   profileHeaderCard: {
-    backgroundColor: '#171B26',
+    backgroundColor: colors.profileHeaderBg,
     borderRadius: 22,
     padding: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: colors.profileHeaderBorder,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 26,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: colors.shadowOpacity ?? 0.25,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: colors.elevation ?? 4,
   },
-  profileInfoRow: { flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 10 },
+  profileInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
   avatarWrap: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.avatarBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
-  nameWrap: { flex: 1 },
+  nameWrap: {
+    flex: 1,
+  },
   greetingLabel: {
-    color: 'rgba(255, 255, 255, 0.45)',
+    color: colors.textMuted,
     fontSize: 11,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
-  userName: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', marginTop: 1 },
+  userName: {
+    color: colors.titleMain,
+    fontSize: 17,
+    fontWeight: '700',
+    marginTop: 1,
+  },
   coinBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    backgroundColor: colors.coinBadgeBg,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderColor: colors.coinBadgeBorder,
     gap: 6,
   },
-  coinText: { color: '#FBBF24', fontSize: 13, fontWeight: '700' },
-  sectionWrap: { marginBottom: 24 },
+  coinText: {
+    color: colors.coinText,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  sectionWrap: {
+    marginBottom: 24,
+  },
   cardGroup: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: colors.cardGroupBg,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: colors.cardGroupBorder,
     overflow: 'hidden',
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.divider,
     marginLeft: 68,
   },
   shopBanner: {
     position: 'relative',
-    backgroundColor: '#151923',
+    backgroundColor: colors.shopBannerBg,
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.25)',
+    borderColor: colors.shopBannerBorder,
     overflow: 'hidden',
   },
   shopBannerGlow: {
@@ -758,19 +781,30 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    backgroundColor: colors.shopBannerGlow,
   },
-  shopBannerContent: { flexDirection: 'row', alignItems: 'center' },
+  shopBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   shopIconContainer: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    backgroundColor: colors.shopIconBg,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  shopBannerTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-  shopBannerSubtitle: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 12, marginTop: 2 },
+  shopBannerTitle: {
+    color: colors.titleMain,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  shopBannerSubtitle: {
+    color: colors.subTitleMain,
+    fontSize: 12,
+    marginTop: 2,
+  },
 });
 
 export default ProfilScreen;

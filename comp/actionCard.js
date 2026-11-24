@@ -136,8 +136,8 @@ export const PrimaryActionCard = memo(
             >
               <MaterialIcons
                 name={iconName}
-                size={24}
-                color={colors.textOnPrimary || '#742525'}
+                size={28}
+                color={colors.iconEmpty || '#C9A227'}
               />
             </Pressable>
           </View>
@@ -186,6 +186,8 @@ export const SecondaryActionCard = memo(
     const { colors } = useTheme();
     const styles = useThemedStyles(createStyles);
 
+    const iconColor = colors.accentText || colors.primary || '#3B82F6';
+
     return (
       <Pressable
         onPress={onPress}
@@ -213,7 +215,7 @@ export const SecondaryActionCard = memo(
               <MaterialIcons
                 name={iconName}
                 size={24}
-                color={colors.textMain}
+                color={iconColor}
               />
             </Pressable>
           )}
@@ -289,7 +291,7 @@ export const SettingsCard = memo(
         <MaterialIcons
           name="chevron-right"
           size={22}
-          color={colors.textMuted || 'rgba(255, 255, 255, 0.3)'}
+          color={colors.textMuted}
         />
       </Pressable>
     );
@@ -315,16 +317,16 @@ const createStyles = (colors, fontSize) => ({
     padding: 18,
     borderWidth: 1,
     borderColor: colors.actionCardBorder,
-    shadowColor: colors.shadow || '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: colors.shadowOpacity ?? 0.1,
     shadowRadius: 8,
     elevation: colors.elevation ?? 2,
   },
   primaryActionCard: {
-    backgroundColor: colors.actionCard || 'rgba(16, 45, 92, 0.12)',
-    borderColor: colors.actionCardBorder || 'rgba(59, 130, 246, 0.35)',
-    shadowColor: colors.primary || '#3B82F6',
+    backgroundColor: colors.actionCard,
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.primary,
     shadowOpacity: colors.primaryShadowOpacity ?? 0.15,
     shadowRadius: 12,
     elevation: colors.primaryElevation ?? 3,
@@ -333,13 +335,13 @@ const createStyles = (colors, fontSize) => ({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: '#404a8350',
+    backgroundColor: colors.iconContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
   },
   primaryIconContainer: {
-    backgroundColor: colors.primary || '#2cbe19bd',
+    backgroundColor: colors.primary,
   },
   cardTextContainer: {
     flex: 1,
@@ -361,9 +363,9 @@ const createStyles = (colors, fontSize) => ({
     fontWeight: '800',
   },
   inlineBadge: {
-    backgroundColor: colors.badgeBg || 'rgba(59, 130, 246, 0.16)',
+    backgroundColor: colors.badgeBg,
     borderWidth: 1,
-    borderColor: colors.badgeBorder || 'rgba(59, 130, 246, 0.35)',
+    borderColor: colors.badgeBorder,
     paddingVertical: 2,
     paddingHorizontal: 7,
     borderRadius: 6,
@@ -386,22 +388,13 @@ const createStyles = (colors, fontSize) => ({
     borderRadius: 24,
     padding: 22,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.35)',
-    shadowColor: '#3B82F6',
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowOpacity: colors.primaryShadowOpacity ?? 0.2,
     shadowRadius: 16,
-    elevation: 8,
+    elevation: colors.primaryElevation ?? 4,
     overflow: 'hidden',
-  },
-  primaryGlowEffect: {
-    position: 'absolute',
-    top: -40,
-    right: -40,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(59, 130, 246, 0.12)',
   },
   primaryTopRow: {
     flexDirection: 'row',
@@ -413,23 +406,25 @@ const createStyles = (colors, fontSize) => ({
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: colors.primary || '#3B82F6',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#3B82F6',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: colors.shadowOpacity ?? 0.25,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: colors.elevation ?? 3,
   },
   badgePrimary: {
-    backgroundColor: 'rgba(59, 130, 246, 0.18)',
     paddingVertical: 4,
+    backgroundColor: colors.badgeBg,
+    borderColor: colors.badgeBorder,
+    borderWidth: 1,
     paddingHorizontal: 8,
     borderRadius: 8,
   },
   badgePrimaryText: {
-    color: '#60A5FA',
+    color: colors.badgeText,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
@@ -438,13 +433,13 @@ const createStyles = (colors, fontSize) => ({
     marginBottom: 16,
   },
   primaryBigCardTitle: {
-    color: colors.titleMain || '#FFFFFF',
+    color: colors.titleMain,
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 6,
   },
   primaryCardDescription: {
-    color: colors.subTitleMain || 'rgba(255, 255, 255, 0.6)',
+    color: colors.subTitleMain,
     fontSize: 13.5,
     lineHeight: 19,
   },
@@ -454,10 +449,10 @@ const createStyles = (colors, fontSize) => ({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: colors.divider,
   },
   primaryFooterText: {
-    color: colors.titleMain || '#FFFFFF',
+    color: colors.titleMain,
     fontSize: 13.5,
     fontWeight: '600',
   },
@@ -465,7 +460,7 @@ const createStyles = (colors, fontSize) => ({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: colors.iconContainer,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -474,17 +469,17 @@ const createStyles = (colors, fontSize) => ({
   secondaryCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.actionCard,
+    backgroundColor: colors.secondaryCardBg,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: colors.actionCardBorder || 'rgba(255, 255, 255, 0.08)',
+    borderColor: colors.actionCardBorder,
   },
   secondaryIconContainer: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: colors.iconBg || 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: colors.iconContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
@@ -494,13 +489,13 @@ const createStyles = (colors, fontSize) => ({
     paddingRight: 8,
   },
   secondaryCardTitle: {
-    color: colors.titleMain || '#FFFFFF',
+    color: colors.titleMain,
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 3,
   },
   secondaryCardDescription: {
-    color: colors.subTitleMain || 'rgba(255, 255, 255, 0.45)',
+    color: colors.subTitleMain,
     fontSize: 12.5,
     lineHeight: 17,
   },
@@ -512,13 +507,13 @@ const createStyles = (colors, fontSize) => ({
     padding: 16,
   },
   settingsCardPressed: {
-    backgroundColor: colors.pressedBg || 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: colors.pressedBg,
   },
   settingsIconWrap: {
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: colors.iconBg || 'rgba(59, 130, 246, 0.12)',
+    backgroundColor: colors.iconBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
@@ -533,23 +528,23 @@ const createStyles = (colors, fontSize) => ({
     gap: 8,
   },
   settingsTitle: {
-    color: colors.titleMain || '#FFFFFF',
+    color: colors.titleMain,
     fontSize: 15,
     fontWeight: '600',
   },
   settingsInlineBadge: {
-    backgroundColor: colors.badgeBg || 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.badgeBg,
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 6,
   },
   settingsInlineBadgeText: {
-    color: colors.subTitleMain || 'rgba(255, 255, 255, 0.8)',
+    color: colors.subTitleMain,
     fontSize: 11,
     fontWeight: '700',
   },
   settingsDescription: {
-    color: colors.subTitleMain || 'rgba(255, 255, 255, 0.45)',
+    color: colors.subTitleMain,
     fontSize: 12,
     marginTop: 2,
   },

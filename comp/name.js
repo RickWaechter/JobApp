@@ -5,7 +5,7 @@
 -  2. Tokens & Keyboard-Cache
 -  3. Subkomponenten (Field)
 -  4. Hauptkomponente (Layout ohne interne Animationen)
--  5. Styles
+-  5. Themed Styles (createStyles)
 - ═══════════════════════════════════════════════════════════════════════ */
 
 import MaterialIcons from "@react-native-vector-icons/material-icons";
@@ -36,7 +36,9 @@ import {
 } from "react-native";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import colors from "../inc/colors.js";
+import { darkColors, lightColors } from "../inc/colors.js";
+import { useTheme } from "../comp/themeContext";
+import { useThemedStyles } from "../comp/themeStyles";
 import "../local/i18n.js";
 import Info, { useInfoModal } from "../comp/info.js";
 
@@ -100,34 +102,6 @@ const PANEL = {
   gutter: 12,
 };
 
-/* ── Farbpalette ── */
-const WARM = {
-  bg: colors.background || "#171412",
-  backdrop: "rgba(18, 13, 10, 0.8)",
-  surface: "rgba(255, 240, 225, 0.05)",
-  surfaceBorder: "rgba(255, 220, 190, 0.14)",
-  surfaceBorderSubtle: "rgba(255, 220, 190, 0.07)",
-
-  primary: "#E06D28",
-  accentBadgeBg: "rgba(245, 158, 11, 0.15)",
-  accentBadgeBorder: "rgba(245, 158, 11, 0.3)",
-
-  iconLeading: "#F59E0B",
-  iconClear: "#F87171",
-  iconPin: "#FB923C",
-  iconArrow: "#FBBF24",
-  iconEmpty: "#F59E0B",
-  iconClose: "#FFF7ED",
-
-  textMain: "#FFF9F2",
-  textMuted: "rgba(255, 240, 225, 0.65)",
-  textDim: "rgba(255, 235, 220, 0.38)",
-
-  error: "#F87171",
-  errorBg: "rgba(248, 113, 113, 0.08)",
-  errorBorder: "rgba(248, 113, 113, 0.45)",
-};
-
 /* ── 3. Subkomponente: Eingabefeld ─────────────────────────────────────── */
 const Field = memo(function Field({
   value,
@@ -135,7 +109,7 @@ const Field = memo(function Field({
   placeholder,
   error,
   iconName,
-  iconColor = WARM.iconLeading,
+  iconColor,
   inputRef,
   returnKeyType = "next",
   onSubmitEditing,
@@ -143,6 +117,8 @@ const Field = memo(function Field({
   onPressIcon,
   style,
   inputRowStyle,
+  styles,
+  c,
 }) {
   const handleClear = useCallback(() => onChangeText(""), [onChangeText]);
 
@@ -166,7 +142,7 @@ const Field = memo(function Field({
             <MaterialIcons
               name={iconName}
               size={20}
-              color={iconColor}
+              color={iconColor ?? c.iconLeading ?? c.titleMain}
               style={styles.leadingIcon}
             />
           </TouchableOpacity>
@@ -178,7 +154,7 @@ const Field = memo(function Field({
           spellCheck={false}
           style={[styles.input, Boolean(iconName) && styles.inputWithIcon]}
           placeholder={placeholder}
-          placeholderTextColor={WARM.textDim}
+          placeholderTextColor={c.textDim ?? c.subTitleMain}
           value={value}
           onChangeText={onChangeText}
           returnKeyType={returnKeyType}
@@ -195,7 +171,11 @@ const Field = memo(function Field({
             activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <MaterialIcons name="cancel" size={18} color={WARM.iconClear} />
+            <MaterialIcons
+              name="cancel"
+              size={18}
+              color={c.iconClear ?? "#F87171"}
+            />
           </TouchableOpacity>
         )}
       </View>
@@ -218,6 +198,11 @@ const CompanySearchModal = ({
   const insets = useSafeAreaInsets();
   const { width: winW, height: winH } = useWindowDimensions();
   const { infoVisible, infoMessage, openInfo, closeInfo } = useInfoModal();
+
+  const theme = useTheme();
+  const c =
+    theme?.colors ?? (theme?.mode === "dark" ? darkColors : lightColors);
+  const styles = useThemedStyles(createStyles);
 
   /* ── State & Refs ── */
   const [yourName, setYourName] = useState(initialName);
@@ -282,10 +267,9 @@ const CompanySearchModal = ({
 
     const onShow = (e) => {
       const h = Math.round(e?.endCoordinates?.height ?? 0);
-              console.log("duration", e.duration);
-        console.log("endCoordinates", e.endCoordinates);
+      console.log("duration", e.duration);
+      console.log("endCoordinates", e.endCoordinates);
       if (h > 0 && h !== cachedKbHeight) {
-
         cachedKbHeight = h;
         setKbHeight(h);
         EncryptedStorage.setItem(KB_HEIGHT_KEY, String(h)).catch(() => {});
@@ -299,7 +283,7 @@ const CompanySearchModal = ({
   /* ── Auto-Focus & Auto-Search beim Einblenden ── */
   useEffect(() => {
     if (visible) {
-          nameRef.current?.focus();
+      nameRef.current?.focus();
 
       const hasFullAddress = Boolean(
         initialCity?.trim() && initialStreet?.trim() && initialName?.trim()
@@ -310,13 +294,11 @@ const CompanySearchModal = ({
         setYourStreet(initialStreet);
         setYourName(initialName);
         setManualMode(true);
-
-      
       } else {
         setManualMode(false);
 
         // Sofort fokussieren -> Tastatur & Modal fahren synchron ein
-          searchRef.current?.focus();
+        searchRef.current?.focus();
 
         // MapKit-Suche erst nach der Slide-Animation starten (kein Re-Render im Flug)
         const searchTerm = searchGmbh(initialName);
@@ -475,7 +457,7 @@ const CompanySearchModal = ({
 
   const renderSeparator = useCallback(
     () => <View style={styles.separator} />,
-    []
+    [styles]
   );
 
   const renderResultItem = useCallback(
@@ -496,7 +478,11 @@ const CompanySearchModal = ({
           }
           hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
         >
-          <MaterialIcons name="location-on" size={20} color={WARM.iconPin} />
+          <MaterialIcons
+            name="location-on"
+            size={20}
+            color={c.iconPin ?? c.badgeText}
+          />
         </TouchableOpacity>
 
         <View style={styles.resultTextContainer}>
@@ -510,10 +496,14 @@ const CompanySearchModal = ({
           )}
         </View>
 
-        <MaterialIcons name="north-west" size={16} color={WARM.iconArrow} />
+        <MaterialIcons
+          name="north-west"
+          size={16}
+          color={c.iconArrow ?? c.subTitleMain}
+        />
       </TouchableOpacity>
     ),
-    [handleSelect, openInfo, t]
+    [handleSelect, openInfo, t, styles, c]
   );
 
   const keyExtractor = useCallback(
@@ -581,7 +571,7 @@ const CompanySearchModal = ({
               activeOpacity={0.7}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <MaterialIcons name="close" size={18} color={WARM.iconClose} />
+              <MaterialIcons name="close" size={18} color={c.titleMain} />
             </TouchableOpacity>
           </View>
 
@@ -589,6 +579,8 @@ const CompanySearchModal = ({
           <View style={[styles.mode, manualMode && styles.modeHidden]}>
             <View style={styles.modeHead}>
               <Field
+                styles={styles}
+                c={c}
                 value={query}
                 inputRef={searchRef}
                 iconName="search"
@@ -610,6 +602,7 @@ const CompanySearchModal = ({
                 {results.length > 0 ? (
                   <FlatList
                     data={results}
+                    extraData={c.mode}
                     keyExtractor={keyExtractor}
                     keyboardShouldPersistTaps="handled"
                     keyboardDismissMode="none"
@@ -623,7 +616,7 @@ const CompanySearchModal = ({
                     {searching ? (
                       <ActivityIndicator
                         size="small"
-                        color={WARM.iconLeading}
+                        color={c.iconLeading ?? c.titleMain}
                       />
                     ) : (
                       <TouchableOpacity
@@ -638,7 +631,7 @@ const CompanySearchModal = ({
                         <MaterialIcons
                           name="travel-explore"
                           size={32}
-                          color={WARM.iconEmpty}
+                          color={c.iconEmpty ?? c.subTitleMain}
                         />
                       </TouchableOpacity>
                     )}
@@ -663,7 +656,7 @@ const CompanySearchModal = ({
                 <MaterialIcons
                   name="edit-note"
                   size={22}
-                  color={WARM.iconLeading}
+                  color={c.iconLeading ?? c.titleMain}
                   style={styles.buttonIconLeft}
                 />
                 <Text style={styles.buttonSecondaryText}>
@@ -683,77 +676,83 @@ const CompanySearchModal = ({
                 showsVerticalScrollIndicator={false}
                 bounces={false}
               >
-              <Field
-      style={styles.manualFieldFlex}
-      inputRowStyle={styles.manualInputRowFlex}
-      inputRef={nameRef}
-      iconName="business"
-      value={yourName}
-      onChangeText={(v) => {
-        setYourName(v);
-        if (errors.nameErr)
-          setErrors((p) => ({ ...p, nameErr: "" }));
-      }}
-      placeholder={t("companySearchModal.namePlaceholder")}
-      error={errors.nameErr}
-      returnKeyType="next"
-      blurOnSubmit={false}
-      onSubmitEditing={() => streetRef.current?.focus()}
-      onPressIcon={() =>
-        openInfo(
-          t("info.companyName") ||
-            "Der offizielle Name des Unternehmens für das Anschreiben."
-        )
-      }
-    />
+                <Field
+                  styles={styles}
+                  c={c}
+                  style={styles.manualFieldFlex}
+                  inputRowStyle={styles.manualInputRowFlex}
+                  inputRef={nameRef}
+                  iconName="business"
+                  value={yourName}
+                  onChangeText={(v) => {
+                    setYourName(v);
+                    if (errors.nameErr)
+                      setErrors((p) => ({ ...p, nameErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.namePlaceholder")}
+                  error={errors.nameErr}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => streetRef.current?.focus()}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyName") ||
+                        "Der offizielle Name des Unternehmens für das Anschreiben."
+                    )
+                  }
+                />
 
-    <Field
-      style={styles.manualFieldFlex}
-      inputRowStyle={styles.manualInputRowFlex}
-      inputRef={streetRef}
-      iconName="add-road"
-      value={yourStreet}
-      onChangeText={(v) => {
-        setYourStreet(v);
-        if (errors.streetErr)
-          setErrors((p) => ({ ...p, streetErr: "" }));
-      }}
-      placeholder={t("companySearchModal.streetPlaceholder")}
-      error={errors.streetErr}
-      returnKeyType="next"
-      blurOnSubmit={false}
-      onSubmitEditing={() => cityRef.current?.focus()}
-      onPressIcon={() =>
-        openInfo(
-          t("info.companyStreet") ||
-            "Straße und Hausnummer des Unternehmens."
-        )
-      }
-    />
+                <Field
+                  styles={styles}
+                  c={c}
+                  style={styles.manualFieldFlex}
+                  inputRowStyle={styles.manualInputRowFlex}
+                  inputRef={streetRef}
+                  iconName="add-road"
+                  value={yourStreet}
+                  onChangeText={(v) => {
+                    setYourStreet(v);
+                    if (errors.streetErr)
+                      setErrors((p) => ({ ...p, streetErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.streetPlaceholder")}
+                  error={errors.streetErr}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => cityRef.current?.focus()}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyStreet") ||
+                        "Straße und Hausnummer des Unternehmens."
+                    )
+                  }
+                />
 
-    <Field
-      style={styles.manualFieldFlex}
-      inputRowStyle={styles.manualInputRowFlex}
-      inputRef={cityRef}
-      iconName="location-city"
-      value={yourCity}
-      onChangeText={(v) => {
-        setYourCity(v);
-        if (errors.cityErr)
-          setErrors((p) => ({ ...p, cityErr: "" }));
-      }}
-      placeholder={t("companySearchModal.cityPlaceholder")}
-      error={errors.cityErr}
-      returnKeyType="done"
-      onSubmitEditing={validateAndContinue}
-      blurOnSubmit={false}
-      onPressIcon={() =>
-        openInfo(
-          t("info.companyCity") ||
-            "Postleitzahl und Ort des Unternehmens."
-        )
-      }
-    />
+                <Field
+                  styles={styles}
+                  c={c}
+                  style={styles.manualFieldFlex}
+                  inputRowStyle={styles.manualInputRowFlex}
+                  inputRef={cityRef}
+                  iconName="location-city"
+                  value={yourCity}
+                  onChangeText={(v) => {
+                    setYourCity(v);
+                    if (errors.cityErr)
+                      setErrors((p) => ({ ...p, cityErr: "" }));
+                  }}
+                  placeholder={t("companySearchModal.cityPlaceholder")}
+                  error={errors.cityErr}
+                  returnKeyType="done"
+                  onSubmitEditing={validateAndContinue}
+                  blurOnSubmit={false}
+                  onPressIcon={() =>
+                    openInfo(
+                      t("info.companyCity") ||
+                        "Postleitzahl und Ort des Unternehmens."
+                    )
+                  }
+                />
               </ScrollView>
             </View>
 
@@ -769,7 +768,7 @@ const CompanySearchModal = ({
                 <MaterialIcons
                   name="arrow-forward"
                   size={18}
-                  color="#FFFFFF"
+                  color={c.titleMain}
                   style={styles.buttonIconRight}
                 />
               </TouchableOpacity>
@@ -788,311 +787,301 @@ const CompanySearchModal = ({
         </View>
       </View>
 
-      <Info
-        visible={infoVisible}
-        onClose={closeInfo}
-        message={infoMessage}
-      />
+      <Info visible={infoVisible} onClose={closeInfo} message={infoMessage} />
     </View>
   );
 };
 
-/* ── 5. Styles ─────────────────────────────────────────────────────────── */
-const styles = StyleSheet.create({
-  root: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 90,
-    elevation: 15,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  formScroll: {
-  flex: 1,
-},
-formContent: {
-  flexGrow: 1,
-  justifyContent: "space-between",
-  paddingTop: 2,
-  gap: M.fieldGap,
-},
-manualFieldFlex: {
-  flex: 1,
-  minHeight: M.inputH,
-},
-manualInputRowFlex: {
-  flex: 1,
-  height: "100%",
-},
-  stage: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  panel: {
-    backgroundColor: WARM.bg,
-    borderRadius: PANEL.panelRadius ?? M.panelRadius,
-    paddingHorizontal: M.panelPadH,
-    paddingTop: M.panelPadV,
-    paddingBottom: M.panelPadV,
-    borderWidth: 1,
-    borderColor: WARM.surfaceBorder,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.55,
-    shadowRadius: 28,
-    elevation: 16,
-    overflow: "hidden",
-  },
+/* ── 5. Themed Styles ──────────────────────────────────────────────────── */
+const createStyles = (c) =>
+  StyleSheet.create({
+    root: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 90,
+      elevation: 15,
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    stage: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    panel: {
+      backgroundColor: c.namePanel,
+      borderRadius: M.panelRadius,
+      paddingHorizontal: M.panelPadH,
+      paddingTop: M.panelPadV,
+      paddingBottom: M.panelPadV,
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 14 },
+      shadowOpacity: 0.55,
+      shadowRadius: 28,
+      elevation: 16,
+      overflow: "hidden",
+    },
 
-  /* ── Zonen ── */
-  mode: {
-    flex: 1,
-    minHeight: 0,
-  },
-  modeHidden: {
-    display: "none",
-  },
-  modeHead: {
-    flexShrink: 0,
-  },
-  modeBody: {
-    flex: 1,
-    minHeight: 0,
-    marginTop: M.zoneGap,
-  },
-  modeBodyScrollable: {
-    flex: 1,
-    minHeight: 0,
-  },
-  modeFoot: {
-    flexShrink: 0,
-    paddingTop: M.footGap,
-  },
+    /* ── Zonen ── */
+    mode: {
+      flex: 1,
+      minHeight: 0,
+    },
+    modeHidden: {
+      display: "none",
+    },
+    modeHead: {
+      flexShrink: 0,
+    },
+    modeBody: {
+      flex: 1,
+      minHeight: 0,
+      marginTop: M.zoneGap,
+    },
+    modeBodyScrollable: {
+      flex: 1,
+      minHeight: 0,
+    },
+    modeFoot: {
+      flexShrink: 0,
+      paddingTop: M.footGap,
+    },
 
-  /* ── Header ── */
-  header: {
-    height: M.headerH,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: M.headerGap,
-    flexShrink: 0,
-  },
-  headerTitleWrap: {
-    flex: 1,
-    justifyContent: "space-between",
-    height: "100%",
-  },
-  badgeHub: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    height: 20,
-    backgroundColor: WARM.accentBadgeBg,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: WARM.accentBadgeBorder,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: WARM.iconLeading,
-    marginRight: 6,
-  },
-  badgeHubText: {
-    color: WARM.iconArrow,
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-  },
-  title: {
-    color: WARM.textMain,
-    fontSize: 18,
-    lineHeight: 22,
-    fontWeight: "800",
-    letterSpacing: -0.3,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 240, 225, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 12,
-  },
+    /* ── Header ── */
+    header: {
+      height: M.headerH,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: M.headerGap,
+      flexShrink: 0,
+    },
+    headerTitleWrap: {
+      flex: 1,
+      justifyContent: "space-between",
+      height: "100%",
+    },
+    badgeHub: {
+      flexDirection: "row",
+      alignItems: "center",
+      alignSelf: "flex-start",
+      height: 20,
+      backgroundColor: c.badge,
+      paddingHorizontal: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+    },
+    statusDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: c.badgeDot,
+      marginRight: 6,
+    },
+    badgeHubText: {
+      color: c.badgeText,
+      fontSize: 10,
+      fontWeight: "700",
+      letterSpacing: 0.6,
+    },
+    title: {
+      color: c.titleMain,
+      fontSize: 18,
+      lineHeight: 22,
+      fontWeight: "800",
+      letterSpacing: -0.3,
+    },
+    closeButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.actionCard,
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+      justifyContent: "center",
+      alignItems: "center",
+      marginLeft: 12,
+    },
 
-  /* ── Inputs ── */
-  formScroll: {
-    flex: 1,
-  },
-  formContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    paddingTop: 2,
-    gap: M.fieldGap,
-  },
-  fieldWrap: {
-    width: "100%",
-  },
-  inputRow: {
-    height: M.inputH,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: WARM.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: WARM.surfaceBorder,
-  },
-  inputRowError: {
-    borderColor: WARM.errorBorder,
-    borderWidth: 1.5,
-    backgroundColor: WARM.errorBg,
-  },
-  iconHitArea: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingLeft: 12,
-  },
-  leadingIcon: {
-    marginRight: 0,
-  },
-  input: {
-    flex: 1,
-    height: "100%",
-    paddingLeft: 14,
-    paddingRight: 36,
-    paddingVertical: 0,
-    color: WARM.textMain,
-    fontSize: 14.5,
-  },
-  inputWithIcon: {
-    paddingLeft: 8,
-  },
-  clearBtn: {
-    position: "absolute",
-    right: 12,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-  },
+    /* ── Inputs ── */
+    formScroll: {
+      flex: 1,
+    },
+    formContent: {
+      flexGrow: 1,
+      justifyContent: "flex-start",
+      paddingTop: 2,
+      gap: M.fieldGap,
+    },
+    manualFieldFlex: {
+      flex: 1,
+      minHeight: M.inputH,
+    },
+    manualInputRowFlex: {
+      flex: 1,
+      height: "100%",
+    },
+    fieldWrap: {
+      width: "100%",
+    },
+    inputRow: {
+      height: M.inputH,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor:'transparent',
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+    },
+    inputRowError: {
+      borderColor: c.errorBorder ?? "rgba(248, 113, 113, 0.65)",
+      borderWidth: 1.5,
+      backgroundColor: c.errorBg ?? "rgba(248, 113, 113, 0.12)",
+    },
+    iconHitArea: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingLeft: 12,
+    },
+    leadingIcon: {
+      marginRight: 0,
+    },
+    input: {
+      flex: 1,
+      height: "100%",
+      paddingLeft: 14,
+      paddingRight: 36,
+      paddingVertical: 0,
+      color: c.titleMain,
+      fontSize: 14.5,
+    },
+    inputWithIcon: {
+      paddingLeft: 8,
+    },
+    clearBtn: {
+      position: "absolute",
+      right: 12,
+      top: 0,
+      bottom: 0,
+      justifyContent: "center",
+    },
 
-  /* ── Liste ── */
-  listCard: {
-    flex: 1,
-    borderRadius: 14,
-    overflow: "hidden",
-    backgroundColor: "rgba(255, 240, 225, 0.02)",
-    borderWidth: 1,
-    borderColor: WARM.surfaceBorderSubtle,
-  },
-  listContent: {
-    paddingVertical: 4,
-  },
-  placeholderBox: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  placeholderText: {
-    color: WARM.textMuted,
-    fontSize: 12.5,
-    marginTop: 8,
-    textAlign: "center",
-  },
-  suggestionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  resultIconWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "rgba(251, 146, 60, 0.16)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  resultTextContainer: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: WARM.surfaceBorderSubtle,
-    marginHorizontal: 12,
-  },
-  suggestionTitle: {
-    color: WARM.textMain,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  suggestionSubtitle: {
-    color: WARM.textMuted,
-    fontSize: 11.5,
-    marginTop: 1.5,
-  },
+    /* ── Liste ── */
+    listCard: {
+      flex: 1,
+      borderRadius: 14,
+      overflow: "hidden",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+    },
+    listContent: {
+      paddingVertical: 4,
+    },
+    placeholderBox: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 20,
+    },
+    placeholderText: {
+      color: c.subTitleMain,
+      fontSize: 12.5,
+      marginTop: 8,
+      textAlign: "center",
+    },
+    suggestionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+    },
+    resultIconWrapper: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      backgroundColor: c.resultIconBg ?? "rgba(255, 255, 255, 0.08)",
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 10,
+    },
+    resultTextContainer: {
+      flex: 1,
+      paddingRight: 8,
+    },
+    separator: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.actionCardBorder,
+      marginHorizontal: 12,
+    },
+    suggestionTitle: {
+      color: c.titleMain,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    suggestionSubtitle: {
+      color: c.subTitleMain,
+      fontSize: 11.5,
+      marginTop: 1.5,
+    },
 
-  /* ── Buttons ── */
-  buttonPrimary: {
-    marginBottom: 10,
-    width: "100%",
-    height: 46,
-    backgroundColor: WARM.primary,
-    borderRadius: 14,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: WARM.primary,
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  buttonPrimaryText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  buttonSecondary: {
-    width: "100%",
-    height: 46,
-    backgroundColor: WARM.surface,
-    borderRadius: 14,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: WARM.surfaceBorder,
-  },
-  buttonSecondaryText: {
-    color: WARM.textMain,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  buttonGhost: {
-    width: "100%",
-    height: M.btnGhost,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: M.btnGap,
-  },
-  buttonGhostText: {
-    color: WARM.textMuted,
-    fontSize: 12.5,
-    fontWeight: "500",
-  },
-  buttonIconLeft: { marginRight: 8 },
-  buttonIconRight: { marginLeft: 6 },
-});
+    /* ── Buttons ── */
+    buttonPrimary: {
+      marginBottom: 10,
+      width: "100%",
+      height: 46,
+      backgroundColor:"transparent",
+      borderRadius: 14,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: c.buttonSearch ?? c.badge,
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 4,
+    },
+    buttonPrimaryText: {
+      color: c.titleMain,
+      fontSize: 15,
+      fontWeight: "700",
+      letterSpacing: 0.2,
+    },
+    buttonSecondary: {
+      width: "100%",
+      height: 46,
+      backgroundColor: "transparent",
+      borderRadius: 14,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: c.actionCardBorder,
+    },
+    buttonSecondaryText: {
+      color: c.titleMain,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    buttonGhost: {
+      width: "100%",
+      height: M.btnGhost,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: M.btnGap,
+    },
+    buttonGhostText: {
+      color: c.subTitleMain,
+      fontSize: 12.5,
+      fontWeight: "500",
+    },
+    buttonIconLeft: { marginRight: 8 },
+    buttonIconRight: { marginLeft: 6 },
+  });
 
 export default CompanySearchModal;

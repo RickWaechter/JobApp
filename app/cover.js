@@ -1,27 +1,32 @@
 // CoverScreen.js
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
   AppState,
-  StyleSheet,
   Text,
+  Dimensions,
+  ImageBackground,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
+import {font} from '../inc/style';
+
 import {
   NestableDraggableFlatList,
   NestableScrollContainer,
 } from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { Image } from 'expo-image';
 import { CoverFabMenu, CvPreviewOverlay } from '../comp/coverParts';
 import { EducationCard } from '../comp/eduCard';
 import { ExperienceCard } from '../comp/expCard';
+import { useTheme } from '../comp/themeContext';
+
+import { useThemedStyles } from '../comp/themeStyles';
 import {
   deleteCvSnapshot,
   loadSavedCvsMap,
@@ -48,7 +53,8 @@ const SECTION_BUTTONS = [
 
 export default function CoverScreen() {
   const { width: winW } = useWindowDimensions();
-  const isDark = useColorScheme() === 'dark';
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const t = useCallback((key) => key, []);
 
   // Formular-States
@@ -87,21 +93,6 @@ export default function CoverScreen() {
   // Autosave Refs
   const isLoadedRef = useRef(false);
   const lastSavedRef = useRef('');
-
-  const theme = useMemo(
-    () => ({
-      bg: isDark ? '#000000' : '#f3f4f6',
-      card: isDark ? '#18181b' : '#ffffff',
-      cardElevated: isDark ? '#22252e' : '#f9fafb',
-      text: isDark ? '#ffffff' : '#111827',
-      subtext: isDark ? '#a1a1aa' : '#6b7280',
-      inputBg: isDark ? '#27272a' : '#f3f4f6',
-      border: isDark ? '#27272a' : '#e5e7eb',
-      primary: isDark ? '#0b3b77' : '#2563eb',
-      badgeBg: isDark ? '#27272a' : '#eff6ff',
-    }),
-    [isDark]
-  );
 
   const htmlLayout = cvView(isTwoPage, personal, experiences, educations, skills);
 
@@ -370,31 +361,43 @@ export default function CoverScreen() {
     (props) => (
       <ExperienceCard
         {...props}
-        theme={theme}
         onUpdate={updateExperience}
         onRemove={removeExperience}
       />
     ),
-    [theme, updateExperience, removeExperience]
+    [updateExperience, removeExperience]
   );
 
   const renderEducationItem = useCallback(
     (props) => (
       <EducationCard
         {...props}
-        theme={theme}
         onUpdate={updateEducation}
         onRemove={removeEducation}
       />
     ),
-    [theme, updateEducation, removeEducation]
+    [updateEducation, removeEducation]
   );
 
   return (
+    
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
+          <ImageBackground source={{uri: 'https://www1.xup.in/exec/ximg.php?fid=96261766'}} resizeMode="cover" style={{flex:1, justifyContent:"center"}}>
+
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.badgeHub}>
+            <View style={styles.statusDot} />
+            <Text style={styles.badgeHubText}>{"LEBENSLAUF"}</Text>
+          </View>
+          <Text style={styles.titleMain}>{"Lebenslauf Generator"}</Text>
+          <View style={styles.headerDivider} />
+          <Text style={styles.subtitleMain}>{"Erstellen Sie hier einfach & schnell Ihren eigenen Lebenslauf !"}</Text>
+        </View>
         <NestableScrollContainer contentContainerStyle={styles.scrollContent}>
+           
           <View style={styles.cardsContainer}>
+           
             {/* 1. Persönliche Daten */}
             {visibleSections.personal && (
               <Animated.View
@@ -402,43 +405,42 @@ export default function CoverScreen() {
                   styles.sectionWrapper,
                   { transform: [{ translateX: animMap.personal }] },
                   exitingSection === 'personal' && styles.exitingCard,
-                ]}
-              >
-                <View style={[styles.singleCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.text }]}>Persönliche Daten</Text>
+                ]}>
+              <View style={styles.singleCard}>
+                  <Text style={styles.sectionTitle}>Persönliche Daten</Text>
 
-                  <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Name</Text>
+                  <Text style={styles.fieldLabel}>Name</Text>
                   <TextInput
                     value={personal.name}
                     onChangeText={(val) => setPersonal({ ...personal, name: val })}
                     placeholder="Vollständiger Name"
-                    placeholderTextColor={theme.subtext}
+                    placeholderTextColor={colors.textDim}
                     autoComplete="name"
                     autoCapitalize="words"
-                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                    style={styles.input}
                   />
 
-                  <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Jobtitel</Text>
+                  <Text style={styles.fieldLabel}>Jobtitel</Text>
                   <TextInput
                     value={personal.title}
                     onChangeText={(val) => setPersonal({ ...personal, title: val })}
                     placeholder="z.B. Mobile Developer"
-                    placeholderTextColor={theme.subtext}
-                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                    placeholderTextColor={colors.textDim}
+                    style={styles.input}
                   />
 
-                  <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Adresse</Text>
+                  <Text style={styles.fieldLabel}>Adresse</Text>
                   <TextInput
                     value={personal.location}
                     onChangeText={(val) => setPersonal({ ...personal, location: val })}
                     placeholder="Stadt, Land"
-                    placeholderTextColor={theme.subtext}
-                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                    placeholderTextColor={colors.textDim}
+                    style={styles.input}
                   />
 
                   <View style={styles.row}>
                     <View style={[styles.flex1, styles.mr8]}>
-                      <Text style={[styles.fieldLabel, { color: theme.subtext }]}>E-Mail</Text>
+                      <Text style={styles.fieldLabel}>E-Mail</Text>
                       <TextInput
                         value={personal.email}
                         onChangeText={(val) => setPersonal({ ...personal, email: val })}
@@ -446,31 +448,31 @@ export default function CoverScreen() {
                         textContentType="emailAddress"
                         autoComplete="email"
                         autoCapitalize="none"
-                        placeholderTextColor={theme.subtext}
-                        style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                        placeholderTextColor={colors.textDim}
+                        style={styles.input}
                       />
                     </View>
                     <View style={styles.flex1}>
-                      <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Telefon</Text>
+                      <Text style={styles.fieldLabel}>Telefon</Text>
                       <TextInput
                         value={personal.phone}
                         onChangeText={(val) => setPersonal({ ...personal, phone: val })}
                         keyboardType="phone-pad"
                         textContentType="telephoneNumber"
-                        placeholderTextColor={theme.subtext}
-                        style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                        placeholderTextColor={colors.textDim}
+                        style={styles.input}
                       />
                     </View>
                   </View>
 
-                  <Text style={[styles.fieldLabel, { color: theme.subtext }]}>Kurzprofil</Text>
+                  <Text style={styles.fieldLabel}>Kurzprofil</Text>
                   <TextInput
                     value={personal.summary}
                     onChangeText={(val) => setPersonal({ ...personal, summary: val })}
                     multiline
                     placeholder="Kurze Beschreibung..."
-                    placeholderTextColor={theme.subtext}
-                    style={[styles.input, styles.textArea, { backgroundColor: theme.inputBg, color: theme.text }]}
+                    placeholderTextColor={colors.textDim}
+                    style={[styles.input, styles.textArea]}
                   />
                 </View>
               </Animated.View>
@@ -486,7 +488,7 @@ export default function CoverScreen() {
                 ]}
               >
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                  <Text style={styles.sectionTitle}>
                     Berufserfahrung ({experiences.length})
                   </Text>
                   <TouchableOpacity
@@ -496,7 +498,7 @@ export default function CoverScreen() {
                         ...prev,
                       ])
                     }
-                    style={[styles.addButton, { backgroundColor: theme.primary }]}
+                    style={styles.addButton}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.addButtonText}>+ Neue Position</Text>
@@ -523,7 +525,7 @@ export default function CoverScreen() {
                 ]}
               >
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                  <Text style={styles.sectionTitle}>
                     Ausbildung ({educations.length})
                   </Text>
                   <TouchableOpacity
@@ -533,7 +535,7 @@ export default function CoverScreen() {
                         ...prev,
                       ])
                     }
-                    style={[styles.addButton, { backgroundColor: theme.primary }]}
+                    style={styles.addButton}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.addButtonText}>+ Neuer Abschluss</Text>
@@ -559,19 +561,15 @@ export default function CoverScreen() {
                   exitingSection === 'skills' && styles.exitingCard,
                 ]}
               >
-                <View style={[styles.singleCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.text }]}>
-                    Fähigkeiten & Kenntnisse
-                  </Text>
-                  <Text style={[styles.fieldLabel, { color: theme.subtext }]}>
-                    Kommagetrennt eingeben
-                  </Text>
+                <View style={styles.singleCard}>
+                  <Text style={styles.sectionTitle}>Fähigkeiten & Kenntnisse</Text>
+                  <Text style={styles.fieldLabel}>Kommagetrennt eingeben</Text>
                   <TextInput
                     value={skills}
                     onChangeText={setSkills}
                     placeholder="React Native, TypeScript, Git..."
-                    placeholderTextColor={theme.subtext}
-                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text }]}
+                    placeholderTextColor={colors.textDim}
+                    style={styles.input}
                   />
                 </View>
               </Animated.View>
@@ -583,8 +581,6 @@ export default function CoverScreen() {
         <CoverFabMenu
           isOpen={isFabOpen}
           fabAnim={fabAnim}
-          isDark={isDark}
-          theme={theme}
           isScanningCv={isScanningCv}
           savedCvKeys={Object.keys(savedCv)}
           currentPersonName={personal.name}
@@ -601,7 +597,7 @@ export default function CoverScreen() {
 
         {/* Untere Tab-Leiste */}
         <View style={styles.bottomNavContainer}>
-          <View style={[styles.bottomTabBar, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={styles.bottomTabBar}>
             {SECTION_BUTTONS.map((btn) => {
               const isSelected = activeSection === btn.key;
               return (
@@ -610,11 +606,7 @@ export default function CoverScreen() {
                   onPress={() => changeSection(btn.key)}
                   style={[
                     styles.bottomTabButton,
-                    isSelected && {
-                      backgroundColor: isDark
-                        ? 'rgba(11, 59, 119, 0.35)'
-                        : 'rgba(37, 99, 235, 0.12)',
-                    },
+                    isSelected && styles.bottomTabButtonActive,
                   ]}
                   activeOpacity={0.7}
                 >
@@ -624,16 +616,13 @@ export default function CoverScreen() {
                   <Text
                     style={[
                       styles.bottomTabLabel,
-                      { color: isSelected ? theme.primary : theme.subtext },
                       isSelected && styles.bottomTabLabelActive,
                     ]}
                     numberOfLines={1}
                   >
                     {btn.label}
                   </Text>
-                  {isSelected && (
-                    <View style={[styles.bottomTabActiveDot, { backgroundColor: theme.primary }]} />
-                  )}
+                  {isSelected && <View style={styles.bottomTabActiveDot} />}
                 </TouchableOpacity>
               );
             })}
@@ -644,8 +633,6 @@ export default function CoverScreen() {
         <CvPreviewOverlay
           visible={webViewVisible}
           htmlLayout={htmlLayout}
-          isDark={isDark}
-          theme={theme}
           isTwoPage={isTwoPage}
           setIsTwoPage={setIsTwoPage}
           isExporting={isExporting}
@@ -653,15 +640,31 @@ export default function CoverScreen() {
           onClose={() => setWebViewVisible(false)}
         />
       </SafeAreaView>
+    </ImageBackground>
+
     </GestureHandlerRootView>
   );
 }
+  const {width} = Dimensions.get("window")
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 120 },
-  cardsContainer: { position: 'relative', width: '100%' },
-  sectionWrapper: { width: '100%' },
+const createStyles = (colors) => ({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background || colors.bg,
+    
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  cardsContainer: {
+    paddingBottom:60,
+    position: 'relative',
+    width: '100%',
+  },
+  sectionWrapper: {
+    width: '100%',
+  },
   exitingCard: {
     position: 'absolute',
     top: 0,
@@ -674,11 +677,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     width: '100%',
-    shadowColor: '#000',
+    backgroundColor: colors.actionCard,
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: colors.shadowOpacity ?? 0.15,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: colors.elevation ?? 2,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -687,9 +692,78 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 2,
   },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold' },
-  addButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  addButtonText: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.titleMain,
+  },
+  addButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+  },
+   header: {
+      marginTop: 16,
+      padding:16,
+    },
+    badgeHub: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'center',
+      backgroundColor: colors.badge,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.08)',
+      marginBottom: 8,
+    },
+    headerDivider: {
+    width: width / 1.2,
+    height: 1,
+    borderRadius: 2,
+    backgroundColor: colors.badgeDogt || '#787c9e38',
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 6,
+  },
+    statusDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor:colors.badgeDot,
+      marginRight: 6,
+    },
+    badgeHubText: {
+      color: colors.badgeText,
+      fontSize: font.badgeText,
+      fontWeight: '800',
+      letterSpacing: 0.8,
+    },
+    titleMain: {
+      color: colors.titleMain,
+      fontSize: font.sizeHeadline,
+      fontWeight: '800',
+      letterSpacing: -0.4,
+      alignSelf: 'center',
+      
+  
+    },
+    subtitleMain: {
+      color: colors.subTitleMain,
+      alignSelf: 'center',
+      fontSize: font.sizeSubline,
+      marginTop: 4,
+      lineHeight: 18,
+      textAlign: 'center',
+    },
+  
+  addButtonText: {
+    color: colors.textOnPrimary,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   fieldLabel: {
     fontSize: 11.5,
     fontWeight: '600',
@@ -697,18 +771,32 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
+    color: colors.subTitleMain,
   },
   input: {
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderRadius: 8,
+    borderWidth: 1,
     fontSize: 13.5,
     marginBottom: 8,
+    backgroundColor: colors.inputBg,
+    borderColor: colors.inputBorder,
+    color: colors.titleMain,
   },
-  textArea: { minHeight: 70, textAlignVertical: 'top' },
-  row: { flexDirection: 'row' },
-  flex1: { flex: 1 },
-  mr8: { marginRight: 8 },
+  textArea: {
+    minHeight: 70,
+    textAlignVertical: 'top',
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  flex1: {
+    flex: 1,
+  },
+  mr8: {
+    marginRight: 8,
+  },
   bottomNavContainer: {
     marginVertical: 12,
     paddingHorizontal: 12,
@@ -722,9 +810,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 20,
     borderWidth: 1,
-    shadowColor: '#000',
+    backgroundColor: colors.tabBarBg,
+    borderColor: colors.actionCardBorder,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
+    shadowOpacity: colors.shadowOpacity ?? 0.2,
     shadowRadius: 10,
     elevation: 8,
   },
@@ -737,15 +827,31 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     position: 'relative',
   },
-  bottomTabIcon: { fontSize: 19, marginBottom: 2 },
-  bottomTabIconActive: { transform: [{ scale: 1.08 }] },
-  bottomTabLabel: { fontSize: 11, fontWeight: '600' },
-  bottomTabLabelActive: { fontWeight: '800' },
+  bottomTabButtonActive: {
+    backgroundColor: colors.tabActiveBg,
+  },
+  bottomTabIcon: {
+    fontSize: 19,
+    marginBottom: 2,
+  },
+  bottomTabIconActive: {
+    transform: [{ scale: 1.08 }],
+  },
+  bottomTabLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.subTitleMain,
+  },
+  bottomTabLabelActive: {
+    fontWeight: '800',
+    color: colors.accentText,
+  },
   bottomTabActiveDot: {
     position: 'absolute',
     bottom: 2,
     width: 4,
     height: 4,
     borderRadius: 2,
+    backgroundColor: colors.accentText,
   },
 });
